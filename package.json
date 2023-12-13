@@ -1,0 +1,20 @@
+{
+  "name": "@web5/credential-issuance-protocol",
+  "version": "1.0.0",
+  "description": "Credential Issuance Protocol",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p .",
+    "postinstall": "npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^20.6.2",
+    "typescript": "^5.2.2"
+  }
+}
