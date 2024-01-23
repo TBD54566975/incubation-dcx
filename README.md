@@ -2,6 +2,16 @@
 
 This package provides a DWN protocol for credential issuance. See `protocol/credential-issuance.ts` for the protocol, and the accompanying schemas directory for individual schemas
 
+## The protocol
+
+This project defines a protocol that uses [Credential Manifests](https://identity.foundation/credential-manifest/) to define the credentials required to get other credentials.
+
+A credential issuer provides one or more manifests defining credentials needed to apply for other credentials.
+
+A credential applicant can then send a Credential Application to the issuer.
+
+The issuer can reply with a Credential Response fulfillment including one or more credentials, or a denial including reasons why the credentials were not sufficient. It may also optionally respond with an invoice that must be paid before the request is fulfilled.
+
 # Use
 
 ```javascript
