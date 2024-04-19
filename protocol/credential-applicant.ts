@@ -36,12 +36,12 @@ export const protocol = {
             {
               "who": "recipient",
               "of": "application",
-              "can": "write"
+              "can": ["write"]
             },
             {
               "who": "author",
               "of": "application",
-              "can": "read"
+              "can": ["read"]
             }
           ]
         },
@@ -51,12 +51,12 @@ export const protocol = {
             {
               "who": "recipient",
               "of": "application",
-              "can": "write"
+              "can": ["write"]
             },
             {
               "who": "author",
               "of": "application",
-              "can": "read"
+              "can": ["read"]
             }
           ]
         },
