@@ -40,7 +40,7 @@ export const protocol = {
         "$actions": [
           {
             "who": "anyone",
-            "can": ["write"]
+            "can": ["create", "update"]
           }
         ],
         // a credential response might be sent in response to an application
@@ -49,7 +49,7 @@ export const protocol = {
             {
               "who": "recipient",
               "of": "application",
-              "can": ["write"]
+              "can": ["create", "update"]
             },
             {
               "who": "author",
@@ -64,7 +64,7 @@ export const protocol = {
             {
               "who": "recipient",
               "of": "application",
-              "can": ["write"]
+              "can": ["create", "update"]
             },
             {
               "who": "author",
