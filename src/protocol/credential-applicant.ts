@@ -1,7 +1,7 @@
-import { schema as responseSchema } from './schemas/response';
-import { schema as invoiceSchema } from './schemas/invoice';
-import { schema as manifestSchema } from './schemas/manifest';
-import { schema as presentationSchema } from './schemas/presentation';
+import { schema as responseSchema } from '../schemas/response.js';
+import { schema as invoiceSchema } from '../schemas/invoice.js';
+import { schema as manifestSchema } from '../schemas/manifest.js';
+import { schema as presentationSchema } from '../schemas/presentation.js';
 
 export const protocol = {
     // applicant protocol is a subset of issuance protocol
