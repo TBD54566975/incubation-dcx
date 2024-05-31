@@ -1,20 +1,95 @@
 {
-  "name": "@web5/credential-issuance-protocol",
+  "name": "dcx",
   "version": "1.0.0",
-  "description": "Credential Issuance Protocol",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "type": "commonjs",
+  "description": "Decentralized Credential Exchange: DWN protocol definition for verifiable credential exchange using credential manifests",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
   "scripts": {
-    "build": "tsc -p .",
-    "postinstall": "npm run build"
+    "gen-cpr-key": "openssl rand -base64 32",
+    "test": "echo TODO && exit 0",
+    "clean": "rimraf dist",
+    "build:esm": "rimraf dist/esm dist/types && tsc",
+    "build": "npm run clean && npm run build:esm",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "dev": "tsx dist/esm/index.js"
   },
-  "author": "",
-  "license": "ISC",
+  "homepage": "https://github.com/TBD54566975/incubation-tblend#readme",
+  "bugs": "https://github.com/TBD54566975/incubation-tblend/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/TBD54566975/incubation-tblend.git"
+  },
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Bryan Nonni",
+      "url": "https://github.com/bnonni"
+    },
+    {
+      "name": "Ian Patton",
+      "url": "https://github.com/ianpatton"
+    }
+  ],
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./utils": {
+      "types": "./dist/types/utils.d.ts",
+      "import": "./dist/esm/utils.js",
+      "require": "./dist/cjs/utils.js"
+    }
+  },
+  "keywords": [
+    "decentralized",
+    "decentralized-applications",
+    "decentralized-identity",
+    "decentralized-web",
+    "vcs",
+    "verifiable credentials",
+    "web5",
+    "verifiable credentials issuer"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
+    "@types/node": "^20.13.0",
+    "@types/readable-stream": "^4.0.14",
+    "@web5/agent": "^0.3.8",
+    "@web5/api": "^0.9.4",
+    "@web5/common": "^1.0.1",
+    "@web5/credentials": "^1.0.2",
+    "@web5/crypto": "^1.0.1",
+    "@web5/crypto-aws-kms": "^1.0.1",
+    "@web5/dids": "^1.1.0",
+    "@web5/identity-agent": "^0.3.8",
+    "@web5/proxy-agent": "^0.3.8",
+    "@web5/user-agent": "^0.3.8",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@types/node": "^20.6.2",
-    "typescript": "^5.2.2"
+    "@eslint/js": "^9.4.0",
+    "@hapi/code": "^9.0.3",
+    "@hapi/lab": "^25.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "rimraf": "^5.0.7",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
   }
 }
