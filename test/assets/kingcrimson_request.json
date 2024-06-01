@@ -1,0 +1,3200 @@
+{
+    "RequestType": "RIKI",
+    "ResponseFormat": [
+        "pdf"
+    ],
+    "ConsumerInformation": {
+        "FirstName": "King",
+        "LastName": "Crimson",
+        "Identifiers": [
+            {
+                "Source": "VODRequest_ID",
+                "Id": "00b14761-bc70-4378-8a87-0f42f8bf944a"
+            }
+        ],
+        "DateOfBirth": "",
+        "Email": [
+            "kc@example.com"
+        ],
+        "PhoneNumber": "5555555555",
+        "Address": {
+            "Street": "",
+            "Street2": "",
+            "City": "",
+            "Region": "",
+            "PostalCode": "",
+            "Country": ""
+        },
+        "AssociatedCustomerId": ""
+    },
+    "Institutions": [
+        {
+            "ExternalInstitutionId": "222cc01d-37c1-4f6c-aa97-156cd63103ba",
+            "Name": "Capital One",
+            "Accounts": [
+                {
+                    "AccountNumber": "6830",
+                    "AccountType": "CCA",
+                    "CurrencyCode": "",
+                    "DataSourceId": "222cc01d-37c1-4f6c-aa97-156cd63103ba",
+                    "ExternalAccountId": "222cc01d-37c1-4f6c-aa97-156cd63103ba",
+                    "CurrentBalance": -327.61,
+                    "CurrentBalanceDate": "2019-10-23T22:50:51",
+                    "Transactions": [
+                        {
+                            "ExternalTransactionId": "c3c0c26a-d8d3-4672-a7a7-dfae3b9c23fc",
+                            "Date": "2019-07-25T11:00:00",
+                            "Description": "Home Depot",
+                            "Action": "debit",
+                            "Amount": -34.7
+                        },
+                        {
+                            "ExternalTransactionId": "17fcbac6-d27b-4e94-bb1c-98f7a00f9f51",
+                            "Date": "2019-07-25T11:00:00",
+                            "Description": "J. Crew",
+                            "Action": "debit",
+                            "Amount": -29.82
+                        },
+                        {
+                            "ExternalTransactionId": "4d47d1ac-89cf-431a-b715-a85d55c2f38c",
+                            "Date": "2019-07-25T11:00:00",
+                            "Description": "U-Haul",
+                            "Action": "debit",
+                            "Amount": -21.62
+                        },
+                        {
+                            "ExternalTransactionId": "cf18a55b-a96f-4b4e-9cfd-e5cf70e4edaa",
+                            "Date": "2019-07-26T11:00:00",
+                            "Description": "Banana Republic",
+                            "Action": "debit",
+                            "Amount": -19.97
+                        },
+                        {
+                            "ExternalTransactionId": "f7f7da97-8f3b-4821-b346-e1dd38fe1dcc",
+                            "Date": "2019-07-27T11:00:00",
+                            "Description": "DailySteals",
+                            "Action": "debit",
+                            "Amount": -39.99
+                        },
+                        {
+                            "ExternalTransactionId": "a7ff7419-2176-4540-8055-a6f6fba3f1fa",
+                            "Date": "2019-07-27T11:00:00",
+                            "Description": "DailySteals",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "d7989a24-771f-46db-b7c4-c74ae70ab0d0",
+                            "Date": "2019-07-29T11:00:00",
+                            "Description": "PAYPAL *PROOZY",
+                            "Action": "debit",
+                            "Amount": -52.97
+                        },
+                        {
+                            "ExternalTransactionId": "f4907abf-1c27-4dc5-94c7-2e36e117b076",
+                            "Date": "2019-08-03T11:00:00",
+                            "Description": "PAYPAL *MACY S",
+                            "Action": "debit",
+                            "Amount": -79.97
+                        },
+                        {
+                            "ExternalTransactionId": "b21c1ecb-2a6c-476f-ae2e-1d319e71d0cf",
+                            "Date": "2019-08-03T11:00:00",
+                            "Description": "PAYPAL *BEST CHOICE",
+                            "Action": "debit",
+                            "Amount": -79.46
+                        },
+                        {
+                            "ExternalTransactionId": "26bd3f94-8961-417c-9ae1-4dd28efb26fe",
+                            "Date": "2019-08-03T11:00:00",
+                            "Description": "eBay",
+                            "Action": "debit",
+                            "Amount": -0.29
+                        },
+                        {
+                            "ExternalTransactionId": "96a2cb8c-234d-451c-b676-e7503f54eec1",
+                            "Date": "2019-08-03T11:00:00",
+                            "Description": "eBay",
+                            "Action": "debit",
+                            "Amount": -0.21
+                        },
+                        {
+                            "ExternalTransactionId": "305aa6bb-76c1-4779-933d-0a4b4af21730",
+                            "Date": "2019-08-05T11:00:00",
+                            "Description": "PAYPAL *MACY S",
+                            "Action": "debit",
+                            "Amount": -64.89
+                        },
+                        {
+                            "ExternalTransactionId": "405f8af4-6f6f-402f-bca4-3fe5f1ac60ae",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 06-A ug",
+                            "Action": "credit",
+                            "Amount": 1415.64
+                        },
+                        {
+                            "ExternalTransactionId": "24163c2d-9169-4ab8-8bf2-a203415e9050",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "JC Penney",
+                            "Action": "debit",
+                            "Amount": -83.02
+                        },
+                        {
+                            "ExternalTransactionId": "b9d20b35-47a3-4858-a4e1-95f242cc7f45",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "JC Penney",
+                            "Action": "debit",
+                            "Amount": -13.49
+                        },
+                        {
+                            "ExternalTransactionId": "a9cd14fb-2a55-4be3-a857-7a5bcf07decd",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "89663e65-3e2d-48ea-96df-658ac52d96a3",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "e0186e70-909a-47a9-9d92-2d9d33c3b301",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "a044fbc7-2013-4d6d-b063-372682e993a3",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -8.33
+                        },
+                        {
+                            "ExternalTransactionId": "e3d7d4be-7ce3-4586-ab9e-15bd98669d8f",
+                            "Date": "2019-08-07T11:00:00",
+                            "Description": "JC Penney",
+                            "Action": "debit",
+                            "Amount": -7.75
+                        },
+                        {
+                            "ExternalTransactionId": "6440b2f4-73f4-465f-91fb-9a156da75cba",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "Costco",
+                            "Action": "debit",
+                            "Amount": -216.64
+                        },
+                        {
+                            "ExternalTransactionId": "2fc58740-99a5-4655-8df7-247764089134",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "PAYPAL *MACY S",
+                            "Action": "debit",
+                            "Amount": -98.8
+                        },
+                        {
+                            "ExternalTransactionId": "a784f287-7944-42f3-92c4-5fbd401d2727",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "Costco",
+                            "Action": "debit",
+                            "Amount": -37.83
+                        },
+                        {
+                            "ExternalTransactionId": "4b7b99fb-1332-4527-8c80-0d7f2ea4e4fc",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "U-Haul",
+                            "Action": "debit",
+                            "Amount": -21.67
+                        },
+                        {
+                            "ExternalTransactionId": "93219a05-d11d-45a6-bca0-55b1f91d6295",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "PAYPAL *MACY S",
+                            "Action": "debit",
+                            "Amount": -9.96
+                        },
+                        {
+                            "ExternalTransactionId": "7420c880-c21f-43f3-883f-f092fa75db97",
+                            "Date": "2019-08-09T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "eaf49cb4-5fc3-4915-bad2-9159a13224c2",
+                            "Date": "2019-08-10T11:00:00",
+                            "Description": "PAYPAL *INSTANTINK",
+                            "Action": "debit",
+                            "Amount": -3.26
+                        },
+                        {
+                            "ExternalTransactionId": "120a3a39-ecf4-42a9-87c6-fc7556479962",
+                            "Date": "2019-08-12T11:00:00",
+                            "Description": "Metroplus Health Plan",
+                            "Action": "debit",
+                            "Amount": -44.7
+                        },
+                        {
+                            "ExternalTransactionId": "745fbecf-b2c8-4ad3-aa76-51580066948b",
+                            "Date": "2019-08-13T11:00:00",
+                            "Description": "U-Haul",
+                            "Action": "debit",
+                            "Amount": -34.73
+                        },
+                        {
+                            "ExternalTransactionId": "d6d73c17-6214-4419-a9a7-9b7ac42e7482",
+                            "Date": "2019-08-13T11:00:00",
+                            "Description": "U-Haul",
+                            "Action": "debit",
+                            "Amount": -32.5
+                        },
+                        {
+                            "ExternalTransactionId": "03ad5d47-4d94-4d1a-80ef-2144a3cf1c0b",
+                            "Date": "2019-08-14T11:00:00",
+                            "Description": "AOL",
+                            "Action": "debit",
+                            "Amount": -5.41
+                        },
+                        {
+                            "ExternalTransactionId": "4793000f-60f8-4bd1-92a1-1eda98f916de",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "LAN AIRLINES",
+                            "Action": "debit",
+                            "Amount": -165.0
+                        },
+                        {
+                            "ExternalTransactionId": "3e2e666e-3f72-4ffa-9859-b124fb169ad7",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "Peapod",
+                            "Action": "debit",
+                            "Amount": -157.73
+                        },
+                        {
+                            "ExternalTransactionId": "934b1ffe-4eb5-465c-8593-8f7a992dfff9",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "Marshalls",
+                            "Action": "debit",
+                            "Amount": -102.67
+                        },
+                        {
+                            "ExternalTransactionId": "321babe9-dc01-4b0e-ab86-f75f0da239fd",
+                            "Date": "2019-08-20T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -25.0
+                        },
+                        {
+                            "ExternalTransactionId": "5e432322-b19b-4ebe-b46a-a6adb2cd93a9",
+                            "Date": "2019-08-20T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -16.5
+                        },
+                        {
+                            "ExternalTransactionId": "443ce189-8a23-4185-9c96-cbd5536ae91c",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -27.38
+                        },
+                        {
+                            "ExternalTransactionId": "2e1d20f6-5ead-4275-a90b-c91e84c5274d",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "85a562fa-7219-4426-a0c3-01c9576b8a0a",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "Evine Live",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "176f14ab-3eb4-4128-9347-11b515dd08f1",
+                            "Date": "2019-08-22T11:00:00",
+                            "Description": "Walmart",
+                            "Action": "debit",
+                            "Amount": -40.27
+                        },
+                        {
+                            "ExternalTransactionId": "ffb51175-60d8-4c1d-ace8-b46dbb31ec38",
+                            "Date": "2019-08-23T11:00:00",
+                            "Description": "CVS",
+                            "Action": "debit",
+                            "Amount": -55.16
+                        },
+                        {
+                            "ExternalTransactionId": "f56d1bf6-f0ec-4252-a383-54ce437d4173",
+                            "Date": "2019-08-24T11:00:00",
+                            "Description": "eBay",
+                            "Action": "debit",
+                            "Amount": -14.9
+                        },
+                        {
+                            "ExternalTransactionId": "c58f1121-404e-4257-a0f6-127c3f399319",
+                            "Date": "2019-08-24T11:00:00",
+                            "Description": "JFK RED LOT",
+                            "Action": "debit",
+                            "Amount": -12.0
+                        },
+                        {
+                            "ExternalTransactionId": "38fb0d38-394b-4a0a-9ff4-5dbbd397d93e",
+                            "Date": "2019-08-28T11:00:00",
+                            "Description": "ELIZA PODOLOGA",
+                            "Action": "debit",
+                            "Amount": -21.84
+                        },
+                        {
+                            "ExternalTransactionId": "7215fc46-44b9-499d-b79c-31a49c0aae19",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 11-A ug",
+                            "Action": "credit",
+                            "Amount": 1346.54
+                        },
+                        {
+                            "ExternalTransactionId": "f97baf96-c926-4ff5-b18c-560211b71bfa",
+                            "Date": "2019-09-02T11:00:00",
+                            "Description": "Peapod",
+                            "Action": "debit",
+                            "Amount": -196.71
+                        },
+                        {
+                            "ExternalTransactionId": "da32e3c4-9b76-451a-ad72-44ee174b35fa",
+                            "Date": "2019-09-02T11:00:00",
+                            "Description": "JFK RED LOT",
+                            "Action": "debit",
+                            "Amount": -8.0
+                        },
+                        {
+                            "ExternalTransactionId": "c5f137db-f83a-457c-831b-574ac1597280",
+                            "Date": "2019-09-05T11:00:00",
+                            "Description": "Banana Republic",
+                            "Action": "debit",
+                            "Amount": -47.19
+                        },
+                        {
+                            "ExternalTransactionId": "0385235a-a74a-4577-9049-d10ea9355553",
+                            "Date": "2019-09-05T11:00:00",
+                            "Description": "Banana Republic",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "9354f83d-3426-4032-b87c-a24395a35c74",
+                            "Date": "2019-09-06T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "24861864-e67f-43e3-b52b-5e08a84495de",
+                            "Date": "2019-09-06T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "3eff5c50-a4ee-48de-92aa-c93e17a6f303",
+                            "Date": "2019-09-06T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "a3c086a7-6f6e-49c4-87ee-8dc37cbaafd0",
+                            "Date": "2019-09-06T11:00:00",
+                            "Description": "Banana Republic",
+                            "Action": "debit",
+                            "Amount": -10.18
+                        },
+                        {
+                            "ExternalTransactionId": "48eb4dea-2b82-42ac-aa1d-37b91ee671ad",
+                            "Date": "2019-09-06T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -8.33
+                        },
+                        {
+                            "ExternalTransactionId": "bc87bd54-6087-402a-850a-07ddb85cabc4",
+                            "Date": "2019-09-07T11:00:00",
+                            "Description": "Banana Republic",
+                            "Action": "debit",
+                            "Amount": -7.64
+                        },
+                        {
+                            "ExternalTransactionId": "0e8a27af-7bdd-46ee-994e-6f484ef2dae4",
+                            "Date": "2019-09-09T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "b40a61c7-8883-41d7-b91d-5ab77fb7f187",
+                            "Date": "2019-09-10T11:00:00",
+                            "Description": "PAYPAL *INSTANTINK",
+                            "Action": "debit",
+                            "Amount": -3.26
+                        },
+                        {
+                            "ExternalTransactionId": "f61705dd-4f6b-45b0-b85e-018544651873",
+                            "Date": "2019-09-12T11:00:00",
+                            "Description": "Costco",
+                            "Action": "debit",
+                            "Amount": -201.69
+                        },
+                        {
+                            "ExternalTransactionId": "b0d29e80-73df-4ea2-9d47-8056ba2c9a2d",
+                            "Date": "2019-09-14T11:00:00",
+                            "Description": "AOL",
+                            "Action": "debit",
+                            "Amount": -5.41
+                        },
+                        {
+                            "ExternalTransactionId": "ef42ad3b-bfd3-47eb-88aa-9219e605e5b5",
+                            "Date": "2019-09-19T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -25.0
+                        },
+                        {
+                            "ExternalTransactionId": "53ce20b5-ce1b-4199-886b-210ea2c295b1",
+                            "Date": "2019-09-19T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -16.5
+                        },
+                        {
+                            "ExternalTransactionId": "6589e296-efbb-450f-89e5-6fbf56817f91",
+                            "Date": "2019-09-20T11:00:00",
+                            "Description": "American Airlines",
+                            "Action": "debit",
+                            "Amount": -78.37
+                        },
+                        {
+                            "ExternalTransactionId": "87878b96-05d5-41bd-bac3-97715a7780e6",
+                            "Date": "2019-09-20T11:00:00",
+                            "Description": "American Airlines",
+                            "Action": "debit",
+                            "Amount": -78.37
+                        },
+                        {
+                            "ExternalTransactionId": "56d0a2e4-be0b-4ba5-8d0f-e7615f1d2d8b",
+                            "Date": "2019-09-20T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -27.38
+                        },
+                        {
+                            "ExternalTransactionId": "7bd5ac1a-4e4e-4199-b804-d787765fab68",
+                            "Date": "2019-09-20T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "c720a4cd-81d4-422d-acbf-431e490a052c",
+                            "Date": "2019-09-20T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "72ff6ddf-6638-44cb-a4f4-376ec842eeac",
+                            "Date": "2019-09-24T11:00:00",
+                            "Description": "eBay",
+                            "Action": "debit",
+                            "Amount": -14.9
+                        },
+                        {
+                            "ExternalTransactionId": "8b4ea107-bef2-4fc9-ac42-663f8252ff98",
+                            "Date": "2019-09-24T11:00:00",
+                            "Description": "WWW.CVS.COM",
+                            "Action": "debit",
+                            "Amount": -5.44
+                        },
+                        {
+                            "ExternalTransactionId": "24f5cc17-3808-4050-99a9-be0f63f32e5b",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "Gap",
+                            "Action": "debit",
+                            "Amount": -153.05
+                        },
+                        {
+                            "ExternalTransactionId": "e175ae6d-360a-4068-a192-a77101aab137",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "Gap",
+                            "Action": "debit",
+                            "Amount": -40.42
+                        },
+                        {
+                            "ExternalTransactionId": "0424a039-e317-4494-acae-aa143304debe",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "AOL",
+                            "Action": "debit",
+                            "Amount": -3.99
+                        },
+                        {
+                            "ExternalTransactionId": "7c31a2e4-150e-4488-b40c-ef990381a887",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 30-S ep",
+                            "Action": "credit",
+                            "Amount": 1031.82
+                        },
+                        {
+                            "ExternalTransactionId": "ba25bb5c-d989-4082-a470-2d692f48585c",
+                            "Date": "2019-10-05T11:00:00",
+                            "Description": "Shell Oil",
+                            "Action": "debit",
+                            "Amount": -500.02
+                        },
+                        {
+                            "ExternalTransactionId": "19e64be1-8c2b-4675-a2c1-94503572f638",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "60c527d2-d239-4afc-95d6-423aa20d4787",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -13.33
+                        },
+                        {
+                            "ExternalTransactionId": "5789b5e9-ecf5-4a7d-a60f-1cc499316634",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "7e467805-1ce7-4529-8d9d-0bb9b4129f1a",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -8.33
+                        },
+                        {
+                            "ExternalTransactionId": "b0e5c758-79cb-4e22-bd53-d459a4f45c20",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 07-O ct",
+                            "Action": "credit",
+                            "Amount": 500.02
+                        },
+                        {
+                            "ExternalTransactionId": "fae66026-4bbd-454c-840f-c5ef8731e3ef",
+                            "Date": "2019-10-08T11:00:00",
+                            "Description": "Costco",
+                            "Action": "debit",
+                            "Amount": -65.33
+                        },
+                        {
+                            "ExternalTransactionId": "915f4e64-be7c-481d-8a37-9cb70de96b92",
+                            "Date": "2019-10-08T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -11.67
+                        },
+                        {
+                            "ExternalTransactionId": "87512f89-af94-45fb-83da-6856a61277ab",
+                            "Date": "2019-10-08T11:00:00",
+                            "Description": "PAYPAL *INSTANTINK",
+                            "Action": "debit",
+                            "Amount": -5.2
+                        },
+                        {
+                            "ExternalTransactionId": "b21ef6e8-cd33-4b38-9957-70c469d9c5b5",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "Costco",
+                            "Action": "debit",
+                            "Amount": -213.3
+                        },
+                        {
+                            "ExternalTransactionId": "a0f54f41-683a-47d8-8579-3bc9070bcdaf",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 11-O ct",
+                            "Action": "credit",
+                            "Amount": 128.86
+                        },
+                        {
+                            "ExternalTransactionId": "140f376e-d5d8-496f-9814-4d3c944f915d",
+                            "Date": "2019-10-14T11:00:00",
+                            "Description": "AOL",
+                            "Action": "debit",
+                            "Amount": -5.43
+                        },
+                        {
+                            "ExternalTransactionId": "9f0b918c-1ab3-454d-a505-9c1c2ee6ea70",
+                            "Date": "2019-10-19T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -25.0
+                        },
+                        {
+                            "ExternalTransactionId": "b3943497-be04-4d73-a248-8ed8ac963bae",
+                            "Date": "2019-10-19T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -16.5
+                        },
+                        {
+                            "ExternalTransactionId": "77024995-c43c-4a78-a3f4-1a66208b8907",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -27.38
+                        },
+                        {
+                            "ExternalTransactionId": "a7b5bd35-3d50-42bb-8e04-1635c862dba7",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "fac336d1-f288-463e-b7b2-442a6e2693c6",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "ShopHQ",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ExternalInstitutionId": "0527c49b-5195-40ca-a962-69534ae1de73",
+            "Name": "Capital One",
+            "Accounts": [
+                {
+                    "AccountNumber": "4289",
+                    "AccountType": "SDA",
+                    "CurrencyCode": "",
+                    "DataSourceId": "0527c49b-5195-40ca-a962-69534ae1de73",
+                    "ExternalAccountId": "0527c49b-5195-40ca-a962-69534ae1de73",
+                    "CurrentBalance": 1000.0,
+                    "CurrentBalanceDate": "2019-10-23T22:50:42",
+                    "Transactions": []
+                }
+            ]
+        },
+        {
+            "ExternalInstitutionId": "f288648c-5aa7-4ae6-a26f-8d270fe56761",
+            "Name": "Capital One",
+            "Accounts": [
+                {
+                    "AccountNumber": "4509",
+                    "AccountType": "CCA",
+                    "CurrencyCode": "",
+                    "DataSourceId": "f288648c-5aa7-4ae6-a26f-8d270fe56761",
+                    "ExternalAccountId": "f288648c-5aa7-4ae6-a26f-8d270fe56761",
+                    "CurrentBalance": -9.99,
+                    "CurrentBalanceDate": "2019-10-23T22:50:51",
+                    "Transactions": [
+                        {
+                            "ExternalTransactionId": "a28945fe-581f-416b-9895-233167404809",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 06-A ug",
+                            "Action": "credit",
+                            "Amount": 9.99
+                        },
+                        {
+                            "ExternalTransactionId": "90e5fb5b-4a0c-49f3-b914-f53201155c72",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "GOOGLE *YouTubePremium",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "d33328f9-f105-45a2-8255-5acce753aaa8",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 30-A ug",
+                            "Action": "credit",
+                            "Amount": 9.99
+                        },
+                        {
+                            "ExternalTransactionId": "cda5d36c-eb8c-4ee5-83f3-8fa0e20307e5",
+                            "Date": "2019-09-21T11:00:00",
+                            "Description": "GOOGLE *YouTubePremium",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "db263673-d98f-4921-bdfd-e65f96ee6abd",
+                            "Date": "2019-09-30T11:00:00",
+                            "Description": "CAPITAL ONE ONLINE PYMT AuthDate 30-S ep",
+                            "Action": "credit",
+                            "Amount": 9.99
+                        },
+                        {
+                            "ExternalTransactionId": "c7febf12-f61c-4c8c-b940-2ae6a2ecb218",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "GOOGLE *YouTubePremium",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "ExternalInstitutionId": "660d0faa-e6e3-436b-9297-ca4cd36f890b",
+            "Name": "Capital One",
+            "Accounts": [
+                {
+                    "AccountNumber": "5934",
+                    "AccountType": "DDA",
+                    "CurrencyCode": "",
+                    "DataSourceId": "660d0faa-e6e3-436b-9297-ca4cd36f890b",
+                    "ExternalAccountId": "660d0faa-e6e3-436b-9297-ca4cd36f890b",
+                    "CurrentBalance": 5702.13,
+                    "CurrentBalanceDate": "2019-10-23T22:52:42",
+                    "Transactions": [
+                        {
+                            "ExternalTransactionId": "0f3530d2-cf0c-467c-9090-df3f6dff010b",
+                            "Date": "2018-10-23T11:00:00",
+                            "Description": "Customer withdrawal #7127",
+                            "Action": "debit",
+                            "Amount": -300.0
+                        },
+                        {
+                            "ExternalTransactionId": "2019b95e-bc51-478d-b1ad-fa1776b2172a",
+                            "Date": "2018-10-24T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -147.7
+                        },
+                        {
+                            "ExternalTransactionId": "8acfa010-4d91-40d9-bbe0-f3db195b900a",
+                            "Date": "2018-10-25T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -95.18
+                        },
+                        {
+                            "ExternalTransactionId": "e4af38ac-4de4-498b-8384-80c85ef57f01",
+                            "Date": "2018-10-25T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.92
+                        },
+                        {
+                            "ExternalTransactionId": "91853c89-ef5c-4e41-afec-077f173cfa6d",
+                            "Date": "2018-10-26T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -598.33
+                        },
+                        {
+                            "ExternalTransactionId": "b2df95fb-dee5-48d1-bcbf-1885965a1f97",
+                            "Date": "2018-10-29T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "389361b8-6227-4156-a230-ce55d6c10ba9",
+                            "Date": "2018-10-30T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -135.39
+                        },
+                        {
+                            "ExternalTransactionId": "0cff58c5-be92-43a7-b01f-749a2cf27c4d",
+                            "Date": "2018-11-01T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 279.17
+                        },
+                        {
+                            "ExternalTransactionId": "dc3e5b52-6367-4198-9139-d4311adbf045",
+                            "Date": "2018-11-02T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -200.0
+                        },
+                        {
+                            "ExternalTransactionId": "6a6beb4c-ddd2-4b84-9082-6be6d0b605b2",
+                            "Date": "2018-11-05T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "15024790-1201-4824-bc48-b1ebab1fdffb",
+                            "Date": "2018-11-08T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.92
+                        },
+                        {
+                            "ExternalTransactionId": "b0ff4ef5-25b1-41a3-a00d-d9caa7d10b52",
+                            "Date": "2018-11-09T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "5b39ab56-1fc8-4b9f-81cd-450a5f9f2ea5",
+                            "Date": "2018-11-09T13:00:00",
+                            "Description": "Speedway",
+                            "Action": "debit",
+                            "Amount": -20.0
+                        },
+                        {
+                            "ExternalTransactionId": "76fc8931-30b4-4c98-9988-1dead5f6c471",
+                            "Date": "2018-11-13T13:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -173.05
+                        },
+                        {
+                            "ExternalTransactionId": "b0c06bbf-342f-4035-b35a-85b3f4bbf68b",
+                            "Date": "2018-11-13T13:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -60.02
+                        },
+                        {
+                            "ExternalTransactionId": "cf469a33-4964-4bcc-a400-876cc4700930",
+                            "Date": "2018-11-13T13:00:00",
+                            "Description": "BP",
+                            "Action": "debit",
+                            "Amount": -20.03
+                        },
+                        {
+                            "ExternalTransactionId": "48413ff6-b43f-464f-86c3-a5c35cda031f",
+                            "Date": "2018-11-13T13:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...0572",
+                            "Action": "credit",
+                            "Amount": 1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "29ef3609-7e56-4c21-ad0a-af568585fbf2",
+                            "Date": "2018-11-14T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -257.91
+                        },
+                        {
+                            "ExternalTransactionId": "8a51cd9b-8adc-4a22-a469-b004bbd7a589",
+                            "Date": "2018-11-14T13:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "1d980210-a95b-4752-bac5-68c4956ac970",
+                            "Date": "2018-11-15T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.93
+                        },
+                        {
+                            "ExternalTransactionId": "bf3669e4-778d-49e2-8ea1-fef6c08ff72a",
+                            "Date": "2018-11-16T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 150.0
+                        },
+                        {
+                            "ExternalTransactionId": "97824a1d-c0b1-4f73-8e57-af72ff10aa9a",
+                            "Date": "2018-11-20T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -100.0
+                        },
+                        {
+                            "ExternalTransactionId": "56dfd0be-5d79-4547-968c-557b4218fae4",
+                            "Date": "2018-11-21T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -350.0
+                        },
+                        {
+                            "ExternalTransactionId": "5d2dc804-50d7-4435-8771-7dc1400347f5",
+                            "Date": "2018-11-21T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.92
+                        },
+                        {
+                            "ExternalTransactionId": "2b30d9f3-089c-4f3e-890a-8a8b2fd7ee70",
+                            "Date": "2018-11-21T13:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1135.0
+                        },
+                        {
+                            "ExternalTransactionId": "6955fa3a-0ffe-426e-b168-0b5ee92ab44b",
+                            "Date": "2018-11-21T13:00:00",
+                            "Description": "Customer Deposit",
+                            "Action": "credit",
+                            "Amount": 2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "68f49b7f-4b53-425b-b984-dd2a3ded7ee5",
+                            "Date": "2018-11-23T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1929.04
+                        },
+                        {
+                            "ExternalTransactionId": "3000cb73-53c5-4361-9c44-2cbf227b2e37",
+                            "Date": "2018-11-23T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -170.19
+                        },
+                        {
+                            "ExternalTransactionId": "93ee0271-240b-4245-8044-a509acd18cf0",
+                            "Date": "2018-11-26T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 250.0
+                        },
+                        {
+                            "ExternalTransactionId": "dccfc1ba-d05c-4da5-bce2-024bd6b473d8",
+                            "Date": "2018-11-27T13:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -216.66
+                        },
+                        {
+                            "ExternalTransactionId": "db19fcc0-1d1f-491e-b8a6-dd845bb1392b",
+                            "Date": "2018-11-28T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -762.2
+                        },
+                        {
+                            "ExternalTransactionId": "fcdd88f8-d39a-4d6a-8996-eeda92a03b96",
+                            "Date": "2018-11-28T13:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "18c55c69-7527-4af7-828a-71d14cd30bf2",
+                            "Date": "2018-11-29T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.93
+                        },
+                        {
+                            "ExternalTransactionId": "7bb994a0-46cf-4a85-9ee8-4fe692267b56",
+                            "Date": "2018-11-30T13:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -406.21
+                        },
+                        {
+                            "ExternalTransactionId": "bf1b215d-7290-46dd-af28-4723ca3212eb",
+                            "Date": "2018-11-30T13:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -91.95
+                        },
+                        {
+                            "ExternalTransactionId": "d6ec8d46-30ef-4546-923d-6a1186243949",
+                            "Date": "2018-12-03T13:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E717 3702 82ND ST               JACKSON HEIGH  NY",
+                            "Action": "debit",
+                            "Amount": -200.0
+                        },
+                        {
+                            "ExternalTransactionId": "265b9f2c-ae40-4db6-b1d7-c7462a77c5df",
+                            "Date": "2018-12-03T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -113.03
+                        },
+                        {
+                            "ExternalTransactionId": "c385914d-bc4a-41f1-9e64-86b0df72600a",
+                            "Date": "2018-12-04T13:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -32.01
+                        },
+                        {
+                            "ExternalTransactionId": "1d0a78bc-7e17-47a0-847b-2e74d4f7f589",
+                            "Date": "2018-12-05T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -150.0
+                        },
+                        {
+                            "ExternalTransactionId": "c6817809-c4a2-4da0-9883-fbb6d211be63",
+                            "Date": "2018-12-05T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "5f27cdc6-a1f1-4fb5-bb54-e8aaaaa91647",
+                            "Date": "2018-12-06T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.92
+                        },
+                        {
+                            "ExternalTransactionId": "0015daf1-f6b9-4b39-8864-9e2267193efd",
+                            "Date": "2018-12-07T13:00:00",
+                            "Description": "Customer Deposit",
+                            "Action": "credit",
+                            "Amount": 1500.0
+                        },
+                        {
+                            "ExternalTransactionId": "1a0b606f-e0bc-4811-a740-bb00d0d2d6c7",
+                            "Date": "2018-12-10T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -896.43
+                        },
+                        {
+                            "ExternalTransactionId": "b8d032a0-f5c8-4023-bed5-57c8e3bdff2d",
+                            "Date": "2018-12-10T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "496e3196-a141-4c99-945b-d86d827b0dc4",
+                            "Date": "2018-12-10T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -207.48
+                        },
+                        {
+                            "ExternalTransactionId": "284441e7-7871-4ea4-8da1-48aed12f4b5a",
+                            "Date": "2018-12-10T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "6f29f51c-0334-43ad-9e66-cb488a287e54",
+                            "Date": "2018-12-11T13:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -173.05
+                        },
+                        {
+                            "ExternalTransactionId": "0cdde6eb-2405-4fe0-8872-12c4650ff67d",
+                            "Date": "2018-12-13T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 100.0
+                        },
+                        {
+                            "ExternalTransactionId": "2abaf66c-c645-4698-91e5-9ee35482f82f",
+                            "Date": "2018-12-13T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 421.08
+                        },
+                        {
+                            "ExternalTransactionId": "2d29d37c-4f5f-48c3-a248-e8c544c5cb28",
+                            "Date": "2018-12-14T13:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -99.55
+                        },
+                        {
+                            "ExternalTransactionId": "366867f9-e4c2-4430-a69c-438bcfdc03c5",
+                            "Date": "2018-12-14T13:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "0531b227-6f8e-43ad-bead-500911951e47",
+                            "Date": "2018-12-19T13:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1135.0
+                        },
+                        {
+                            "ExternalTransactionId": "4da6780b-ae69-47b0-b3cb-6d676b735f84",
+                            "Date": "2018-12-20T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.92
+                        },
+                        {
+                            "ExternalTransactionId": "0752ff52-6612-407a-9bac-51e97130598c",
+                            "Date": "2018-12-24T13:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -600.0
+                        },
+                        {
+                            "ExternalTransactionId": "1f45a794-cc2c-4f2f-bbf9-7d0f23513e77",
+                            "Date": "2018-12-24T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -300.0
+                        },
+                        {
+                            "ExternalTransactionId": "bdf0a25b-eca6-42b1-a7b8-91a8cdabeffa",
+                            "Date": "2018-12-24T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -282.26
+                        },
+                        {
+                            "ExternalTransactionId": "1b2fe15a-9049-469b-a462-c8b914580fe3",
+                            "Date": "2018-12-24T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -98.09
+                        },
+                        {
+                            "ExternalTransactionId": "743678c7-c64f-42f9-8104-63d5f14a53b3",
+                            "Date": "2018-12-24T13:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -72.99
+                        },
+                        {
+                            "ExternalTransactionId": "ee39e5b5-45d5-4bda-bc50-91bf3f3c794b",
+                            "Date": "2018-12-26T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -154.78
+                        },
+                        {
+                            "ExternalTransactionId": "1eadcaf7-6dbf-4c53-bceb-fe96d193bcdb",
+                            "Date": "2018-12-27T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 205.93
+                        },
+                        {
+                            "ExternalTransactionId": "b637858c-aea8-47b2-bc74-7bc3b5097825",
+                            "Date": "2018-12-28T13:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "2df36d15-3ca2-4d11-b1cd-7396c12728db",
+                            "Date": "2019-01-02T13:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -101.28
+                        },
+                        {
+                            "ExternalTransactionId": "24e93390-2e30-4f27-816c-0ca8b4bedf30",
+                            "Date": "2019-01-03T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "69accb0d-f476-495b-80da-670dbc9fd351",
+                            "Date": "2019-01-04T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "0a8c541d-f2c1-440f-afaa-58f9ba687326",
+                            "Date": "2019-01-04T13:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 4800.0
+                        },
+                        {
+                            "ExternalTransactionId": "8903eb4d-2732-49ff-80f8-b6d1ab536a8c",
+                            "Date": "2019-01-07T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1127.18
+                        },
+                        {
+                            "ExternalTransactionId": "4546fa4a-c259-41aa-b4bd-4682acd729e2",
+                            "Date": "2019-01-07T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -85.62
+                        },
+                        {
+                            "ExternalTransactionId": "155046aa-2f93-42a5-9ad2-146263e754db",
+                            "Date": "2019-01-07T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -49.93
+                        },
+                        {
+                            "ExternalTransactionId": "e731f381-c8d2-432f-ba4c-742972eebdea",
+                            "Date": "2019-01-07T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 800.0
+                        },
+                        {
+                            "ExternalTransactionId": "dd32f0ab-70b1-417c-b180-ac292ed686e6",
+                            "Date": "2019-01-08T13:00:00",
+                            "Description": "Customer withdrawal #8783",
+                            "Action": "debit",
+                            "Amount": -2500.0
+                        },
+                        {
+                            "ExternalTransactionId": "6b6ea7a0-96c4-432b-af20-c7817084e01c",
+                            "Date": "2019-01-08T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -91.67
+                        },
+                        {
+                            "ExternalTransactionId": "ce747642-be8a-4d03-a5a4-de27cc70f52e",
+                            "Date": "2019-01-09T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -474.91
+                        },
+                        {
+                            "ExternalTransactionId": "5e239487-f0ec-400e-adc8-38a4b6f3b566",
+                            "Date": "2019-01-09T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "bc4ff0dd-6060-4b3e-82f1-39f8b635dfdf",
+                            "Date": "2019-01-10T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "589e18b4-2bfb-4cca-9e70-7b28a5a64f45",
+                            "Date": "2019-01-11T13:00:00",
+                            "Description": "Customer withdrawal #8642",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "83a1ddb5-5985-4e1f-8b10-394958193ec1",
+                            "Date": "2019-01-11T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -372.63
+                        },
+                        {
+                            "ExternalTransactionId": "adabb4c9-0f6f-4e89-9ba4-d8536d54de78",
+                            "Date": "2019-01-14T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -196.07
+                        },
+                        {
+                            "ExternalTransactionId": "a6a39d31-1ee4-406e-876b-c55e79529623",
+                            "Date": "2019-01-14T13:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -115.99
+                        },
+                        {
+                            "ExternalTransactionId": "9d330a40-d772-4df4-b659-ee0fbe89d877",
+                            "Date": "2019-01-14T13:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -41.24
+                        },
+                        {
+                            "ExternalTransactionId": "b949c6ec-86f1-4783-aace-1519e61e7877",
+                            "Date": "2019-01-14T13:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "cc1d4439-912f-4dbb-88a9-96d1e4414dd6",
+                            "Date": "2019-01-15T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -86.0
+                        },
+                        {
+                            "ExternalTransactionId": "9c03da54-e593-4179-aff7-bee833577446",
+                            "Date": "2019-01-16T13:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "30a712be-093e-4be7-8baa-770e55e68914",
+                            "Date": "2019-01-17T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "9c02e7b6-3813-473f-a79b-0c8064880407",
+                            "Date": "2019-01-18T13:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E288 SUNNYSIDE                  SUNNYSIDE      NY",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "12986257-1667-4963-b5f0-bac87f5bfca6",
+                            "Date": "2019-01-22T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -69.0
+                        },
+                        {
+                            "ExternalTransactionId": "f73c1512-6a7b-43fe-98c3-356f7fbd9b8e",
+                            "Date": "2019-01-23T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -400.0
+                        },
+                        {
+                            "ExternalTransactionId": "e727232b-3bbc-431c-a222-f607e6616c77",
+                            "Date": "2019-01-23T13:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -157.97
+                        },
+                        {
+                            "ExternalTransactionId": "4ec7d649-4778-46a8-b0bd-c10b928c7acb",
+                            "Date": "2019-01-24T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "b302554c-0e3c-4a93-b0fa-99aeb2605dec",
+                            "Date": "2019-01-28T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -81.31
+                        },
+                        {
+                            "ExternalTransactionId": "1eaf3d67-db89-46da-80bb-3301aabc9325",
+                            "Date": "2019-01-29T13:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "953ae3ac-827e-4d0a-9a31-51f304b2571b",
+                            "Date": "2019-01-29T13:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -76.05
+                        },
+                        {
+                            "ExternalTransactionId": "deb039a8-f354-4083-9abf-44de86a6a799",
+                            "Date": "2019-01-29T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "96794e8d-8acc-484f-a44e-d7f6554f50a4",
+                            "Date": "2019-01-30T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -281.3
+                        },
+                        {
+                            "ExternalTransactionId": "b3e35a18-fcb7-4e7d-a4b3-a251e1d4ba2b",
+                            "Date": "2019-01-31T13:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -74.59
+                        },
+                        {
+                            "ExternalTransactionId": "1fd94f4d-7de9-48b5-8bab-358440cd1003",
+                            "Date": "2019-01-31T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "28ac61ca-a8f0-4744-a47a-63c6c6fdd792",
+                            "Date": "2019-02-05T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "528d893e-627d-4486-9570-275b15c705a5",
+                            "Date": "2019-02-05T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 70.0
+                        },
+                        {
+                            "ExternalTransactionId": "ce769d7d-a9fc-40e0-a47e-86958eff713e",
+                            "Date": "2019-02-05T13:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 500.0
+                        },
+                        {
+                            "ExternalTransactionId": "ac097074-f5f3-4a0b-af2c-0d27a54a72aa",
+                            "Date": "2019-02-06T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "824bdaf0-9d00-4d5f-b24e-1d0d57b4f9d2",
+                            "Date": "2019-02-07T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "de7a3b98-7cc5-4b8d-8e04-894733399d92",
+                            "Date": "2019-02-08T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -148.4
+                        },
+                        {
+                            "ExternalTransactionId": "b672532f-2e95-41d6-a198-a0d2c917c749",
+                            "Date": "2019-02-08T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -67.57
+                        },
+                        {
+                            "ExternalTransactionId": "2c3c6b31-44e2-4186-b3e9-acb28dd2d469",
+                            "Date": "2019-02-11T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -700.0
+                        },
+                        {
+                            "ExternalTransactionId": "482d055e-c419-4ed4-a844-f0ea81a329b9",
+                            "Date": "2019-02-11T13:00:00",
+                            "Description": "DEBTMGMTSERVICES",
+                            "Action": "debit",
+                            "Amount": -88.41
+                        },
+                        {
+                            "ExternalTransactionId": "a5f6eaed-411a-4e28-b3c6-0a6bdde3ce51",
+                            "Date": "2019-02-11T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "dd405cbf-ef63-4e58-bc2f-5bdc90e7948e",
+                            "Date": "2019-02-11T13:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 500.0
+                        },
+                        {
+                            "ExternalTransactionId": "7ad664e8-98ae-470b-aecb-26f93671869c",
+                            "Date": "2019-02-13T13:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -154.59
+                        },
+                        {
+                            "ExternalTransactionId": "553aa630-0f8f-435a-85a3-22f77799377f",
+                            "Date": "2019-02-14T13:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "d7196836-4b5f-42f8-842d-d8e917d8a01d",
+                            "Date": "2019-02-14T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 646.45
+                        },
+                        {
+                            "ExternalTransactionId": "6d61c613-9f7b-4ed9-9933-438f151f2158",
+                            "Date": "2019-02-15T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -800.0
+                        },
+                        {
+                            "ExternalTransactionId": "f7ecf967-27a4-404e-a72b-729880480d30",
+                            "Date": "2019-02-15T13:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...0572",
+                            "Action": "credit",
+                            "Amount": 500.0
+                        },
+                        {
+                            "ExternalTransactionId": "80990090-24a2-4394-8d21-e399b15cef8a",
+                            "Date": "2019-02-19T13:00:00",
+                            "Description": "P2P Payment Sent To MARIE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "735d9305-0136-4434-8c7c-e761c54ce04a",
+                            "Date": "2019-02-19T13:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "66db2573-39d4-4cc5-a164-6677ec046da3",
+                            "Date": "2019-02-19T13:00:00",
+                            "Description": "P2P Payment Reversed MARIE328@GMAIL.COM",
+                            "Action": "credit",
+                            "Amount": 250.0
+                        },
+                        {
+                            "ExternalTransactionId": "0eb4f134-3552-4eb2-8ecf-be81bf605133",
+                            "Date": "2019-02-20T13:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "3e551647-6ed3-4791-9793-c6f3cacb3ed3",
+                            "Date": "2019-02-21T13:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1512.3
+                        },
+                        {
+                            "ExternalTransactionId": "a7051d87-b70e-4484-be25-d8ee07f306c8",
+                            "Date": "2019-02-21T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 415.57
+                        },
+                        {
+                            "ExternalTransactionId": "8ab35c34-eab3-4b77-842a-1738a654b118",
+                            "Date": "2019-02-25T13:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -46.33
+                        },
+                        {
+                            "ExternalTransactionId": "9b894a79-b127-4a85-80ba-106cf8ada10a",
+                            "Date": "2019-02-26T13:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -77.95
+                        },
+                        {
+                            "ExternalTransactionId": "5776cead-36c9-41c8-8dd1-288b69f8f62b",
+                            "Date": "2019-02-26T13:00:00",
+                            "Description": "NY STATE",
+                            "Action": "credit",
+                            "Amount": 727.0
+                        },
+                        {
+                            "ExternalTransactionId": "de512b59-0682-4abf-94ff-4b3d9a762b85",
+                            "Date": "2019-02-27T13:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "ef81ab90-fdab-43a0-93e1-29afec621c8d",
+                            "Date": "2019-02-27T13:00:00",
+                            "Description": "IRS  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1513.0
+                        },
+                        {
+                            "ExternalTransactionId": "e711361a-af4b-4afb-924b-defd057b5a1b",
+                            "Date": "2019-02-28T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "9dfb919a-4b24-49a9-bb38-3d869fd040f5",
+                            "Date": "2019-03-01T13:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -1178.71
+                        },
+                        {
+                            "ExternalTransactionId": "70943fc0-fac7-4fd9-9b53-6a787f1a73f4",
+                            "Date": "2019-03-01T13:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -276.45
+                        },
+                        {
+                            "ExternalTransactionId": "8aab0f10-aa72-4bb5-b394-83123a0c2bed",
+                            "Date": "2019-03-01T13:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -228.53
+                        },
+                        {
+                            "ExternalTransactionId": "6f155856-f521-4532-808f-2daa706a4c6d",
+                            "Date": "2019-03-04T13:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -96.23
+                        },
+                        {
+                            "ExternalTransactionId": "178bf4c5-a0fc-4f07-921a-85977577804e",
+                            "Date": "2019-03-04T13:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "6551d2d9-d748-4526-8a39-2d26ca737d92",
+                            "Date": "2019-03-05T13:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -311.76
+                        },
+                        {
+                            "ExternalTransactionId": "c320f379-14e1-4a7e-8bb6-1d0c247b5204",
+                            "Date": "2019-03-07T13:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 279.46
+                        },
+                        {
+                            "ExternalTransactionId": "cbf56725-e41c-4add-9514-6b1d57f8d706",
+                            "Date": "2019-03-08T13:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 150.0
+                        },
+                        {
+                            "ExternalTransactionId": "1b3e4c1f-286b-4742-ac50-a3d6bc8d3e84",
+                            "Date": "2019-03-11T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "a8ff9f05-9645-4f20-b59b-d1e8c6833f5d",
+                            "Date": "2019-03-14T11:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "abf46bae-3021-4f6a-bbcf-06a3ba603495",
+                            "Date": "2019-03-14T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "4dc5461e-8b29-400f-9f24-275d6e39e6ad",
+                            "Date": "2019-03-15T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -128.15
+                        },
+                        {
+                            "ExternalTransactionId": "3a002552-a0a4-4d25-a845-1ef2dd288a7b",
+                            "Date": "2019-03-18T11:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -300.0
+                        },
+                        {
+                            "ExternalTransactionId": "74359119-4b19-4af8-a5c1-e8146a5c10c0",
+                            "Date": "2019-03-20T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "728e0f52-fd65-4bcb-819d-9632fcbfab89",
+                            "Date": "2019-03-21T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -900.0
+                        },
+                        {
+                            "ExternalTransactionId": "ff4fc9e0-98b4-4d1b-a1d1-4d1ce0c65809",
+                            "Date": "2019-03-21T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "bbdd8584-866b-413d-848d-ae354f9aa8b4",
+                            "Date": "2019-03-21T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -223.5
+                        },
+                        {
+                            "ExternalTransactionId": "cde1142e-5a8a-4e1a-bc73-e5b94bc2b243",
+                            "Date": "2019-03-21T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "e9a2597f-e21a-4648-beee-a1f3b5d071e9",
+                            "Date": "2019-03-26T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -64.12
+                        },
+                        {
+                            "ExternalTransactionId": "bbe988ba-ce6f-4ea6-9996-34b302e98d86",
+                            "Date": "2019-03-26T11:00:00",
+                            "Description": "AMZ_STORECRD_PMT",
+                            "Action": "debit",
+                            "Amount": -22.43
+                        },
+                        {
+                            "ExternalTransactionId": "0e90c711-06a5-48ff-9084-444e8d7ae325",
+                            "Date": "2019-03-27T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -124.76
+                        },
+                        {
+                            "ExternalTransactionId": "b6aa7fd9-3b19-40ff-bd6e-c2c0711cb2c3",
+                            "Date": "2019-03-28T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -300.0
+                        },
+                        {
+                            "ExternalTransactionId": "6b7cf55d-7896-4779-9ef1-556b8aa0a480",
+                            "Date": "2019-03-28T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "690088da-2834-498a-b560-bee3cfeb38b1",
+                            "Date": "2019-04-02T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -103.33
+                        },
+                        {
+                            "ExternalTransactionId": "6f02738d-4d09-46e6-936e-93eac12d374e",
+                            "Date": "2019-04-04T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "355ab54a-8844-4b11-93a9-6f16a9d02c84",
+                            "Date": "2019-04-04T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "83274b95-c529-4e1a-916b-f3552aa35780",
+                            "Date": "2019-04-08T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 184.15
+                        },
+                        {
+                            "ExternalTransactionId": "9a2d32c6-c4a4-43e5-bc0c-01528841be27",
+                            "Date": "2019-04-10T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "f431ba48-01cb-4d18-af37-9725220fbdcc",
+                            "Date": "2019-04-11T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "30dc34ef-5bc0-435c-a9f0-701c8f6e4f45",
+                            "Date": "2019-04-12T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -111.33
+                        },
+                        {
+                            "ExternalTransactionId": "0857a46d-c63a-4b65-a2e3-57ef7643cb3a",
+                            "Date": "2019-04-12T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -42.99
+                        },
+                        {
+                            "ExternalTransactionId": "c256e1d8-0e43-4c73-ad80-ef0960cbd178",
+                            "Date": "2019-04-15T11:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "a5e4f76a-56de-44c3-84fb-15fa61fb99ad",
+                            "Date": "2019-04-15T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "credit",
+                            "Amount": 512.36
+                        },
+                        {
+                            "ExternalTransactionId": "a5ff8314-4e11-492d-88e3-09b7c6a46cdf",
+                            "Date": "2019-04-16T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 590.0
+                        },
+                        {
+                            "ExternalTransactionId": "d354d638-4f74-42c7-a492-f85a3fc22a92",
+                            "Date": "2019-04-17T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "30c4eaf2-017e-47e1-be66-383316221f2f",
+                            "Date": "2019-04-18T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "504dbc61-36ab-4bf4-93a1-234824aa28f1",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -726.97
+                        },
+                        {
+                            "ExternalTransactionId": "28caf5cf-5554-4e4a-9928-4d8cf3e08436",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -347.33
+                        },
+                        {
+                            "ExternalTransactionId": "03de7508-8bb6-4eae-ba56-eda3d5ef8d64",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -225.09
+                        },
+                        {
+                            "ExternalTransactionId": "9b904733-30b5-4170-acd3-3965c4397afe",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -91.39
+                        },
+                        {
+                            "ExternalTransactionId": "3a8bba12-eba7-4c2c-b589-de362c9b45fd",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -37.63
+                        },
+                        {
+                            "ExternalTransactionId": "821a0ea3-db83-4770-9651-08477c017879",
+                            "Date": "2019-04-19T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "credit",
+                            "Amount": 1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "d2463660-6e53-41ab-aa3b-b5f598e90959",
+                            "Date": "2019-04-22T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -2257.08
+                        },
+                        {
+                            "ExternalTransactionId": "7425651e-12bc-427d-8853-ff500eb58785",
+                            "Date": "2019-04-22T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "f78014a1-6da3-4ce2-95f0-c4a624b8fe9e",
+                            "Date": "2019-04-22T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 500.0
+                        },
+                        {
+                            "ExternalTransactionId": "e7e666a8-fcfa-4d76-9ee4-aa9350e48afa",
+                            "Date": "2019-04-25T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "cfcbb285-79c6-434a-8000-2b9856d32c49",
+                            "Date": "2019-04-29T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -56.58
+                        },
+                        {
+                            "ExternalTransactionId": "2eec8951-cf21-4991-895f-02ac3cf720cb",
+                            "Date": "2019-05-01T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -88.29
+                        },
+                        {
+                            "ExternalTransactionId": "28fbf58e-afe9-497c-b8ca-0746a965161d",
+                            "Date": "2019-05-02T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -153.4
+                        },
+                        {
+                            "ExternalTransactionId": "ba46eec1-943e-4640-9371-01b8bd7874fa",
+                            "Date": "2019-05-02T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -79.46
+                        },
+                        {
+                            "ExternalTransactionId": "210e63c2-95a3-41cb-a945-559f23ccce36",
+                            "Date": "2019-05-02T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "e4fe14cc-f38a-4a68-bca6-6a1bad1a1653",
+                            "Date": "2019-05-06T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "361ad731-8d3a-4e44-9c1d-638493409bd6",
+                            "Date": "2019-05-06T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -43.45
+                        },
+                        {
+                            "ExternalTransactionId": "6a5e0f91-0d7e-4fe4-8da4-333a0fe24022",
+                            "Date": "2019-05-06T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -19.97
+                        },
+                        {
+                            "ExternalTransactionId": "a86be915-72be-4532-8cdd-dda38319f820",
+                            "Date": "2019-05-07T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -17.25
+                        },
+                        {
+                            "ExternalTransactionId": "51752516-b215-4a6e-a94a-a855a37194e3",
+                            "Date": "2019-05-07T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 50.0
+                        },
+                        {
+                            "ExternalTransactionId": "48d61c38-6417-4ccf-b4b8-cec8f2b638fc",
+                            "Date": "2019-05-09T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "8583616b-49f9-47ec-975f-434b464468f6",
+                            "Date": "2019-05-09T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "9e93698c-25d1-4ede-9a6d-6ed37baab113",
+                            "Date": "2019-05-13T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -153.49
+                        },
+                        {
+                            "ExternalTransactionId": "6f65a0a4-7105-4cea-941e-e46e0c0feb72",
+                            "Date": "2019-05-14T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -99.6
+                        },
+                        {
+                            "ExternalTransactionId": "b2fa3953-62fc-4a40-9de1-b586042f4726",
+                            "Date": "2019-05-14T11:00:00",
+                            "Description": "AOL DESKTOP GOLD PLUS",
+                            "Action": "debit",
+                            "Amount": -5.19
+                        },
+                        {
+                            "ExternalTransactionId": "9da3da56-fdae-49c6-a6d9-468f95276874",
+                            "Date": "2019-05-15T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "credit",
+                            "Amount": 422.49
+                        },
+                        {
+                            "ExternalTransactionId": "a78d4246-8324-4bb9-9124-1508b58807e7",
+                            "Date": "2019-05-15T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "4f200593-a5a2-4895-abf1-60082b08360e",
+                            "Date": "2019-05-16T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -730.7
+                        },
+                        {
+                            "ExternalTransactionId": "cd01f0c4-5f63-4cb0-9e23-4bad4fe2baf9",
+                            "Date": "2019-05-16T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "343f4f5e-6a44-417e-b826-e65e002e5b7c",
+                            "Date": "2019-05-17T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -811.65
+                        },
+                        {
+                            "ExternalTransactionId": "60325dff-1a58-498d-a672-eeb1ebf1c99f",
+                            "Date": "2019-05-21T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -213.4
+                        },
+                        {
+                            "ExternalTransactionId": "363d9043-452f-4eca-8715-fcc5ca7f95b1",
+                            "Date": "2019-05-22T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "5719a7fe-125b-4532-b099-91ac74165202",
+                            "Date": "2019-05-23T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "55af7cc7-189a-4217-8f99-a53b173544b3",
+                            "Date": "2019-05-24T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "16cf81be-d685-487c-aa8a-b98774479fee",
+                            "Date": "2019-05-24T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 40.0
+                        },
+                        {
+                            "ExternalTransactionId": "52a63610-db75-4058-b6f5-a3d9100254ef",
+                            "Date": "2019-05-24T11:00:00",
+                            "Description": "Customer Deposit",
+                            "Action": "credit",
+                            "Amount": 1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "dc356cdf-f79b-46ed-8ee4-8e481b87c687",
+                            "Date": "2019-05-28T11:00:00",
+                            "Description": "Sunoco Gas",
+                            "Action": "debit",
+                            "Amount": -44.5
+                        },
+                        {
+                            "ExternalTransactionId": "0902e386-3614-421a-af3a-9bad2a811d94",
+                            "Date": "2019-05-30T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -156.92
+                        },
+                        {
+                            "ExternalTransactionId": "f1897a24-4b10-4553-ac76-9a0ca57839cf",
+                            "Date": "2019-05-30T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -42.47
+                        },
+                        {
+                            "ExternalTransactionId": "3ebe102f-b5a4-46c8-9db1-9609e7c45bdb",
+                            "Date": "2019-05-30T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "4bab6c10-b98d-4e48-8abf-881efe0b40e5",
+                            "Date": "2019-05-31T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -75.47
+                        },
+                        {
+                            "ExternalTransactionId": "e56d058f-971f-4251-806f-3d7a9ed9d032",
+                            "Date": "2019-06-03T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -153.4
+                        },
+                        {
+                            "ExternalTransactionId": "a85eda96-ab84-4104-9f61-675dde6e6b1d",
+                            "Date": "2019-06-03T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 105.5
+                        },
+                        {
+                            "ExternalTransactionId": "17af12b3-7045-4c37-a537-67c993cad9d6",
+                            "Date": "2019-06-03T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "credit",
+                            "Amount": 205.74
+                        },
+                        {
+                            "ExternalTransactionId": "3edcc2e9-2b56-4692-9680-1bc5f9b97e06",
+                            "Date": "2019-06-04T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 34.25
+                        },
+                        {
+                            "ExternalTransactionId": "fa346df1-f230-4ac6-ba77-5649928d5883",
+                            "Date": "2019-06-04T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 560.0
+                        },
+                        {
+                            "ExternalTransactionId": "89de1cb1-61c7-4b5c-874f-675712c871c6",
+                            "Date": "2019-06-05T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "682db73b-58cf-4a20-958b-15443cbe5dab",
+                            "Date": "2019-06-05T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "45c8b068-3f22-4036-afe9-df2f0df53635",
+                            "Date": "2019-06-05T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 50.0
+                        },
+                        {
+                            "ExternalTransactionId": "6b5ac75f-83c5-4548-8216-b9a2f222fe7f",
+                            "Date": "2019-06-06T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "a528bb6d-5086-443d-b362-19975a22bedc",
+                            "Date": "2019-06-06T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 300.0
+                        },
+                        {
+                            "ExternalTransactionId": "daa7f4c1-0061-48f0-aa1f-579feb886935",
+                            "Date": "2019-06-07T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "9c1fa173-be2d-4f0a-9940-fc70df961f0f",
+                            "Date": "2019-06-10T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -152.75
+                        },
+                        {
+                            "ExternalTransactionId": "7dd56b09-1db0-471b-9a18-c95b0486c3b4",
+                            "Date": "2019-06-10T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -67.49
+                        },
+                        {
+                            "ExternalTransactionId": "15e803e0-d845-48d9-ab1d-cbdd6277eb15",
+                            "Date": "2019-06-10T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "98cd6309-649d-4c25-8504-c2d2c56a6d68",
+                            "Date": "2019-06-11T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -70.71
+                        },
+                        {
+                            "ExternalTransactionId": "906de1ce-ccaf-4bbc-8669-86d914d757ee",
+                            "Date": "2019-06-13T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "533d48fd-cbe5-4124-8aea-26d25a4f200c",
+                            "Date": "2019-06-14T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -70.91
+                        },
+                        {
+                            "ExternalTransactionId": "5c8ca820-178b-4368-a5b9-6720c26dd882",
+                            "Date": "2019-06-17T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 6.64
+                        },
+                        {
+                            "ExternalTransactionId": "afd3241f-3ef0-496a-a608-3a0df91b3b1f",
+                            "Date": "2019-06-17T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 13.28
+                        },
+                        {
+                            "ExternalTransactionId": "75b0a9be-c637-485e-bb08-c49d84b7e62d",
+                            "Date": "2019-06-19T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "57e2967e-7a20-46dc-99b1-72aa5e743cf2",
+                            "Date": "2019-06-20T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "debit",
+                            "Amount": -15.67
+                        },
+                        {
+                            "ExternalTransactionId": "ad13906c-f596-40cc-88b1-8c7d127972cd",
+                            "Date": "2019-06-20T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 279.47
+                        },
+                        {
+                            "ExternalTransactionId": "10efdea4-cfba-47a5-bc51-0f93cf2f8636",
+                            "Date": "2019-06-24T11:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E595 FRESH POND ROAD            RIDGEWOOD      NY",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "bc3027c6-3b59-4047-af60-e1ae44ade0b2",
+                            "Date": "2019-06-24T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -350.0
+                        },
+                        {
+                            "ExternalTransactionId": "0e2ece97-f769-4957-8bb5-62bd57e48b93",
+                            "Date": "2019-06-24T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -145.57
+                        },
+                        {
+                            "ExternalTransactionId": "22fd9815-a672-4451-aaa9-d24f91a4333c",
+                            "Date": "2019-06-25T11:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E595 FRESH POND ROAD            RIDGEWOOD      NY",
+                            "Action": "debit",
+                            "Amount": -400.0
+                        },
+                        {
+                            "ExternalTransactionId": "979aeff3-9f18-4678-a67d-430d1a5258b1",
+                            "Date": "2019-06-26T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.25
+                        },
+                        {
+                            "ExternalTransactionId": "c6fef1ed-ee4b-4daf-be89-8e900f5eaa80",
+                            "Date": "2019-06-27T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -156.92
+                        },
+                        {
+                            "ExternalTransactionId": "ce47ab5a-b4ad-45df-93f4-0024024025ee",
+                            "Date": "2019-06-27T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "79d20471-5285-4f18-ba65-907b33a88556",
+                            "Date": "2019-07-01T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -120.9
+                        },
+                        {
+                            "ExternalTransactionId": "b060056c-6dba-412d-9f32-85e14ea2ab1e",
+                            "Date": "2019-07-02T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -142.49
+                        },
+                        {
+                            "ExternalTransactionId": "3fd9db27-1eb6-4386-8542-5c36f27e92b1",
+                            "Date": "2019-07-03T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "e050f64e-64e5-4e3a-b86b-55b2bc572b09",
+                            "Date": "2019-07-05T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -723.49
+                        },
+                        {
+                            "ExternalTransactionId": "fbe4167b-6976-4f49-8e25-20d077c648d3",
+                            "Date": "2019-07-05T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "9cb6d1f8-1a10-4b86-a6be-425dc82cf94a",
+                            "Date": "2019-07-05T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 520.0
+                        },
+                        {
+                            "ExternalTransactionId": "aa0cf832-b1a8-451e-9421-447ebad32993",
+                            "Date": "2019-07-10T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "13214570-0ff8-469c-a30c-5ef57e9e10c5",
+                            "Date": "2019-07-11T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "d9cbf84c-6e9e-4a53-863a-1b1ea6644f1b",
+                            "Date": "2019-07-12T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -271.31
+                        },
+                        {
+                            "ExternalTransactionId": "11e91e8e-361c-4474-9e21-52e9bf670490",
+                            "Date": "2019-07-12T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -55.06
+                        },
+                        {
+                            "ExternalTransactionId": "be3f37ef-eea2-4379-90b3-94d718e53ebf",
+                            "Date": "2019-07-12T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 200.0
+                        },
+                        {
+                            "ExternalTransactionId": "146fb6ab-1ebd-4bfb-832d-70adbc04a01e",
+                            "Date": "2019-07-17T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "404387bf-729a-4dcd-b85c-8b4a42b057e6",
+                            "Date": "2019-07-17T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "db66eb2c-90ea-4ecd-9499-18293071b255",
+                            "Date": "2019-07-17T11:00:00",
+                            "Description": "Paypal",
+                            "Action": "credit",
+                            "Amount": 1339.68
+                        },
+                        {
+                            "ExternalTransactionId": "2e34774d-754b-4a01-a754-f213bdee0fc6",
+                            "Date": "2019-07-18T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1769.3
+                        },
+                        {
+                            "ExternalTransactionId": "cfdacdd9-f8cd-4f03-9cb6-752460140023",
+                            "Date": "2019-07-18T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "46276231-487f-4a23-bbfb-2c6602344e7a",
+                            "Date": "2019-07-19T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -200.0
+                        },
+                        {
+                            "ExternalTransactionId": "0a093139-b72d-4d22-be9d-01caafa4d4dc",
+                            "Date": "2019-07-19T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -120.93
+                        },
+                        {
+                            "ExternalTransactionId": "1af8c4a6-0063-4789-8c39-187765787d87",
+                            "Date": "2019-07-22T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -215.15
+                        },
+                        {
+                            "ExternalTransactionId": "8c63c082-b705-4e4a-bfee-bdd1d3a095fc",
+                            "Date": "2019-07-22T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 150.0
+                        },
+                        {
+                            "ExternalTransactionId": "645cae6b-10c4-4564-8299-0ff27f63a033",
+                            "Date": "2019-07-24T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -350.0
+                        },
+                        {
+                            "ExternalTransactionId": "4392afa6-9e61-435b-a464-b681b89d8120",
+                            "Date": "2019-07-25T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "5193d7be-e92a-4f96-b602-540460f22a4e",
+                            "Date": "2019-07-29T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -156.92
+                        },
+                        {
+                            "ExternalTransactionId": "98a291e3-bc9a-49de-a378-525230dda7b8",
+                            "Date": "2019-07-29T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.5
+                        },
+                        {
+                            "ExternalTransactionId": "225e6c42-d03b-48e8-ba33-c2b0daaa6330",
+                            "Date": "2019-07-30T11:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -111.5
+                        },
+                        {
+                            "ExternalTransactionId": "c4f94b12-816d-40ed-9f4f-6563600e1cfe",
+                            "Date": "2019-07-31T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -177.12
+                        },
+                        {
+                            "ExternalTransactionId": "116460cc-2405-43e1-a3ec-f65b270cb342",
+                            "Date": "2019-08-01T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.5
+                        },
+                        {
+                            "ExternalTransactionId": "97039719-67c2-42a4-8e83-f6e019e7072c",
+                            "Date": "2019-08-01T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.12
+                        },
+                        {
+                            "ExternalTransactionId": "9ef9fd23-9fc3-476a-8a71-da40debe0a22",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "P2P Payment Sent To MARIE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "d2928cae-cc62-4fe6-a476-05742395ceb0",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "a74160f3-f7c3-4f01-a9de-8d59f1a18301",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -143.28
+                        },
+                        {
+                            "ExternalTransactionId": "a293e6ec-c727-4f14-9458-014ed4d29b45",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "b0e1f30e-f2c9-4242-928f-5ad1c0a65b6c",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "P2P Payment Reversed MARIE328@GMAIL.COM",
+                            "Action": "credit",
+                            "Amount": 2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "131e5d38-6e19-45d6-a076-ddc3d0e23275",
+                            "Date": "2019-08-02T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 3000.0
+                        },
+                        {
+                            "ExternalTransactionId": "8ca6870b-648f-43b8-a1d8-cc6a9df4d281",
+                            "Date": "2019-08-05T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "c1a34fc9-045d-43f6-a0d2-0bf0aadf3b37",
+                            "Date": "2019-08-05T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "2508f48d-f77a-4bd8-9141-d8c462b86bfc",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "TRANSFER WITHDRAWAL TO ...4289",
+                            "Action": "debit",
+                            "Amount": -5970.0
+                        },
+                        {
+                            "ExternalTransactionId": "25e93506-052d-4408-b91e-1b00bf196df7",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "Customer withdrawal #7415",
+                            "Action": "debit",
+                            "Amount": -2500.0
+                        },
+                        {
+                            "ExternalTransactionId": "1d772141-b147-4e62-b61e-a4f7190558ab",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1415.64
+                        },
+                        {
+                            "ExternalTransactionId": "790ed9f7-d866-4d84-a29f-80715f4b1746",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "b099760b-9cf9-46fa-8db4-46a1a904b6c7",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "da6bdce7-7df1-4f5e-b5a5-dbde3ccf5052",
+                            "Date": "2019-08-06T11:00:00",
+                            "Description": "VACP TREAS 310",
+                            "Action": "credit",
+                            "Amount": 15828.5
+                        },
+                        {
+                            "ExternalTransactionId": "be0abd43-5d76-457e-bf07-f5944686ea45",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -581.66
+                        },
+                        {
+                            "ExternalTransactionId": "8b2257f3-c0dc-43d2-ad2e-66a8afe0f1a6",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -400.0
+                        },
+                        {
+                            "ExternalTransactionId": "ddd045ab-e2a5-4a9e-aaf4-143210dfa5f2",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -352.66
+                        },
+                        {
+                            "ExternalTransactionId": "e4dfc31b-087b-475a-a1d6-415e3e2609d5",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -228.31
+                        },
+                        {
+                            "ExternalTransactionId": "3dfe31ab-cc8e-4ecf-8a98-ac9e7c5ca663",
+                            "Date": "2019-08-08T11:00:00",
+                            "Description": "APEX PEST CONTRO",
+                            "Action": "credit",
+                            "Amount": 206.11
+                        },
+                        {
+                            "ExternalTransactionId": "26479f6d-009a-4b27-a603-f4dba2bba160",
+                            "Date": "2019-08-09T11:00:00",
+                            "Description": "Customer withdrawal #8289",
+                            "Action": "debit",
+                            "Amount": -1500.0
+                        },
+                        {
+                            "ExternalTransactionId": "82f4014a-bb58-4e90-b467-59dd93010f36",
+                            "Date": "2019-08-09T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "240619cf-ea63-424c-a2b2-19e2be516fb8",
+                            "Date": "2019-08-09T11:00:00",
+                            "Description": "Speedway",
+                            "Action": "debit",
+                            "Amount": -34.8
+                        },
+                        {
+                            "ExternalTransactionId": "121d6bc2-9e85-4d5c-824b-e3d07af98c6a",
+                            "Date": "2019-08-09T11:00:00",
+                            "Description": "VACP TREAS 310",
+                            "Action": "credit",
+                            "Amount": 852.25
+                        },
+                        {
+                            "ExternalTransactionId": "8fb29f26-9df2-4a0f-a426-89baa07104b8",
+                            "Date": "2019-08-14T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -59.55
+                        },
+                        {
+                            "ExternalTransactionId": "500feaf0-908e-4cd8-96ed-1faf209a6085",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "Customer withdrawal #3014",
+                            "Action": "debit",
+                            "Amount": -1300.0
+                        },
+                        {
+                            "ExternalTransactionId": "c77c7b6e-fdc5-4ee4-8536-3edc04774861",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "KEY FOOD  xx86 6",
+                            "Action": "debit",
+                            "Amount": -41.92
+                        },
+                        {
+                            "ExternalTransactionId": "779e5c7d-937a-41c1-99ef-21e70e2b7e21",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "Home Depot",
+                            "Action": "debit",
+                            "Amount": -21.03
+                        },
+                        {
+                            "ExternalTransactionId": "e83e7dc2-4f47-4cb4-98da-908de50806e0",
+                            "Date": "2019-08-16T11:00:00",
+                            "Description": "Mobile Deposit",
+                            "Action": "credit",
+                            "Amount": 167.0
+                        },
+                        {
+                            "ExternalTransactionId": "8cf3bc70-e18d-426c-ae52-57aeb6f7f3dc",
+                            "Date": "2019-08-19T11:00:00",
+                            "Description": "TRANSFER WITHDRAWAL TO ...4289",
+                            "Action": "debit",
+                            "Amount": -1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "ef61d79e-2389-4fb7-a08b-985c4d38ad16",
+                            "Date": "2019-08-19T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.5
+                        },
+                        {
+                            "ExternalTransactionId": "10bd5006-4e27-4117-b710-ec64cfb1b718",
+                            "Date": "2019-08-20T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "968ac0ef-1ec6-4c80-91ef-9ce787d5527a",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "4e419bb1-22d7-4ce5-8372-9aff759cd985",
+                            "Date": "2019-08-21T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "8ba4c751-7f30-41d4-a876-0b196108402a",
+                            "Date": "2019-08-28T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -156.92
+                        },
+                        {
+                            "ExternalTransactionId": "7e493835-de66-4e22-9eee-8b295f5c7b34",
+                            "Date": "2019-08-29T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -164.1
+                        },
+                        {
+                            "ExternalTransactionId": "4eb93e3f-8d91-45ae-bff6-92cdad9f42dd",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "TRANSFER WITHDRAWAL TO ...4289",
+                            "Action": "debit",
+                            "Amount": -2000.0
+                        },
+                        {
+                            "ExternalTransactionId": "455473f4-5746-469b-a3f2-ad7ab1918036",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1346.54
+                        },
+                        {
+                            "ExternalTransactionId": "f8498195-c43d-4104-b529-663802201c2f",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -239.7
+                        },
+                        {
+                            "ExternalTransactionId": "b2c6df6f-f9f4-411c-809f-ed623a24a8f1",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "COMENITY PAY CP",
+                            "Action": "debit",
+                            "Amount": -32.22
+                        },
+                        {
+                            "ExternalTransactionId": "0a4b47a9-1e03-44d2-b32e-d67f64abd6a4",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "c1c0a21f-6844-4a07-a6a7-0110d40927ff",
+                            "Date": "2019-08-30T11:00:00",
+                            "Description": "VACP TREAS 310",
+                            "Action": "credit",
+                            "Amount": 3336.15
+                        },
+                        {
+                            "ExternalTransactionId": "1ada79c5-2cc9-4445-b1d7-50b7e052a1f5",
+                            "Date": "2019-09-03T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -255.6
+                        },
+                        {
+                            "ExternalTransactionId": "6c02987f-9fd5-4bbe-9f3a-854b372876f7",
+                            "Date": "2019-09-03T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -143.33
+                        },
+                        {
+                            "ExternalTransactionId": "5484aa06-0fcf-4bab-a6b5-d376099570d3",
+                            "Date": "2019-09-04T11:00:00",
+                            "Description": "COMENITY PAY IL",
+                            "Action": "debit",
+                            "Amount": -155.87
+                        },
+                        {
+                            "ExternalTransactionId": "9a625965-82b1-40f2-a95a-641b0362f906",
+                            "Date": "2019-09-04T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "b355ae36-bc6f-45f7-a4c5-6c64e56c166a",
+                            "Date": "2019-09-09T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "91c8ed3a-d59f-4228-a0ee-7fee50334b7b",
+                            "Date": "2019-09-09T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -63.05
+                        },
+                        {
+                            "ExternalTransactionId": "4ad02a33-a919-40e0-8e44-de32b3a99d98",
+                            "Date": "2019-09-13T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -53.02
+                        },
+                        {
+                            "ExternalTransactionId": "d22a73ea-4f87-44d6-91e9-acb50bdee5f7",
+                            "Date": "2019-09-17T11:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E595 FRESH POND ROAD            RIDGEWOOD      NY",
+                            "Action": "debit",
+                            "Amount": -300.0
+                        },
+                        {
+                            "ExternalTransactionId": "6b1e07cb-6a10-4a50-b8a6-d38accdb85a8",
+                            "Date": "2019-09-18T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "3df785fa-164c-4e65-9847-2e6616d672f2",
+                            "Date": "2019-09-19T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -1175.54
+                        },
+                        {
+                            "ExternalTransactionId": "aa52ff71-c74d-4852-aaf6-0191b262f4bb",
+                            "Date": "2019-09-19T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -3.73
+                        },
+                        {
+                            "ExternalTransactionId": "e2025797-4c30-4e48-b38f-4034eb944ae7",
+                            "Date": "2019-09-25T11:00:00",
+                            "Description": "RUTGERS THE STAT",
+                            "Action": "debit",
+                            "Amount": -4927.76
+                        },
+                        {
+                            "ExternalTransactionId": "67586496-d619-496c-92fc-439f0746de09",
+                            "Date": "2019-09-25T11:00:00",
+                            "Description": "Wire transfer fee WIRE TRANSFER",
+                            "Action": "debit",
+                            "Amount": -25.0
+                        },
+                        {
+                            "ExternalTransactionId": "c4a2b6ad-665e-4b18-82fc-9de1d9389043",
+                            "Date": "2019-09-25T11:00:00",
+                            "Description": "Wire transfer fee RUTGERS THE STAT E UNIVERSI",
+                            "Action": "debit",
+                            "Amount": -15.0
+                        },
+                        {
+                            "ExternalTransactionId": "524b84ee-212c-449e-96c4-3c2ade08cf13",
+                            "Date": "2019-09-25T11:00:00",
+                            "Description": "Reverse wire transfer w/drawal RUTGERS THE STAT E UNIVERSI USDTPxxxx7535",
+                            "Action": "credit",
+                            "Amount": 4927.76
+                        },
+                        {
+                            "ExternalTransactionId": "fb00b128-4873-4034-8897-0b5c52db3754",
+                            "Date": "2019-09-25T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 5000.0
+                        },
+                        {
+                            "ExternalTransactionId": "afe85f89-45d0-4f07-a7c3-78de86c3e3f2",
+                            "Date": "2019-09-26T11:00:00",
+                            "Description": "LUZ KOSAR",
+                            "Action": "debit",
+                            "Amount": -4927.76
+                        },
+                        {
+                            "ExternalTransactionId": "5a3b6c9e-7162-4ac4-9740-036a47f402aa",
+                            "Date": "2019-09-26T11:00:00",
+                            "Description": "Wire transfer fee WIRE TRANSFER",
+                            "Action": "debit",
+                            "Amount": -25.0
+                        },
+                        {
+                            "ExternalTransactionId": "f67915ca-6e63-4bbf-9b2a-f207ce4bf73b",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "P2P Payment Sent To MLOUISE328@GMAIL.COM",
+                            "Action": "debit",
+                            "Amount": -250.0
+                        },
+                        {
+                            "ExternalTransactionId": "f20d5496-930f-40a8-82df-3fb213c18adc",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "State Farm Insurance",
+                            "Action": "debit",
+                            "Amount": -156.92
+                        },
+                        {
+                            "ExternalTransactionId": "2cd52f55-3463-4d31-b34e-6f944a62ae4b",
+                            "Date": "2019-09-27T11:00:00",
+                            "Description": "ATM Cash Deposit",
+                            "Action": "credit",
+                            "Amount": 280.0
+                        },
+                        {
+                            "ExternalTransactionId": "09b8722b-26a5-49e9-8276-cb074ef31da5",
+                            "Date": "2019-09-30T11:00:00",
+                            "Description": "CON ED OF NY",
+                            "Action": "debit",
+                            "Amount": -155.5
+                        },
+                        {
+                            "ExternalTransactionId": "c10b03f0-cbcc-4615-b57b-cfd5318ed0b2",
+                            "Date": "2019-10-01T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -9.99
+                        },
+                        {
+                            "ExternalTransactionId": "a585a0ac-65ba-4223-a5eb-0d1fd571f00d",
+                            "Date": "2019-10-01T11:00:00",
+                            "Description": "VACP TREAS 310",
+                            "Action": "credit",
+                            "Amount": 3336.15
+                        },
+                        {
+                            "ExternalTransactionId": "9454ef86-1fda-4c93-bd22-41c29ba604ee",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -1031.82
+                        },
+                        {
+                            "ExternalTransactionId": "fa79c378-3b24-42f8-a06d-5b3ce12067a3",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -330.46
+                        },
+                        {
+                            "ExternalTransactionId": "75124aef-f54c-4e89-9a8a-220c7b3d8df4",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -194.81
+                        },
+                        {
+                            "ExternalTransactionId": "b183ef8c-c981-46e9-b46a-d9b97b7a2ba0",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "Verizon",
+                            "Action": "debit",
+                            "Amount": -143.33
+                        },
+                        {
+                            "ExternalTransactionId": "7596e9df-3cd7-4fe9-bbb5-24134df9c3cc",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "COMENITY PAY NS",
+                            "Action": "debit",
+                            "Amount": -75.8
+                        },
+                        {
+                            "ExternalTransactionId": "195cbfe3-c3fb-4881-b225-b41225c86efd",
+                            "Date": "2019-10-02T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -27.71
+                        },
+                        {
+                            "ExternalTransactionId": "833a3151-3311-4268-8e8c-c3c58d3c0f7c",
+                            "Date": "2019-10-04T11:00:00",
+                            "Description": "P2P Payment Sent To ...x0311",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "69fa2b1f-9470-40b6-a1cc-acc982c9e135",
+                            "Date": "2019-10-04T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "f0790a55-a774-4141-a77d-0dd275249f84",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -500.02
+                        },
+                        {
+                            "ExternalTransactionId": "e9a09b72-3dee-462b-bcfd-399de6d96625",
+                            "Date": "2019-10-07T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 1034.58
+                        },
+                        {
+                            "ExternalTransactionId": "8ab49c2b-dd19-41cf-afa5-a3de4e09de96",
+                            "Date": "2019-10-09T11:00:00",
+                            "Description": "GERBER LIFE INS",
+                            "Action": "debit",
+                            "Amount": -65.54
+                        },
+                        {
+                            "ExternalTransactionId": "d67a74a9-4b5f-498e-87e1-58f66d56ff4a",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "USCIS DALLAS",
+                            "Action": "debit",
+                            "Amount": -680.0
+                        },
+                        {
+                            "ExternalTransactionId": "07d97dc8-39d4-4447-8ea9-6044793d6eda",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "ATM withdrawal ATM WITHDRAWAL   E289 SUNNYSIDE                  SUNNYSIDE      NY",
+                            "Action": "debit",
+                            "Amount": -500.0
+                        },
+                        {
+                            "ExternalTransactionId": "df57e90c-c92a-4289-b4d9-0cc71a6d9e43",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "CAPITAL ONE",
+                            "Action": "debit",
+                            "Amount": -128.86
+                        },
+                        {
+                            "ExternalTransactionId": "703b73c6-3b53-432e-b2ba-a85c1e329636",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.5
+                        },
+                        {
+                            "ExternalTransactionId": "f2b8a4d5-6d69-4437-895a-ddd13ea54517",
+                            "Date": "2019-10-11T11:00:00",
+                            "Description": "New York City Dept. of Transportation",
+                            "Action": "debit",
+                            "Amount": -0.5
+                        },
+                        {
+                            "ExternalTransactionId": "1b749242-feaa-48ea-afba-bb0d7429fff6",
+                            "Date": "2019-10-15T11:00:00",
+                            "Description": "P2P Payment Sent To ...x1544",
+                            "Action": "debit",
+                            "Amount": -400.0
+                        },
+                        {
+                            "ExternalTransactionId": "87cc684a-af5c-4180-91a7-74d013add558",
+                            "Date": "2019-10-15T11:00:00",
+                            "Description": "NATIONAL GRID NY",
+                            "Action": "debit",
+                            "Amount": -58.83
+                        },
+                        {
+                            "ExternalTransactionId": "10270a9a-1b94-4c04-93ff-fb9329298577",
+                            "Date": "2019-10-15T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 1000.0
+                        },
+                        {
+                            "ExternalTransactionId": "61313c3e-ddce-4002-bba9-cf52cfc20dec",
+                            "Date": "2019-10-15T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 3000.0
+                        },
+                        {
+                            "ExternalTransactionId": "190f5e67-6007-41b6-baad-6ecf0fd7766c",
+                            "Date": "2019-10-16T11:00:00",
+                            "Description": "SSA  TREAS 310",
+                            "Action": "credit",
+                            "Amount": 1169.0
+                        },
+                        {
+                            "ExternalTransactionId": "90ef2abd-d9c0-43a4-91c4-cb710558f93a",
+                            "Date": "2019-10-17T11:00:00",
+                            "Description": "DISCOVER",
+                            "Action": "debit",
+                            "Amount": -283.16
+                        },
+                        {
+                            "ExternalTransactionId": "ab795ac4-6822-4585-b34c-2ef6ba4959bf",
+                            "Date": "2019-10-18T11:00:00",
+                            "Description": "Customer withdrawal #8029",
+                            "Action": "debit",
+                            "Amount": -800.0
+                        },
+                        {
+                            "ExternalTransactionId": "02c2e8d2-9b14-429b-be2e-b0676a4f53fa",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "PAYMENT FOR AMZ",
+                            "Action": "debit",
+                            "Amount": -85.14
+                        },
+                        {
+                            "ExternalTransactionId": "1b3428f1-0381-4536-94e0-b6bf8436a997",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "BK OF AMER VISA",
+                            "Action": "debit",
+                            "Amount": -8.16
+                        },
+                        {
+                            "ExternalTransactionId": "d856244a-57fc-4037-9f03-f5d643b49748",
+                            "Date": "2019-10-21T11:00:00",
+                            "Description": "TRANSFER DEPOSIT FROM ...4289",
+                            "Action": "credit",
+                            "Amount": 2000.0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
