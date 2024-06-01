@@ -13,7 +13,7 @@
     "build:browser": "rimraf dist/browser.mjs dist/browser.js && node build/bundles.js",
     "build:tests:node": "rimraf tests/compiled && npm tsc -p tests/tsconfig.json",
     "build:tests:browser": "rimraf tests/compiled && node build/esbuild-tests.cjs",
-    "build": "npm clean && npm build:esm && npm build:cjs && npm build:browser",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "test:node": "npm build:tests:node && npm c8 mocha",
@@ -85,16 +85,15 @@
     "@hapi/code": "^9.0.3",
     "@hapi/lab": "^25.1.3",
     "@types/node": "^20.6.2",
-    "@types/uuid": "^9.0.4",
-    "ts-node": "^10.9.1",
-    "tsx": "^4.7.0",
     "@types/readable-stream": "^4.0.14",
     "@types/secp256k1": "^4.0.6",
+    "@types/uuid": "^9.0.4",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "eslint": "^8.57.0",
     "eslint-plugin-todo-plz": "^1.3.0",
     "rimraf": "^5.0.7",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.2"
   }
 }

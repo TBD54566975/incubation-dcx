@@ -2,7 +2,7 @@
     "compilerOptions": {
         "lib": [
             "DOM",
-            "ES2022"
+            "ES6"
         ],
         "allowJs": true,
         "strict": true,
