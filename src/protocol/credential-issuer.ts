@@ -33,6 +33,7 @@ export const protocol = {
           "who": "anyone",
           "can": ["read"]
         }
+        // TODO: discussion adding new action here: {"who": "author","can": ["create", "update"]}
       ]
     },
     // applicants can apply for a credential
