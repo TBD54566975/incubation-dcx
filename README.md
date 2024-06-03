@@ -1,10 +1,10 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is both a protocol and a software package. The DCX protocol is built into the software package and defines a generalized credential exchange protocol that out the structure and flow of messages between user agents and issuers via DWN protocols, DWN records and DWN subscriptions. The DCX package is a FOSS npm package that implements a "credentials in, credentials out" asynchronous web server to faciliate and manage interactions with corresponding DWN servers.
+DCX is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers.
 
 ## Goal
 
-Implement a well documented, abstractly designed npm package for developers to easily create DCX issuer servers. Merge the package into TBD's Web5 monorepo named `@web5/dcx`, so developers can `npm install` it into any javascript/typescript project to easily participate in the DCX protocol.
+Implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
 
 ## Package
 
@@ -12,9 +12,8 @@ The DCX package is a FOSS npm package used to bootstrap running a DCX issuer ser
 
 1. DCX to DWN server connection - asynchronous communication between issuers and applicants
 2. DCX to DHT gateway connection - asynchronous communication between issuers and DHT gateways
-3. DID DHT key management - bring your own DID DHT keys and DID DHT CRUD operations
-4. DCX protocol structure pre-defined and auto-configured to DWN
-5. DCX protocol handlers for handling DWN operations
+3. DID DHT key management - import/export/create DID DHT keys
+4. DCX protocol & handlers - integrated with api handlers to facilitate required interactions with DWNs and 3rd parties
 
 ## Protocol
 
@@ -24,9 +23,9 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 - The credential issuer protocol [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts)
 - The schemas for both protocols are defined in the directory [`src/schemas`](./src/schemas/) 
   - [`src/schemas/invoice.ts`](./src/schemas/invoice.ts) defines the schema for an invoice DWN record
-  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) manifest
-  - [`src/schemas/presentation.ts`](./src/schemas/presentation.ts) presentation
-  - [`src/schemas/response.ts`](./src/schemas/response.ts) response
+  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) defines schema for manifest DWN record
+  - [`src/schemas/presentation.ts`](./src/schemas/presentation.ts) defines schema for presentation (application) DWN record
+  - [`src/schemas/response.ts`](./src/schemas/response.ts) defined schema for application response DWN record
 
 
 ## Steps
@@ -64,7 +63,7 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 ## Technical Requirements
 - [ ] DHT gateway connection(s)
 - [ ] DWN server connection(s)
-- [ ] Key management for DHT DIDs
+- [ ] DID key management (DID DHT)
   - [ ] Read existing keys
   - [ ] Create new keys
   - [ ] Update and delete new/existing keys
