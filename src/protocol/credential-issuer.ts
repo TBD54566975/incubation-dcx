@@ -4,8 +4,8 @@ import { schema as manifestSchema } from '../schemas/manifest.js';
 import { schema as presentationSchema } from '../schemas/presentation.js';
 
 export const protocol = {
-  // issuer protocol is a subset of issuance protocol
-  "protocol": "https://tblend.io/protocol/credential-issuance",
+  // issuer protocol is a subset of exchange protocol
+  "protocol": "https://tblend.io/protocol/credential-exchange",
   "published": false,
   "types": {
     "application": {
@@ -33,7 +33,6 @@ export const protocol = {
           "who": "anyone",
           "can": ["read"]
         }
-        // TODO: discussion adding new action here: {"who": "author","can": ["create", "update"]}
       ]
     },
     // applicants can apply for a credential
