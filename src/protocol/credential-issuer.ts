@@ -41,7 +41,7 @@ export const protocol = {
       "$actions": [
         {
           "who": "anyone",
-          "can": ["create", "update"]
+          "can": ["create"]
         }
       ],
       // a credential response might be sent in response to an application
