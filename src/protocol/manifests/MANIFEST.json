@@ -1,0 +1,51 @@
+{
+    "id": "PLACEHOLDER-SUMMARY",
+    "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
+    "issuer": {
+        "id": "[replaced dynamically]",
+        "name": "DCX PLACEHOLDER ISSUER"
+    },
+    "output_descriptors": [
+        {
+            "id": "placeholder-report-summary",
+            "name": "Placeholder Report - Summary",
+            "schema": "https://example.com/schemas/PlaceholderReportSummaryCredential"
+        }
+    ],
+    "format": {
+        "jwt_vc": {
+            "alg": [
+                "EdDSA"
+            ]
+        }
+    },
+    "presentation_definition": {
+        "id": "presentation-data",
+        "input_descriptors": [
+            {
+                "id": "presentation-input-descriptor",
+                "purpose": "Placeholder input descriptor for example purposes",
+                "constraints": {
+                    "fields": [
+                        {
+                            "path": [
+                                "$.type[*]"
+                            ],
+                            "filter": {
+                                "type": "string",
+                                "pattern": "^*$"
+                            }
+                        },
+                        {
+                            "path": [
+                                "$.credentialSubject.holder.name.first",
+                                "$.credentialSubject.holder.name.last",
+                                "$.credentialSubject.holder.phone[0].number"
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
