@@ -61,12 +61,13 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 <!-- TODO: include architecture and sequence diagrams -->
 
 ## Technical Requirements
-- [ ] DHT gateway connection(s)
-- [ ] DWN server connection(s)
+
 - [ ] DID key management (DID DHT)
   - [ ] Read existing keys
   - [ ] Create new keys
   - [ ] Update and delete new/existing keys
+- [ ] DHT gateway connection
+- [ ] DWN server connection and configuration
 - [ ] Credential issuer protocol handlers
   - [ ] Create, read, update credential manifests
   - [ ] Read applications, parse credentials and validate against manifest (presentation exchange)

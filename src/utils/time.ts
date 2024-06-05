@@ -7,7 +7,7 @@ export class Time {
    * @param durationInMillisecond the desired amount of sleep time
    * @returns when the provided duration has passed
    */
-  public static async sleep(durationInMillisecond: number = 0): Promise<void> {
+  public static async sleep(durationInMillisecond: number = 5000): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, durationInMillisecond));
   }
 
