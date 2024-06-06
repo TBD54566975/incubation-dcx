@@ -28,7 +28,20 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
   - [`src/schemas/response.ts`](./src/schemas/response.ts) defined schema for application response DWN record
 
 
-## Steps
+## Architecture
+
+![DCX Architecture](./docs/DCX-Architecture.png)
+
+## Sequence
+
+1. Issuer configures DWN with credential-issuer protocol, creates manifest record DWN and subscribes to DWN
+2. Applicant subscribes to DWN, queries issuer DWN for a credential manifest and acquires required credentials
+3. Applicant sends application to issuer DWN
+4. Issuer reads application from DWN and validates credentials against manifest
+5. Issuer sends application response or denial to applicant DWN
+6. Applicant reads application response or denial from DWN
+7. Issuer sends invoice to applicant DWN
+8. Applicant remites payment outside of protocol
 
 **Credential Issuer**
 
@@ -47,18 +60,7 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 4. Applicant reads application response or denial from issuer retrieving either new credentials or denial reason
 5. Applicant reads incoming invoice and remits payment outside of protocol
 
-## Sequence
-
-1. Issuer configures DWN with credential-issuer protocol, creates manifest record DWN and subscribes to DWN
-2. Applicant subscribes to DWN, queries issuer DWN for a credential manifest and acquires required credentials
-3. Applicant sends application to issuer DWN
-4. Issuer reads application from DWN and validates credentials against manifest
-5. Issuer sends application response or denial to applicant DWN
-6. Applicant reads application response or denial from DWN
-7. Issuer sends invoice to applicant DWN
-8. Applicant DWN remites payment outside of protocol
-
-<!-- TODO: include architecture and sequence diagrams -->
+<!-- TODO: include sequence diagrams -->
 
 ## Technical Requirements
 
