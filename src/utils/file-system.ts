@@ -5,9 +5,10 @@ import { DcxError } from '../error.js';
 export async function readFileToString(filepath: string) {
   try {
     const data = await readFileAsync(filepath);
-    if (!!data) {
-      console.log(`Loaded data from ${filepath}`, data);
+    if (!data) {
+      throw new DcxError(`No data in file ${filepath}`);
     }
+    console.log(`Loaded data from ${filepath}`, data);
     return data.toString();
   } catch (error) {
     console.error(`${filepath} DNE`);

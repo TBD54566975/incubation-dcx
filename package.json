@@ -7,7 +7,7 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "gen-enc-key": "openssl rand -base64 32",
+    "gen-cpr-key": "openssl rand -base64 32",
     "test": "echo TODO && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc",
