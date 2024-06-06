@@ -5,3 +5,6 @@ db-data
 .DS_Store
 keys.json
 .env
+cursor.json
+lastRecordId
+index.ts
