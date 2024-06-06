@@ -9,8 +9,19 @@ import { processMessage } from './utils/processor.js';
 import { Time } from './utils/time.js';
 
 async function start() {
-    // 1. Create and start Web5
-    const { web5, did } = await Web5.connect({
+    /**
+     *  1. Create and start Web5 instance locally, connect to remote DWN using password & recovery phrase
+     *  2. Check if protocol is installed on remote DWN
+     *  3. If protocol not installed, install it on remote DWN
+     *  4. Query for manifest records in remote DWN
+     *  5. Read each manifest record from DWN and check if credential-issuer protocol manifest installed
+     *  6. Find unwritten manifests and write them to DWN
+     *  7. If current cursor.json invalid, reset it
+     *  8. Read protocol records from DWN
+     *  9. If lastRecordId exists, skip ahead to that record id
+     * 10. Process incoming records from DWN
+     */
+    const { web5, did, recoveryPhrase } = await Web5.connect({
         sync: 'off',
         techPreview: {
             dwnEndpoints: dcxConfig.DWN_ENDPOINTS,
@@ -18,11 +29,15 @@ async function start() {
         password: dcxConfig.DWN_PASSWORD,
         recoveryPhrase: dcxConfig.DWN_RECOVERY_PHRASE,
     });
-    console.log('Web5 connected');
+    console.log('Web5 connected!');
+    console.log('web5 =>', web5);
+    console.log('web5.agent =>', web5.agent);
+    console.log('web5.did =>', web5.did);
+    console.log('web5.dwn =>', web5.dwn);
+    console.log('web5.vc =>', web5.vc);
+    console.log('did =>', did);
+    console.log('recoveryPhrase =>', recoveryPhrase);
 
-    const portableDid = await web5.did.resolve(did);
-
-    // 5.3 Check if protocol is installed on DWN
     const { protocols } = await web5.dwn.protocols.query({
         from: did,
         message: {
@@ -33,7 +48,6 @@ async function start() {
     });
     console.log(`DWN has ${protocols.length} protocols available`);
 
-    // 5.4 If missing, install protocol to local DWN then sync to remote DWN
     if (!protocols.length) {
         const { status: { code, detail }, protocol } = await web5.dwn.protocols.configure({
             message: { definition: credentialIssuerProtocol },
@@ -46,7 +60,6 @@ async function start() {
 
         console.log(`Configured credential issuer protocol locally ${code} - ${detail}`);
 
-        // sync to remote
         const { status: protoSendStatus } = (await protocol?.send(did)) ?? {};
         const { code: protoSendCode = 500, detail: protoSendDetail = 'Failed' } = protoSendStatus ?? {};
         if (!protoSendCode.toString().startsWith('2')) {
@@ -59,7 +72,6 @@ async function start() {
         console.log('Sent protocol to remote DWN', protoSendStatus);
     }
 
-    // 6. Check if the credential issuer protocol manifest is installed
     const { records: manifestRecords = [] } =
         (await web5.dwn.records
             .query({
@@ -77,7 +89,6 @@ async function start() {
 
     console.log(`Found ${manifestRecords.length} manifests`);
 
-    // 7. Read each manifest record from DWN
     const manifestsRead = await Promise.all(
         manifestRecords.map(async (manifestResponse) => {
             const { record } = await web5.dwn.records.read({
@@ -93,17 +104,14 @@ async function start() {
     );
     console.log(`Read ${manifestsRead.length} manifest records`, manifestsRead);
 
-    // 7.1 find unwritten manifests
     const unwrittenManifests = [Manifest].filter(
         (manifest) => !manifestsRead.find((manifestRead) => manifestRead?.id === manifest.id),
     );
     console.log(`Found ${unwrittenManifests.length} unwritten manifests`);
 
-    // 7.2 write unwritten manifests
     if (!!unwrittenManifests.length) {
         const manifestWrites = await Promise.all(
             unwrittenManifests.map(async (manifest) => {
-                // 7.2.1 set issuer dynamically
                 manifest.issuer.id = did;
 
                 const { record } = await web5.dwn.records.create({
@@ -118,7 +126,6 @@ async function start() {
                     },
                 });
 
-                // send to remote dwn
                 const sendResult = await record?.send(did);
                 console.log('Sent manifest to remote DWN', sendResult);
 
@@ -128,11 +135,9 @@ async function start() {
         console.log(`Wrote ${manifestWrites.length} manifests`);
     }
 
-    // check for incoming requests
     let cursor = await readFileToJSON(dcxConfig.DWN_CURSOR_FILE);
     let lastRecordId = await readFileToString(dcxConfig.DWN_LAST_RECORD_ID_FILE);
 
-    // Poll for new protocol messages
     while (true) {
         const { records = [], cursor: nextCursor } = await web5.dwn.records.query({
             from: did,
@@ -148,11 +153,9 @@ async function start() {
         });
 
         if (cursor && !records.length) {
-            // reset invalid cursor
             cursor = undefined;
         }
 
-        // read record data
         const recordReads = await Promise.all(
             records.map(async (recordResponse) => {
                 const { record } = await web5.dwn.records.read({
@@ -167,7 +170,6 @@ async function start() {
             }),
         );
 
-        // process records
         for (const record of recordReads) {
             if (record.id != lastRecordId) {
                 if (record.protocolPath === 'application') {
