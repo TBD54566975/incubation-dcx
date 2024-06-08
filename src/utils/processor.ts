@@ -1,6 +1,6 @@
 import { Record, Web5 } from '@web5/api';
 import { VerifiableCredential } from '@web5/credentials';
-import { DidDht, PortableDid } from '@web5/dids';
+import { BearerDid, DidDht, PortableDid } from '@web5/dids';
 import { DcxHandlers } from '../handlers/index.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
 import { manifestSchema } from '../protocol/index.js';
@@ -26,7 +26,7 @@ async function verifyCredentials(vp: any, requestAuthor?: string | undefined) {
   }
 }
 
-export async function processMessage(web5: Web5, issuerDid: any, record: Record) {
+export async function processMessage(web5: Web5, issuerDid: BearerDid, record: Record) {
   console.log('Process message', JSON.stringify(record, null, 2));
 
   // applications are JSON VP
