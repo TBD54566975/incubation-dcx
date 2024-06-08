@@ -1,4 +1,7 @@
+import { Web5PlatformAgent } from '@web5/agent';
 import { Web5 } from '@web5/api';
+import { BearerDid } from '@web5/dids';
+import { Web5UserAgent } from '@web5/user-agent';
 import { writeFile } from 'fs/promises';
 import { dcxConfig } from './config/index.js';
 import { DcxDwnError, DcxError } from './error.js';
@@ -7,12 +10,10 @@ import Manifest from './protocol/manifests/MANIFEST.json';
 import { readFileToJSON, readFileToString } from './utils/file-system.js';
 import { processMessage } from './utils/processor.js';
 import { Time } from './utils/time.js';
-import { Web5PlatformAgent, Web5Agent, BearerIdentity } from '@web5/agent';
-import { BearerDid } from '@web5/dids';
-import { Web5UserAgent } from '@web5/user-agent';
 
 type Web5ConnectResponse = {
     web5: Web5,
+    agent: Web5PlatformAgent,
     did: string,
     bearerDid: BearerDid,
     recoveryPhrase?: string
@@ -24,56 +25,48 @@ const DWN_PASSWORD_ERROR = 'SECURITY WARNING: ' +
     'Please configure a secure, unique password.';
 
 async function web5Connect() {
-    const agent = await Web5UserAgent.create();
-    agent.initialize({
-        password: dcxConfig.DWN_PASSWORD,
-        recoveryPhrase: dcxConfig.DWN_RECOVERY_PHRASE
-    });
+    try {
+        if (!dcxConfig.DWN_RECOVERY_PHRASE) {
+            console.info('No recoveryPhrase provided in .env, A new one will be generated and saved to config/seed.txt');
+        }
 
-    const { web5, did, recoveryPhrase } = await Web5.connect({
-        agent,
-        sync: 'off',
-        techPreview: {
-            dwnEndpoints: dcxConfig.DWN_ENDPOINTS,
-        },
-    });
+        const agent = await Web5UserAgent.create();
+        agent.initialize({
+            password: dcxConfig.DWN_PASSWORD,
+            recoveryPhrase: dcxConfig.DWN_RECOVERY_PHRASE
+        });
 
-    /*
-    export type AgentParams<TKeyManager extends AgentKeyManager = LocalKeyManager> = {
-        agentDid?: BearerDid;
-        agentVault: HdIdentityVault;
-        cryptoApi: AgentCryptoApi;
-        dataPath?: string;
-        didApi: AgentDidApi<TKeyManager>;
-        dwnApi: AgentDwnApi;
-        identityApi: AgentIdentityApi<TKeyManager>;
-        keyManager: TKeyManager;
-        rpcClient: Web5Rpc;
-        syncApi: AgentSyncApi;
-}
-    */
+        const { web5, did, recoveryPhrase } = await Web5.connect({
+            agent,
+            sync: 'off',
+            techPreview: {
+                dwnEndpoints: dcxConfig.DWN_ENDPOINTS,
+            },
+        });
 
-    console.log('Web5 connected!');
-    console.log('web5 =>', web5);
-    console.log('web5.agent =>', web5.agent);
-    console.log('web5.did =>', web5.did);
-    console.log('web5.dwn =>', web5.dwn);
-    console.log('web5.vc =>', web5.vc);
-    console.log('dcxDid =>', did);
-    console.log('recoveryPhrase =>', recoveryPhrase);
-    if (!dcxConfig.DWN_RECOVERY_PHRASE) {
-        console.info('No recoveryPhrase provided in .env. A new one will be generated and saved to config/seed.txt');
+        console.log('Web5 connected!');
+        console.log('web5 =>', web5);
+        console.log('web5.agent =>', web5.agent);
+        console.log('web5.did =>', web5.did);
+        console.log('web5.dwn =>', web5.dwn);
+        console.log('web5.vc =>', web5.vc);
+        console.log('dcxDid =>', did);
+        console.log('recoveryPhrase =>', recoveryPhrase);
+
         if (!!recoveryPhrase) {
             await writeFile(dcxConfig.DWN_RECOVERY_PHRASE_FILE, recoveryPhrase);
         }
-    }
 
-    const identity = await agent.identity.get({ didUri: did });
-    const bearerDid = identity?.did;
-    if (!identity || !bearerDid) {
-        throw new DcxError('Failed to get identity');
+        const identity = await agent.identity.get({ didUri: did });
+        const bearerDid = identity?.did;
+        if (!identity || !bearerDid) {
+            throw new DcxError('Failed to get identity');
+        }
+        return { web5, agent, did, bearerDid, recoveryPhrase };
+    } catch (error: any) {
+        console.error('web5Connect error', error);
+        throw new DcxError(error?.message ?? 'Failed to connect to Web5');
     }
-    return { web5, did, bearerDid, recoveryPhrase };
 }
 
 async function start() {
@@ -94,7 +87,7 @@ async function start() {
          *  9. If lastRecordId exists, skip ahead to that record id
          * 10. Process incoming records from DWN
          */
-        const { web5, did, bearerDid, recoveryPhrase }: Web5ConnectResponse = await web5Connect();
+        const { web5, agent, did, bearerDid, recoveryPhrase }: Web5ConnectResponse = await web5Connect();
 
         const { protocols } = await web5.dwn.protocols.query({
             from: did,
@@ -252,10 +245,9 @@ async function start() {
                 await Time.sleep();
             }
         }
-
-
     } catch (error: any) {
-
+        console.error('web5Connect error', error);
+        throw new DcxError(error?.message ?? 'Failed to connect to Web5');
     }
 }
 const server = { start };
