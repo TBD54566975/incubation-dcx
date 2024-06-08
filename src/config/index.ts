@@ -1,14 +1,24 @@
+import { Web5 } from '@web5/api';
+import { Web5UserAgent } from '@web5/user-agent';
 import { config } from 'dotenv'; config();
 const CWD = process.cwd();
 
 export class Config {
+  public _Web5?: Web5;
+  public _Web5UserAgent?: Web5UserAgent;
+  
   public DWN_RECOVERY_PHRASE_FILE = `${CWD}/src/config/seed.txt`;
-
   public DWN_LAST_RECORD_ID_FILE = process.env.DWN_LAST_RECORD_ID_FILE || `${CWD}/lastRecordId`;
   public DWN_CURSOR_FILE = process.env.DWN_CURSOR_FILE || `${CWD}/cursor.json`;
 
   public ISSUER_SERVICE_ENDPOINT = process.env.ISSUER_SERVICE_ENDPOINT || '';
-  public TRUSTED_ISSUERS = (process.env.TRUSTED_ISSUERS && JSON.parse(process.env.TRUSTED_ISSUERS)) || [{ "name": "mx", "did": "did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo" }];
+  public TRUSTED_ISSUERS = (process.env.TRUSTED_ISSUERS && JSON.parse(process.env.TRUSTED_ISSUERS))
+    || [
+      {
+        "name": "mx",
+        "did": "did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo"
+      }
+    ];
 
   public DHT_GATEWAY_ENDPOINT = process.env.DHT_GATEWAY_ENDPOINT || '0.0.0.0:8305';
   public DWN_ENDPOINTS = process.env.DWN_ENDPOINTS?.split(',') || [];
