@@ -1,4 +1,4 @@
-export * from "./config.js";
+export * from "./config/index.js";
 export * from './did-manager.js';
 export * from './error.js';
 export * from "./server.js";
