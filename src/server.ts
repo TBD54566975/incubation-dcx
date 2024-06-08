@@ -69,6 +69,39 @@ async function web5Connect() {
     }
 }
 
+async function configIssuerProtocol(web5: Web5, did: string) {
+    try {
+        const { status: configure, protocol } = await web5.dwn.protocols.configure({
+            message: { definition: credentialIssuerProtocol },
+        });
+
+        if (!configure.code.toString().startsWith('2')) {
+            const { code, detail } = configure;
+            console.error('configureDcxProtocol configure.code !startwith 2', configure);
+            throw new DcxDwnError(code, detail);
+        }
+        if (!protocol) {
+            const { code, detail } = configure;
+            console.error('configureDcxProtocol !protocol', protocol);
+            throw new DcxDwnError(code, detail);
+        }
+
+        console.log('Configured credential issuer protocol', protocol);
+
+        const { status: send } = await protocol.send(did) ?? {};
+        if (!send?.code.toString().startsWith('2')) {
+            const { code, detail } = send;
+            console.error('configureDcxProtocol send.code !startwith 2', send);
+            throw new DcxDwnError(code, detail);
+        }
+        console.log('Sent protocol to remote DWN');
+        return send;
+    } catch (error: any) {
+        console.error('configureDcxProtocol error', error);
+        throw new DcxError(error?.message ?? 'Failed to configure credential issuer protocol');
+    }
+}
+
 async function start() {
     try {
         if (!dcxConfig.DWN_PASSWORD) {
@@ -88,7 +121,6 @@ async function start() {
          * 10. Process incoming records from DWN
          */
         const { web5, agent, did, bearerDid, recoveryPhrase }: Web5ConnectResponse = await web5Connect();
-
         const { protocols } = await web5.dwn.protocols.query({
             from: did,
             message: {
@@ -100,43 +132,23 @@ async function start() {
         console.log(`DWN has ${protocols.length} protocols available`);
 
         if (!protocols.length) {
-            const { status: { code, detail }, protocol } = await web5.dwn.protocols.configure({
-                message: { definition: credentialIssuerProtocol },
-            });
-
-            if (!code.toString().startsWith('2')) {
-                console.error('Failed to configure credential issuer protocol locally', code, detail);
-                throw new DcxDwnError(code, detail);
-            }
-
-            console.log(`Configured credential issuer protocol locally ${code} - ${detail}`);
-
-            const { status: protoSendStatus } = (await protocol?.send(did)) ?? {};
-            const { code: protoSendCode = 500, detail: protoSendDetail = 'Failed' } = protoSendStatus ?? {};
-            if (!protoSendCode.toString().startsWith('2')) {
-                console.error('Failed to configure credential issuer protocol locally', protoSendStatus);
-                throw new DcxDwnError(protoSendCode, protoSendDetail);
-            }
-            console.log(
-                `Configured credential issuer protocol locally ${protoSendCode} - ${protoSendDetail}`,
-            );
-            console.log('Sent protocol to remote DWN', protoSendStatus);
+            console.log('Configuring credential-issuer protocol ...');
+            const result = await configIssuerProtocol(web5, did);
+            console.log('Credential-issuer protocol configured on DWN', result);
         }
 
-        const { records: manifestRecords = [] } =
-            (await web5.dwn.records
-                .query({
-                    from: did,
-                    message: {
-                        filter: {
-                            schema: manifestSchema.$id,
-                            dataFormat: 'application/json',
-                            protocol: credentialIssuerProtocol.protocol,
-                            protocolPath: 'manifest',
-                        },
+        const { records: manifestRecords = [] } = await web5.dwn.records
+            .query({
+                from: did,
+                message: {
+                    filter: {
+                        schema: manifestSchema.$id,
+                        dataFormat: 'application/json',
+                        protocol: credentialIssuerProtocol.protocol,
+                        protocolPath: 'manifest',
                     },
-                })
-                .catch((e) => console.warn('manifest records query error', e))) ?? {};
+                },
+            }) ?? {};
 
         console.log(`Found ${manifestRecords.length} manifests`);
 
