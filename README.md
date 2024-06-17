@@ -30,6 +30,8 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 
 ## Architecture
 
+![dcx-architecture](./img/dcx-architecture.png)
+
 - DCX
 - DCX Issuer
   - web5-js
@@ -41,8 +43,6 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
   - @web5/dcx
 - Applicant DWN
   - dwn-sdk-js
-
-![dcx-architecture](./img/dcx-architecture.png)
 
 ## Full Sequence
 
@@ -62,6 +62,8 @@ DCX Applicant->Applicant DWN: read response record via subscription
 DCX Issuer->Applicant DWN: create invoice record (optional)
 DCX Applicant->Applicant DWN: read invoice record  (optional)
 -->
+
+![dcx-full-sequence](./img/dcx-full-sequence.png)
 
 1.  DCX Issuer configures Issuer DWN with dcx protocol: credential-issuer and credential-applicant
 2.  DCX Issuer creates credential manifest record in Issuer DWN
@@ -88,10 +90,7 @@ Notes:
 7. Application record includes credentials that satisfy credential manifest mentioned in step 5
 9. DCX Issuer validates credentials against credential manifest using DCX software handlers
 
-![dcx-full-sequence](./img/dcx-full-sequence.png)
-
 ## Credential Issuer Sequence
-
 <!--
 DCX Issuer->Issuer DWN: configure dcx protocol
 Issuer DWN\-\->DCX Issuer: return protocol create status
@@ -107,6 +106,8 @@ DCX Issuer->Issuer DWN: create invoice record (optional)
 Issuer DWN\-\->DCX Issuer: return record create status (optional)
 -->
 
+![dcx-issuer-sequence](./img/dcx-issuer-sequence.png)
+
 1. DCX Issuer configures Issuer DWN with dcx protocol (issuer & applicant)
 2. DCX Issuer creates credential manifest record in Issuer DWN
 3. DCX Issuer creates subscription to Issuer DWN
@@ -118,8 +119,6 @@ Issuer DWN\-\->DCX Issuer: return record create status (optional)
 9. DCX Issuer reads an incoming application record and validates against respective credential manifest
 10. DCX Issuer creates application response or denial record and sends to applicant DWN
 11. DCX Issuer creates invoice response record and sends to applicant DWN
-
-![dcx-issuer-sequence](./img/dcx-issuer-sequence.png)
 
 ## Credential Applicant Sequence
 <!--
@@ -137,6 +136,8 @@ DCX Applicant->Applicant DWN: read response record via subscription
 DCX Applicant->Applicant DWN: read invoice record via subscription (optional)
 -->
 
+![dcx-applicant-sequence](./img/dcx-applicant-sequence.png)
+
 1. DCX Applicant configures Applicant DWN with dcx protocol (issuer & applicant)
 1. DCX Applicant creates subscription to Applicant DWN 
 2. DCX Applicant reads credential manifest record from Issuer DWN
@@ -145,7 +146,6 @@ DCX Applicant->Applicant DWN: read invoice record via subscription (optional)
 5. DCX Applicant reads response record via Applicant DWN subscription
 6. DCX Applicant reads invoice record via Applicant DWN subscription (optional)
 
-![dcx-applicant-sequence](./img/dcx-applicant-sequence.png)
 
 ## TODO
 
