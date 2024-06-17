@@ -30,46 +30,126 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 
 ## Architecture
 
-![DCX Architecture](./docs/DCX-Architecture.png)
+- DCX
+- DCX Issuer
+  - web5-js
+  - @web5/dcx
+- Issuer DWN
+  - dwn-sdk-js
+- DCX Applicant
+  - web5-js
+  - @web5/dcx
+- Applicant DWN
+  - dwn-sdk-js
 
-## Sequence
+![dcx-architecture](./img/dcx-architecture.png)
 
-1. Issuer configures DWN with credential-issuer protocol, creates manifest record DWN and subscribes to DWN
-2. Applicant subscribes to DWN, queries issuer DWN for a credential manifest and acquires required credentials
-3. Applicant sends application to issuer DWN
-4. Issuer reads application from DWN and validates credentials against manifest
-5. Issuer sends application response or denial to applicant DWN
-6. Applicant reads application response or denial from DWN
-7. Issuer sends invoice to applicant DWN
-8. Applicant remites payment outside of protocol
+## Full Sequence
 
-**Credential Issuer**
+<!--
+DCX Issuer->Issuer DWN: configure dcx protocol
+DCX Issuer->Issuer DWN: create manifest record
+DCX Issuer->Issuer DWN: subscribe to record updates
+DCX Applicant->Applicant DWN: configure dcx protocol
+DCX Applicant->Applicant DWN: create subscription
+DCX Applicant->Issuer DWN: read manifest record
+DCX Applicant->Trusted Issuers: acquire credentials required by manifest
+DCX Applicant->Issuer DWN: create application record
+DCX Issuer->Issuer DWN: read application record via subscription
+DCX Issuer->DCX Issuer: verify application record credentials
+DCX Issuer->Applicant DWN: create application response record
+DCX Applicant->Applicant DWN: read response record via subscription
+DCX Issuer->Applicant DWN: create invoice record (optional)
+DCX Applicant->Applicant DWN: read invoice record  (optional)
+-->
 
-1. Issuer runs @web5/dcx server and configures DWN with issuer protocol
-2. Issuer creates DWN manifest record in own DWN to define required credentials to obtain other credentials
-3. Issuer subscribes to own DWN to listen for application records
-4. Issuer reads an incoming application record and validates against respective credential manifest
-5. Issuer creates application response or denial record and sends to applicant DWN
-6. Issuer creates invoice response record and sends to applicant DWN
+1.  DCX Issuer configures Issuer DWN with dcx protocol: credential-issuer and credential-applicant
+2.  DCX Issuer creates credential manifest record in Issuer DWN
+3.  DCX Issuer creates subscription to Issuer DWN
+4.  DCX Applicant creates subscription to Applicant DWN 
+5.  DCX Applicant reads credential manifest record from Issuer DWN 
+6.  DCX Applicant acquires required credentials from issuers listed in manifest
+7.  DCX Applicant creates application record in Issuer DWN
+8.  DCX Issuer reads application record via Issuer DWN subscription
+9.  DCX Issuer uses @web5/dcx to verify application record credentials against credential manifest 
+10. DCX Issuer creates response record in Applicant DWN
+11. DCX Applicant reads response record via Applicant DWN subscription
+12. DCX Issuer creates invoice record in Applicant DWN
+13. DCX Applicant reads invoice record via Applicant DWN subscription
 
-**Credential Applicant**
+Notes:
 
-1. Applicant queries issuer DWN credential manifests and subscribes to own DWN to listen for responses
-2. Applicant acquires necessary credentials based on issuer credential manifest
-3. Applicant creates application record containing proof of required credentials and sends to issuer DWN
-4. Applicant reads application response or denial from issuer retrieving either new credentials or denial reason
-5. Applicant reads incoming invoice and remits payment outside of protocol
+1. Credential-issuer and credential-applicant protocols defines DWN record CRUD actions between Issuer and Applicant
+2. under the credential-issuer manifest route
+3. Subscription to receive incoming application records
+4. Subscription to receive incoming response records
+5. Defines required "credentials in" to receive desired "credentials out"
+6. Credentials are acquired separately, outside of DCX protocol, from listed trusted issuers
+7. Application record includes credentials that satisfy credential manifest mentioned in step 5
+9. DCX Issuer validates credentials against credential manifest using DCX software handlers
 
-<!-- TODO: include sequence diagrams -->
+![dcx-full-sequence](./img/dcx-full-sequence.png)
+
+## Credential Issuer Sequence
+
+<!--
+DCX Issuer->Issuer DWN: configure dcx protocol
+Issuer DWN\-\->DCX Issuer: return protocol create status
+DCX Issuer->Issuer DWN: create manifest record
+Issuer DWN\-\->DCX Issuer: return record create status
+DCX Issuer->Issuer DWN: subscribe to record updates
+Issuer DWN\-\->DCX Issuer: return record subscription
+DCX Issuer->Issuer DWN: read application record via subscription
+DCX Issuer->DCX Issuer: verify application record credentials 
+DCX Issuer->Issuer DWN: create response record
+Issuer DWN\-\->DCX Issuer: return record create status
+DCX Issuer->Issuer DWN: create invoice record (optional)
+Issuer DWN\-\->DCX Issuer: return record create status (optional)
+-->
+
+1. DCX Issuer configures Issuer DWN with dcx protocol (issuer & applicant)
+2. DCX Issuer creates credential manifest record in Issuer DWN
+3. DCX Issuer creates subscription to Issuer DWN
+4. DCX Issuer reads application record via Issuer DWN subscription
+5. DCX Issuer uses DCX software handlers to verify credentials against credential manifest
+6. DCX Issuer configures DWN with DCX Issuer protocol
+7. DCX Issuer creates DWN manifest record in own DWN to define required credentials to obtain other credentials
+8. DCX Issuer subscribes to own DWN to listen for application records
+9. DCX Issuer reads an incoming application record and validates against respective credential manifest
+10. DCX Issuer creates application response or denial record and sends to applicant DWN
+11. DCX Issuer creates invoice response record and sends to applicant DWN
+
+![dcx-issuer-sequence](./img/dcx-issuer-sequence.png)
+
+## Credential Applicant Sequence
+<!--
+DCX Applicant->Applicant DWN: create dcx protocol
+Applicant DWN\-\->DCX Applicant: return protocol create status
+DCX Applicant->Applicant DWN: create subscription
+Applicant DWN\-\->DCX Applicant: return record subscription
+DCX Applicant->Issuer DWN: read credential manifest record
+Issuer DWN\-\->DCX Applicant: return credential manifest record
+DCX Applicant->Trusted Issuers: request credentials required by manifest
+Trusted Issuers\-\->DCX Applicant: return requested credentials or alt response
+DCX Applicant->Issuer DWN: create application record
+Issuer DWN\-\->DCX Applicant: return record create status
+DCX Applicant->Applicant DWN: read response record via subscription
+DCX Applicant->Applicant DWN: read invoice record via subscription (optional)
+-->
+
+1. DCX Applicant configures Applicant DWN with dcx protocol (issuer & applicant)
+1. DCX Applicant creates subscription to Applicant DWN 
+2. DCX Applicant reads credential manifest record from Issuer DWN
+3. DCX Applicant acquires required credentials from issuers listed in manifest
+4. DCX Applicant creates application record in Issuer DWN
+5. DCX Applicant reads response record via Applicant DWN subscription
+6. DCX Applicant reads invoice record via Applicant DWN subscription (optional)
+
+![dcx-applicant-sequence](./img/dcx-applicant-sequence.png)
 
 ## TODO
 
-- [ ] DID key management (DID DHT)
-  - [ ] Read existing keys
-  - [ ] Create new keys
-  - [ ] Update and delete new/existing keys
-- [ ] DHT gateway connection
-- [ ] DWN server connection and configuration
+- [x] Create repo with documentation
 - [ ] Credential issuer protocol handlers
   - [ ] Create, read, update credential manifests
   - [ ] Read applications, parse credentials and validate against manifest (presentation exchange)
@@ -77,6 +157,12 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
   - [ ] Create new credentials from 3rd party data requests
   - [ ] Create and update responses to applications
   - [ ] Create and update invoices as responses to applications
+- [ ] DID key management (DID DHT)
+  - [ ] Read existing keys
+  - [ ] Create new keys
+  - [ ] Update and delete new/existing keys
+- [ ] DHT gateway connection
+- [ ] DWN server connection and configuration
 
 # Use
 
