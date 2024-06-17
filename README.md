@@ -1,10 +1,6 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers.
-
-## Goal
-
-Implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
+DCX is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
 
 ## Package
 
@@ -44,7 +40,7 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 - Applicant DWN
   - dwn-sdk-js
 
-## Full Sequence
+## Sequences
 
 <!--
 DCX Issuer->Issuer DWN: configure dcx protocol
@@ -62,6 +58,7 @@ DCX Applicant->Applicant DWN: read response record via subscription
 DCX Issuer->Applicant DWN: create invoice record (optional)
 DCX Applicant->Applicant DWN: read invoice record  (optional)
 -->
+#### Full Sequence
 
 ![dcx-full-sequence](./img/dcx-full-sequence.png)
 
@@ -90,7 +87,7 @@ Notes:
 7. Application record includes credentials that satisfy credential manifest mentioned in step 5
 9. DCX Issuer validates credentials against credential manifest using DCX software handlers
 
-## Credential Issuer Sequence
+#### Issuer Sequence
 <!--
 DCX Issuer->Issuer DWN: configure dcx protocol
 Issuer DWN\-\->DCX Issuer: return protocol create status
@@ -120,7 +117,7 @@ Issuer DWN\-\->DCX Issuer: return record create status (optional)
 10. DCX Issuer creates application response or denial record and sends to applicant DWN
 11. DCX Issuer creates invoice response record and sends to applicant DWN
 
-## Credential Applicant Sequence
+#### Applicant Sequence
 <!--
 DCX Applicant->Applicant DWN: create dcx protocol
 Applicant DWN\-\->DCX Applicant: return protocol create status
@@ -149,7 +146,7 @@ DCX Applicant->Applicant DWN: read invoice record via subscription (optional)
 
 ## TODO
 
-- [x] Create repo with documentation
+- [x] Create repo with documentation and diagrams
 - [ ] Credential issuer protocol handlers
   - [ ] Create, read, update credential manifests
   - [ ] Read applications, parse credentials and validate against manifest (presentation exchange)
@@ -157,14 +154,14 @@ DCX Applicant->Applicant DWN: read invoice record via subscription (optional)
   - [ ] Create new credentials from 3rd party data requests
   - [ ] Create and update responses to applications
   - [ ] Create and update invoices as responses to applications
+- [ ] DWN server connection and configuration
 - [ ] DID key management (DID DHT)
   - [ ] Read existing keys
   - [ ] Create new keys
   - [ ] Update and delete new/existing keys
-- [ ] DHT gateway connection
-- [ ] DWN server connection and configuration
+- [ ] DHT gateway connection 
 
-# Use
+## Use
 
 ```javascript
 // issuer side
