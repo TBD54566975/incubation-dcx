@@ -62,7 +62,7 @@ The DCX protocol is designed as a genearlized credential issuance protocol using
 
 <!-- TODO: include sequence diagrams -->
 
-## Technical Requirements
+## TODO
 
 - [ ] DID key management (DID DHT)
   - [ ] Read existing keys
