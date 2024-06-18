@@ -1,2 +1,3 @@
-import server from "./src/server";
-server.start();
+import { DcxServer } from "./src/index";
+const dcxServer = new DcxServer();
+dcxServer.start();

@@ -1,6 +1,6 @@
 import { PortableDid, BearerDid, DidDht, DidDhtCreateOptions, DidDocument } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { DcxError } from './error.js';
+import { DcxServerError } from './error.js';
 
 export class DidManager {
   public static async resolveDid(didUri: string): Promise<DidDocument | null> {
@@ -9,7 +9,7 @@ export class DidManager {
       return didResolution.didDocument;
     } catch (error) {
       console.error(error);
-      throw new DcxError('Failed to import did from file');
+      throw new DcxServerError('Failed to import did from file');
     }
   }
 
@@ -26,7 +26,7 @@ export class DidManager {
       return await this.importPortableDid(portableDid);
     } catch (error: any) {
       console.error(error);
-      throw new DcxError('Failed to import did from file');
+      throw new DcxServerError('Failed to import did from file');
     }
   }
 
@@ -38,13 +38,13 @@ export class DidManager {
   public static async importPortableDid(portableDid: PortableDid): Promise<PortableDid> {
     try {
       if (!portableDid) {
-        throw new DcxError('No portableDid provided');
+        throw new DcxServerError('No portableDid provided');
       }
       const bearerDid = await DidDht.import({ portableDid });
       return await bearerDid.export();
     } catch (error: any) {
       console.error(error);
-      throw new DcxError('Failed to import did from file');
+      throw new DcxServerError('Failed to import did from file');
     }
   }
 
@@ -56,12 +56,12 @@ export class DidManager {
   public static async importBearerDid(portableDid: PortableDid): Promise<BearerDid> {
     try {
       if (!portableDid) {
-        throw new DcxError('No portableDid provided');
+        throw new DcxServerError('No portableDid provided');
       }
       return await DidDht.import({ portableDid });
     } catch (error: any) {
       console.error(error);
-      throw new DcxError('Failed to import DID');
+      throw new DcxServerError('Failed to import DID');
     }
   }
 
@@ -75,7 +75,7 @@ export class DidManager {
       return await DidDht.create({ options });
     } catch (error: any) {
       console.error(error);
-      throw new DcxError('Failed to create DID');
+      throw new DcxServerError('Failed to create DID');
     }
   }
 
@@ -87,12 +87,12 @@ export class DidManager {
   public static async exportPortableDid(bearerDid: BearerDid): Promise<PortableDid> {
     try {
       if (!bearerDid) {
-        throw new DcxError('No bearerDid provided');
+        throw new DcxServerError('No bearerDid provided');
       }
       return await bearerDid.export();
     } catch (error: any) {
       console.error(error);
-      throw new DcxError('Failed to import DID');
+      throw new DcxServerError('Failed to import DID');
     }
   }
 }

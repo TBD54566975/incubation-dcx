@@ -1,7 +1,7 @@
-export class DcxError extends Error {
+export class DcxServerError extends Error {
   constructor(public message: string) {
     super(message);
-    this.name = 'DcxError';
+    this.name = 'DcxServerError';
   }
 }
 

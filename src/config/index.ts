@@ -1,14 +1,16 @@
 import crypto from 'crypto';
 import { Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
-import { config } from 'dotenv'; import { readFileToJSON } from '../utils/file-system.js';
-import { DcxError } from '../error.js';
-config();
+import dotenv from 'dotenv';
+import { readFileToJSON } from '../utils/file-system.js';
+import { DcxServerError } from '../utils/error.js';
+
+dotenv.config();
 const CWD = process.cwd();
 
 const isValidVcManifestFile = async (vcManifestFilename: string) => {
   if (!vcManifestFilename) {
-    throw new DcxError('VC_MANIFEST_FILENAME missing from .env')
+    throw new DcxServerError('VC_MANIFEST_FILENAME missing from .env')
   }
   const isDefaultManifestFile = vcManifestFilename.includes("MANIFEST")
   if (isDefaultManifestFile) {
@@ -19,6 +21,7 @@ const isValidVcManifestFile = async (vcManifestFilename: string) => {
     }
   }
 }
+
 export class Config {
   public _Web5?: Web5;
   public _Web5UserAgent?: Web5UserAgent;
@@ -63,7 +66,7 @@ export class Config {
     this._DWN_RECOVERY_PHRASE = process.env.DWN_RECOVERY_PHRASE || '';
 
     if (!process.env.CIPHER_KEY) {
-      console.log(`CIPHER_KEY missing from .env, new one created at ${CWD}/cipher-key.txt`, dcxConfig.CIPHER_KEY);
+      console.log(`CIPHER_KEY missing from .env, new one created at ${CWD}/cipher-key.txt`, config.CIPHER_KEY);
     }
   }
 
@@ -80,12 +83,14 @@ export class Config {
   }
 }
 
-export const dcxConfig = new Config();
-console.debug("dcxConfig", dcxConfig);
+export const config = new Config();
+console.debug("config", config);
 
 if (process.env.NODE_ENV === 'production') {
-  isValidVcManifestFile(dcxConfig.OUTPUT_VC_MANIFEST_FILENAME).then(console.log).catch(console.error);
+  isValidVcManifestFile(config.OUTPUT_VC_MANIFEST_FILENAME).then(console.log).catch(console.error);
 }
+
+export type DcxServerConfig = typeof config;
 
 /*
   TODO: work these async loading function into config class

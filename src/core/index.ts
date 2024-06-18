@@ -2,33 +2,34 @@ import { Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { writeFile } from 'fs/promises';
 
-import { dcxConfig } from './config/index.js';
-import { DcxDwnError, DcxError } from './error.js';
-import { DCX } from './protocol/handlers/index.js';
-import { credentialIssuerProtocol, manifestSchema } from './protocol/index.js';
-import Manifest from './protocol/manifests/MANIFEST.json';
-import { Web5ConnectResponse } from './types/web5.js';
-import { DWN_PASSWORD_ERROR } from './utils/constants.js';
-import { readFileToJSON, readFileToString } from './utils/file-system.js';
-import { Time } from './utils/time.js';
+import { type DcxServerConfig, config as defaultConfig } from '../config/index.js';
+import { config } from '../config/index.js';
+import { DcxDwnError, DcxServerError } from '../utils/error.js';
+import { DcxHandlers } from '../protocol/index.js';
+import { credentialIssuerProtocol, manifestSchema } from '../protocol/index.js';
+import Manifest from '../protocol/manifests/MANIFEST.json';
+import { Web5ConnectResponse } from '../types/web5.js';
+import { DWN_PASSWORD_ERROR } from '../utils/constants.js';
+import { readFileToJSON, readFileToString } from '../utils/file-system.js';
+import { Time } from '../utils/time.js';
 
 async function web5Connect() {
     try {
-        if (!dcxConfig.DWN_RECOVERY_PHRASE) {
+        if (!config.DWN_RECOVERY_PHRASE) {
             console.info('No recoveryPhrase provided in .env, A new one will be generated and saved to config/seed.txt');
         }
 
         const agent = await Web5UserAgent.create();
-        agent.initialize({
-            password: dcxConfig.DWN_PASSWORD,
-            recoveryPhrase: dcxConfig.DWN_RECOVERY_PHRASE
+        await agent.initialize({
+            password: config.DWN_PASSWORD,
+            recoveryPhrase: config.DWN_RECOVERY_PHRASE
         });
 
         const { web5, did, recoveryPhrase } = await Web5.connect({
             agent,
             sync: 'off',
             techPreview: {
-                dwnEndpoints: dcxConfig.DWN_ENDPOINTS,
+                dwnEndpoints: config.DWN_ENDPOINTS,
             },
         });
 
@@ -39,23 +40,22 @@ async function web5Connect() {
         // console.log('web5.dwn =>', web5.dwn);
         // console.log('web5.vc =>', web5.vc);
         console.log('~~~~~~~~~~~~~~~~~~~~~~');
-
         console.log('dcxDid =>', did);
         console.log('recoveryPhrase =>', recoveryPhrase);
 
         if (!!recoveryPhrase) {
-            await writeFile(dcxConfig.DWN_RECOVERY_PHRASE_FILENAME, recoveryPhrase);
+            await writeFile(config.DWN_RECOVERY_PHRASE_FILENAME, recoveryPhrase);
         }
 
         const identity = await agent.identity.get({ didUri: did });
         const bearerDid = identity?.did;
         if (!identity || !bearerDid) {
-            throw new DcxError('Failed to get identity');
+            throw new DcxServerError('Failed to get identity');
         }
         return { web5, agent, did, bearerDid, recoveryPhrase };
     } catch (error: any) {
         console.error('web5Connect error', error);
-        throw new DcxError(error?.message ?? 'Failed to connect to Web5');
+        throw new DcxServerError(error?.message ?? 'Failed to connect to Web5');
     }
 }
 
@@ -88,15 +88,15 @@ async function configIssuerProtocol(web5: Web5, did: string) {
         return send;
     } catch (error: any) {
         console.error('configureDcxProtocol error', error);
-        throw new DcxError(error?.message ?? 'Failed to configure credential issuer protocol');
+        throw new DcxServerError(error?.message ?? 'Failed to configure credential issuer protocol');
     }
 }
 
 async function start() {
     try {
-        if (!dcxConfig.DWN_PASSWORD) {
+        if (!config.DWN_PASSWORD) {
             console.error(DWN_PASSWORD_ERROR, 'font-weight: bold; color: red;', 'font-weight: normal; color: inherit;');
-            throw new DcxError(DWN_PASSWORD_ERROR);
+            throw new DcxServerError(DWN_PASSWORD_ERROR);
         }
         /**
          *  1. Create and start Web5 instance locally, connect to remote DWN using password & recovery phrase
@@ -188,8 +188,8 @@ async function start() {
             console.log(`Wrote ${manifestWrites.length} manifests`);
         }
 
-        let cursor = await readFileToJSON(dcxConfig.DWN_CURSOR_FILE);
-        let lastRecordId = await readFileToString(dcxConfig.DWN_LAST_RECORD_ID_FILE);
+        let cursor = await readFileToJSON(config.DWN_CURSOR_FILE);
+        let lastRecordId = await readFileToString(config.DWN_LAST_RECORD_ID_FILE);
 
         while (true) {
             const { records = [], cursor: nextCursor } = await web5.dwn.records.query({
@@ -226,12 +226,12 @@ async function start() {
             for (const record of recordReads) {
                 if (record.id != lastRecordId) {
                     if (record.protocolPath === 'application') {
-                        await DCX.processApplicationRecord(web5, bearerDid, record);
+                        await DcxHandlers.processApplicationRecord(web5, bearerDid, record);
                     } else {
                         console.log('Skipped message with protocol path', record.protocolPath);
                     }
                     lastRecordId = record.id;
-                    await writeFile(dcxConfig.DWN_LAST_RECORD_ID_FILE, lastRecordId);
+                    await writeFile(config.DWN_LAST_RECORD_ID_FILE, lastRecordId);
                 } else {
                     await Time.sleep();
                 }
@@ -240,7 +240,7 @@ async function start() {
             if (nextCursor) {
                 console.log('Updated cursor for next query', nextCursor);
                 cursor = nextCursor;
-                await writeFile(dcxConfig.DWN_CURSOR_FILE, cursor);
+                await writeFile(config.DWN_CURSOR_FILE, cursor);
             }
 
             if (!recordReads.length) {
@@ -249,9 +249,27 @@ async function start() {
         }
     } catch (error: any) {
         console.error('web5Connect error', error);
-        throw new DcxError(error?.message ?? 'Failed to connect to Web5');
+        throw new DcxServerError(error?.message ?? 'Failed to connect to Web5');
     }
 }
-const server = { start };
 
-export default server;
+export type DcxServerOptions = {
+    config?: DcxServerConfig;
+};
+
+export class DcxServer {
+    config: DcxServerConfig;
+
+    constructor(options: DcxServerOptions = {}) {
+        this.config = options.config ?? defaultConfig;
+    }
+
+    async start(): Promise<void> {
+        try {
+            await start();
+        } catch (error: any) {
+            console.error('DcxServer start error', error);
+            throw new DcxServerError(error?.message ?? 'Failed to start DCX server');
+        }
+    }
+}

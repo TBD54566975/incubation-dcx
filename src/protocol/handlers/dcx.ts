@@ -2,14 +2,14 @@ import { Record, Web5 } from '@web5/api';
 import { PresentationExchange, VerifiableCredential, VerifiablePresentation } from '@web5/credentials';
 import { BearerDid, DidDht } from "@web5/dids";
 
-import { dcxConfig } from "../../config/index.js";
+import { config } from "../../config/index.js";
 import { AdditionalProperties, TrustedIssuer, VcRequestBody } from '../../types/dcx.js';
 import { stringify } from '../../utils/json.js';
 import { credentialIssuerProtocol, responseSchema } from '../index.js';
 
 import Manifest from "../manifests/MANIFEST.json";
 
-export class DCX {
+export class DcxHandlers {
 
     static async processApplicationRecord(web5: Web5, issuerDid: BearerDid, record: Record) {
         console.log('Process message', stringify(record));
@@ -67,7 +67,7 @@ export class DCX {
 
         console.log('Valid creds selected', stringify(selectedVcJwts));
 
-        const trustedIssuerDids = dcxConfig.INPUT_VC_TRUSTED_ISSUERS.map((trustedIssuer: TrustedIssuer) => trustedIssuer.did);
+        const trustedIssuerDids = config.INPUT_VC_TRUSTED_ISSUERS.map((trustedIssuer: TrustedIssuer) => trustedIssuer.did);
         const validInputVcs: VerifiableCredential[] = [];
         for (const vcJwt of selectedVcJwts) {
             console.log('Parsing vc', vcJwt)
@@ -87,7 +87,7 @@ export class DCX {
 
         // generate vc
         const outputVc = await VerifiableCredential.create({
-            type: dcxConfig.OUTPUT_VC_NAME,
+            type: config.OUTPUT_VC_NAME,
             issuer: trustedIssuerDids,
             subject: subjectDid,
             data: vcData,
@@ -116,9 +116,9 @@ export class DCX {
             'Content-Type': 'application/json'
         }
     ) {
-        console.log('Using dcxConfig', stringify(dcxConfig));
-        console.log(`Sending request to vc data provider ${dcxConfig.OUTPUT_VC_DATA_PROVIDER} at endpoint ${dcxConfig.OUTPUT_VC_DATA_PROVIDER_ENDPOINT}`);
-        const response = await fetch(dcxConfig.OUTPUT_VC_DATA_PROVIDER_ENDPOINT, {
+        console.log('Using config', stringify(config));
+        console.log(`Sending request to vc data provider ${config.OUTPUT_VC_DATA_PROVIDER} at endpoint ${config.OUTPUT_VC_DATA_PROVIDER_ENDPOINT}`);
+        const response = await fetch(config.OUTPUT_VC_DATA_PROVIDER_ENDPOINT, {
             method,
             headers,
             body: stringify(body),
@@ -141,11 +141,11 @@ export class DCX {
 //     const vc = VerifiableCredential.parseJwt({ vcJwt: credentialJwt });
 //     const vcDataModel: VcDataModel = vc.vcDataModel;
 //     const credentialSubject: VerifiableCredentialDCX = vcDataModel.credentialSubject;
-//     const decrypted = Cipher.aes256CbcDecrypt(dcxConfig.CIPHER_KEY, dcxConfig.CIPHER_KEY, credentialSubject?.encrypted);
+//     const decrypted = Cipher.aes256CbcDecrypt(config.CIPHER_KEY, config.CIPHER_KEY, credentialSubject?.encrypted);
 
 //     // generate VCs
 //     const decryptedVC = await VerifiableCredential.create({
-//         type: dcxConfig.ISSUER_VC_TYPE,
+//         type: config.ISSUER_VC_TYPE,
 //         issuer: issuerDid.uri,
 //         subject: subjectDid,
 //         data: JSON.parse(decrypted.toString()),
