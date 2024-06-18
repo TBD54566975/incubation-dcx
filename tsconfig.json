@@ -1,10 +1,14 @@
 {
     "compilerOptions": {
+        "lib": [
+            "DOM",
+            "ES2022"
+        ],
         "allowJs": true,
         "strict": true,
         "declaration": true,
         "declarationMap": true,
-        "target": "ES2017",
+        "target": "ES6",
         "module": "NodeNext",
         "sourceMap": true,
         "esModuleInterop": true,
@@ -14,7 +18,8 @@
         "outDir": "dist/esm",
     },
     "include": [
-        "src"
+        "src",
+        "./src/index.ts",
     ],
     "exclude": [
         "node_modules",

@@ -34,10 +34,12 @@ async function web5Connect() {
 
         console.log('Web5 connected!');
         console.log('web5 =>', web5);
-        console.log('web5.agent =>', web5.agent);
-        console.log('web5.did =>', web5.did);
-        console.log('web5.dwn =>', web5.dwn);
-        console.log('web5.vc =>', web5.vc);
+        // console.log('web5.agent =>', web5.agent);
+        // console.log('web5.did =>', web5.did);
+        // console.log('web5.dwn =>', web5.dwn);
+        // console.log('web5.vc =>', web5.vc);
+        console.log('~~~~~~~~~~~~~~~~~~~~~~');
+
         console.log('dcxDid =>', did);
         console.log('recoveryPhrase =>', recoveryPhrase);
 

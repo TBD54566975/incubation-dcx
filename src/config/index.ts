@@ -84,8 +84,7 @@ export const dcxConfig = new Config();
 console.debug("dcxConfig", dcxConfig);
 
 if (process.env.NODE_ENV === 'production') {
-  const filecheck = await isValidVcManifestFile(dcxConfig.OUTPUT_VC_MANIFEST_FILENAME)
-  console.log("filecheck", filecheck);
+  isValidVcManifestFile(dcxConfig.OUTPUT_VC_MANIFEST_FILENAME).then(console.log).catch(console.error);
 }
 
 /*
