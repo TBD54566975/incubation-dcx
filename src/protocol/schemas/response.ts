@@ -3,7 +3,7 @@ export const schema = {
     "$id": "https://tblend.io/protocol/credential-issuance/schemas/response",
     "title": "Credential Response",
     "type": "object",
-    "properties": {    
+    "properties": {
       "id": { "type": "string" },
       "spec_version": { "type" : "string" },
       "applicant": { "type": "string" },

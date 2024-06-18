@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { Readable } from '@web5/common';
 import { CipherAlgorightm } from '../types/cipher.js';
 
-export class StreamCiphering {
+export class StreamCipher {
   algorithm: CipherAlgorightm;
   constructor(algorithm: CipherAlgorightm) {
     this.algorithm = algorithm;
@@ -18,9 +18,9 @@ export class StreamCiphering {
   public async encryptStream(key: Buffer, initVector: Buffer, plaintextStream: Readable): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return await StreamCiphering.aes256CbcEncryptStream(key, initVector, plaintextStream);
+        return await StreamCipher.aes256CbcEncryptStream(key, initVector, plaintextStream);
       case CipherAlgorightm.AES_256_CTR:
-        return await StreamCiphering.aes256CtrEncryptStream(key, initVector, plaintextStream);
+        return await StreamCipher.aes256CtrEncryptStream(key, initVector, plaintextStream);
       default:
         throw new Error('Algorithm not supported');
     }
@@ -36,9 +36,9 @@ export class StreamCiphering {
   public async decryptStream(key: Buffer, initVector: Buffer, cipherStream: Readable): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return StreamCiphering.aes256CbcDecryptStream(key, initVector, cipherStream);
+        return StreamCipher.aes256CbcDecryptStream(key, initVector, cipherStream);
       case CipherAlgorightm.AES_256_CTR:
-        return StreamCiphering.aes256CtrDecryptStream(key, initVector, cipherStream);
+        return StreamCipher.aes256CtrDecryptStream(key, initVector, cipherStream);
       default:
         throw new Error('Algorithm unset or not supported');
     }
@@ -203,7 +203,7 @@ export class StreamCiphering {
 }
 
 
-export class Ciphering extends StreamCiphering {
+export class Cipher extends StreamCipher {
   constructor(algorithm: CipherAlgorightm) {
     super(algorithm);
   }
@@ -220,9 +220,9 @@ export class Ciphering extends StreamCiphering {
       case undefined || null:
         throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
-        return Ciphering.aes256CbcEncrypt(key, initVector, plaintext);
+        return Cipher.aes256CbcEncrypt(key, initVector, plaintext);
       case CipherAlgorightm.AES_256_CTR:
-        return Ciphering.aes256CtrEncrypt(key, initVector, plaintext);
+        return Cipher.aes256CtrEncrypt(key, initVector, plaintext);
       default:
         throw new Error('Algorithm not supported');
     }
@@ -240,9 +240,9 @@ export class Ciphering extends StreamCiphering {
       case undefined || null:
         throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
-        return Ciphering.aes256CbcDecrypt(key, initVector, ciphertext);
+        return Cipher.aes256CbcDecrypt(key, initVector, ciphertext);
       case CipherAlgorightm.AES_256_CTR:
-        return Ciphering.aes256CtrDecrypt(key, initVector, ciphertext);
+        return Cipher.aes256CtrDecrypt(key, initVector, ciphertext);
       default:
         throw new Error('Algorithm not supported');
     }
