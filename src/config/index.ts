@@ -14,7 +14,9 @@ const isValidVcManifestFile = async (vcManifestFilename: string) => {
   if (isDefaultManifestFile) {
     console.log("VC_MANIFEST_FILENAME is default MANIFEST file, checking contents ...");
     const fileData = await readFileToJSON(vcManifestFilename);
-    if (!fileData || fileData.id.toLowerCase().includes('example'))
+    if (!fileData || fileData.id.toLowerCase().includes('example')) {
+
+    }
   }
 }
 export class Config {
