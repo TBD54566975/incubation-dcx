@@ -1,7 +1,7 @@
 import { schema as responseSchema } from './schemas/response.js';
 import { schema as invoiceSchema } from './schemas/invoice.js';
 import { schema as manifestSchema } from './schemas/manifest.js';
-import { schema as presentationSchema } from './schemas/presentation.js';
+import { schema as applicationSchema } from './schemas/application.js';
 
 export const protocol = {
   // applicant protocol is a subset of exchange protocol
@@ -9,7 +9,7 @@ export const protocol = {
   "published": false,
   "types": {
     "application": {
-      "schema": presentationSchema.$id,
+      "schema": applicationSchema.$id,
       "dataFormats": ["application/json"]
     },
     "invoice": {

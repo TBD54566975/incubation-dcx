@@ -1,28 +1,16 @@
-import { Web5PlatformAgent } from '@web5/agent';
 import { Web5 } from '@web5/api';
-import { BearerDid } from '@web5/dids';
 import { Web5UserAgent } from '@web5/user-agent';
 import { writeFile } from 'fs/promises';
+
 import { dcxConfig } from './config/index.js';
 import { DcxDwnError, DcxError } from './error.js';
+import { DCX } from './protocol/handlers/index.js';
 import { credentialIssuerProtocol, manifestSchema } from './protocol/index.js';
 import Manifest from './protocol/manifests/MANIFEST.json';
+import { Web5ConnectResponse } from './types/web5.js';
+import { DWN_PASSWORD_ERROR } from './utils/constants.js';
 import { readFileToJSON, readFileToString } from './utils/file-system.js';
-import { processMessage } from './utils/processor.js';
 import { Time } from './utils/time.js';
-
-type Web5ConnectResponse = {
-    web5: Web5,
-    agent: Web5PlatformAgent,
-    did: string,
-    bearerDid: BearerDid,
-    recoveryPhrase?: string
-};
-
-const DWN_PASSWORD_ERROR = 'SECURITY WARNING: ' +
-    'You have not set a DWN_PASSWORD, which defaults to a static, guessable value. ' +
-    'This significantly compromises the security of your data. ' +
-    'Please configure a secure, unique password.';
 
 async function web5Connect() {
     try {
@@ -54,7 +42,7 @@ async function web5Connect() {
         console.log('recoveryPhrase =>', recoveryPhrase);
 
         if (!!recoveryPhrase) {
-            await writeFile(dcxConfig.DWN_RECOVERY_PHRASE_FILE, recoveryPhrase);
+            await writeFile(dcxConfig.DWN_RECOVERY_PHRASE_FILENAME, recoveryPhrase);
         }
 
         const identity = await agent.identity.get({ didUri: did });
@@ -236,7 +224,7 @@ async function start() {
             for (const record of recordReads) {
                 if (record.id != lastRecordId) {
                     if (record.protocolPath === 'application') {
-                        await processMessage(web5, bearerDid, record);
+                        await DCX.processApplicationRecord(web5, bearerDid, record);
                     } else {
                         console.log('Skipped message with protocol path', record.protocolPath);
                     }
