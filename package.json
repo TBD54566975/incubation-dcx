@@ -11,6 +11,7 @@
     "test": "echo TODO && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc",
+    "build:dev": "npm run dev && npm run dev",
     "build": "npm run clean && npm run build:esm",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",

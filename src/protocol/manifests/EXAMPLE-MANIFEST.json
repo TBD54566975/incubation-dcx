@@ -1,6 +1,4 @@
 {
-    "example": true,
-    "warning": "DO NOT USE IN PROD",
     "id": "dcx-credential-manifest-example",
     "name": "DCX Credential Manifest Example",
     "description": "This is an example of a credential manifest used by DCX. This document should be replaced with your own version to satify the requirements of the credentials your DCX server expects as inputs and the desired output credential.",
