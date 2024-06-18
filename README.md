@@ -13,37 +13,41 @@ The DCX package is a FOSS npm package used to bootstrap running a DCX issuer ser
 
 ## Protocol
 
-The DCX protocol is a genearlized DWN protocol designed to facilitate the decentralized exchange of credentials between issuer and applicant via DWeb Nodes. DCX Issuers and Applicants perform CRUD actions on different DCX actors' DWNs int he form of DWN records. The records written to DWNs act as a decentralized communication channel facilitating the exchange of data about VCs to acquire VCs. To achieve this, DCX uses [Credential Manifests](https://identity.foundation/credential-manifest/). Manifests are defined by the Issuer and written as records into the Issuer's DWN. Manifests describe the inputs an Applicant must provide to an Issuer for subsequent evaluation and issuance of the credential(s) indicated in the Credential Manifest. DCX Issuers write credential manifest records to their own DWNs as DWN records. DCX Applicants read the DWN manifest records from DCX Issuers to understand the credential inputs and outputs. Applicants create Credential Application records in issuers' DWNs to provide proof of the credentials they hold. The Issuer reviews the application record verifying the the credentials against the manifest. Issuers reply with a Response records written to the Applicant's DWN. This Response record will include either acceptance and output credentials or denial and reasons for the denial. Issuers can optionally write an Invoice record to an Applicant's DWN to require payment.
+The DCX protocol is a DWN protocol designed to facilitate the decentralized exchange of credentials between issuers, applicants and their DWNs. The interactions between these actors is achieved by performing CRUD operations on DWNs in the form of DWN Records. Specifically, DWN records are used to facilitate decentralized communication between actors. These records contain informatino about required input VCs to desired output VCs.
 
-[DCX protocol](./src/protocol/)
-- [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
-- [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
+The DCX protocol uses [Credential Manifests](https://identity.foundation/credential-manifest/) to achieve this communication between DCX actors such that issuers define manifests for applicants to read so they can understand what VCs are required in the exchange. Specifically, manifests describe the VC inputs and VC outputs of an Applicant and an Issuer. For more details on the interactions, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
 
-[DCX protocol manifests](./src/protocol/manifests/)
-- [`src/protocol/manifests/MANIFEST.json`](./src/protocol/manifests/MANIFEST.json) example manifest defines expected JSON object
+[Protocol](./src/protocol/)
+  - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
+  - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
 
-[DCX protocol schemas](./src/protocol/schemas/)
-- [`src/protocol/schemas/invoice.ts`](./src/protocol/schemas/invoice.ts) defines the schema for invoice records
-- [`src/protocol/schemas/manifest.ts`](./src/protocol/schemas/manifest.ts) defines schema for manifest records
-- [`src/protocol/schemas/application.ts`](./src/protocol/schemas/application.ts) defines schema for application records
-- [`src/protocol/schemas/response.ts`](./src/protocol/schemas/response.ts) defines schema for response records
+[Protocol Schemas](./src/protocol/schemas/)
+  - [`src/protocol/schemas/invoice.ts`](./src/protocol/schemas/invoice.ts) defines the schema for invoice records
+  - [`src/protocol/schemas/manifest.ts`](./src/protocol/schemas/manifest.ts) defines schema for manifest records
+  - [`src/protocol/schemas/application.ts`](./src/protocol/schemas/application.ts) defines schema for application records
+  - [`src/protocol/schemas/response.ts`](./src/protocol/schemas/response.ts) defines schema for response records
 
+[Protocol Manifests](./src/protocol/manifests/)
+  - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
+  - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
 
 ## Architecture
 
 ![dcx-architecture](./docs/img/dcx-architecture.png)
-<!-- TODO: define actors in arch -->
-- DCX
-- DCX Issuer
-  - web5-js
-  - @web5/dcx
-- Issuer DWN
-  - dwn-sdk-js
-- DCX Applicant
-  - web5-js
-  - @web5/dcx
-- Applicant DWN
-  - dwn-sdk-js
+
+#### Actors
+
+- **DCX**: Protocol boundary within which actors communicate
+- **DCX Issuer**: Web server running @web5/dcx and web5-js
+- **Issuer DWN**: DCX Issuer's DWN server running dwn-sdk-js
+- **DCX Applicant**: User client application running @web5/dcx and web5-js
+- **Applicant DWN**: DCX Applicant's DWN server running dwn-sdk-js
+
+#### Packages
+
+- [web5-js](https://github.com/TBD54566975/web5-js)
+- [@web5/dcx](https://github.com/TBD54566975/incubation-tblend)
+- [dwn-sdk-js](https://github.com/TBD54566975/dwn-sdk-js)
 
 ## Sequence
 
