@@ -2,49 +2,39 @@ import { PortableDid, BearerDid, DidDht, DidDhtCreateOptions, DidDocument } from
 import { readFile } from 'fs/promises';
 import { DcxServerError } from './error.js';
 
-export class DidManager {
-  public static async resolveDid(didUri: string): Promise<DidDocument | null> {
-    try {
-      const didResolution = await DidDht.resolve(didUri);
-      return didResolution.didDocument;
-    } catch (error) {
-      console.error(error);
-      throw new DcxServerError('Failed to import did from file');
-    }
+type DidManagerOptions = {
+  did?: string;
+  bearerDid?: BearerDid;
+  portableDid?: PortableDid
+}
+
+
+export class DidImporter {
+  did?: string;
+  bearerDid?: BearerDid;
+  portableDid?: PortableDid;
+
+  constructor(didManagerOptions: DidManagerOptions = {}) {
+    this.did = didManagerOptions.did;
+    this.bearerDid = didManagerOptions.bearerDid;
+    this.portableDid = didManagerOptions.portableDid;
   }
 
   /**
-  * Uses DidDht to handle importing a portable did bearer did; see {@link DidDht.import()}
-  * @param didFilepath the path to the file containing the portable did object; see {@link PortableDid}
-  * @returns corresponding bearer did; see {@link BearerDid}
-  */
-  public static async importPortableDidFile(didFilepath: string): Promise<PortableDid> {
-    try {
-
-      const didFileString = (await readFile(didFilepath))?.toString();
-      const portableDid = JSON.parse(didFileString);
-      return await this.importPortableDid(portableDid);
-    } catch (error: any) {
-      console.error(error);
-      throw new DcxServerError('Failed to import did from file');
-    }
-  }
-
-  /**
+   * 
    * Uses DidDht to handle importing a portable did bearer did; see {@link DidDht.import()}
    * @param didFilepath the path to the file containing the portable did object; see {@link PortableDid}
    * @returns corresponding bearer did; see {@link BearerDid}
    */
-  public static async importPortableDid(portableDid: PortableDid): Promise<PortableDid> {
+  public async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
     try {
-      if (!portableDid) {
-        throw new DcxServerError('No portableDid provided');
-      }
-      const bearerDid = await DidDht.import({ portableDid });
-      return await bearerDid.export();
+      const didFileString = (await readFile(didFilepath))?.toString();
+      const portableDid = JSON.parse(didFileString);
+      this.portableDid = portableDid;
+      return await this.importPortableDid(portableDid);
     } catch (error: any) {
-      console.error(error);
-      throw new DcxServerError('Failed to import did from file');
+      console.error('DidManager', 'importPortableDidFromFile', error);
+      throw new DcxServerError('Failed to import portableDid from didFilepath', error);
     }
   }
 
@@ -53,46 +43,67 @@ export class DidManager {
    * @param portableDid a portable did object; see {@link PortableDid}
    * @returns a bearer did object; see {@link BearerDid}
    */
-  public static async importBearerDid(portableDid: PortableDid): Promise<BearerDid> {
+  public async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
     try {
-      if (!portableDid) {
-        throw new DcxServerError('No portableDid provided');
-      }
-      return await DidDht.import({ portableDid });
+      this.bearerDid = await DidDht.import({ portableDid: this.portableDid ?? portableDid });
+      return this.bearerDid
     } catch (error: any) {
-      console.error(error);
-      throw new DcxServerError('Failed to import DID');
+      console.error('DidManager', 'importPortableDid', error);
+      throw new DcxServerError('Failed to import portableDid', error);
+    }
+  }
+}
+
+export class DidManager extends DidImporter {
+  /**
+   * 
+   * Uses DidDht and a didUri to resolve the corresponding didDocument; see {@link DidDht.resolve()}
+   * @param didUri the uri to resolve
+   * @returns DidDocument object or null; see {@link DidDocument}
+   */
+  public async resolveDid(didUri: string): Promise<DidDocument | null> {
+    try {
+      const didResolution = await DidDht.resolve(this.did ?? didUri);
+      return didResolution.didDocument;
+    } catch (error) {
+      console.error('DidManager', 'resolveDid', error);
+      throw new DcxServerError('Failed to resolve didDocument using didUri', error);
     }
   }
 
   /**
- * Uses DidDht to create a bearer did; see {@link DidDht.create()}
- * @param options The did dht create options; see {@link DidDhtCreateOptions}
- * @returns a bearer did object; see {@link BearerDid}
- */
-  public static async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
+   *
+   * Uses DidDht to create a bearer did; see {@link DidDht.create()}
+   * @param options The did dht create options; see {@link DidDhtCreateOptions}
+   * @returns a bearer did object; see {@link BearerDid}
+   */
+  public async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
     try {
-      return await DidDht.create({ options });
+      this.bearerDid = await DidDht.create({ options });
+      this.portableDid = await this.exportPortableDid(this.bearerDid);
+      return this.bearerDid;
     } catch (error: any) {
-      console.error(error);
-      throw new DcxServerError('Failed to create DID');
+      console.error('DidManager', 'createBearerDid', error);
+      throw new DcxServerError('Failed to create bearerDid', error);
     }
   }
 
   /**
+   *
    * Handles exporting portable did from corresponding bearer did; see {@link BearerDid.export()}
    * @param bearerDid a bearer did object; see {@link BearerDid}
    * @returns a  did object; see {@link }
    */
-  public static async exportPortableDid(bearerDid: BearerDid): Promise<PortableDid> {
+  public async exportPortableDid(bearerDid: BearerDid): Promise<PortableDid> {
     try {
-      if (!bearerDid) {
-        throw new DcxServerError('No bearerDid provided');
-      }
-      return await bearerDid.export();
+      bearerDid = this.bearerDid ?? bearerDid;
+      this.portableDid = await bearerDid.export();
+      return this.portableDid
     } catch (error: any) {
-      console.error(error);
-      throw new DcxServerError('Failed to import DID');
+      console.error('DidManager', 'exportPortableDid', error);
+      throw new DcxServerError('Failed to export portableDid to bearerDid', error);
     }
   }
 }
+
+export const didManager = new DidManager();

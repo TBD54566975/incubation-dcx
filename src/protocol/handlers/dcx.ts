@@ -7,7 +7,7 @@ import { AdditionalProperties, TrustedIssuer, VcRequestBody } from '../../types/
 import { stringify } from '../../utils/json.js';
 import { credentialIssuerProtocol, responseSchema } from '../index.js';
 
-import Manifest from "../manifests/MANIFEST.json";
+import Manifest from "../manifests/EXAMPLE-MANIFEST.json";
 
 export class DcxHandlers {
 
