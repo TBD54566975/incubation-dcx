@@ -132,37 +132,40 @@ export class DcxHandlers {
 }
 
 
+// TODO: create and update invocies as responses to applications
+// TODO: include some kind of toggle / flag to allow devs to use a encrypt/decrypt function below
+/*
+export async function decryptVC(presentation: any, issuerDid: PortableDid, subjectDid: string) {
+    // filter valid creds
+    const validInputVcs = PresentationExchange.selectCredentials({ vcJwts: presentation, presentationDefinition: Manifest.presentation_definition })
 
-// export async function decryptVC(presentation: any, issuerDid: PortableDid, subjectDid: string) {
-//     // filter valid creds
-//     const validInputVcs = PresentationExchange.selectCredentials({ vcJwts: presentation, presentationDefinition: Manifest.presentation_definition })
+    const credentialJwt = validInputVcs[0];
+    const vc = VerifiableCredential.parseJwt({ vcJwt: credentialJwt });
+    const vcDataModel: VcDataModel = vc.vcDataModel;
+    const credentialSubject: VerifiableCredentialDCX = vcDataModel.credentialSubject;
+    const decrypted = Cipher.aes256CbcDecrypt(config.CIPHER_KEY, config.CIPHER_KEY, credentialSubject?.encrypted);
 
-//     const credentialJwt = validInputVcs[0];
-//     const vc = VerifiableCredential.parseJwt({ vcJwt: credentialJwt });
-//     const vcDataModel: VcDataModel = vc.vcDataModel;
-//     const credentialSubject: VerifiableCredentialDCX = vcDataModel.credentialSubject;
-//     const decrypted = Cipher.aes256CbcDecrypt(config.CIPHER_KEY, config.CIPHER_KEY, credentialSubject?.encrypted);
+    // generate VCs
+    const decryptedVC = await VerifiableCredential.create({
+        type: config.ISSUER_VC_TYPE,
+        issuer: issuerDid.uri,
+        subject: subjectDid,
+        data: JSON.parse(decrypted.toString()),
+    });
 
-//     // generate VCs
-//     const decryptedVC = await VerifiableCredential.create({
-//         type: config.ISSUER_VC_TYPE,
-//         issuer: issuerDid.uri,
-//         subject: subjectDid,
-//         data: JSON.parse(decrypted.toString()),
-//     });
+    const decryptedVCJwt = await decryptedVC.sign({ did: issuerDid });
 
-//     const decryptedVCJwt = await decryptedVC.sign({ did: issuerDid });
-
-//     return {
-//         fulfillment: {
-//             descriptor_map: [
-//                 {
-//                     "id": "atp-report",
-//                     "format": "jwt_vc",
-//                     "path": "$.verifiableCredential[0]"
-//                 },
-//             ]
-//         },
-//         verifiableCredential: [decryptedVCJwt]
-//     }
-// }
+    return {
+        fulfillment: {
+            descriptor_map: [
+                {
+                    "id": "atp-report",
+                    "format": "jwt_vc",
+                    "path": "$.verifiableCredential[0]"
+                },
+            ]
+        },
+        verifiableCredential: [decryptedVCJwt]
+    }
+}
+*/
