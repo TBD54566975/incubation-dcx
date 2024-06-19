@@ -1,24 +1,23 @@
 import { PortableDid, BearerDid, DidDht, DidDhtCreateOptions, DidDocument } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { DcxServerError } from './error.js';
+import { DcxDidError } from './error.js';
 import { Ed25519, Jwk } from '@web5/crypto';
 
-type DidManagerOptions = {
+export type DidDcxConfig = {
   did?: string;
   bearerDid?: BearerDid;
   portableDid?: PortableDid
 }
 
-
-export class DidImporter {
+export class DidDcxManager {
   did?: string;
   bearerDid?: BearerDid;
   portableDid?: PortableDid;
 
-  constructor(didManagerOptions: DidManagerOptions = {}) {
-    this.did = didManagerOptions.did;
-    this.bearerDid = didManagerOptions.bearerDid;
-    this.portableDid = didManagerOptions.portableDid;
+  constructor(config: DidDcxConfig = {}) {
+    this.did = config.did;
+    this.bearerDid = config.bearerDid;
+    this.portableDid = config.portableDid;
   }
 
   /**
@@ -34,8 +33,8 @@ export class DidImporter {
       this.portableDid = portableDid;
       return await this.importPortableDid(portableDid);
     } catch (error: any) {
-      console.error('DidManager', 'importPortableDidFromFile', error);
-      throw new DcxServerError('Failed to import portableDid from didFilepath', error);
+      console.error('importPortableDidFromFile', error);
+      throw new DcxDidError('Failed to import portableDid from didFilepath', this.did);
     }
   }
 
@@ -49,27 +48,28 @@ export class DidImporter {
       this.bearerDid = await DidDht.import({ portableDid: this.portableDid ?? portableDid });
       return this.bearerDid
     } catch (error: any) {
-      console.error('DidManager', 'importPortableDid', error);
-      throw new DcxServerError('Failed to import portableDid', error);
+      console.error('importPortableDid', error);
+      throw new DcxDidError('Failed to import portableDid', this.did);
     }
   }
 }
 
-export const JWK_PRIVATE_KEY_FORMAT = {
-  crv: "Ed25519",
-  kty: "OKP",
-  x: "",
-} as Jwk;
-export class DidManager extends DidImporter {
-
-  public async computeDidJwkPublicKey(privKey: string): Promise<typeof JWK_PRIVATE_KEY_FORMAT> {
+export const JWK_PRIVATE_KEY_FORMAT = { crv: "Ed25519", kty: "OKP", x: "" };
+export class DidDcx extends DidDcxManager {
+  /**
+   * 
+   * Uses Ed25519 to generate a private key; see {@link Ed25519.generatePrivateKey()}
+   * @param privKey the private key to generate the public key from
+   * @returns the public key object; see {@link Jwk}
+   */
+  public async computeDidJwkPublicKey(privKey: string): Promise<Jwk> {
     try {
-      const key = { ...JWK_PRIVATE_KEY_FORMAT, d: privKey }
+      const key = { ...JWK_PRIVATE_KEY_FORMAT, d: privKey } as Jwk;
       const keyPair = await Ed25519.computePublicKey({ key });
       return { ...keyPair, x: keyPair.x }
     } catch (error: any) {
-      console.error('DidManager', 'genPubFromPriv', error);
-      throw new DcxServerError('Failed to compute public key', error);
+      console.error('computeDidJwkPublicKey', error);
+      throw new DcxDidError('Failed to compute public key', this.did);
     }
   }
 
@@ -84,8 +84,8 @@ export class DidManager extends DidImporter {
       const didResolution = await DidDht.resolve(this.did ?? didUri);
       return didResolution.didDocument;
     } catch (error) {
-      console.error('DidManager', 'resolveDid', error);
-      throw new DcxServerError('Failed to resolve didDocument using didUri', error);
+      console.error('resolveDid', error);
+      throw new DcxDidError('Failed to resolve didDocument using didUri', this.did);
     }
   }
 
@@ -101,8 +101,8 @@ export class DidManager extends DidImporter {
       this.portableDid = await this.exportPortableDid(this.bearerDid);
       return this.bearerDid;
     } catch (error: any) {
-      console.error('DidManager', 'createBearerDid', error);
-      throw new DcxServerError('Failed to create bearerDid', error);
+      console.error('createBearerDid', error);
+      throw new DcxDidError('Failed to create bearerDid', this.did);
     }
   }
 
@@ -118,10 +118,10 @@ export class DidManager extends DidImporter {
       this.portableDid = await bearerDid.export();
       return this.portableDid
     } catch (error: any) {
-      console.error('DidManager', 'exportPortableDid', error);
-      throw new DcxServerError('Failed to export portableDid to bearerDid', error);
+      console.error('exportPortableDid', error);
+      throw new DcxDidError('Failed to export portableDid to bearerDid', this.did);
     }
   }
 }
 
-export const didManager = new DidManager();
+export const didManager = new DidDcxManager();

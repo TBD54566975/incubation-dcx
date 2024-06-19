@@ -301,8 +301,8 @@ export class DcxServer {
             const { web5, did, recoveryPhrase: seed, agent } = await this.setupDcxServer();
 
             console.log("DCX server setup complete, polling for incoming records ...");
-            let cursor = await readFileToJSON(this.config.DWN_CURSOR_FILEPATH);
-            let lastRecordId = await readFileToString(this.config.DWN_LAST_RECORD_ID_FILEPATH);
+            let cursor = await readFileToJSON(this.config.DWN_CURSOR);
+            let lastRecordId = await readFileToString(this.config.DWN_LAST_RECORD_ID);
 
             while (true) {
                 const { records = [], cursor: nextCursor } = await web5.dwn.records.query({
@@ -344,7 +344,7 @@ export class DcxServer {
                             console.log('Skipped message with protocol path', record.protocolPath);
                         }
                         lastRecordId = record.id;
-                        if (!!lastRecordId) await writeFile(config.DWN_LAST_RECORD_ID_FILEPATH, lastRecordId);
+                        if (!!lastRecordId) await writeFile(config.DWN_LAST_RECORD_ID, lastRecordId);
                     } else {
                         await Time.sleep();
                     }
@@ -353,7 +353,7 @@ export class DcxServer {
                 if (nextCursor) {
                     console.log('Updated cursor for next query', nextCursor);
                     cursor = nextCursor;
-                    await writeFile(config.DWN_CURSOR_FILEPATH, cursor);
+                    await writeFile(config.DWN_CURSOR, cursor);
                 }
 
                 if (!recordReads.length) {

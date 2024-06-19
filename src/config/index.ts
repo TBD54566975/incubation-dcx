@@ -1,25 +1,26 @@
 import dotenv from 'dotenv';
-import { DcxServerError } from '../utils/error.js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { DcxServerError } from '../utils/error.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const CWD = process.cwd();
+
 dotenv.config();
 
 export class Config {
   public PORT = process.env.PORT || 3000;
   public EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
   public EXTERNAL_HOSTNAME = process.env.EXTERNAL_HOSTNAME || 'localhost';
-  public SERVICE_NAME = process.env.SERVICE_NAME || 'dcx';
+  public SERVICE_NAME = process.env.SERVICE_NAME || 'decentralized credential exchange';
+  public SERVICE_ID = process.env.SERVICE_ID || 'dcx';
+  public DWN_LAST_RECORD_ID = `${__dirname}/lastRecordId`;
+  public DWN_CURSOR = `${__dirname}/cursor.json`;
 
-  public DHT_GATEWAY_ENDPOINT = process.env.DHT_GATEWAY_ENDPOINT || 'https://dht.formfree.com:8305/';
+  public DHT_GATEWAY_ENDPOINT = process.env.DHT_GATEWAY_ENDPOINT || 'https://dev.dht.formfree.com:8305/';
   public DCX_DID_URI = process.env.DCX_DID_URI || '';
   public DCX_DID_FILEPATH = process.env.DCX_DID_FILEPATH || '';
-  public DWN_ENDPOINTS = process.env.DWN_ENDPOINTS?.split(',') || ['https://dwn.formfree.com/'];
-  public DWN_LAST_RECORD_ID_FILEPATH = `${__dirname}/lastRecordId`;
-  public DWN_CURSOR_FILEPATH = `${__dirname}/cursor.json`;
+  public DWN_ENDPOINTS = process.env.DWN_ENDPOINTS?.split(',') || ['https://dev.dwn.formfree.com/'];
 
   public VC_DATA_PROVIDER = process.env.VC_DATA_PROVIDER || '';
   public VC_ID = process.env.VC_ID || 'dcx-verifiable-credential';
