@@ -27,18 +27,18 @@ export type VerifiablePresentation = {
 export type VcRequestBody = { validInputVcs: VerifiableCredential[] } | null;
 
 export type DcxServerUse = {
-    manifest?: string,
+    manifest?: any,
     config?: string | DcxServerConfig,
     [key: string]: any
 }
 export type DcxServerOptions = {
-    web5: Web5;
-    did: string;
-    agent: Web5UserAgent;
-    manifest: string;
-    config: DcxServerConfig;
+    initialization?: boolean;
+    web5?: Web5;
+    did?: string;
+    agent?: Web5UserAgent;
+    manifest?: string;
+    config?: DcxServerConfig;
 };
-
 export type ManifestOutputDescriptor = {
     id: string;
     name: string;

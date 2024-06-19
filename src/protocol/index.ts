@@ -1,8 +1,8 @@
 
 export * from "./handlers/dcx.js";
 
-import Manifest from './manifests/EXAMPLE-MANIFEST.json';
-export { Manifest };
+import ExampleManifest from './manifests/EXAMPLE-MANIFEST.json';
+export { ExampleManifest };
 
 export { schema as presentationSchema } from './schemas/application.js';
 export { schema as responseSchema } from './schemas/response.js';

@@ -3,8 +3,17 @@ dist
 db-data
 /DATA
 .DS_Store
-keys.json
-.env
+
 cursor.json
 lastRecordId
 local-test.ts
+
+# Secrets
+.env
+key.json
+did.json
+keys.json
+web5.seed
+cipher.key
+*.seed
+*.key

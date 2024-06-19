@@ -9,13 +9,14 @@ import { DwnResponseStatus } from '@web5/agent';
 import { config, type DcxServerConfig, config as defaultConfig } from '../config/index.js';
 import { credentialIssuerProtocol, DcxHandlers, manifestSchema } from '../protocol/index.js';
 import ExampleManifest from '../protocol/manifests/EXAMPLE-MANIFEST.json';
-import { DcxServerOptions, DcxServerUse, Manifest } from '../types/dcx.js';
-import { CIPHER_KEY_WARNING, DWN_PASSWORD_WARNING, DWN_RECOVERY_PHRASE_WARNING } from '../utils/constants.js';
+import { DcxServerOptions, Manifest } from '../types/dcx.js';
+import { CIPHER_KEY_WARNING, WEB5_CONNECT_PASSWORD_WARNING, WEB5_CONNECT_RECOVERY_PHRASE_WARNING } from '../utils/constants.js';
 import { didManager } from '../utils/did-manager.js';
 import { DcxDwnError, DcxServerError } from '../utils/error.js';
 import { readFileToJSON, readFileToString } from '../utils/file-system.js';
 import { stringify } from '../utils/json.js';
 import { Time } from '../utils/time.js';
+
 const defaultWeb5Options = {
     sync: 'off',
     techPreview: {
@@ -23,28 +24,31 @@ const defaultWeb5Options = {
     },
 }
 
-export class DcxServerConfigurer {
-    web5: Web5;
-    did: string;
-    agent: Web5UserAgent;
-    manifest: string;
+export class DcxServer {
+    initialization: boolean;
+    web5?: Web5;
+    did?: string;
+    agent?: Web5UserAgent;
+    manifest?: string;
     config: DcxServerConfig;
 
-    constructor(options: DcxServerOptions) {
+    constructor(options: DcxServerOptions = {}) {
+        this.initialization = options.initialization ?? true;
         this.config = options.config ?? defaultConfig;
         this.web5 = options.web5;
-        this.did = options.did;
-        this.agent = options.agent;
+        this.did = options.did ?? config.DCX_DID_URI;
         this.manifest = options.manifest;
+        this.agent = options.agent;
     }
-    use(name: string, value: DcxServerUse): void {
+
+    use(name: string, value: { [key: string]: any }): void {
         (this as any)[name] = value?.[name];
+        console.log("use name value", name, value?.[name]);
+        console.log("use this", this);
     }
-}
-export class DcxServer extends DcxServerConfigurer {
 
     async createDwnPassword(): Promise<string> {
-        console.warn(DWN_PASSWORD_WARNING)
+        console.warn(WEB5_CONNECT_PASSWORD_WARNING)
         const mnemonic = generateMnemonic(128).split(' ');
         const words: string[] = [];
         for (let i = 0; i < 6; i++) {
@@ -52,17 +56,17 @@ export class DcxServer extends DcxServerConfigurer {
             words.push(mnemonic[rand]);
         }
         const password = words.join(' ');
-        this.config.DWN_PASSWORD = password;
+        this.config.WEB5_CONNECT_PASSWORD = password;
         await writeFile("dwn-password.txt", password);
         return password;
     }
 
     async initWeb5(): Promise<Web5ConnectResult & { agent: Web5UserAgent }> {
-        console.info(DWN_RECOVERY_PHRASE_WARNING);
+        console.info(WEB5_CONNECT_RECOVERY_PHRASE_WARNING);
         const agentDid = await didManager.createBearerDid({ gatewayUri: this.config.DHT_GATEWAY_ENDPOINT })
         const agent = await Web5UserAgent.create({ agentDid });
-        const recoveryPhrase = await agent.initialize({ password: this.config.DWN_PASSWORD });
-        this.config.DWN_RECOVERY_PHRASE = recoveryPhrase;
+        const recoveryPhrase = await agent.initialize({ password: this.config.WEB5_CONNECT_PASSWORD });
+        this.config.WEB5_CONNECT_RECOVERY_PHRASE = recoveryPhrase;
         await writeFile("dwn-recovery-phrase.txt", recoveryPhrase);
         await writeFile("dcx-issuer-did.json", stringify(agentDid));
         const response = await Web5.connect({
@@ -70,21 +74,21 @@ export class DcxServer extends DcxServerConfigurer {
             agent,
             recoveryPhrase,
             connectedDid: agentDid.uri,
-            password: this.config.DWN_PASSWORD,
+            password: this.config.WEB5_CONNECT_PASSWORD,
         });
         return { ...response, agent };
     }
 
     async startWeb5(): Promise<Web5ConnectResult & { agent: Web5UserAgent }> {
-        const did = await readFileToJSON(this.config.DCX_ISSUER_DID_FILEPATH);
+        const did = await readFileToJSON(this.config.DCX_DID_FILEPATH);
         const agentDid = await didManager.importPortableDid(did)
         const agent = await Web5UserAgent.create({ agentDid });
-        await agent.start({ password: this.config.DWN_PASSWORD });
+        await agent.start({ password: this.config.WEB5_CONNECT_PASSWORD });
         const response = await Web5.connect({
             ...defaultWeb5Options,
             agent,
             connectedDid: agentDid.uri,
-            recoveryPhrase: this.config.DWN_RECOVERY_PHRASE,
+            recoveryPhrase: this.config.WEB5_CONNECT_RECOVERY_PHRASE,
         });
         return { ...response, agent };
     }
@@ -92,27 +96,34 @@ export class DcxServer extends DcxServerConfigurer {
     /**
      * @summary Sets up the DCX server
      */
-    async setupDcxServer(): Promise<boolean> {
+    async setupDcxServer(): Promise<any> {
         /**
          * 
-         * If no DWN_PASSWORD set, warn user and create one
+         * If no WEB5_CONNECT_PASSWORD set, warn user and create one
          * Else continue
          * 
-         * If no DWN_RECOVERY_PHRASE set, warn user, create new did, initialize new agent and start web5 connection
+         * If no WEB5_CONNECT_RECOVERY_PHRASE set, warn user, create new did, initialize new agent and start web5 connection
          * Else read and import did from local file, 
          */
-        const DWN_RECOVERY_PHRASE = this.config.DWN_RECOVERY_PHRASE
-        const DCX_ISSUER_DID_FILEPATH = this.config.DCX_ISSUER_DID_FILEPATH
+        const DCX_DID_URI = this.config.DCX_DID_URI
+        const DCX_DID_JWK_D = this.config.DCX_DID_JWK_D
+        const DCX_DID_FILEPATH = this.config.DCX_DID_FILEPATH
 
-        if (!(DWN_RECOVERY_PHRASE && DCX_ISSUER_DID_FILEPATH)) {
-            throw new DcxServerError('DWN_RECOVERY_PHRASE and DCX_ISSUER_DID_FILEPATH cannot both be undefined', null)
+        if (!(DCX_DID_URI && DCX_DID_JWK_D && DCX_DID_FILEPATH)) {
+
         }
 
-        if (!this.config.DWN_PASSWORD) {
+        if (!DCX_DID_URI) {
+            const didDocument = await didManager.resolveDid(this.config.DCX_DID_URI);
+            console.log('Resolved didDocument', didDocument);
+            didManager.computeDidJwkPublicKey(this.config.DCX_DID_JWK_D)
+        }
+
+        if (!this.config.WEB5_CONNECT_PASSWORD) {
             await this.createDwnPassword();
         }
 
-        const { web5, did, recoveryPhrase: seed, agent } = !this.config.DWN_RECOVERY_PHRASE ? await this.initWeb5() : await this.startWeb5();
+        const { web5, did, recoveryPhrase: seed, agent } = !this.config.WEB5_CONNECT_RECOVERY_PHRASE ? await this.initWeb5() : await this.startWeb5();
 
         this.web5 = web5;
         this.did = did;
@@ -130,31 +141,31 @@ export class DcxServer extends DcxServerConfigurer {
             await writeFile("cipher-key.txt", this.config.CIPHER_KEY.toString('base64'));
         }
 
-        const { status, protocols } = await this.queryDcxIssuerProtocol();
+        const { status, protocols } = await this.queryDcxIssuerProtocol(web5, did);
         console.log(`DWN credential-issuer protocol query status ${status}`);
         if (!protocols.length) {
             console.log('No credential-issuer protocol in DWN. Configuring credential-issuer protocol ...');
-            const result = await this.configureDcxIssuerProtocol();
+            const result = await this.configureDcxIssuerProtocol(web5, did);
             console.log('Credential-issuer protocol configured in DWN', result);
         }
 
-        const manifestRecords = await this.queryDcxIssuerManifest();
-        const missingManifests = await this.findUnwrittenManifests(manifestRecords);
+        const manifestRecords = await this.queryDcxIssuerManifest(web5, did);
+        const missingManifests = await this.findUnwrittenManifests(web5, did, manifestRecords);
         if (!!missingManifests.length) {
             const manifestWrites: (Record | undefined)[] = await Promise.all(
-                missingManifests.map(async (unwrittenManifest: Manifest) => await this.createMissingManifests(unwrittenManifest))
+                missingManifests.map(async (unwrittenManifest: Manifest) => await this.createMissingManifests(web5, did, unwrittenManifest))
             );
             console.log(`Wrote ${manifestWrites.length} manifests`);
         }
-        return true;
+        return { web5, did, recoveryPhrase: seed, agent };
     }
 
     /**
      * 
      * @returns DWN response status object; see {@link DwnResponseStatus}
      */
-    async configureDcxIssuerProtocol(): Promise<DwnResponseStatus> {
-        const { status: configure, protocol } = await this.web5.dwn.protocols.configure({
+    async configureDcxIssuerProtocol(web5: Web5, did: string): Promise<DwnResponseStatus> {
+        const { status: configure, protocol } = await web5.dwn.protocols.configure({
             message: { definition: credentialIssuerProtocol },
         });
         if (configure.code < 200 || configure.code >= 300) {
@@ -169,7 +180,7 @@ export class DcxServer extends DcxServerConfigurer {
         }
         console.log('Configured credential issuer protocol', protocol);
 
-        const { status: send } = await protocol.send(this.did) ?? {};
+        const { status: send } = await protocol.send(did) ?? {};
         if (send.code < 200 || send.code >= 300) {
             const { code, detail } = send;
             console.error('configureDcxIssuerProtocol send.code < 200 || send.code >= 300', send);
@@ -183,10 +194,10 @@ export class DcxServer extends DcxServerConfigurer {
     * 
     * @returns DWN response status object; see {@link ProtocolsQueryResponse}
     */
-    async queryDcxIssuerProtocol(): Promise<ProtocolsQueryResponse> {
+    async queryDcxIssuerProtocol(web5: Web5, did: string): Promise<ProtocolsQueryResponse> {
         // Query DWN for credential-issuer protocol
-        const { status: query, protocols = [] } = await this.web5.dwn.protocols.query({
-            from: this.did,
+        const { status: query, protocols = [] } = await web5.dwn.protocols.query({
+            from: did,
             message: {
                 filter: {
                     protocol: credentialIssuerProtocol.protocol,
@@ -202,9 +213,9 @@ export class DcxServer extends DcxServerConfigurer {
         return { status: query, protocols };
     }
 
-    async queryDcxIssuerManifest(): Promise<Record[]> {
-        const { records: manifestRecords = [] } = await this.web5.dwn.records.query({
-            from: this.did,
+    async queryDcxIssuerManifest(web5: Web5, did: string): Promise<Record[]> {
+        const { records: manifestRecords = [] } = await web5.dwn.records.query({
+            from: did,
             message: {
                 filter: {
                     schema: manifestSchema.$id,
@@ -223,11 +234,11 @@ export class DcxServer extends DcxServerConfigurer {
      * @param manifestRecords 
      * @returns List of DWN record objects; see {@link Record}
      */
-    async findUnwrittenManifests(manifestRecords: Record[]): Promise<Manifest[]> {
+    async findUnwrittenManifests(web5: Web5, did: string, manifestRecords: Record[]): Promise<Manifest[]> {
         const manifestsRead = await Promise.all(
             manifestRecords.map(async (manifestRecord) => {
-                const { record } = await this.web5.dwn.records.read({
-                    from: this.did,
+                const { record } = await web5.dwn.records.read({
+                    from: did,
                     message: {
                         filter: {
                             recordId: manifestRecord.id,
@@ -249,9 +260,9 @@ export class DcxServer extends DcxServerConfigurer {
         return missingManifests;
     }
 
-    async createMissingManifests(unwrittenManifest: Manifest) {
-        unwrittenManifest.issuer.id = this.did;
-        const { record } = await this.web5.dwn.records.create({
+    async createMissingManifests(web5: Web5, did: string, unwrittenManifest: Manifest) {
+        unwrittenManifest.issuer.id = did;
+        const { record } = await web5.dwn.records.create({
             store: false,
             data: unwrittenManifest,
             message: {
@@ -287,18 +298,15 @@ export class DcxServer extends DcxServerConfigurer {
      */
     async start(): Promise<void> {
         try {
-            const success = await this.setupDcxServer();
-            if (!success) {
-                throw new DcxServerError('Failed to setup DCX server', null);
-            }
+            const { web5, did, recoveryPhrase: seed, agent } = await this.setupDcxServer();
 
             console.log("DCX server setup complete, polling for incoming records ...");
             let cursor = await readFileToJSON(this.config.DWN_CURSOR_FILEPATH);
             let lastRecordId = await readFileToString(this.config.DWN_LAST_RECORD_ID_FILEPATH);
 
             while (true) {
-                const { records = [], cursor: nextCursor } = await this.web5.dwn.records.query({
-                    from: this.did,
+                const { records = [], cursor: nextCursor } = await web5.dwn.records.query({
+                    from: did,
                     message: {
                         filter: {
                             protocol: credentialIssuerProtocol.protocol,
@@ -315,9 +323,9 @@ export class DcxServer extends DcxServerConfigurer {
                 }
 
                 const recordReads = await Promise.all(
-                    records.map(async (recordResponse) => {
-                        const { record } = await this.web5.dwn.records.read({
-                            from: this.did,
+                    records.map(async (recordResponse: { id: any; }) => {
+                        const { record } = await web5.dwn.records.read({
+                            from: did,
                             message: {
                                 filter: {
                                     recordId: recordResponse.id,
@@ -331,12 +339,12 @@ export class DcxServer extends DcxServerConfigurer {
                 for (const record of recordReads) {
                     if (record.id != lastRecordId) {
                         if (record.protocolPath === 'application') {
-                            await DcxHandlers.processApplicationRecord(this.web5, this.agent.agentDid, record);
+                            await DcxHandlers.processApplicationRecord(web5, agent.agentDid, record);
                         } else {
                             console.log('Skipped message with protocol path', record.protocolPath);
                         }
                         lastRecordId = record.id;
-                        await writeFile(config.DWN_LAST_RECORD_ID_FILEPATH, lastRecordId);
+                        if (!!lastRecordId) await writeFile(config.DWN_LAST_RECORD_ID_FILEPATH, lastRecordId);
                     } else {
                         await Time.sleep();
                     }
@@ -358,4 +366,3 @@ export class DcxServer extends DcxServerConfigurer {
         }
     }
 }
-

@@ -1,6 +1,7 @@
 import { PortableDid, BearerDid, DidDht, DidDhtCreateOptions, DidDocument } from '@web5/dids';
 import { readFile } from 'fs/promises';
 import { DcxServerError } from './error.js';
+import { Ed25519, Jwk } from '@web5/crypto';
 
 type DidManagerOptions = {
   did?: string;
@@ -54,7 +55,24 @@ export class DidImporter {
   }
 }
 
+export const JWK_PRIVATE_KEY_FORMAT = {
+  crv: "Ed25519",
+  kty: "OKP",
+  x: "",
+} as Jwk;
 export class DidManager extends DidImporter {
+
+  public async computeDidJwkPublicKey(privKey: string): Promise<typeof JWK_PRIVATE_KEY_FORMAT> {
+    try {
+      const key = { ...JWK_PRIVATE_KEY_FORMAT, d: privKey }
+      const keyPair = await Ed25519.computePublicKey({ key });
+      return { ...keyPair, x: keyPair.x }
+    } catch (error: any) {
+      console.error('DidManager', 'genPubFromPriv', error);
+      throw new DcxServerError('Failed to compute public key', error);
+    }
+  }
+
   /**
    * 
    * Uses DidDht and a didUri to resolve the corresponding didDocument; see {@link DidDht.resolve()}

@@ -4,3 +4,5 @@ type JSONStringifyOptions = {
 }
 
 export const stringify = (obj: any, options: JSONStringifyOptions = { space: 2 }) => JSON.stringify(obj, options.replacer, options.space)
+
+export const parse = (strObj: string) => JSON.parse(strObj);
