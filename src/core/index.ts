@@ -1,69 +1,29 @@
 import crypto from 'crypto';
 
-import { ProtocolsQueryResponse, RecordsQueryResponse, Web5, Web5ConnectResult, Record } from '@web5/api';
+import { ProtocolsQueryResponse, Record, Web5, Web5ConnectResult } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
 import { writeFile } from 'fs/promises';
 
+import { DwnResponseStatus } from '@web5/agent';
 import { config, type DcxServerConfig, config as defaultConfig } from '../config/index.js';
 import { credentialIssuerProtocol, DcxHandlers, manifestSchema } from '../protocol/index.js';
 import ExampleManifest from '../protocol/manifests/EXAMPLE-MANIFEST.json';
+import { DcxServerOptions, DcxServerUse, Manifest } from '../types/dcx.js';
 import { CIPHER_KEY_WARNING, DWN_PASSWORD_WARNING, DWN_RECOVERY_PHRASE_WARNING } from '../utils/constants.js';
 import { didManager } from '../utils/did-manager.js';
 import { DcxDwnError, DcxServerError } from '../utils/error.js';
 import { readFileToJSON, readFileToString } from '../utils/file-system.js';
 import { stringify } from '../utils/json.js';
 import { Time } from '../utils/time.js';
-import { DcxServerOptions, DcxServerUse } from '../types/dcx.js';
-import { DwnResponseStatus } from '@web5/agent';
 const defaultWeb5Options = {
     sync: 'off',
     techPreview: {
         dwnEndpoints: config.DWN_ENDPOINTS
     },
 }
-type ManifestOutputDescriptor = {
-    id: string;
-    name: string;
-    schema: string;
-}
-type ManifestFormat = { jwt_vc: { alg: string[]; }; }
-type ManifestIssuer = {
-    id: string;
-    name: string;
-};
-type Filter = {
-    type: string;
-    pattern: string;
-};
-type Field = {
-    path: string[];
-    filter?: Filter;
-};
-type Constraint = {
-    fields: Field[];
-};
-type InputDescriptor = {
-    id: string;
-    purpose: string;
-    constraints: Constraint;
-};
-type PresentationDefinition = {
-    id: string;
-    input_descriptors: InputDescriptor[];
-};
-type Manifest = {
-    id: string;
-    name: string;
-    description: string;
-    spec_version: string;
-    issuer: ManifestIssuer;
-    output_descriptors: ManifestOutputDescriptor[];
-    format: ManifestFormat;
-    presentation_definition: PresentationDefinition
-}
-type DcxCredentialIssuerManifestSchema = typeof manifestSchema;
-export class DcxServer {
+
+export class DcxServerConfigurer {
     web5: Web5;
     did: string;
     agent: Web5UserAgent;
@@ -77,10 +37,11 @@ export class DcxServer {
         this.agent = options.agent;
         this.manifest = options.manifest;
     }
-
     use(name: string, value: DcxServerUse): void {
         (this as any)[name] = value?.[name];
     }
+}
+export class DcxServer extends DcxServerConfigurer {
 
     async createDwnPassword(): Promise<string> {
         console.warn(DWN_PASSWORD_WARNING)
@@ -397,3 +358,4 @@ export class DcxServer {
         }
     }
 }
+
