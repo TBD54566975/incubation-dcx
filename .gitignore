@@ -9,6 +9,7 @@ lastRecordId
 local-test.ts
 
 # Secrets
+CUSTOM-MANIFEST.json
 .env
 key.json
 did.json
