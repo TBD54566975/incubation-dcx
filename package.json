@@ -1,20 +1,22 @@
 {
   "name": "dcx",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Decentralized Credential Exchange: DWN protocol definition for verifiable credential exchange using credential manifests",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "gen-cpr-key": "openssl rand -base64 32",
+    "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
     "test": "echo TODO && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc",
+    "build:dev": "npm run build && npm run dev",
     "build": "npm run clean && npm run build:esm",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "dev": "tsx dist/esm/index.js"
+    "dev": "tsx dist/esm/index.js",
+    "format": "npx prettier --write ./src/**/**/**/*"
   },
   "homepage": "https://github.com/TBD54566975/incubation-tblend#readme",
   "bugs": "https://github.com/TBD54566975/incubation-tblend/issues",
@@ -79,7 +81,9 @@
     "@web5/identity-agent": "^0.3.8",
     "@web5/proxy-agent": "^0.3.8",
     "@web5/user-agent": "^0.3.8",
-    "dotenv": "^16.4.5"
+    "bip39": "^3.1.0",
+    "dotenv": "^16.4.5",
+    "prettier": "^3.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",

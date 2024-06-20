@@ -11,7 +11,7 @@ export async function readFileToString(filepath: string) {
     console.log(`Loaded data from ${filepath}`, data);
     return data.toString();
   } catch (error) {
-    console.error("failed to readFileToString", error);
+    console.error('failed to readFileToString', error);
   }
 }
 
@@ -24,6 +24,6 @@ export async function readFileToJSON(filepath: string) {
     console.log(`Loaded data from ${filepath}`, data);
     return JSON.parse(data);
   } catch (error: any) {
-    console.error("failed to readFileToJSON", error);
+    console.error('failed to readFileToJSON', error);
   }
 }
