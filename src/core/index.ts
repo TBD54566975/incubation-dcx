@@ -1,2 +1,2 @@
-export * from "./dcx-dwn.js";
-export * from "./dcx-server.js";
+export * from './dwn-manager.js';
+export * from './dcx-server.js';

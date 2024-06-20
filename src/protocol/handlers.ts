@@ -7,8 +7,13 @@ import {
 } from '@web5/credentials';
 import { BearerDid, DidDht } from '@web5/dids';
 
-import { dcxEnvConfig } from '../config/env-config.js';
-import { AdditionalProperties, CredentialManifest, TrustedIssuer, VcRequestBody } from '../types/dcx.js';
+import { dcxEnvConfig } from '../config/env.js';
+import {
+  AdditionalProperties,
+  CredentialManifest,
+  TrustedIssuer,
+  VcRequestBody,
+} from '../types/dcx.js';
 import { stringify } from '../utils/json.js';
 import { credentialIssuerProtocol, responseSchema } from './index.js';
 import { handleAsyncErrors } from '../utils/error.js';
@@ -17,26 +22,35 @@ type VcVerificationResponse = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
-}
+};
 
-type VcIssuanceDids = { issuerDid: BearerDid, subjectDid: string }
+type VcIssuanceDids = { issuerDid: BearerDid; subjectDid: string };
 export class DcxProtocolHandlers {
   /**
-   * 
+   *
    * Processes a DCX application record
    * @param web5 web5 api object; see {@link Web5}
    * @param bearerDid bearer did object; see {@link BearerDid}
    * @param record Dwn record object; see {@link Record}a
    */
   @handleAsyncErrors
-  static async processDcxApplication(web5: Web5, bearerDid: BearerDid, record: Record, manifest: CredentialManifest) {
+  static async processDcxApplication(
+    web5: Web5,
+    bearerDid: BearerDid,
+    record: Record,
+    manifest: CredentialManifest,
+  ) {
     console.log('Process record', stringify(record));
     // applications are JSON VP
     const vp: VerifiablePresentation = await record.data.json();
     console.log('Presentation', stringify(vp));
     const recordAuthor = record.protocolPath;
     await this.verifyCredentials(vp, recordAuthor);
-    const response = await this.issueVC({ issuerDid: bearerDid, subjectDid: recordAuthor }, vp, manifest);
+    const response = await this.issueVC(
+      { issuerDid: bearerDid, subjectDid: recordAuthor },
+      vp,
+      manifest,
+    );
     const { record: postRecord, status: createStatus } = await web5.dwn.records.create({
       store: false,
       data: response,
@@ -51,15 +65,17 @@ export class DcxProtocolHandlers {
     console.log('Sent reply to remote:', replyStatus, createStatus);
   }
 
-
   /**
    *
    * @param vp Dcx application VCs for review and verification; see {@link VerifiablePresentation}
    * @param recordAuthor Dwn Record author; see {@link Record.author}
    */
   @handleAsyncErrors
-  static async verifyCredentials(vp: VerifiablePresentation, recordAuthor?: string): Promise<VcVerificationResponse[]> {
-    const verifications = []
+  static async verifyCredentials(
+    vp: VerifiablePresentation,
+    recordAuthor?: string,
+  ): Promise<VcVerificationResponse[]> {
+    const verifications = [];
     const credentials = vp.verifiableCredential;
     for (const credentialJWT of credentials) {
       // if the request author is provided, make sure credential subject matches
@@ -75,8 +91,8 @@ export class DcxProtocolHandlers {
           );
         }
       }
-      const verify = await VerifiableCredential.verify({ vcJwt: credentialJWT })
-      verifications.push(verify)
+      const verify = await VerifiableCredential.verify({ vcJwt: credentialJWT });
+      verifications.push(verify);
     }
     return verifications;
   }
@@ -90,7 +106,11 @@ export class DcxProtocolHandlers {
    */
 
   @handleAsyncErrors
-  static async issueVC(vcIssuanceDids: VcIssuanceDids, vp: VerifiablePresentation, credentialManifest: CredentialManifest) {
+  static async issueVC(
+    vcIssuanceDids: VcIssuanceDids,
+    vp: VerifiablePresentation,
+    credentialManifest: CredentialManifest,
+  ) {
     // filter valid creds
     console.log('Verifiable Presentation', stringify(vp));
     const selectedVcJwts: string[] = PresentationExchange.selectCredentials({

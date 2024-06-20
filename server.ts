@@ -1,5 +1,6 @@
-import { server } from "./src/index";
-import CustomManifest from "./CUSTOM-MANIFEST.json";
+import { DcxServer } from './src/index';
+import CustomManifest from './CUSTOM-MANIFEST.json';
 
-server.use("manifest", CustomManifest);
+const server = new DcxServer({ needWeb5Init: true });
+server.useManifest('customManifest', CustomManifest);
 server.start();

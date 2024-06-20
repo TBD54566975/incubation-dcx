@@ -2,23 +2,26 @@
     "compilerOptions": {
         "lib": [
             "DOM",
-            "ES2022"
+            "ES6",
         ],
+        "rootDir": ".",
+        "module": "ESNext",
+        "target": "ES2020",
+        "moduleResolution": "Node",
         "allowJs": true,
         "strict": true,
         "declaration": true,
         "declarationMap": true,
-        "target": "ES6",
-        "module": "NodeNext",
         "sourceMap": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "moduleResolution": "NodeNext",
         "declarationDir": "dist/types",
         "outDir": "dist/esm",
     },
     "include": [
-        "src",
+        "./src/**/*.ts",
+        "./tests",
+        "./src/types",
         "./src/index.ts",
     ],
     "exclude": [

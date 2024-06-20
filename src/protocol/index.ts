@@ -1,4 +1,3 @@
-
 import ExampleManifest from './manifests/EXAMPLE-MANIFEST.json';
 export { ExampleManifest };
 

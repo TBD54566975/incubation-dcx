@@ -1,9 +1,5 @@
 import dotenv from 'dotenv';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { __dirname } from '../utils/path.js';
 
 dotenv.config();
 
@@ -28,11 +24,11 @@ export class DcxEnvConfig {
   public VC_DATA_PROVIDER_ENDPOINT = process.env.VC_DATA_PROVIDER_ENDPOINT || '';
   public VC_TRUSTED_ISSUERS = (process.env.VC_TRUSTED_ISSUERS &&
     JSON.parse(process.env.VC_TRUSTED_ISSUERS)) || [
-    {
-      name: 'mx',
-      did: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
-    },
-  ];
+      {
+        name: 'mx',
+        did: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
+      },
+    ];
 
   // Private class variables
   private _CIPHER_KEY: Buffer;

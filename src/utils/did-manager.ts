@@ -5,10 +5,10 @@ import {
   DidDhtCreateOptions,
   DidRegistrationResult,
   DidResolutionResult,
-  PortableDid
+  PortableDid,
 } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { dcxEnvConfig } from '../config/env-config.js';
+import { dcxEnvConfig } from '../config/env.js';
 import { DidManagerConfig, JWK_PRIVATE_KEY_FORMAT } from '../types/did.js';
 import { handleAsyncErrors } from './error.js';
 
@@ -25,13 +25,15 @@ export class DidManagerBuilder {
 }
 export class DidUtil extends DidManagerBuilder {
   /**
-  *
-  * Uses Ed25519 to generate a private key; see {@link Ed25519.computePublicKey()}
-  * @param privKey the private key to generate the public key from
-  * @returns Jwk; see {@link Jwk}
-  */
+   *
+   * Uses Ed25519 to generate a private key; see {@link Ed25519.computePublicKey()}
+   * @param privKey the private key to generate the public key from
+   * @returns Jwk; see {@link Jwk}
+   */
   @handleAsyncErrors
-  public static async computeDidJwkPublicKey(privKey: string): Promise<Jwk | void | TypedPropertyDescriptor<any>> {
+  public static async computeDidJwkPublicKey(
+    privKey: string,
+  ): Promise<Jwk | void | TypedPropertyDescriptor<any>> {
     const key = { ...JWK_PRIVATE_KEY_FORMAT, d: privKey } as Jwk;
     const keyPair = await Ed25519.computePublicKey({ key });
     return { ...keyPair, x: keyPair.x } as Jwk;
@@ -62,12 +64,14 @@ export class DidUtil extends DidManagerBuilder {
 
 export class DidManager extends DidUtil {
   /**
- *
- * @param gatewayUri the uri of the gateway to publish the did to
- * @returns DidRegistrationResult; see {@link DidRegistrationResult}
- */
+   *
+   * @param gatewayUri the uri of the gateway to publish the did to
+   * @returns DidRegistrationResult; see {@link DidRegistrationResult}
+   */
   @handleAsyncErrors
-  public async publishDidDoc(gatewayUri: string = dcxEnvConfig.DHT_GATEWAY_ENDPOINT): Promise<DidRegistrationResult> {
+  public async publishDidDoc(
+    gatewayUri: string = dcxEnvConfig.DHT_GATEWAY_ENDPOINT,
+  ): Promise<DidRegistrationResult> {
     return await DidDht.publish({ did: this.bearerDid, gatewayUri });
   }
 
