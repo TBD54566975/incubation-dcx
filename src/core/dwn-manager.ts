@@ -20,7 +20,6 @@ export class DwnManager {
    * Configure credential issuer protocol in DWN
    * @returns DwnResponseStatus; see {@link DwnResponseStatus}
    */
-  @handleDwnErrors
   async configureDcxIssuerProtocol(): Promise<DwnResponseStatus> {
     const { status: configure, protocol } = await this.web5.dwn.protocols.configure({
       message: { definition: credentialIssuerProtocol },
@@ -55,7 +54,6 @@ export class DwnManager {
    * Query credential issuer protocol in DWN
    * @returns ProtocolsQueryResponse; see {@link ProtocolsQueryResponse}
    */
-  @handleDwnErrors
   async queryDcxIssuerProtocol(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-issuer protocol
     const { status: query, protocols = [] } = await this.web5.dwn.protocols.query({
@@ -80,7 +78,6 @@ export class DwnManager {
    * Query credential issuer manifest in DWN
    * @returns Record[]; see {@link Record}
    */
-  @handleDwnErrors
   async queryDcxIssuerManifest(): Promise<Record[]> {
     const { records: manifestRecords = [] } = await this.web5.dwn.records.query({
       from: this.did,
@@ -102,8 +99,7 @@ export class DwnManager {
    * @param manifestRecords Record[]; see {@link Record}
    * @returns CredentialManifest[]; see {@link CredentialManifest}
    */
-  @handleDwnErrors
-  async findUnwrittenManifests(manifestRecords: Record[]): Promise<CredentialManifest[]> {
+  async readMissingManifests(manifestRecords: Record[]): Promise<CredentialManifest[]> {
     const manifestsRead = await Promise.all(
       manifestRecords.map(async (manifestRecord) => {
         const { record } = await this.web5.dwn.records.read({
@@ -135,7 +131,6 @@ export class DwnManager {
    * @param unwrittenManifest CredentialManifest; see {@link CredentialManifest}
    * @returns Record; see {@link Record}
    */
-  @handleDwnErrors
   async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<Record> {
     unwrittenManifest.issuer.id = this.did;
     const { record } = await this.web5.dwn.records.create({
@@ -175,9 +170,7 @@ export class DwnManager {
     console.log(`Found ${protocols.length} credential-issuer protocols in DWN`);
 
     if (!protocols.length) {
-      console.log(
-        'No credential-issuer protocol in DWN. Configuring credential-issuer protocol ...',
-      );
+      console.log('No dcx protocol manifests found. Configuring ...');
       const result = await this.configureDcxIssuerProtocol();
       console.log('Credential-issuer protocol configured in DWN', result);
     }
@@ -185,7 +178,7 @@ export class DwnManager {
     const records = await this.queryDcxIssuerManifest();
     console.log(`Found ${records.length} manifests`);
 
-    const unwrittenManifests = await this.findUnwrittenManifests(records);
+    const unwrittenManifests = await this.readMissingManifests(records);
     console.log(`Found ${unwrittenManifests.length} unwritten manifests`);
 
     const createdManifests = await this.createMissingManifests(unwrittenManifests);
