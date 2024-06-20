@@ -1,5 +1,5 @@
 import { VerifiableCredential } from '@web5/credentials';
-import { DcxServerConfig } from '../config/index.js';
+import { DcxServerConfig } from '../config/env-config.js';
 import { manifestSchema } from '../protocol/index.js';
 
 export type TrustedIssuer = { name: string; did: string };

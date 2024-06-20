@@ -41,7 +41,7 @@ export const schema = {
           },
         },
       },
-      description: 'The Verifiable Credentials that represent your bank transactions',
+      description: 'The Verifiable Credentials that represent your application',
     },
     verifiableCredential: {
       type: 'array',

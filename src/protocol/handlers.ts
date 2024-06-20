@@ -1,33 +1,42 @@
 import { Record, Web5 } from '@web5/api';
 import {
   PresentationExchange,
+  VcDataModel,
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
 import { BearerDid, DidDht } from '@web5/dids';
 
-import { dcxEnvConfig } from '../../config/index.js';
-import { AdditionalProperties, TrustedIssuer, VcRequestBody } from '../../types/dcx.js';
-import { stringify } from '../../utils/json.js';
-import { credentialIssuerProtocol, responseSchema } from '../index.js';
+import { dcxEnvConfig } from '../config/env-config.js';
+import { AdditionalProperties, CredentialManifest, TrustedIssuer, VcRequestBody } from '../types/dcx.js';
+import { stringify } from '../utils/json.js';
+import { credentialIssuerProtocol, responseSchema } from './index.js';
+import { handleAsyncErrors } from '../utils/error.js';
 
-import Manifest from '../manifests/EXAMPLE-MANIFEST.json';
+type VcVerificationResponse = {
+  issuer: string;
+  subject: string;
+  vc: VcDataModel;
+}
 
-export class DcxHandlers {
+type VcIssuanceDids = { issuerDid: BearerDid, subjectDid: string }
+export class DcxProtocolHandlers {
   /**
-   *
-   * @param web5
-   * @param bearerDid
-   * @param record
+   * 
+   * Processes a DCX application record
+   * @param web5 web5 api object; see {@link Web5}
+   * @param bearerDid bearer did object; see {@link BearerDid}
+   * @param record Dwn record object; see {@link Record}a
    */
-  static async processApplicationRecord(web5: Web5, bearerDid: BearerDid, record: Record) {
-    console.log('Process message', stringify(record));
+  @handleAsyncErrors
+  static async processDcxApplication(web5: Web5, bearerDid: BearerDid, record: Record, manifest: CredentialManifest) {
+    console.log('Process record', stringify(record));
     // applications are JSON VP
     const vp: VerifiablePresentation = await record.data.json();
     console.log('Presentation', stringify(vp));
-    const requestAuthor = record.author;
-    await this.verifyCredentials(vp, requestAuthor);
-    const response = await this.issueVC(vp, bearerDid, requestAuthor);
+    const recordAuthor = record.protocolPath;
+    await this.verifyCredentials(vp, recordAuthor);
+    const response = await this.issueVC({ issuerDid: bearerDid, subjectDid: recordAuthor }, vp, manifest);
     const { record: postRecord, status: createStatus } = await web5.dwn.records.create({
       store: false,
       data: response,
@@ -38,48 +47,55 @@ export class DcxHandlers {
         protocolPath: 'application/response',
       },
     });
-    const replyStatus = await postRecord?.send(requestAuthor);
+    const replyStatus = await postRecord?.send(recordAuthor);
     console.log('Sent reply to remote:', replyStatus, createStatus);
   }
 
+
   /**
    *
-   * @param vp
-   * @param requestAuthor
+   * @param vp Dcx application VCs for review and verification; see {@link VerifiablePresentation}
+   * @param recordAuthor Dwn Record author; see {@link Record.author}
    */
-  static async verifyCredentials(vp: VerifiablePresentation, requestAuthor?: string | undefined) {
+  @handleAsyncErrors
+  static async verifyCredentials(vp: VerifiablePresentation, recordAuthor?: string): Promise<VcVerificationResponse[]> {
+    const verifications = []
     const credentials = vp.verifiableCredential;
     for (const credentialJWT of credentials) {
       // if the request author is provided, make sure credential subject matches
-      if (requestAuthor) {
+      if (recordAuthor) {
         const credential = VerifiableCredential.parseJwt({ vcJwt: credentialJWT });
         console.log('Credential', stringify(credential));
         console.log('Issuer', credential.issuer);
         const doc = await DidDht.resolve(credential.issuer);
         console.log('DID  Doc', stringify(doc));
-        if (credential.subject !== requestAuthor) {
+        if (credential.subject !== recordAuthor) {
           throw new Error(
-            `Credential subject ${credential.subject} does not match request author ${requestAuthor}`,
+            `Credential subject ${credential.subject} does not match request author ${recordAuthor}`,
           );
         }
       }
-      await VerifiableCredential.verify({ vcJwt: credentialJWT });
+      const verify = await VerifiableCredential.verify({ vcJwt: credentialJWT })
+      verifications.push(verify)
     }
+    return verifications;
   }
 
   /**
    *
-   * @param presentation
-   * @param dcxIssuerDid
+   * @param vp
+   * @param issuerDid
    * @param subjectDid
    * @returns
    */
-  static async issueVC(presentation: any, dcxIssuerDid: BearerDid, subjectDid: string) {
+
+  @handleAsyncErrors
+  static async issueVC(vcIssuanceDids: VcIssuanceDids, vp: VerifiablePresentation, credentialManifest: CredentialManifest) {
     // filter valid creds
-    console.log('Presentation', stringify(presentation));
+    console.log('Verifiable Presentation', stringify(vp));
     const selectedVcJwts: string[] = PresentationExchange.selectCredentials({
-      vcJwts: presentation.verifiableCredential,
-      presentationDefinition: Manifest.presentation_definition,
+      vcJwts: vp.verifiableCredential,
+      presentationDefinition: credentialManifest.presentation_definition,
     });
 
     console.log('Valid creds selected', stringify(selectedVcJwts));
@@ -103,7 +119,7 @@ export class DcxHandlers {
     // request vc data
     const vcData = await this.vcDataRequest({ validInputVcs });
     console.log('Got VC data from Issuer', vcData);
-
+    const { issuerDid, subjectDid } = vcIssuanceDids;
     // generate vc
     const outputVc = await VerifiableCredential.create({
       type: dcxEnvConfig.VC_NAME,
@@ -112,7 +128,7 @@ export class DcxHandlers {
       data: vcData,
     });
     // sign vc
-    const signedOutputVc = await outputVc.sign({ did: dcxIssuerDid });
+    const signedOutputVc = await outputVc.sign({ did: issuerDid });
 
     return {
       fulfillment: {
@@ -135,6 +151,7 @@ export class DcxHandlers {
    * @param headers
    * @returns
    */
+  @handleAsyncErrors
   static async vcDataRequest(
     body: VcRequestBody,
     method: string = 'POST',
