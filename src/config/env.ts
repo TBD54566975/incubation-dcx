@@ -1,16 +1,14 @@
 import dotenv from 'dotenv';
-import { __dirname } from '../utils/path.js';
-
 dotenv.config();
-
+console.log("process.cwd()", process.cwd())
 export class DcxEnvConfig {
   public PORT = process.env.PORT || 3000;
   public EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
   public EXTERNAL_HOSTNAME = process.env.EXTERNAL_HOSTNAME || 'localhost';
   public SERVICE_NAME = process.env.SERVICE_NAME || 'decentralized credential exchange';
   public SERVICE_ID = process.env.SERVICE_ID || 'dcx';
-  public DWN_LAST_RECORD_ID = `${__dirname}/lastRecordId`;
-  public DWN_CURSOR = `${__dirname}/cursor.json`;
+  public DWN_LAST_RECORD_ID = `${process.cwd()}/lastRecordId`;
+  public DWN_CURSOR = `${process.cwd()}/cursor.json`;
 
   public DHT_GATEWAY_ENDPOINT =
     process.env.DHT_GATEWAY_ENDPOINT || 'https://dev.dht.formfree.com:8305/';

@@ -11,11 +11,10 @@
     "test": "echo TODO && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc",
-    "build:dev": "npm run build && npm run dev",
     "build": "npm run clean && npm run build:esm",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "dev": "tsx dist/esm/index.js",
+    "dev": "npx run build && tsx dist/esm/src/index.js",
     "format": "npx prettier --write ./src/**/**/**/*"
   },
   "homepage": "https://github.com/TBD54566975/incubation-tblend#readme",
