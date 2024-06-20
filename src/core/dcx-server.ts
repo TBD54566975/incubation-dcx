@@ -60,7 +60,7 @@ export class DcxServer extends DcxServerConfig {
   }
 
   @handleAsyncErrors
-  async #createDwnPassword(): Promise<string> {
+  private async createDwnPassword(): Promise<string> {
     console.warn(WEB5_CONNECT_PASSWORD_WARNING);
 
     const mnemonic = generateMnemonic(128).split(' ');
@@ -155,7 +155,7 @@ export class DcxServer extends DcxServerConfig {
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
    */
   @handleAsyncErrors
-  async #setupDcxServer(): Promise<void> {
+  private async setupDcxServer(): Promise<void> {
     if (!this.CIPHER_KEY) {
       console.warn(CIPHER_KEY_WARNING);
       this.CIPHER_KEY = crypto.randomBytes(32);
@@ -164,7 +164,7 @@ export class DcxServer extends DcxServerConfig {
     }
 
     if (!this.WEB5_CONNECT_PASSWORD) {
-      await this.#createDwnPassword();
+      await this.createDwnPassword();
       console.log('DWN password created!');
     }
 
@@ -270,7 +270,7 @@ export class DcxServer extends DcxServerConfig {
     console.log('Setting up DCX server ...');
 
     // Setup DCX server
-    await this.#setupDcxServer();
+    await this.setupDcxServer();
     console.log('DCX server setup complete!');
 
     // Setup DCX DWN

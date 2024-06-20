@@ -161,20 +161,9 @@ const { record: applicationRecord, status: createStatus } =
   - [x] Request new credentials from trusted 3rd party issuers: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
   - [x] Create new credentials from 3rd party data requests: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
   - [ ] Create and update invoices as responses to applications
-- [ ] DWN server configuration, connection and interaction
-  - [x] Query DWN for all dcx manifest records
-  - [x] If none exist, look for local manifests and create them in DWN
-  - [x] If some exist, diff check DWN manifest records against local manifests to find missing DWN manifest records and create them
-  - [x] Query DWN for existing dcx protocol records
-  - [x] Filter for dcx applications and pass to handlers for processing
-  - [x] Re-runs on every boot/reboot to ensure DCX server and DWN server are synced
-- [ ] DID DHT Manager [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
-  - [x] Create new dids and Read existing dids
-  - [x] Recreate existing did from recovery phrase
-  - [x] Publish did doc
-  - [x] Resolve did to did doc
-  - [x] Import portable from bearer and from file
-- [ ] DHT gateway connection 
+- [x] DCX DWN Manager [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
+- [x] DID DHT Manager [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
+- [x] DCX Server [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
 
 ## Project Resources
 
