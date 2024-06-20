@@ -59,6 +59,7 @@ export class DcxServer extends DcxServerConfig {
     this.credentialManifests.push({ ...manifest, name });
   }
 
+  @handleAsyncErrors
   async #createDwnPassword(): Promise<string> {
     console.warn(WEB5_CONNECT_PASSWORD_WARNING);
 
@@ -79,54 +80,49 @@ export class DcxServer extends DcxServerConfig {
     return password;
   }
 
-  // @handleAsyncErrors
+  @handleAsyncErrors
   async web5ConnectInit(): Promise<void> {
-    try {
-      console.warn(WEB5_CONNECT_RECOVERY_PHRASE_WARNING);
+    console.warn(WEB5_CONNECT_RECOVERY_PHRASE_WARNING);
 
-      const agentDid = await DidManager.createBearerDid({ gatewayUri: this.DHT_GATEWAY_ENDPOINT });
-      const platformAgent = await Web5UserAgent.create({ agentDid });
-      const recoveryPhrase = await platformAgent.initialize({
-        password: this.WEB5_CONNECT_PASSWORD,
-      });
-      const portableDid: PortableDid & { [key: string]: any } = await agentDid.export();
+    const agentDid = await DidManager.createBearerDid({ gatewayUri: this.DHT_GATEWAY_ENDPOINT });
+    const platformAgent = await Web5UserAgent.create({ agentDid });
+    const recoveryPhrase = await platformAgent.initialize({
+      password: this.WEB5_CONNECT_PASSWORD,
+    });
+    const portableDid: PortableDid & { [key: string]: any } = await agentDid.export();
 
-      this.didManager.did = agentDid.uri;
-      this.didManager.bearerDid = agentDid;
-      this.didManager.portableDid = portableDid;
+    this.didManager.did = agentDid.uri;
+    this.didManager.bearerDid = agentDid;
+    this.didManager.portableDid = portableDid;
 
-      const { web5 } = await Web5.connect({
-        sync: 'off',
-        agent: platformAgent,
-        connectedDid: agentDid.uri,
-        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        techPreview: { dwnEndpoints: this.DWN_ENDPOINTS },
-      });
+    const { web5 } = await Web5.connect({
+      sync: 'off',
+      agent: platformAgent,
+      connectedDid: agentDid.uri,
+      recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+      techPreview: { dwnEndpoints: this.DWN_ENDPOINTS },
+    });
 
-      this.web5 = web5;
-      this.platformAgent = platformAgent;
-      this.WEB5_CONNECT_RECOVERY_PHRASE = recoveryPhrase;
+    this.web5 = web5;
+    this.platformAgent = platformAgent;
+    this.WEB5_CONNECT_RECOVERY_PHRASE = recoveryPhrase;
 
-      this.dwnManager.web5 = web5;
-      this.didManager.did = agentDid.uri;
+    this.dwnManager.web5 = web5;
+    this.didManager.did = agentDid.uri;
 
-      await writeFile('web5.seed', recoveryPhrase);
-      console.info(
-        'New Web5.connect recovery phrase created and saved to file web5.seed, ' +
-        'to reuse the Web5 data created in this DCX server, set ' +
-        'WEB5_CONNECT_RECOVERY_PHRASE to this value in .env',
-      );
+    await writeFile('web5.seed', recoveryPhrase);
+    console.info(
+      'New Web5.connect recovery phrase created and saved to file web5.seed, ' +
+      'to reuse the Web5 data created in this DCX server, set ' +
+      'WEB5_CONNECT_RECOVERY_PHRASE to this value in .env',
+    );
 
-      await writeFile('portable.json', stringify(portableDid));
-      console.info(
-        'New DCX DID created and saved to file portable.json ' +
-        'to reuse the DID created for this DCX server, set ' +
-        'WEB5_CONNECT_RECOVERY_PHRASE and WEB5_CONNECT_PASSWORD in .env',
-      );
-    } catch (error: any) {
-      console.error('DcxServer.web5ConnectInit error', error);
-      throw new DcxServerError(error);
-    }
+    await writeFile('portable.json', stringify(portableDid));
+    console.info(
+      'New DCX DID created and saved to file portable.json ' +
+      'to reuse the DID created for this DCX server, set ' +
+      'WEB5_CONNECT_RECOVERY_PHRASE and WEB5_CONNECT_PASSWORD in .env',
+    );
   }
 
   @handleAsyncErrors
@@ -158,6 +154,7 @@ export class DcxServer extends DcxServerConfig {
    * @summary Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
    */
+  @handleAsyncErrors
   async #setupDcxServer(): Promise<void> {
     if (!this.CIPHER_KEY) {
       console.warn(CIPHER_KEY_WARNING);
@@ -172,14 +169,10 @@ export class DcxServer extends DcxServerConfig {
     }
 
     if (!this.WEB5_CONNECT_RECOVERY_PHRASE) {
-      await this.web5ConnectInit().catch((error: any) => {
-        throw new DcxServerError(error);
-      });
+      await this.web5ConnectInit();
       console.log('Web5 initialized & connected!');
     } else {
-      await this.web5Connect().catch((error: any) => {
-        throw new DcxServerError(error);
-      });
+      await this.web5Connect();
       console.log('Web5 connected!');
     }
 
@@ -196,11 +189,13 @@ export class DcxServer extends DcxServerConfig {
     console.log('DCX DWN setup complete!');
   }
 
+  @handleAsyncErrors
   public async poll(): Promise<void> {
     const DWN_CURSOR = this.DWN_CURSOR;
     const DWN_LAST_RECORD_ID = this.DWN_LAST_RECORD_ID;
     let cursor = await readFileToJSON(DWN_CURSOR);
     let lastRecordId = await readFileToString(DWN_LAST_RECORD_ID);
+    console.log('DCX server running!');
 
     while (true) {
       const { records = [], cursor: nextCursor } = await this.web5.dwn.records.query({
@@ -272,23 +267,15 @@ export class DcxServer extends DcxServerConfig {
   }
 
   public async setup(): Promise<void> {
+    console.log('Setting up DCX server ...');
+
     // Setup DCX server
-    try {
-      await this.#setupDcxServer();
-      console.log('DCX server setup complete!');
-    } catch (error: any) {
-      console.error('DcxServer.#setupDcxServer error', error);
-      throw new DcxServerError(error);
-    }
+    await this.#setupDcxServer();
+    console.log('DCX server setup complete!');
 
     // Setup DCX DWN
-    try {
-      await this.dwnManager.setupDcxDwn();
-      console.log('DCX DWN setup complete!');
-    } catch (error: any) {
-      console.error('DcxServer.setupDcxDwn error', error);
-      throw new DcxServerError(error);
-    }
+    await this.dwnManager.setupDcxDwn();
+    console.log('DCX DWN setup complete!');
 
     this.isInitialized = true;
     console.log('DCX initialized! Polling for incoming records ...')
@@ -301,11 +288,6 @@ export class DcxServer extends DcxServerConfig {
    */
   public start(): void {
     // Start polling for incoming records
-    try {
-      this.setup().then(this.poll);
-    } catch (error: any) {
-      console.error('DcxServer.start', error);
-      throw new DcxServerError(error);
-    }
+    this.setup().then(this.poll).catch(console.error);
   }
 }
