@@ -5,7 +5,7 @@ import { CredentialManifest } from '../types/dcx.js';
 import { DcxDwnError, handleDwnErrors } from '../utils/error.js';
 
 /**
- * DWN manager class
+ * DWN manager handles interactions between the DCX server and the DWN
  */
 export class DwnManager {
   public web5: Web5;
