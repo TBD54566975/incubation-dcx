@@ -12,9 +12,11 @@ local-test.ts
 CUSTOM-MANIFEST.json
 .env
 key.json
-did.json
+portable.json
 keys.json
 web5.seed
 cipher.key
 *.seed
 *.key
+web5.password
+*.password

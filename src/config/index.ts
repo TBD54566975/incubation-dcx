@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 
 dotenv.config();
 
-export class Config {
+export class DcxEnvConfig {
   public PORT = process.env.PORT || 3000;
   public EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
   public EXTERNAL_HOSTNAME = process.env.EXTERNAL_HOSTNAME || 'localhost';
@@ -17,7 +17,8 @@ export class Config {
   public DWN_LAST_RECORD_ID = `${__dirname}/lastRecordId`;
   public DWN_CURSOR = `${__dirname}/cursor.json`;
 
-  public DHT_GATEWAY_ENDPOINT = process.env.DHT_GATEWAY_ENDPOINT || 'https://dev.dht.formfree.com:8305/';
+  public DHT_GATEWAY_ENDPOINT =
+    process.env.DHT_GATEWAY_ENDPOINT || 'https://dev.dht.formfree.com:8305/';
   public DCX_DID_URI = process.env.DCX_DID_URI || '';
   public DCX_DID_FILEPATH = process.env.DCX_DID_FILEPATH || '';
   public DWN_ENDPOINTS = process.env.DWN_ENDPOINTS?.split(',') || ['https://dev.dwn.formfree.com/'];
@@ -26,14 +27,13 @@ export class Config {
   public VC_ID = process.env.VC_ID || 'dcx-verifiable-credential';
   public VC_NAME = process.env.VC_NAME || 'DCXVerifiableCredential';
   public VC_DATA_PROVIDER_ENDPOINT = process.env.VC_DATA_PROVIDER_ENDPOINT || '';
-  public VC_MANIFEST_FILENAME = process.env.VC_MANIFEST_FILENAME || 'EXAMPLE-MANIFEST.json';
-  public VC_TRUSTED_ISSUERS = (process.env.VC_TRUSTED_ISSUERS && JSON.parse(process.env.VC_TRUSTED_ISSUERS))
-    || [
-      {
-        "name": "mx",
-        "did": "did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo"
-      }
-    ];
+  public VC_TRUSTED_ISSUERS = (process.env.VC_TRUSTED_ISSUERS &&
+    JSON.parse(process.env.VC_TRUSTED_ISSUERS)) || [
+    {
+      name: 'mx',
+      did: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
+    },
+  ];
 
   // Private class variables
   private _CIPHER_KEY: Buffer;
@@ -77,24 +77,6 @@ export class Config {
   }
 }
 
-export type DcxServerConfig = typeof config;
-
-export const config = new Config();
-
-console.debug("config", config);
-
-const NODE_ENV = process.env.NODE_ENV ?? "development";
-
-if (NODE_ENV === 'production') {
-  if (!(config.WEB5_CONNECT_RECOVERY_PHRASE && config.ISSUER_DID_FILEPATH)) {
-    throw new DcxServerError('WEB5_CONNECT_RECOVERY_PHRASE and ISSUER_DID_FILEPATH cannot both be undefined', null)
-  }
-  if (!config.OUTPUT_VC_MANIFEST_FILENAME) {
-    console.log("OUTPUT_VC_MANIFEST_FILENAME is required but not found in config", config.OUTPUT_VC_MANIFEST_FILENAME);
-    throw new DcxServerError('OUTPUT_VC_MANIFEST_FILENAME is required but not found in config')
-  }
-  if (config.OUTPUT_VC_MANIFEST_FILENAME.toLowerCase().includes("example")) {
-    console.log("OUTPUT_VC_MANIFEST_FILENAME set to default EXAMPLE-EXAMPLE-MANIFEST.json file", config.OUTPUT_VC_MANIFEST_FILENAME);
-    throw new DcxServerError('OUTPUT_VC_MANIFEST_FILENAME cannot be default EXAMPLE-EXAMPLE-MANIFEST.json file in production');
-  }
-}
+export const dcxEnvConfig = new DcxEnvConfig();
+export type DcxServerConfig = typeof dcxEnvConfig;
+console.debug('dcxEnvConfig', dcxEnvConfig);

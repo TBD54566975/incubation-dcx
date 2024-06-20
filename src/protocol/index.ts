@@ -1,5 +1,4 @@
-
-export * from "./handlers/dcx.js";
+export * from './handlers/dcx.js';
 
 import ExampleManifest from './manifests/EXAMPLE-MANIFEST.json';
 export { ExampleManifest };
