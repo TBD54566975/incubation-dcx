@@ -21,32 +21,28 @@ import { readFileToJSON, readFileToString } from '../utils/file-system.js';
 import { Time } from '../utils/time.js';
 import { DwnManager } from './dwn-manager.js';
 
-export type DcxServerOptions = {
-  needWeb5Init: boolean;
+type DcxServerOptions = {
+  isInitialized?: boolean;
   dcxEnvConfig?: DcxEnvConfig;
   credentialManifests?: CredentialManifest[];
 };
 
-export class DcxServerConfig extends DcxEnvConfig {
-  public isInitialized: boolean;
-  public needWeb5Init: boolean;
-  public credentialManifests: CredentialManifest[];
+class DcxServerConfig extends DcxEnvConfig {
   public dcxEnvConfig: DcxEnvConfig;
+  public isInitialized: boolean;
 
   public web5: Web5;
   public didManager: DidManager;
   public platformAgent: Web5PlatformAgent;
   public dwnManager: DwnManager;
+  public credentialManifests: CredentialManifest[];
 
   constructor(options: DcxServerOptions) {
     super();
 
-    this.isInitialized = false;
-
     this.dcxEnvConfig = options.dcxEnvConfig ?? dcxEnvConfig;
+    this.isInitialized = false;
     this.credentialManifests = options.credentialManifests ?? [];
-    this.needWeb5Init = options.needWeb5Init ?? true;
-
     this.web5 = {} as Web5;
     this.platformAgent = {} as Web5PlatformAgent;
     this.didManager = new DidManager({
@@ -279,9 +275,7 @@ export class DcxServer extends DcxServerConfig {
     // Setup DCX server
     try {
       await this.#setupDcxServer();
-      if (this.needWeb5Init) {
-        this.needWeb5Init = false;
-      }
+      console.log('DCX server setup complete!');
     } catch (error: any) {
       console.error('DcxServer.#setupDcxServer error', error);
       throw new DcxServerError(error);
@@ -290,20 +284,18 @@ export class DcxServer extends DcxServerConfig {
     // Setup DCX DWN
     try {
       await this.dwnManager.setupDcxDwn();
-      console.log('DCX server setup complete, polling for incoming records ...');
+      console.log('DCX DWN setup complete!');
     } catch (error: any) {
       console.error('DcxServer.setupDcxDwn error', error);
       throw new DcxServerError(error);
     }
+
+    this.isInitialized = true;
+    console.log('DCX initialized! Polling for incoming records ...')
   }
 
   /**
-   *  try {
-
-      } catch (error: any) {
-        console.error('DcxServer.web5Connect error', error);
-        throw new DcxServerError('Failed to connect to Web5', error);
-      }
+   *  
    * @summary Starts the DCX server
    * @returns void
    */
