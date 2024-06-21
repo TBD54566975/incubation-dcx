@@ -1,5 +1,5 @@
 import { VerifiableCredential } from '@web5/credentials';
-import { DcxEnvConfig } from '../config/env.js';
+import { DcxEnv } from '../config/env.js';
 import { manifestSchema } from '../protocol/index.js';
 
 export type TrustedIssuer = { name: string; did: string };
@@ -24,7 +24,7 @@ export type VerifiablePresentation = {
 
 export type VcRequestBody = { validInputVcs: VerifiableCredential[] } | null;
 
-export type DcxServerConfigType = InstanceType<typeof DcxEnvConfig>;
+export type DcxServerConfigType = InstanceType<typeof DcxEnv>;
 
 export type DcxServerUse = {
   manifest?: any;
