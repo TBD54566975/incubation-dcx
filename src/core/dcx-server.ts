@@ -1,5 +1,4 @@
 import { Web5 } from '@web5/api';
-import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
 import crypto from 'crypto';
 import { writeFile } from 'fs/promises';
@@ -13,6 +12,7 @@ import { stringifier } from '../utils/json.js';
 import { Time } from '../utils/time.js';
 import { DidManager } from './did-manager.js';
 import { DwnManager } from './dwn-manager.js';
+import { Web5PlatformAgent } from '@web5/agent';
 
 type DcxServerOptions = { manifests?: CredentialManifest[] };
 
@@ -65,47 +65,38 @@ export class DcxServer extends DcxEnv {
       }
       console.log('Web5 initializing and connecting ... ');
 
-      const password = this.WEB5_CONNECT_PASSWORD;
-      const gatewayUri = DcxEnv.DHT_GATEWAY_ENDPOINT;
-      const dwnEndpoints = DcxEnv.DWN_ENDPOINTS;
-
-      const agent = await Web5UserAgent.create();
-      const firstLaunch = await agent.firstLaunch()
-      console.log("agent", agent, "\n~~~~~~~~~~~~~~~~~~~~~~\n")
-      console.log("firstLaunch", firstLaunch, "\n~~~~~~~~~~~~~~~~~~~~~~\n")
-      const agentDid = firstLaunch ? await DidManager.createBearerDid({ gatewayUri }) : agent.agentDid;
-      const recoveryPhrase = firstLaunch ? await agent.initialize({ password }) : this.WEB5_CONNECT_RECOVERY_PHRASE
-      await agent.start({ password });
-
-      DidManager.bearerDid = agentDid;
-      DidManager.portableDid = await agentDid.export();
-      const { web5 } = await Web5.connect({
-        agent,
-        password,
+      const { web5, did, recoveryPhrase: newSeedPhrase } = await Web5.connect({
+        password: this.WEB5_CONNECT_PASSWORD,
         sync: 'off',
-        recoveryPhrase,
-        connectedDid: agentDid.uri,
-        techPreview: { dwnEndpoints },
+        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+        techPreview: { dwnEndpoints: DcxEnv.DWN_ENDPOINTS },
       });
+      console.log("web5 =>", web5);
+
+      
       DwnManager.web5 = web5;
-      DwnManager.agent = agent;
+      DwnManager.agent = web5.agent as Web5PlatformAgent;
+
+      const { did: bearerDid } = await DwnManager.agent.identity.get({ didUri: did }) ?? {};
+      if (!bearerDid) {
+        throw new DcxServerError('Failed to get bearer DID');
+      }
+
+      DidManager.did = did;
+      DidManager.bearerDid = bearerDid;
+      DidManager.portableDid = await bearerDid.export();
 
       console.log("DidManager.portableDid", DidManager.portableDid, "\n~~~~~~~~~~~~~~~~~~~~~~\n");
-      if (firstLaunch) {
+
+      if (newSeedPhrase) {
         console.info(
           'ADVISORY: New Web5.connect recovery phrase created and saved to file web5.seed,\n' +
           '   to reuse the Web5 data created in this DCX server, set\n' +
           '   WEB5_CONNECT_RECOVERY_PHRASE to this value in .env',
         );
-        await writeFile('web5.seed', recoveryPhrase);
-
-        console.info(
-          'ADVISORY: New DCX DID created and saved to file portable.json\n' +
-          '   to reuse the DID created for this DCX server, set\n' +
-          '   WEB5_CONNECT_RECOVERY_PHRASE and WEB5_CONNECT_PASSWORD in .env',
-        );
-        await writeFile('portable.json', stringifier(DidManager.portableDid));
+        await writeFile('web5.seed', newSeedPhrase);
       }
+
       console.info(
         'ADVISORY: New DCX DID created and saved to file portable.json\n' +
         '   to reuse the DID created for this DCX server, set\n' +

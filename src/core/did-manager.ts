@@ -13,7 +13,7 @@ import { AdditionalProperties } from '../types/dcx.js';
 export class DidManager {
   public static did: string;
   public static bearerDid: BearerDid;
-  public static portableDid: PortableDid & AdditionalProperties;
+  public static portableDid: PortableDid;
 
   /**
    *
