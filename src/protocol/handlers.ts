@@ -33,7 +33,7 @@ export class DcxProtocolHandlers {
    * @param bearerDid bearer did object; see {@link BearerDid}
    * @param record Dwn record object; see {@link Record}a
    */
-  @handleAsyncErrors
+  // @handleAsyncErrors
   static async processDcxApplication(
     web5: Web5,
     bearerDid: BearerDid,
@@ -70,7 +70,7 @@ export class DcxProtocolHandlers {
    * @param vp Dcx application VCs for review and verification; see {@link VerifiablePresentation}
    * @param recordAuthor Dwn Record author; see {@link Record.author}
    */
-  @handleAsyncErrors
+  // @handleAsyncErrors
   static async verifyCredentials(
     vp: VerifiablePresentation,
     recordAuthor?: string,
@@ -105,7 +105,7 @@ export class DcxProtocolHandlers {
    * @returns
    */
 
-  @handleAsyncErrors
+  // @handleAsyncErrors
   static async issueVC(
     vcIssuanceDids: VcIssuanceDids,
     vp: VerifiablePresentation,
@@ -171,7 +171,7 @@ export class DcxProtocolHandlers {
    * @param headers
    * @returns
    */
-  @handleAsyncErrors
+  // @handleAsyncErrors
   static async vcDataRequest(
     body: VcRequestBody,
     method: string = 'POST',

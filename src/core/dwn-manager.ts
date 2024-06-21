@@ -163,8 +163,9 @@ export class DwnManager {
    * Setup DWN for credential-issuer protocol
    * @returns Promise<void>
    */
-  @handleDwnErrors
+  // @handleDwnErrors
   async setupDcxDwn(): Promise<void> {
+    console.log('Setting up DWN ...')
     const { status, protocols } = await this.queryDcxIssuerProtocol();
     console.log('Query status', status);
     console.log(`Found ${protocols.length} credential-issuer protocols in DWN`);

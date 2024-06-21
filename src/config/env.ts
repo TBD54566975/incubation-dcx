@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-console.log("process.cwd()", process.cwd())
 export class DcxEnvConfig {
   public PORT = process.env.PORT || 3000;
   public EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
@@ -71,4 +70,4 @@ export class DcxEnvConfig {
 }
 
 export const dcxEnvConfig = new DcxEnvConfig();
-console.debug('dcxEnvConfig', dcxEnvConfig);
+// console.debug('dcxEnvConfig', dcxEnvConfig);
