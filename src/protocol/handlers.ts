@@ -6,27 +6,24 @@ import {
   VerifiablePresentation,
 } from '@web5/credentials';
 import { BearerDid, DidDht } from '@web5/dids';
-
 import { DcxEnv } from '../config/env.js';
+import { DidManager, DwnManager } from '../core/index.js';
 import {
   AdditionalProperties,
   CredentialManifest,
   TrustedIssuer,
   VcRequestBody,
 } from '../types/dcx.js';
-import { stringifier } from '../utils/json.js';
+import { stringifier } from '../utils/index.js';
 import { credentialIssuerProtocol, responseSchema } from './index.js';
-import { handleAsyncErrors } from '../utils/error.js';
-import { DwnManager } from '../index.js';
-import { DidManager } from '../core/did-manager.js';
 
-type VcVerificationResponse = {
+type VerificationResponse = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
 };
 
-export class DcxProtocolHandlers {
+export class ProtocolHandlers {
   /**
    *
    * Processes a DCX application record
@@ -34,25 +31,20 @@ export class DcxProtocolHandlers {
    * @param bearerDid bearer did object; see {@link BearerDid}
    * @param record Dwn record object; see {@link Record}a
    */
-<<<<<<< Updated upstream
-  @handleAsyncErrors
-  static async processDcxApplication(
-    web5: Web5,
-    bearerDid: BearerDid,
-=======
-  // @handleAsyncErrors
-  public static async processDcxApplication(
->>>>>>> Stashed changes
-    record: Record,
-    manifest: CredentialManifest,
-  ) {
+  public static async processDcxApplication(record: Record, manifest: CredentialManifest) {
     console.log('Process record', stringifier(record));
+
     // applications are JSON VP
     const vp: VerifiablePresentation = await record.data.json();
+
     console.log('Presentation', stringifier(vp));
+
     const recordAuthor = record.protocolPath;
-    await this.verifyCredentials(vp, recordAuthor);
-    const response = await this.issueVC(recordAuthor, vp, manifest);
+
+    await ProtocolHandlers.verifyCredentials(vp, recordAuthor);
+
+    const response = await ProtocolHandlers.issueVC(recordAuthor, vp, manifest);
+
     const { record: postRecord, status: createStatus } = await DwnManager.web5.dwn.records.create({
       store: false,
       data: response,
@@ -63,7 +55,9 @@ export class DcxProtocolHandlers {
         protocolPath: 'application/response',
       },
     });
+
     const replyStatus = await postRecord?.send(recordAuthor);
+
     console.log('Sent reply to remote:', replyStatus, createStatus);
   }
 
@@ -72,16 +66,7 @@ export class DcxProtocolHandlers {
    * @param vp Dcx application VCs for review and verification; see {@link VerifiablePresentation}
    * @param recordAuthor Dwn Record author; see {@link Record.author}
    */
-<<<<<<< Updated upstream
-  @handleAsyncErrors
-  static async verifyCredentials(
-=======
-  // @handleAsyncErrors
-  public static async verifyCredentials(
->>>>>>> Stashed changes
-    vp: VerifiablePresentation,
-    recordAuthor?: string,
-  ): Promise<VcVerificationResponse[]> {
+  public static async verifyCredentials(vp: VerifiablePresentation, recordAuthor?: string): Promise<VerificationResponse[]> {
     const verifications = [];
     const credentials = vp.verifiableCredential;
     for (const credentialJWT of credentials) {
@@ -112,18 +97,7 @@ export class DcxProtocolHandlers {
    * @returns
    */
 
-<<<<<<< Updated upstream
-  @handleAsyncErrors
-  static async issueVC(
-    vcIssuanceDids: VcIssuanceDids,
-=======
-  // @handleAsyncErrors
-  public static async issueVC(
-    subjectDid: string,
->>>>>>> Stashed changes
-    vp: VerifiablePresentation,
-    credentialManifest: CredentialManifest,
-  ) {
+  public static async issueVC(subjectDid: string, vp: VerifiablePresentation, credentialManifest: CredentialManifest) {
     // filter valid creds
     console.log('Verifiable Presentation', stringifier(vp));
     const selectedVcJwts: string[] = PresentationExchange.selectCredentials({
@@ -150,7 +124,7 @@ export class DcxProtocolHandlers {
     console.log('Found valid VCs ...', validInputVcs.length);
 
     // request vc data
-    const vcData = await this.vcDataRequest({ validInputVcs });
+    const vcData = await ProtocolHandlers.vcDataRequest({ validInputVcs });
     console.log('Got VC data from Issuer', vcData);
 
     // generate vc
@@ -184,13 +158,7 @@ export class DcxProtocolHandlers {
    * @param headers
    * @returns
    */
-<<<<<<< Updated upstream
-  @handleAsyncErrors
-  static async vcDataRequest(
-=======
-  // @handleAsyncErrors
   public static async vcDataRequest(
->>>>>>> Stashed changes
     body: VcRequestBody,
     method: string = 'POST',
     headers: AdditionalProperties = {

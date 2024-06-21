@@ -1,16 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-<<<<<<< Updated upstream
-console.log("process.cwd()", process.cwd())
-export class DcxEnvConfig {
-  public PORT = process.env.PORT || 3000;
-  public EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
-  public EXTERNAL_HOSTNAME = process.env.EXTERNAL_HOSTNAME || 'localhost';
-  public SERVICE_NAME = process.env.SERVICE_NAME || 'decentralized credential exchange';
-  public SERVICE_ID = process.env.SERVICE_ID || 'dcx';
-  public DWN_LAST_RECORD_ID = `${process.cwd()}/lastRecordId`;
-  public DWN_CURSOR = `${process.cwd()}/cursor.json`;
-=======
 export class DcxEnv {
   public static PORT = process.env.PORT || 3000;
   public static EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
@@ -19,7 +8,6 @@ export class DcxEnv {
   public static SERVICE_ID = process.env.SERVICE_ID || 'dcx';
   public static DWN_LAST_RECORD_ID = `${process.cwd()}/lastRecordId`;
   public static DWN_CURSOR = `${process.cwd()}/cursor.json`;
->>>>>>> Stashed changes
 
   public static DHT_GATEWAY_ENDPOINT = process.env.DHT_GATEWAY_ENDPOINT || 'http://dev.dht.formfree.com:8305/';
   public static DCX_DID_URI = process.env.DCX_DID_URI || '';
@@ -69,10 +57,5 @@ export class DcxEnv {
   }
 }
 
-<<<<<<< Updated upstream
-export const dcxEnvConfig = new DcxEnvConfig();
-console.debug('dcxEnvConfig', dcxEnvConfig);
-=======
 // export const dcxEnvConfig = new DcxEnvConfig();
 // console.debug('dcxEnvConfig', dcxEnvConfig);
->>>>>>> Stashed changes

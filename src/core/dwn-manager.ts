@@ -10,7 +10,7 @@ import { DcxDwnError } from '../utils/error.js';
 export class DwnManager {
   public static web5: Web5;
   public static agent: Web5PlatformAgent;
-  public static credentialManifests: CredentialManifest[] = [];
+  public static manifests: CredentialManifest[] = [];
   /**
   *
   * Configure credential issuer protocol in DWN
@@ -157,14 +157,9 @@ export class DwnManager {
    * Setup DWN for credential-issuer protocol
    * @returns Promise<void>
    */
-<<<<<<< Updated upstream
-  @handleDwnErrors
-  async setupDcxDwn(): Promise<void> {
-=======
   // @handleDwnErrors
   public static async setupDcxDwn(): Promise<void> {
     console.log('Setting up DWN ...')
->>>>>>> Stashed changes
     const { status, protocols } = await this.queryDcxIssuerProtocol();
     console.log('Query status', status);
     console.log(`Found ${protocols.length} credential-issuer protocols in DWN`);
