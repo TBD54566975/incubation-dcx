@@ -22,7 +22,7 @@ export class DcxServer extends DcxEnv {
 
   constructor(options: DcxServerOptions) {
     super();
-    this.isInitialized = false;
+    this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
     this.manifests = DwnManager.manifests = options.manifests ?? [];
   }
 
@@ -30,8 +30,11 @@ export class DcxServer extends DcxEnv {
     DwnManager.manifests.push({ ...manifest, name });
   }
 
-  // @handleAsyncErrors
-  public async createDwnPassword(): Promise<string> {
+  /**
+   * 
+   * @returns string
+   */
+  public async createPassword(): Promise<string> {
     try {
       const mnemonic = generateMnemonic(128).split(' ');
       const words: string[] = [];
@@ -49,74 +52,16 @@ export class DcxServer extends DcxEnv {
       );
       return password;
     } catch (error) {
-      console.error('DcxServer.createDwnPassword', error);
-      throw new DcxServerError(error);
-    }
-  }
-
-  // @handleAsyncErrors
-  async web5Connect(): Promise<boolean> {
-    try {
-      if (!this.WEB5_CONNECT_RECOVERY_PHRASE) {
-        console.warn(
-          'SECURITY WARNING: You have not set a WEB5_CONNECT_RECOVERY_PHRASE,\n' +
-          '   one will be generated for you and saved to file web5.seed'
-        );
-      }
-      console.log('Web5 initializing and connecting ... ');
-
-      const { web5, did, recoveryPhrase: newSeedPhrase } = await Web5.connect({
-        password: this.WEB5_CONNECT_PASSWORD,
-        sync: 'off',
-        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        techPreview: { dwnEndpoints: DcxEnv.DWN_ENDPOINTS },
-      });
-      console.log("web5 =>", web5);
-
-      
-      DwnManager.web5 = web5;
-      DwnManager.agent = web5.agent as Web5PlatformAgent;
-
-      const { did: bearerDid } = await DwnManager.agent.identity.get({ didUri: did }) ?? {};
-      if (!bearerDid) {
-        throw new DcxServerError('Failed to get bearer DID');
-      }
-
-      DidManager.did = did;
-      DidManager.bearerDid = bearerDid;
-      DidManager.portableDid = await bearerDid.export();
-
-      console.log("DidManager.portableDid", DidManager.portableDid, "\n~~~~~~~~~~~~~~~~~~~~~~\n");
-
-      if (newSeedPhrase) {
-        console.info(
-          'ADVISORY: New Web5.connect recovery phrase created and saved to file web5.seed,\n' +
-          '   to reuse the Web5 data created in this DCX server, set\n' +
-          '   WEB5_CONNECT_RECOVERY_PHRASE to this value in .env',
-        );
-        await writeFile('web5.seed', newSeedPhrase);
-      }
-
-      console.info(
-        'ADVISORY: New DCX DID created and saved to file portable.json\n' +
-        '   to reuse the DID created for this DCX server, set\n' +
-        '   WEB5_CONNECT_RECOVERY_PHRASE and WEB5_CONNECT_PASSWORD in .env',
-      );
-      await writeFile('portable.json', stringifier(DidManager.portableDid));
-      console.log('Web5 initialized & connected!');
-      return true;
-    } catch (error) {
-      console.error('DcxServer.web5Connect', error);
+      console.error('DcxServer.createPassword', error);
       throw new DcxServerError(error);
     }
   }
 
   /**
-   * @summary Configures the DCX server by creating a new password, initializing Web5,
-   * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
-   */
-  // @handleAsyncErrors
-  public async setupDcxServer(): Promise<void> {
+  * @summary Configures the DCX server by creating a new password, initializing Web5,
+  * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
+  */
+  public async setup(): Promise<void> {
     try {
       if (!this.CIPHER_KEY) {
         console.warn(
@@ -134,25 +79,66 @@ export class DcxServer extends DcxEnv {
           'SECURITY WARNING: You have not set a WEB5_CONNECT_PASSWORD, one ' +
           'will be generated for you and saved to web5.password'
         );
-        await this.createDwnPassword();
+        await this.createPassword();
       }
 
-      const connected = await this.web5Connect();
-      console.log('Web5 connected', connected);
-      console.log('this  =>', this, '\n~~~~~~~~~~~~~~~~~~~~~~\n');
-      console.log('web5  =>', DwnManager.web5, '\n~~~~~~~~~~~~~~~~~~~~~~\n');
-      console.log('did   =>', DidManager.bearerDid, '\n~~~~~~~~~~~~~~~~~~~~~~\n');;
+      console.log('Initializing Web5 connection ... ');
+      if (!this.WEB5_CONNECT_RECOVERY_PHRASE) {
+        console.warn(
+          'SECURITY WARNING: You have not set a WEB5_CONNECT_RECOVERY_PHRASE, ' +
+          'one will be generated for you and saved to file web5.seed'
+        );
+      }
+      const { web5, did, recoveryPhrase: newSeedPhrase } = await Web5.connect({
+        sync: 'off',
+        password: this.WEB5_CONNECT_PASSWORD,
+        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+        techPreview: { dwnEndpoints: DcxEnv.DWN_ENDPOINTS },
+      });
 
-      await DwnManager.setupDcxDwn();
-      console.log('DCX DWN setup complete!');
+      DwnManager.web5 = web5;
+      DwnManager.agent = web5.agent as Web5PlatformAgent;
+
+      const { did: bearerDid } = await DwnManager.agent.identity.get({ didUri: did }) ?? {};
+      if (!bearerDid) {
+        throw new DcxServerError('Failed to get bearer DID');
+      }
+
+      DidManager.did = did;
+      DidManager.bearerDid = bearerDid;
+      DidManager.portableDid = await bearerDid.export();
+
+      if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newSeedPhrase) {
+        console.info(
+          'ADVISORY: New Web5.connect recovery phrase created and saved to file web5.seed, ' +
+          'to reuse the Web5 data created in this DCX server, set ' +
+          'WEB5_CONNECT_RECOVERY_PHRASE to this value in .env',
+        );
+        await writeFile('web5.seed', newSeedPhrase);
+
+        console.info(
+          'ADVISORY: New DCX DID created and saved to file portable.json ' +
+          'to reuse the DID created for this DCX server, set ' +
+          'WEB5_CONNECT_RECOVERY_PHRASE and WEB5_CONNECT_PASSWORD in .env',
+        );
+        await writeFile('portable.json', stringifier(DidManager.portableDid));
+      }
+
+      console.log('Web5 connection initialized!');
+      // console.log('this  =>', this, '\n~~~~~~~~~~~~~~~~~~~~~~\n');
+      // console.log('web5  =>', DwnManager.web5, '\n~~~~~~~~~~~~~~~~~~~~~~\n');
+      // console.log('did   =>', DidManager.bearerDid, '\n~~~~~~~~~~~~~~~~~~~~~~\n');;
+      this.isInitialized = true;
     } catch (error: any) {
-      console.error('DcxServer.setupDcxServer', error);
+      console.error('DcxServer.setup', error);
       throw new DcxServerError(error);
     }
   }
 
-  // @handleAsyncErrors
-  public async poll(): Promise<void> {
+  /**
+   * @summary Polls the DWN for incoming records
+   */
+  public static async poll(): Promise<void> {
     try {
       const DWN_CURSOR = DcxEnv.DWN_CURSOR;
       const DWN_LAST_RECORD_ID = DcxEnv.DWN_LAST_RECORD_ID;
@@ -228,38 +214,26 @@ export class DcxServer extends DcxEnv {
     }
   }
 
-  public async setup(): Promise<void> {
-    try {
-      console.log('Setting up DCX server ...');
-
-      // Setup DCX server
-      await this.setupDcxServer();
-      console.log('DCX server setup complete!');
-
-      // Setup DCX DWN
-      await DwnManager.setupDcxDwn();
-      console.log('DCX DWN setup complete!');
-
-      this.isInitialized = true;
-      console.log('DCX initialized! Polling for incoming records ...')
-    } catch (error: any) {
-      console.error('DcxServer.setup', error);
-      throw new DcxServerError('Failed to setup DCX server');
-    }
-  }
-
   /**
    *  
    * @summary Starts the DCX server
    * @returns void
    */
   public async start(): Promise<void> {
-    // Start polling for incoming records
+
     try {
       await this.setup();
-      await this.poll()
     } catch (error) {
-      console.error('Failed to start DCX server', error);
+      console.error('Failed to setup DCX server', error);
     }
+
+    try {
+      await DwnManager.setup();
+    } catch (error) {
+      console.error('Failed to setup DCX DWN', error);
+    }
+
+    // Start polling for incoming records
+    await DcxServer.poll().catch((error: any) => console.error('Error while polling DWN', error));
   }
 }

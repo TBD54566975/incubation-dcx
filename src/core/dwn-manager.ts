@@ -42,7 +42,7 @@ export class DwnManager {
    * Query credential issuer manifest in DWN
    * @returns Record[]; see {@link Record}
    */
-  public static async queryDcxIssuerManifest(): Promise<Record[]> {
+  public static async queryManifests(): Promise<Record[]> {
     const { records: manifestRecords = [] } = await DwnManager.web5.dwn.records.query({
       from: DidManager.did,
       message: {
@@ -62,9 +62,9 @@ export class DwnManager {
   * Configure credential issuer protocol in DWN
   * @returns DwnResponseStatus; see {@link DwnResponseStatus}
   */
-  public static async configureDcxIssuerProtocol(): Promise<DwnResponseStatus> {
-    console.log('configureDcxIssuerProtocol web5', this.web5)
-    console.log('configureDcxIssuerProtocol this.web5.agent.agentDid.uri', this.web5.agent.agentDid.uri)
+  public static async configureProtocols(): Promise<DwnResponseStatus> {
+    console.log('configureProtocols web5', DwnManager.web5)
+    console.log('configureProtocols DwnManager.web5.agent.agentDid.uri', DwnManager.web5.agent.agentDid.uri)
 
     const { status: configure, protocol } = await DwnManager.web5.dwn.protocols.configure({
       message: { definition: credentialIssuerProtocol },
@@ -97,7 +97,7 @@ export class DwnManager {
    * @param manifestRecords Record[]; see {@link Record}
    * @returns CredentialManifest[]; see {@link CredentialManifest}
    */
-  public static async readMissingManifests(manifestRecords: Record[]): Promise<CredentialManifest[]> {
+  public static async filterManifests(manifestRecords: Record[]): Promise<CredentialManifest[]> {
     const manifestsRead = await Promise.all(
       manifestRecords.map(async (manifestRecord) => {
         const { record } = await DwnManager.web5.dwn.records.read({
@@ -130,7 +130,7 @@ export class DwnManager {
    * @returns Record; see {@link Record}
    */
   public static async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<Record> {
-    unwrittenManifest.issuer.id = this.web5.agent.agentDid.uri;
+    unwrittenManifest.issuer.id = DwnManager.web5.agent.agentDid.uri;
     const { record } = await DwnManager.web5.dwn.records.create({
       store: false,
       data: unwrittenManifest,
@@ -142,16 +142,16 @@ export class DwnManager {
         published: true,
       },
     });
-    const sendResult = await record?.send(this.web5.agent.agentDid.uri);
+    const sendResult = await record?.send(DwnManager.web5.agent.agentDid.uri);
     console.log('Sent manifest to remote DWN', sendResult);
     return !record ? ({} as Record) : record;
   }
 
-  public static async createMissingManifests(missingManifests: CredentialManifest[]): Promise<Record[]> {
+  public static async createManifests(missingManifests: CredentialManifest[]): Promise<Record[]> {
     return await Promise.all(
       missingManifests.map(
         async (unwrittenManifest: CredentialManifest) =>
-          await this.createMissingManifest(unwrittenManifest),
+          await DwnManager.createMissingManifest(unwrittenManifest),
       ),
     );
   }
@@ -162,25 +162,25 @@ export class DwnManager {
    * @returns Promise<void>
    */
   // @handleDwnErrors
-  public static async setupDcxDwn(): Promise<void> {
+  public static async setup(): Promise<void> {
     console.log('Setting up DWN ...')
-    const { status, protocols } = await this.queryDcxIssuerProtocol();
+    const { status, protocols } = await DwnManager.queryDcxIssuerProtocol();
     console.log('Query status', status);
     console.log(`Found ${protocols.length} credential-issuer protocols in DWN`);
 
     if (!protocols.length) {
       console.log('No dcx protocol manifests found. Configuring ...');
-      const result = await this.configureDcxIssuerProtocol();
+      const result = await DwnManager.configureProtocols();
       console.log('Credential-issuer protocol configured in DWN', result);
     }
 
-    const records = await this.queryDcxIssuerManifest();
+    const records = await DwnManager.queryManifests();
     console.log(`Found ${records.length} manifests`);
 
-    const unwrittenManifests = await this.readMissingManifests(records);
+    const unwrittenManifests = await DwnManager.filterManifests(records);
     console.log(`Found ${unwrittenManifests.length} unwritten manifests`);
 
-    const createdManifests = await this.createMissingManifests(unwrittenManifests);
+    const createdManifests = await DwnManager.createManifests(unwrittenManifests);
     console.log(`Created ${createdManifests.length} manifests`);
   }
 }
