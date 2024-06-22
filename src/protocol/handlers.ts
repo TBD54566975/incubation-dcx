@@ -7,7 +7,7 @@ import {
 } from '@web5/credentials';
 import { BearerDid, DidDht } from '@web5/dids';
 import { DcxEnv } from '../config/env.js';
-import { DidManager, DwnManager } from '../core/index.js';
+
 import {
   AdditionalProperties,
   CredentialManifest,
@@ -16,6 +16,7 @@ import {
 } from '../types/dcx.js';
 import { stringifier } from '../utils/index.js';
 import { credentialIssuerProtocol, responseSchema } from './index.js';
+import { Web5Manager } from '../core/index.js';
 
 type VerificationResponse = {
   issuer: string;
@@ -45,7 +46,7 @@ export class ProtocolHandlers {
 
     const response = await ProtocolHandlers.issueVC(recordAuthor, vp, manifest);
 
-    const { record: postRecord, status: createStatus } = await DwnManager.web5.dwn.records.create({
+    const { record: postRecord, status: createStatus } = await Web5Manager.web5.dwn.records.create({
       store: false,
       data: response,
       message: {
@@ -135,7 +136,7 @@ export class ProtocolHandlers {
       data: vcData,
     });
     // sign vc
-    const signedOutputVc = await outputVc.sign({ did: DidManager.bearerDid });
+    const signedOutputVc = await outputVc.sign({ did: Web5Manager.bearerDid });
 
     return {
       fulfillment: {

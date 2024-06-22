@@ -1,3 +1,1 @@
-export * from './did-manager.js';
-export * from './dwn-manager.js';
-export * from './dcx-server.js';
+export * from './web5-manager.js';
