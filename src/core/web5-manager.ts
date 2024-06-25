@@ -10,7 +10,7 @@ import {
     PortableDid,
 } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { Config } from '../config.js';
+import { Config } from './config.js';
 import { credentialIssuerProtocol, ExampleManifest, manifestSchema } from '../protocol/index.js';
 import { CredentialManifest, ServerOptionIssuers, ServerOptionManifests, ServerOptionProviders } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';

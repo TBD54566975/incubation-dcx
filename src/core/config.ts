@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { TrustedIssuer } from './index.js';
+import { TrustedIssuer } from '../index.js';
 dotenv.config();
 export class Config {
   public static PORT = process.env.PORT || 3000;
@@ -58,6 +58,3 @@ export class Config {
     return this;
   }
 }
-
-// export const ConfigConfig = new ConfigConfig();
-// console.debug('ConfigConfig', ConfigConfig);
