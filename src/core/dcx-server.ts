@@ -3,34 +3,61 @@ import { Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { writeFile } from 'fs/promises';
 import { exit } from 'process';
+import terminalLink from 'terminal-link';
 import { Config } from '../index.js';
 import { ProtocolHandlers } from '../protocol/handlers.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
-import { CredentialManifest } from '../types/dcx.js';
+import {
+  CredentialManifest,
+  Handler,
+  Provider,
+  ServerOptionHandlers,
+  ServerOptionIssuers,
+  ServerOptionManifests,
+  ServerOptionProviders,
+  ServerOptions,
+  TrustedIssuer
+} from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
+import Logger from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DidManager, Web5Manager } from './web5-manager.js';
-import terminalLink from 'terminal-link';
-import Logger from '../utils/logger.js';
-
-type DcxServerOptions = { manifests?: CredentialManifest[] };
 
 export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
-  manifests: CredentialManifest[];
+  manifests: ServerOptionManifests;
+  handlers: ServerOptionHandlers;
+  providers: ServerOptionProviders;
+  issuers: ServerOptionIssuers;
 
-  constructor(options: DcxServerOptions) {
+  constructor(options: ServerOptions) {
     super();
     this.isPolling = false;
-    this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
-    this.manifests = Web5Manager.manifests = options.manifests ?? [];
+    this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE; 
+    // get: (name: string) => this.manifests?.[name] ?? null,
+    this.manifests = Web5Manager.manifests = options.manifests ?? {};
+    this.handlers = ProtocolHandlers.handlers = options.handlers ?? {};
+    this.providers = Web5Manager.providers = options.providers ?? {};
+    this.issuers = Web5Manager.issuers = options.issuers ?? {};
   }
 
-  public useManifest(name: string, manifest: CredentialManifest): void {
-    Web5Manager.manifests.push({ ...manifest, name });
+  public static useManifest(name: string, manifest: CredentialManifest): void {
+    Web5Manager.manifests[name] = manifest;
+  }
+
+  public static useHandler(name: string, handler: Handler): void {
+    ProtocolHandlers.handlers[name] = handler;
+  }
+
+  public static useProvider(name: string, provider: Provider): void {
+    Web5Manager.providers[name] = provider
+  }
+
+  public static useIssuer(name: string, issuer: TrustedIssuer): void {
+    Web5Manager.issuers[name] = issuer
   }
 
   /**
@@ -76,6 +103,21 @@ export class DcxServer extends Config {
         techPreview: { dwnEndpoints: Config.DWN_ENDPOINTS },
       });
 
+      const agent = web5.agent as Web5PlatformAgent
+      await agent.sync.registerIdentity({ did: connectedDid });
+
+      const { did: connectedBearerDid } = await Web5Manager.agent.identity.get({ didUri: connectedDid }) ?? {};
+      if (!connectedBearerDid) {
+        throw new DcxServerError('Failed to get bearer DID');
+      }
+      Web5Manager.connection = new DidManager(connectedDid, connectedBearerDid, await connectedBearerDid.export());
+      Web5Manager.web5 = web5;
+      Web5Manager.agent = agent;
+
+      const ids = await Web5Manager.agent.identity.list();
+      Logger.debug("ids", ids);
+
+
       if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newSeedPhrase) {
         Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
         Logger.security('New Web5 recovery phrase saved to recovery.key');
@@ -83,30 +125,15 @@ export class DcxServer extends Config {
         await writeFile('recovery.key', newSeedPhrase);
 
         Logger.info(
-          'New Web5 connection created and includes:',
-          `\n    1. Agent ${terminalLink('Web5 Agent', 'https://www.npmjs.com/package/@web5/agent')}; see agent.json` +
+          'New Web5 connection created!',
+          `\n    1. Agent DID ${terminalLink('Web5 User Agent', 'https://www.npmjs.com/package/@web5/user-agent')}; see agent.json` +
           `\n    2. Connection DID; see connection.json` +
           '\n    3. Recovery Phrase; see recovery.key'
         );
 
-        const portable = await Web5Manager.agent.agentDid.export();
-        await writeFile('agent.json', stringifier(portable));
-        await writeFile('connection.json', stringifier(Web5Manager.connectedDid.portableDid));
+        await writeFile('agent.json', stringifier(await Web5Manager.agent.agentDid.export()));
+        await writeFile('connection.json', stringifier(Web5Manager.connection.portableDid));
       }
-
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = web5.agent as Web5PlatformAgent;
-      await Web5Manager.agent.sync.registerIdentity({ did: connectedDid });
-
-      const ids = await Web5Manager.agent.identity.list();
-      Logger.debug("ids", ids);
-
-      const { did: connectedBearerDid } = await Web5Manager.agent.identity.get({ didUri: connectedDid }) ?? {};
-      if (!connectedBearerDid) {
-        throw new DcxServerError('Failed to get bearer DID');
-      }
-      const portableConnectedDid = await connectedBearerDid.export();
-      Web5Manager.connectedDid = new DidManager(connectedDid, connectedBearerDid, portableConnectedDid);
 
       this.isInitialized = true;
     } catch (error: any) {

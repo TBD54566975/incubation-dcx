@@ -12,7 +12,7 @@ import {
 import { readFile } from 'fs/promises';
 import { Config } from '../config.js';
 import { credentialIssuerProtocol, ExampleManifest, manifestSchema } from '../protocol/index.js';
-import { CredentialManifest } from '../types/dcx.js';
+import { CredentialManifest, ServerOptionManifests, ServerOptionProviders, ServerOptionIssuers } from '../types/dcx.js';
 import { DcxDwnError, dwn500Error, DwnError } from '../utils/error.js';
 import Logger from '../utils/logger.js';
 import { DwnUtils } from '../utils/dwn.js';
@@ -100,7 +100,7 @@ export class DwnManager {
      */
     public static async queryManifests(): Promise<Record[]> {
         const { records: manifestRecords = [] } = await Web5Manager.web5.dwn.records.query({
-            from: Web5Manager.connectedDid.did,
+            from: Web5Manager.connection.did,
             message: {
                 filter: {
                     schema: manifestSchema.$id,
@@ -122,7 +122,7 @@ export class DwnManager {
         try {
             // Query DWN for credential-issuer protocol
             const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
-                from: Web5Manager.connectedDid.did,
+                from: Web5Manager.connection.did,
                 message: {
                     filter: {
                         protocol: credentialIssuerProtocol.protocol,
@@ -165,7 +165,7 @@ export class DwnManager {
 
             Logger.debug('Configured credential issuer protocol', protocol);
 
-            const { status: send = dwn500Error } = await protocol.send(Web5Manager.connectedDid.did);
+            const { status: send = dwn500Error } = await protocol.send(Web5Manager.connection.did);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
@@ -193,7 +193,7 @@ export class DwnManager {
             const manifestsRead = await Promise.all(
                 manifestRecords.map(async (manifestRecord) => {
                     const { record } = await Web5Manager.web5.dwn.records.read({
-                        from: Web5Manager.connectedDid.did,
+                        from: Web5Manager.connection.did,
                         message: {
                             filter: {
                                 recordId: manifestRecord.id,
@@ -226,7 +226,7 @@ export class DwnManager {
      * @returns Record; see {@link Record}
      */
     public static async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<Record | undefined> {
-        unwrittenManifest.issuer.id = Web5Manager.connectedDid.did;
+        unwrittenManifest.issuer.id = Web5Manager.connection.did;
         const { record, status: create } = await Web5Manager.web5.dwn.records.create({
             store: false,
             data: unwrittenManifest,
@@ -249,7 +249,7 @@ export class DwnManager {
             throw new DwnError(code, detail);
         }
 
-        const { status: send } = await record.send(Web5Manager.connectedDid.did);
+        const { status: send } = await record.send(Web5Manager.connection.did);
         if (DwnUtils.isFailure(send.code)) {
             const { code, detail } = send;
             Logger.error('DWN protocol send fail', send);
@@ -308,9 +308,12 @@ export class DwnManager {
 
 export abstract class Web5Manager extends DwnManager {
     public static web5: Web5;
+    public static connection: DidManager;
     public static agent: Web5PlatformAgent;
-    public static connectedDid: DidManager;
-    public static manifests: CredentialManifest[] = [];
+    
+    public static manifests: ServerOptionManifests;
+    public static providers: ServerOptionProviders;
+    public static issuers: ServerOptionIssuers;
 
     constructor() {
         super();

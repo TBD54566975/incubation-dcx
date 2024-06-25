@@ -9,6 +9,7 @@ import { Web5Manager } from '../core/index.js';
 import {
   AdditionalProperties,
   CredentialManifest,
+  ServerOptionHandlers,
   TrustedIssuer,
   VcDataRequest,
   VcVerification
@@ -21,7 +22,7 @@ import { DwnUtils } from '../utils/dwn.js';
 
 
 export class ProtocolHandlerUtils {
-
+  public static handlers: ServerOptionHandlers;
   /**
    *
    * Verify DCX application VCs
@@ -60,7 +61,9 @@ export class ProtocolHandlerUtils {
 
 }
 export class ProtocolHandlers extends ProtocolHandlerUtils {
-
+  constructor() {
+    super();
+  }
   /**
    * 
    * Processes an application record
@@ -123,18 +126,25 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
   public static async issueVerifiableCredential(
     vp: VerifiablePresentation,
     subjectDid: string,
-    credentialManifest: CredentialManifest
+    manifestName?: string,
+    credentialManifest?: CredentialManifest,
   ) {
-    const manifest = Web5Manager.manifests?.[0];
+
+    if (!manifestName && !credentialManifest) {
+      throw new DcxProtocolHandlerError('Must provide either manifest or manifest name');
+    }
+
+    const manifest = !!manifestName ? Web5Manager.manifests?.[manifestName] : credentialManifest;
+
     if (!manifest) {
-      throw new DcxProtocolHandlerError('No manifest found');
+      throw new DcxProtocolHandlerError('Manifest not found');
     }
 
     // filter valid creds
     Logger.debug('Parsing verfiable credentials against verifiable presentation', stringifier(vp));
     const selectedVcs: string[] = PresentationExchange.selectCredentials({
       vcJwts: vp.verifiableCredential,
-      presentationDefinition: credentialManifest.presentation_definition,
+      presentationDefinition: manifest.presentation_definition,
     });
     Logger.debug(`Found ${selectedVcs.length} Verifiable Credentials`);
 
@@ -163,12 +173,12 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     // generate vc
     const outputVc = await VerifiableCredential.create({
       type: Config.VC_NAME,
-      issuer: Web5Manager.connectedDid.did,
+      issuer: Web5Manager.connection.did,
       subject: subjectDid,
       data: vcData,
     });
     // sign vc
-    const signedOutputVc = await outputVc.sign({ did: Web5Manager.connectedDid.bearerDid });
+    const signedOutputVc = await outputVc.sign({ did: Web5Manager.connection.bearerDid });
 
     return {
       fulfillment: {

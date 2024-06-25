@@ -1,11 +1,6 @@
 import { VcDataModel, VerifiableCredential } from '@web5/credentials';
 import { Config } from '../config.js';
 
-export type TrustedIssuer = {
-  name: string;
-  did: string
-};
-
 export type AdditionalProperties = Record<string, any>;
 
 export type VerifiablePresentation = {
@@ -29,8 +24,6 @@ export type VcDataRequest = {
 } | null;
 
 export type DcxConfigType = InstanceType<typeof Config>;
-
-
 
 export type ManifestOutputDescriptor = {
   id: string;
@@ -85,4 +78,42 @@ export type VcVerification = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
+};
+
+export type TrustedIssuer = {
+  name: string;
+  did: string
+};
+
+export type Provider = {
+  name: string;
+  endpoint: string
+};
+
+export type Handler =
+  | ((...args: any[]) => any)
+  | ((...args: any[]) => Promise<any>);
+
+export type ServerOptionHandlers = {
+  [key: string | number | symbol]: Handler
+};
+
+export type ServerOptionProviders = {
+  [key: string | number | symbol]: Provider
+};
+
+export type ServerOptionManifests = {
+  [key: string | number | symbol]: CredentialManifest | any;
+  get?(name: string): CredentialManifest | undefined;
+};
+
+export type ServerOptionIssuers = {
+  [key: string | number | symbol]: TrustedIssuer
+};
+
+export type ServerOptions = {
+  handlers?: ServerOptionHandlers;
+  providers?: ServerOptionProviders;
+  manifests?: ServerOptionManifests;
+  issuers?: ServerOptionIssuers;
 };
