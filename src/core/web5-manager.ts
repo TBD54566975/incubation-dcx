@@ -17,7 +17,7 @@ import { DcxDwnError, dwn500Error, DwnError } from '../utils/error.js';
 import Logger from '../utils/logger.js';
 import { DwnUtils } from '../utils/dwn.js';
 
-export class DidManager {
+export class ConnectedDidManager {
     public did: string;
     public bearerDid: BearerDid;
     public portableDid: PortableDid;
@@ -27,6 +27,13 @@ export class DidManager {
         this.bearerDid = bearerDid;
         this.portableDid = portableDid;
     }
+}
+
+export class DidManager extends ConnectedDidManager {
+    public static did: string;
+    public static bearerDid: BearerDid;
+    public static portableDid: PortableDid;
+
 
     /**
      *
@@ -35,9 +42,9 @@ export class DidManager {
      * @returns BearerDid; see {@link BearerDid}
      */
     // @handleAsyncErrors
-    public async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
-        this.bearerDid = await DidDht.create({ options });
-        return this.bearerDid;
+    public static async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
+        DidManager.bearerDid = await DidDht.create({ options });
+        return DidManager.bearerDid;
     }
 
     /**
@@ -47,7 +54,7 @@ export class DidManager {
      * @returns DidResolutionResult; see {@link DidResolutionResult}
      */
     // @handleAsyncErrors
-    public async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
+    public static async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
         return await DidDht.resolve(didUri);
     }
 
@@ -57,10 +64,10 @@ export class DidManager {
      * @returns DidRegistrationResult; see {@link DidRegistrationResult}
      */
     // @handleAsyncErrors
-    public async publishDidDoc(
+    public static async publishDidDoc(
         gatewayUri: string = Config.DHT_GATEWAY_ENDPOINT,
     ): Promise<DidRegistrationResult> {
-        return await DidDht.publish({ did: this.bearerDid, gatewayUri });
+        return await DidDht.publish({ did: DidManager.bearerDid, gatewayUri });
     }
 
     /**
@@ -70,10 +77,10 @@ export class DidManager {
      * @returns BearerDid; see {@link BearerDid}
      */
     // @handleAsyncErrors
-    public async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
+    public static async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
         const didFileString = (await readFile(didFilepath))?.toString();
-        this.portableDid = JSON.parse(didFileString);
-        return await this.importPortableDid(this.portableDid);
+        DidManager.portableDid = JSON.parse(didFileString);
+        return await DidManager.importPortableDid(DidManager.portableDid);
     }
 
     /**
@@ -82,9 +89,9 @@ export class DidManager {
      * @returns BearerDid; see {@link BearerDid}
      */
     // @handleAsyncErrors
-    public async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
-        this.bearerDid = await DidDht.import({ portableDid: this.portableDid ?? portableDid });
-        return this.bearerDid;
+    public static async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
+        DidManager.bearerDid = await DidDht.import({ portableDid: DidManager.portableDid ?? portableDid });
+        return DidManager.bearerDid;
     }
 }
 
@@ -165,7 +172,7 @@ export class DwnManager {
 
             Logger.debug('Configured credential issuer protocol', protocol);
 
-            const { status: send = dwn500Error } = await protocol.send(Web5Manager.connectedDid.did);
+            const { status: send = dwn500Error } = await protocol.send(DidManager.did);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
