@@ -42,6 +42,11 @@ export const protocol = {
           who: 'anyone',
           can: ['create'],
         },
+        {
+          who: 'author',
+          of: 'application',
+          can: ['read'],
+        }
       ],
       // a credential response might be sent in response to an application
       response: {

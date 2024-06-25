@@ -1,6 +1,6 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
+Decentralized Credential Exchange (DCX) is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
 
 ## Package
 
@@ -13,9 +13,20 @@ The DCX package is a FOSS npm package used to bootstrap running a DCX issuer ser
 
 ## Protocol
 
-The DCX protocol is a DWN protocol designed to facilitate the decentralized exchange of credentials between issuers, applicants and their DWNs. The interactions between these actors is achieved by performing CRUD operations on DWNs in the form of DWN Records. Specifically, DWN records are used to facilitate decentralized communication between actors. These records contain informatino about required input VCs to desired output VCs.
+The DCX protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
-The DCX protocol uses [Credential Manifests](https://identity.foundation/credential-manifest/) to achieve this communication between DCX actors such that issuers define manifests for applicants to read so they can understand what VCs are required in the exchange. Specifically, manifests describe the VC inputs and VC outputs of an Applicant and an Issuer. For more details on the interactions, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
+[Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
+1. The input credentials required by the issuer
+2. The output credential(s) the applicant can expect
+3. Data formatting preferences
+
+> Credential Manifests are a resource format that defines preconditional requirements, Issuer style preferences, and other facets. User Agents utilize to help articulate and select the inputs necessary for processing and issuance of a specified credential.
+> 
+> A Credential Manifest is a document, hosted by an Issuer and consumed by User Agents, codifying the credentials that it issues in terms of pre-requisites and inputs. These can be static or dynamic, but their form and usage are detailed in this specification.
+
+Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
+
+The DCX protocol and its varying schemas can be found below:
 
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
@@ -160,7 +171,6 @@ const { record: applicationRecord, status: createStatus } =
   - [x] Read applications, parse credentials and validate against manifest (presentation exchange): [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
   - [x] Request new credentials from trusted 3rd party issuers: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
   - [x] Create new credentials from 3rd party data requests: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [ ] Create and update invoices as responses to applications
 - [x] DCX DWN Manager [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
 - [x] DID DHT Manager [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
 - [x] DCX Server [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)

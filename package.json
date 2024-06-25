@@ -85,7 +85,6 @@
     "prettier": "^3.3.2"
   },
   "devDependencies": {
-    "chai": "^5.1.1",
     "@eslint/js": "^9.4.0",
     "@types/chai": "^4.3.16",
     "@types/eslint": "^8.56.10",
@@ -96,9 +95,12 @@
     "@types/sinon": "^17.0.3",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
+    "chai": "^5.1.1",
+    "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "rimraf": "^5.0.7",
+    "terminal-link": "^3.0.0",
     "tsx": "^4.11.0",
     "typescript": "^5.4.5"
   }
