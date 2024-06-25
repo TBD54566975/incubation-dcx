@@ -14,6 +14,7 @@ import { Time } from '../utils/time.js';
 import { DidManager, Web5Manager } from './web5-manager.js';
 import terminalLink from 'terminal-link';
 import Logger from '../utils/logger.js';
+import { Web5UserAgent } from '@web5/user-agent';
 
 type DcxServerOptions = { manifests?: CredentialManifest[] };
 
@@ -68,15 +69,27 @@ export class DcxServer extends Config {
         await this.createPassword();
       }
 
+      const agent = await Web5UserAgent.create();
       Logger.log('Initializing Web5 connection ... ');
-      const { web5, did: connectedDid, recoveryPhrase: newSeedPhrase } = await Web5.connect({
-        sync: 'off',
+      const isFirstLaunch = await agent.firstLaunch();
+      Logger.debug('isFirstLaunch', isFirstLaunch);
+      const newSeedPhrase = isFirstLaunch ? await agent.initialize({
         password: this.WEB5_CONNECT_PASSWORD,
-        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        techPreview: { dwnEndpoints: Config.DWN_ENDPOINTS },
-      });
+        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE
+      }) : await agent.start({ password: this.WEB5_CONNECT_PASSWORD });
+      Logger.debug('newSeedPhrase', newSeedPhrase);
 
-      if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newSeedPhrase) {
+      // const { web5, did: connectedDid, recoveryPhrase: newSeedPhrase } = await Web5.connect({
+      //   sync: 'off',
+      //   password: this.WEB5_CONNECT_PASSWORD,
+      //   recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+      //   techPreview: { dwnEndpoints: Config.DWN_ENDPOINTS },
+      // });
+
+      Web5Manager.agent = agent as Web5PlatformAgent;
+      Logger.debug("Web5Manager", Web5Manager);
+
+      if (isFirstLaunch && newSeedPhrase && !this.WEB5_CONNECT_RECOVERY_PHRASE) {
         Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
         Logger.security('New Web5 recovery phrase saved to recovery.key');
         Logger.security('Set .env WEB5_CONNECT_RECOVERY_PHRASE to this recovery.key to reuse this Web5 data');
@@ -94,14 +107,17 @@ export class DcxServer extends Config {
         await writeFile('connection.json', stringifier(Web5Manager.connectedDid.portableDid));
       }
 
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = web5.agent as Web5PlatformAgent;
-      await Web5Manager.agent.sync.registerIdentity({ did: connectedDid });
+      // Web5Manager.web5 = web5;
+      const connectedDid = agent.did.agent.agentDid.uri;
+      Web5Manager.web5 = new Web5({ agent, connectedDid })
+      Logger.debug("connectedDid", connectedDid);
+      // await Web5Manager.agent.sync.registerIdentity({ did: connectedDid });
 
       const ids = await Web5Manager.agent.identity.list();
       Logger.debug("ids", ids);
 
       const { did: connectedBearerDid } = await Web5Manager.agent.identity.get({ didUri: connectedDid }) ?? {};
+      Logger.debug("connectedBearerDid", connectedBearerDid);
       if (!connectedBearerDid) {
         throw new DcxServerError('Failed to get bearer DID');
       }
@@ -109,6 +125,7 @@ export class DcxServer extends Config {
       Web5Manager.connectedDid = new DidManager(connectedDid, connectedBearerDid, portableConnectedDid);
 
       this.isInitialized = true;
+      Logger.debug("Web5Manager", Web5Manager);
     } catch (error: any) {
       Logger.error(DcxServer.name, error);
       throw error;
