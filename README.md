@@ -42,29 +42,24 @@ The DCX protocol and its varying schemas can be found below:
   - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
 
-## Architecture
-
-![dcx-architecture](./docs/img/dcx-architecture.png)
-
-#### Actors
+## Architecture Diagram
 
 - **DCX**: Protocol boundary within which actors communicate
 - **DCX Issuer**: Web server running @web5/dcx and web5-js
 - **Issuer DWN**: DCX Issuer's DWN server running dwn-sdk-js
 - **DCX Applicant**: User client application running @web5/dcx and web5-js
 - **Applicant DWN**: DCX Applicant's DWN server running dwn-sdk-js
-
-#### Packages
-
 - [web5-js](https://github.com/TBD54566975/web5-js)
 - [@web5/dcx](https://github.com/TBD54566975/incubation-dcx)
 - [dwn-sdk-js](https://github.com/TBD54566975/dwn-sdk-js)
 
-## Sequence
+![dcx-architecture](./docs/img/dcx-architecture.png)
+
+## Sequence Diagrams
 
 #### Full Sequence
 
-![dcx-full-sequence](./docs/img/dcx-full-sequence.png)
+<details>
 
 1.  DCX Issuer configures Issuer DWN with dcx protocol: credential-issuer and credential-applicant
 2.  DCX Issuer creates credential manifest record in Issuer DWN
@@ -79,8 +74,13 @@ The DCX protocol and its varying schemas can be found below:
 11. DCX Applicant reads response record via Applicant DWN subscription
 12. DCX Issuer creates invoice record in Applicant DWN
 13. DCX Applicant reads invoice record via Applicant DWN subscription
+</details>
+<br />
 
-Notes:
+![dcx-full-sequence](./docs/img/dcx-full-sequence.png)
+
+<details>
+<summary>Notes</summary>
 
 1. Credential-issuer and credential-applicant protocols defines DWN record CRUD actions between Issuer and Applicant
 2. under the credential-issuer manifest route
@@ -91,9 +91,11 @@ Notes:
 7. Application record includes credentials that satisfy credential manifest mentioned in step 5
 9. DCX Issuer validates credentials against credential manifest using DCX software handlers
 
+</details>
+
 #### Issuer Sequence
 
-![dcx-issuer-sequence](./docs/img/dcx-issuer-sequence.png)
+<details>
 
 1. DCX Issuer configures Issuer DWN with dcx protocol (issuer & applicant)
 2. DCX Issuer creates credential manifest record in Issuer DWN
@@ -106,10 +108,14 @@ Notes:
 9. DCX Issuer reads an incoming application record and validates against respective credential manifest
 10. DCX Issuer creates application response or denial record and sends to applicant DWN
 11. DCX Issuer creates invoice response record and sends to applicant DWN
+</details>
+<br />
+
+![dcx-issuer-sequence](./docs/img/dcx-issuer-sequence.png)
 
 #### Applicant Sequence
 
-![dcx-applicant-sequence](./docs/img/dcx-applicant-sequence.png)
+<details>
 
 1. DCX Applicant configures Applicant DWN with dcx protocol (issuer & applicant)
 2. DCX Applicant creates subscription to Applicant DWN 
@@ -118,6 +124,17 @@ Notes:
 5. DCX Applicant creates application record in Issuer DWN
 6. DCX Applicant reads response record via Applicant DWN subscription
 7. DCX Applicant reads invoice record via Applicant DWN subscription (optional)
+</details>
+<br />
+
+![dcx-applicant-sequence](./docs/img/dcx-applicant-sequence.png)
+
+## Package Versions
+
+| Name                                                 |                                                                Latest Version                                                                 |
+| ---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: |
+| [@formfree/dcx](/src) | todo |
+
 
 ## Use
 
@@ -161,24 +178,31 @@ const { record: applicationRecord, status: createStatus } =
   });
 ```
 
-## Issues
+## Issues & PRs
 
 - [x] Create repo with documentation and diagrams
-- [x] [Credential issuer protocol handlers #11](https://github.com/TBD54566975/incubation-dcx/issues/11)
-- [x] [DCX DWN Manager #14](https://github.com/TBD54566975/incubation-dcx/issues/14)
-- [x] [DID DHT Manager #9](https://github.com/TBD54566975/incubation-dcx/issues/9)
-- [x] [DCX Server #12](https://github.com/TBD54566975/incubation-dcx/issues/12)
-- [ ] [Credential applicant protocol handlers #19](https://github.com/TBD54566975/incubation-dcx/issues/19)
-- [ ] [Tests #17](https://github.com/TBD54566975/incubation-dcx/issues/17)
-- [ ] [Publish to npmjs #20](https://github.com/TBD54566975/incubation-dcx/issues/20)
-
-### PRs
-- [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-- [#18](https://github.com/TBD54566975/incubation-dcx/pull/18)
-- [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
-- [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
-- [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
-- [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
+- [x] Credential issuer protocol handlers
+  - [Issue #11](https://github.com/TBD54566975/incubation-dcx/issues/11)
+  - [PR #5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [PR #18](https://github.com/TBD54566975/incubation-dcx/pull/18)
+- [x] DCX DWN Manager
+  - [Issue #14](https://github.com/TBD54566975/incubation-dcx/issues/14)
+  - [PR #15](https://github.com/TBD54566975/incubation-dcx/pull/15)
+- [x] DID DHT Manager
+  - [Issue #9](https://github.com/TBD54566975/incubation-dcx/issues/9)
+  - [PR #10](https://github.com/TBD54566975/incubation-dcx/pull/10)
+- [x] DCX Server
+  - [Issue #12](https://github.com/TBD54566975/incubation-dcx/issues/12)
+  - [PR #13](https://github.com/TBD54566975/incubation-dcx/pull/13)
+- [ ] Credential applicant protocol handlers
+  - [Issue #19](https://github.com/TBD54566975/incubation-dcx/issues/19)
+  - [PR #?]()
+- [ ] Tests
+  - [Issue #17](https://github.com/TBD54566975/incubation-dcx/issues/17)
+  - [PR #?]()
+- [ ] Publish to npmjs
+  - [Issue #20](https://github.com/TBD54566975/incubation-dcx/issues/20)
+  - [PR #?]()
 
 ## Project Resources
 
