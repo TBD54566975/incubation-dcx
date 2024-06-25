@@ -3,8 +3,15 @@ dist
 db-data
 /DATA
 .DS_Store
-keys.json
-.env
+
 cursor.json
 lastRecordId
 local-test.ts
+
+# Secrets
+CUSTOM-MANIFEST.json
+.env
+*keys*
+*key*
+agent.json
+connection.json

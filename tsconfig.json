@@ -2,24 +2,23 @@
     "compilerOptions": {
         "lib": [
             "DOM",
-            "ES2022"
+            "ES2022",
         ],
+        "target": "ES6",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "allowJs": true,
         "strict": true,
         "declaration": true,
         "declarationMap": true,
-        "target": "ES6",
-        "module": "NodeNext",
         "sourceMap": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "moduleResolution": "NodeNext",
         "declarationDir": "dist/types",
         "outDir": "dist/esm",
     },
     "include": [
-        "src",
-        "./src/index.ts",
+        "src"
     ],
     "exclude": [
         "node_modules",
