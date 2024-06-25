@@ -12,7 +12,6 @@ import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
 import { Time } from '../utils/time.js';
 import { DidManager, Web5Manager } from './web5-manager.js';
-
 import terminalLink from 'terminal-link';
 import Logger from '../utils/logger.js';
 
@@ -48,15 +47,10 @@ export class DcxServer extends Config {
       }
       const password = words.join(' ');
       this.WEB5_CONNECT_PASSWORD = password;
-      await writeFile('web5.password', password);
-      Logger.info(
-        'New Web5.connect password created and saved to file web5.password\n' +
-        '   to unlock and reuse the Web5 data created in this DCX server, set\n' +
-        '   WEB5_CONNECT_PASSWORD to this value in .env',
-      );
+      await writeFile('password.key', password);
       return password;
     } catch (error: any) {
-      Logger.error('DcxServer.createPassword', error);
+      Logger.error(DcxServer.name, error);
       throw error;
     }
   }
@@ -70,6 +64,7 @@ export class DcxServer extends Config {
       if (!this.WEB5_CONNECT_PASSWORD) {
         Logger.security('No WEB5_CONNECT_PASSWORD detected!');
         Logger.security('New Web5 password saved to password.key')
+        Logger.security('Be sure to set WEB5_CONNECT_PASSWORD in .env going forward')
         await this.createPassword();
       }
 
@@ -115,7 +110,7 @@ export class DcxServer extends Config {
 
       this.isInitialized = true;
     } catch (error: any) {
-      Logger.error('DcxServer.setup', error);
+      Logger.error(DcxServer.name, error);
       throw error;
     }
   }
@@ -218,7 +213,7 @@ export class DcxServer extends Config {
         }
       }
     } catch (error: any) {
-      Logger.error('DcxServer.poll', error);
+      Logger.error(DcxServer.name, error);
       return error;
     }
   }
@@ -243,8 +238,8 @@ export class DcxServer extends Config {
       this.isPolling = true;
       await this.poll();
     } catch (error: any) {
-      Logger.error('Failed to setup DCX DWN', error?.message);
-      Logger.error(error);
+      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      Logger.error(DcxServer.name, error);
     }
   }
 }
