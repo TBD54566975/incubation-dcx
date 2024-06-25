@@ -17,7 +17,7 @@ enum LogLevel {
  * 
  * A simple console logger with colorized output.
  */
-export default class Logger implements Partial<Console> {
+export class Logger implements Partial<Console> {
     public static level: 'debug' | 'error' | 'info' | 'log' | 'warn' = process.env.NODE_ENV === Env.Production ? 'error' : 'debug';
 
     public static debug(message?: unknown, ...args: unknown[]): void {

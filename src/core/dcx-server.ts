@@ -3,34 +3,68 @@ import { Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { writeFile } from 'fs/promises';
 import { exit } from 'process';
+import terminalLink from 'terminal-link';
 import { Config } from '../index.js';
 import { ProtocolHandlers } from '../protocol/handlers.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
-import { CredentialManifest } from '../types/dcx.js';
+import {
+  CredentialManifest,
+  Handler,
+  Provider,
+  ServerOptionHandlers,
+  ServerOptionIssuers,
+  ServerOptionManifests,
+  ServerOptionProviders,
+  ServerOptions,
+  TrustedIssuer
+} from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
+import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DidManager, Web5Manager } from './web5-manager.js';
-import terminalLink from 'terminal-link';
-import Logger from '../utils/logger.js';
 
-type DcxServerOptions = { manifests?: CredentialManifest[] };
+const defaultConnectOptions = {
+  sync: 'off',
+  techPreview: {
+    dwnEndpoints: Config.DWN_ENDPOINTS
+  },
+}
 
 export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
-  manifests: CredentialManifest[];
+  manifests: ServerOptionManifests;
+  handlers: ServerOptionHandlers;
+  providers: ServerOptionProviders;
+  issuers: ServerOptionIssuers;
 
-  constructor(options: DcxServerOptions) {
+  constructor(options: ServerOptions) {
     super();
     this.isPolling = false;
     this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
-    this.manifests = Web5Manager.manifests = options.manifests ?? [];
+    // get: (name: string) => this.manifests?.[name] ?? null,
+    this.manifests = Web5Manager.manifests = options.manifests ?? {};
+    this.handlers = ProtocolHandlers.handlers = options.handlers ?? {};
+    this.providers = Web5Manager.providers = options.providers ?? {};
+    this.issuers = Web5Manager.issuers = options.issuers ?? {};
   }
 
-  public useManifest(name: string, manifest: CredentialManifest): void {
-    Web5Manager.manifests.push({ ...manifest, name });
+  public useManifest(id: string, manifest: CredentialManifest): void {
+    Web5Manager.manifests[id] = manifest;
+  }
+
+  public useHandler(id: string, handler: Handler): void {
+    ProtocolHandlers.handlers[id] = handler;
+  }
+
+  public useProvider(id: string, provider: Provider): void {
+    Web5Manager.providers[id] = provider
+  }
+
+  public useIssuer(id: string, issuer: TrustedIssuer): void {
+    Web5Manager.issuers[id] = issuer;
   }
 
   /**
@@ -69,12 +103,25 @@ export class DcxServer extends Config {
       }
 
       Logger.log('Initializing Web5 connection ... ');
-      const { web5, did: connectedDid, recoveryPhrase: newSeedPhrase } = await Web5.connect({
-        sync: 'off',
+      const web5ConnectOptions = !this.WEB5_CONNECT_RECOVERY_PHRASE ? {
+        ...defaultConnectOptions,
+        password: this.WEB5_CONNECT_PASSWORD
+      } : {
+        ...defaultConnectOptions,
         password: this.WEB5_CONNECT_PASSWORD,
         recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        techPreview: { dwnEndpoints: Config.DWN_ENDPOINTS },
-      });
+      };
+      const { web5, did: connectedDid, recoveryPhrase: newSeedPhrase } = await Web5.connect(web5ConnectOptions);
+      const agent = web5.agent as Web5PlatformAgent
+
+      const { did: connectedBearerDid } = await agent.identity.get({ didUri: connectedDid }) ?? {};
+      if (!connectedBearerDid) {
+        throw new DcxServerError('Failed to get bearer DID');
+      }
+
+      Web5Manager.connection = new DidManager(connectedDid, connectedBearerDid, await connectedBearerDid.export());
+      Web5Manager.web5 = web5;
+      Web5Manager.agent = agent;
 
       if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newSeedPhrase) {
         Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
@@ -83,30 +130,15 @@ export class DcxServer extends Config {
         await writeFile('recovery.key', newSeedPhrase);
 
         Logger.info(
-          'New Web5 connection created and includes:',
-          `\n    1. Agent ${terminalLink('Web5 Agent', 'https://www.npmjs.com/package/@web5/agent')}; see agent.json` +
+          'New Web5 connection created!',
+          `\n    1. Agent DID ${terminalLink('Web5 User Agent', 'https://www.npmjs.com/package/@web5/user-agent')}; see agent.json` +
           `\n    2. Connection DID; see connection.json` +
           '\n    3. Recovery Phrase; see recovery.key'
         );
 
-        const portable = await Web5Manager.agent.agentDid.export();
-        await writeFile('agent.json', stringifier(portable));
-        await writeFile('connection.json', stringifier(Web5Manager.connectedDid.portableDid));
+        await writeFile('agent.json', stringifier(await Web5Manager.agent.agentDid.export()));
+        await writeFile('connection.json', stringifier(Web5Manager.connection.portableDid));
       }
-
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = web5.agent as Web5PlatformAgent;
-      await Web5Manager.agent.sync.registerIdentity({ did: connectedDid });
-
-      const ids = await Web5Manager.agent.identity.list();
-      Logger.debug("ids", ids);
-
-      const { did: connectedBearerDid } = await Web5Manager.agent.identity.get({ didUri: connectedDid }) ?? {};
-      if (!connectedBearerDid) {
-        throw new DcxServerError('Failed to get bearer DID');
-      }
-      const portableConnectedDid = await connectedBearerDid.export();
-      Web5Manager.connectedDid = new DidManager(connectedDid, connectedBearerDid, portableConnectedDid);
 
       this.isInitialized = true;
     } catch (error: any) {
@@ -156,7 +188,6 @@ export class DcxServer extends Config {
         const recordReads: Record[] = await Promise.all(
           recordIds.map(async (recordId: string) => {
             const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
-              from: Web5Manager.agent.agentDid.uri,
               message: {
                 filter: {
                   recordId,
@@ -181,7 +212,7 @@ export class DcxServer extends Config {
             if (record.protocolPath === 'application') {
               Logger.log(DcxServer.name, 'Web5Manager.manifests', Web5Manager.manifests)
 
-              const applicationManifest = Web5Manager.manifests.find(
+              const applicationManifest: CredentialManifest = Web5Manager.manifests.find(
                 (manifest: CredentialManifest) =>
                   manifest.presentation_definition.id === record.schema,
               );
@@ -197,7 +228,7 @@ export class DcxServer extends Config {
               await writeFile(DWN_LAST_RECORD_ID, lastRecordId);
             }
           } else {
-            await Time.sleep(100000);
+            await Time.sleep();
           }
         }
 
@@ -209,7 +240,7 @@ export class DcxServer extends Config {
 
         if (!recordReads.length) {
           Logger.log('No records found!', recordReads.length);
-          await Time.sleep(100000);
+          await Time.sleep();
         }
       }
     } catch (error: any) {
@@ -218,8 +249,9 @@ export class DcxServer extends Config {
     }
   }
 
-  public static stop() {
+  public stop() {
     Logger.log('Server stopping...');
+    this.isPolling = false;
     exit(0);
   }
 
@@ -232,7 +264,24 @@ export class DcxServer extends Config {
     try {
       await this.setup();
       Logger.log('Web5 connection initialized', this.isInitialized);
-      await Web5Manager.setup();
+    } catch (error: any) {
+      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      Logger.error(DcxServer.name, error);
+      this.stop();
+    }
+
+    try {
+      const success = await Web5Manager.setup();
+      if (!success) {
+        Logger.warn('Failed to setup DCX DWN');
+      }
+    } catch (error: any) {
+      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      Logger.error(DcxServer.name, error);
+      this.stop();
+    }
+
+    try {
 
       // Start polling for incoming records
       this.isPolling = true;
@@ -243,9 +292,5 @@ export class DcxServer extends Config {
     }
   }
 }
-
-process.on('SIGTERM', () => {
-  DcxServer.stop();
-});
 
 export default new DcxServer({});
