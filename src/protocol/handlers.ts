@@ -5,7 +5,6 @@ import {
   VerifiablePresentation
 } from '@web5/credentials';
 import { Config } from '../config.js';
-
 import { Web5Manager } from '../core/index.js';
 import {
   AdditionalProperties,
@@ -14,10 +13,11 @@ import {
   VcDataRequest,
   VcVerification
 } from '../types/dcx.js';
-import { DcxProtocolHandlerError } from '../utils/error.js';
+import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
 import { stringifier } from '../utils/index.js';
 import Logger from '../utils/logger.js';
 import { credentialIssuerProtocol, responseSchema } from './index.js';
+import { DwnUtils } from '../utils/dwn.js';
 
 
 export class ProtocolHandlerUtils {
@@ -29,28 +29,33 @@ export class ProtocolHandlerUtils {
    * @param recordAuthor Dwn Record author; see {@link Record.author}
    */
   public static async verifyCredentials(vp: VerifiablePresentation, recordAuthor: string): Promise<VcVerification[]> {
-    const verifications = [];
-    const credentials = vp.verifiableCredential;
-    for (const credential of credentials) {
-      // Parse VC
-      const vc = VerifiableCredential.parseJwt({ vcJwt: credential });
-      Logger.debug('Parsed verifiable credential', stringifier(credential));
+    try {
+      const valid = [];
+      const credentials = vp.verifiableCredential;
+      for (const credential of credentials) {
+        // Parse VC
+        const vc = VerifiableCredential.parseJwt({ vcJwt: credential });
+        Logger.debug('Parsed verifiable credential', stringifier(credential));
 
-      // Check if credential subject matches record author; i.e. verify that the credential holder is the one submitting the application 
-      if (vc.subject !== recordAuthor) {
-        throw new DcxProtocolHandlerError(
-          `Credential subject ${vc.subject} does not match record author ${recordAuthor}`,
-        );
+        // Check if credential subject matches record author; i.e. verify that the credential holder is the one submitting the application 
+        if (vc.subject !== recordAuthor) {
+          throw new DcxProtocolHandlerError(
+            `Credential subject ${vc.subject} does not match record author ${recordAuthor}`,
+          );
+        }
+
+        if (!Config.VC_TRUSTED_ISSUER_DIDS.includes(vc.issuer)) {
+          throw new DcxProtocolHandlerError(`Credential issuer ${vc.issuer} not trusted`,);
+        }
+
+        const verify = await VerifiableCredential.verify({ vcJwt: credential });
+        valid.push(verify);
       }
-
-      if (!Config.VC_TRUSTED_ISSUER_DIDS.includes(vc.issuer)) {
-        throw new DcxProtocolHandlerError(`Credential issuer ${vc.issuer} not trusted`,);
-      }
-
-      const verify = await VerifiableCredential.verify({ vcJwt: credential });
-      verifications.push(verify);
+      return valid;
+    } catch (error) {
+      Logger.error(this.name, error);
+      throw error;
     }
-    return verifications;
   }
 
 }
@@ -62,25 +67,25 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
    * @param record 
    * @param manifest 
    */
-  public static async processApplicationRecord(record: Record, manifest: CredentialManifest) {
+  public static async processApplicationRecord(applicationRecord: Record, manifest: CredentialManifest) {
     try {
-      Logger.debug('Processing application record', stringifier(record));
+      Logger.debug('Processing application record', stringifier(applicationRecord));
       // applications are JSON VP
-      const vp: VerifiablePresentation = await record.data.json();
+      const vp: VerifiablePresentation = await applicationRecord.data.json();
       Logger.debug('Application record verifiable presentation', stringifier(vp));
 
-      const recordAuthor = record.author;
+      const recordAuthor = applicationRecord.author;
 
       const valid = await ProtocolHandlers.verifyCredentials(vp, recordAuthor);
       if (!valid) {
-
+        throw new DcxProtocolHandlerError('Credential invalid');
       }
 
-      const response = await ProtocolHandlers.issueVerifiableCredential(vp, recordAuthor, manifest);
+      const data = await ProtocolHandlers.issueVerifiableCredential(vp, recordAuthor, manifest);
 
-      const { record: postRecord, status: createStatus } = await Web5Manager.web5.dwn.records.create({
+      const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+        data,
         store: false,
-        data: response,
         message: {
           schema: responseSchema.$id,
           protocol: credentialIssuerProtocol.protocol,
@@ -89,9 +94,18 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
         },
       });
 
-      const replyStatus = await postRecord?.send(recordAuthor);
+      if (DwnUtils.isFailure(create.code)) {
+        const { code, detail } = create;
+        Logger.error(`${this.name}: DWN records create failed`, create);
+        throw new DwnError(code, detail);
+      }
 
-      Logger.debug('Sent reply to remote:', replyStatus, createStatus);
+      if (!record) {
+        throw new DcxProtocolHandlerError('Failed to create application response record.');
+      }
+
+      const { status: send } = await record?.send(recordAuthor);
+      Logger.debug(`${this.name}: Sent applicatino response to applicant DWN`, send, create);
     } catch (error: any) {
       Logger.error(this.name, error);
       throw error;
@@ -106,7 +120,11 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
    * @param credentialManifest 
    * @returns 
    */
-  public static async issueVerifiableCredential(vp: VerifiablePresentation, subjectDid: string, credentialManifest: CredentialManifest) {
+  public static async issueVerifiableCredential(
+    vp: VerifiablePresentation,
+    subjectDid: string,
+    credentialManifest: CredentialManifest
+  ) {
     const manifest = Web5Manager.manifests?.[0];
     if (!manifest) {
       throw new DcxProtocolHandlerError('No manifest found');
@@ -140,12 +158,12 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
 
     // request vc data
     const vcData = await ProtocolHandlers.requestVerifiableCredentialData({ vaidSubmissionVcs });
-    Logger.debug('Got VC data from Issuer', vcData);
+    Logger.debug('VC data from provider', stringifier(vcData));
 
     // generate vc
     const outputVc = await VerifiableCredential.create({
       type: Config.VC_NAME,
-      issuer: trustedIssuerDids,
+      issuer: Web5Manager.connectedDid.did,
       subject: subjectDid,
       data: vcData,
     });
@@ -195,6 +213,3 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     return data;
   }
 }
-
-// TODO: create and update invocies as responses to applications
-// TODO: include some kind of toggle / flag to allow devs to use a encrypt/decrypt function below

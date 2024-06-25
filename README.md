@@ -57,7 +57,7 @@ The DCX protocol and its varying schemas can be found below:
 #### Packages
 
 - [web5-js](https://github.com/TBD54566975/web5-js)
-- [@web5/dcx](https://github.com/TBD54566975/incubation-tblend)
+- [@web5/dcx](https://github.com/TBD54566975/incubation-dcx)
 - [dwn-sdk-js](https://github.com/TBD54566975/dwn-sdk-js)
 
 ## Sequence
@@ -164,16 +164,19 @@ const { record: applicationRecord, status: createStatus } =
 ## To Do
 
 - [x] Create repo with documentation and diagrams
-- [x] Credential issuer protocol handlers: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Use env var to allow importing custom manifests: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Create, read, update credential manifest records in DWN: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Create and update responses to applications: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Read applications, parse credentials and validate against manifest (presentation exchange): [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Request new credentials from trusted 3rd party issuers: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
-  - [x] Create new credentials from 3rd party data requests: [#5](https://github.com/TBD54566975/incubation-tblend/pull/5)
+- [x] Credential issuer protocol handlers: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Use env var to allow importing custom manifests: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Create, read, update credential manifest records in DWN: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Create and update responses to applications: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Read applications, parse credentials and validate against manifest (presentation exchange): [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Request new credentials from trusted 3rd party issuers: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+  - [x] Create new credentials from 3rd party data requests: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
 - [x] DCX DWN Manager [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
 - [x] DID DHT Manager [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
 - [x] DCX Server [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
+
+### Other PRs
+- [Debugging and cleanup](https://github.com/TBD54566975/incubation-dcx/pull/18)
 
 ## Project Resources
 

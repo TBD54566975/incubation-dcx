@@ -13,8 +13,9 @@ import { readFile } from 'fs/promises';
 import { Config } from '../config.js';
 import { credentialIssuerProtocol, ExampleManifest, manifestSchema } from '../protocol/index.js';
 import { CredentialManifest } from '../types/dcx.js';
-import { DcxDwnError, DwnError } from '../utils/error.js';
+import { DcxDwnError, dwn500Error, DwnError } from '../utils/error.js';
 import Logger from '../utils/logger.js';
+import { DwnUtils } from '../utils/dwn.js';
 
 export class DidManager {
     public did: string;
@@ -128,11 +129,13 @@ export class DwnManager {
                     },
                 },
             });
-            if (query.code < 200 || query.code >= 300) {
+
+            if (DwnUtils.isFailure(query.code)) {
                 const { code, detail } = query;
-                Logger.error('queryProtocol query.code < 200 || query.code >= 300', query);
+                Logger.error(`${this.name}: DWN protocols query failed`, query);
                 throw new DwnError(code, detail);
             }
+
             Logger.debug(`DWN has ${protocols.length} protocols available`);
             return protocols;
         } catch (error: any) {
@@ -154,7 +157,7 @@ export class DwnManager {
                 message: { definition: credentialIssuerProtocol },
             });
 
-            if ((configure.code < 200 || configure.code >= 300) || !protocol) {
+            if (DwnUtils.isFailure(configure.code) || !protocol) {
                 const { code, detail } = configure;
                 Logger.error('DWN protocol configure fail', configure, protocol);
                 throw new DwnError(code, detail);
@@ -162,9 +165,9 @@ export class DwnManager {
 
             Logger.debug('Configured credential issuer protocol', protocol);
 
-            const { status: send = { code: 500, detail: "DWN Server Error" } } = await protocol.send(Web5Manager.connectedDid.did);
+            const { status: send = dwn500Error } = await protocol.send(Web5Manager.connectedDid.did);
 
-            if (send.code < 200 || send.code >= 300) {
+            if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
                 Logger.error('DWN protocol send fail', send);
                 throw new DwnError(code, detail);
@@ -239,14 +242,15 @@ export class DwnManager {
             return record;
         }
 
-        if (create.code < 200 || create.code >= 300) {
+
+        if (DwnUtils.isFailure(create.code)) {
             const { code, detail } = create;
             Logger.error('DWN protocol create fail', create);
             throw new DwnError(code, detail);
         }
 
         const { status: send } = await record.send(Web5Manager.connectedDid.did);
-        if (send.code < 200 || send.code >= 300) {
+        if (DwnUtils.isFailure(send.code)) {
             const { code, detail } = send;
             Logger.error('DWN protocol send fail', send);
             throw new DwnError(code, detail);
@@ -277,9 +281,8 @@ export class DwnManager {
      */
     public static async setup(): Promise<void> {
         try {
-            Logger.log('Setting up DWN ...')
-            const { status, protocols } = await Web5Manager.queryProtocol();
-            Logger.log('Query status', status);
+            Logger.log('Configuring DWN with DCX protocol ...')
+            const protocols = await Web5Manager.queryProtocol();
             Logger.log(`Found ${protocols.length} credential-issuer protocols in DWN`);
 
             if (!protocols.length) {

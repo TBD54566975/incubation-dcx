@@ -1,3 +1,7 @@
+export const dwn500Error = {
+  code: 500,
+  detail: 'DWN server error'
+};
 export class DcxError extends Error {
   constructor(
     public error: any,
