@@ -11,12 +11,7 @@ local-test.ts
 # Secrets
 CUSTOM-MANIFEST.json
 .env
-key.json
-portable.json
-keys.json
-web5.seed
-cipher.key
-*.seed
-*.key
-web5.password
-*.password
+*keys*
+*key*
+agent.json
+connection.json

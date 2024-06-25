@@ -1,8 +1,10 @@
-import { VerifiableCredential } from '@web5/credentials';
-import { DcxEnvConfig } from '../config/env.js';
-import { manifestSchema } from '../protocol/index.js';
+import { VcDataModel, VerifiableCredential } from '@web5/credentials';
+import { Config } from '../config.js';
 
-export type TrustedIssuer = { name: string; did: string };
+export type TrustedIssuer = {
+  name: string;
+  did: string
+};
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -22,15 +24,13 @@ export type VerifiablePresentation = {
   };
 } & AdditionalProperties;
 
-export type VcRequestBody = { validInputVcs: VerifiableCredential[] } | null;
+export type VcDataRequest = {
+  vaidSubmissionVcs: VerifiableCredential[]
+} | null;
 
-export type DcxServerConfigType = InstanceType<typeof DcxEnvConfig>;
+export type DcxConfigType = InstanceType<typeof Config>;
 
-export type DcxServerUse = {
-  manifest?: any;
-  config?: string | DcxServerConfigType;
-  [key: string]: any;
-};
+
 
 export type ManifestOutputDescriptor = {
   id: string;
@@ -70,7 +70,7 @@ export type PresentationDefinition = {
   input_descriptors: InputDescriptor[];
 };
 
-export type CredentialManifest = {
+export interface CredentialManifest {
   id: string;
   name: string;
   description: string;
@@ -81,4 +81,8 @@ export type CredentialManifest = {
   presentation_definition: PresentationDefinition;
 };
 
-export type DcxCredentialIssuerManifestSchema = typeof manifestSchema;
+export type VcVerification = {
+  issuer: string;
+  subject: string;
+  vc: VcDataModel;
+};

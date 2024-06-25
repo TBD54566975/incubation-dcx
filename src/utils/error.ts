@@ -1,3 +1,7 @@
+export const dwn500Error = {
+  code: 500,
+  detail: 'DWN server error'
+};
 export class DcxError extends Error {
   constructor(
     public error: any,
@@ -21,15 +25,25 @@ export class DcxServerError extends DcxError {
 }
 
 export class DcxDwnError extends DcxError {
-  constructor(
-    public code: number,
-    message: string,
-  ) {
-    super(`${code} - ${message}`, 'DcxDwnError');
+  constructor(public error: any) {
+    super(error, 'DcxDwnError');
   }
 }
 
-export function handleAsyncErrors(target: any, propertyKey: any, descriptor?: any): any {
+export class DcxProtocolHandlerError extends DcxError {
+  constructor(public error: any) {
+    super(error, 'DcxProtocolHandlerError');
+  }
+}
+
+export class DwnError extends Error {
+  constructor(public code: number, public message: string) {
+    super(`${code} - ${message}`);
+    this.name = 'DwnError';
+  }
+}
+// Decorators; Unused due to lack of node.js support
+export function handleDcxErrors(target: any, propertyKey: any, descriptor?: any): any {
   if (!descriptor) {
     descriptor = Object.getOwnPropertyDescriptor(target, propertyKey)!;
   }
@@ -41,9 +55,11 @@ export function handleAsyncErrors(target: any, propertyKey: any, descriptor?: an
       console.error(`${propertyKey}`, 'Failed', error);
       switch (true) {
         case error instanceof DidManagerError:
-          throw new DcxServerError(error);
+          throw new DidManagerError(error);
         case error instanceof DcxServerError:
           throw new DcxServerError(error);
+        case error instanceof DcxDwnError:
+          throw new DcxDwnError(error);
         default:
           throw new DcxError(error, 'DcxError');
       }
@@ -52,7 +68,7 @@ export function handleAsyncErrors(target: any, propertyKey: any, descriptor?: an
   return descriptor;
 }
 
-export function handleDwnErrors(target: any, propertyKey: any, descriptor?: any): any {
+export function handleDcxDwnErrors(target: any, propertyKey: any, descriptor?: any): any {
   if (!descriptor) {
     descriptor = Object.getOwnPropertyDescriptor(target, propertyKey)!;
   }
@@ -65,7 +81,7 @@ export function handleDwnErrors(target: any, propertyKey: any, descriptor?: any)
       if (error instanceof DcxDwnError) {
         throw error;
       } else {
-        throw new DcxDwnError(500, 'An unexpected error occurred');
+        throw new DcxDwnError(error);
       }
     }
   };
