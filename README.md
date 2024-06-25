@@ -161,22 +161,24 @@ const { record: applicationRecord, status: createStatus } =
   });
 ```
 
-## To Do
+## Issues
 
 - [x] Create repo with documentation and diagrams
-- [x] Credential issuer protocol handlers: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Use env var to allow importing custom manifests: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Create, read, update credential manifest records in DWN: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Create and update responses to applications: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Read applications, parse credentials and validate against manifest (presentation exchange): [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Request new credentials from trusted 3rd party issuers: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [x] Create new credentials from 3rd party data requests: [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-- [x] DCX DWN Manager [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
-- [x] DID DHT Manager [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
-- [x] DCX Server [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
+- [x] [Credential issuer protocol handlers #11](https://github.com/TBD54566975/incubation-dcx/issues/11)
+- [x] [DCX DWN Manager #14](https://github.com/TBD54566975/incubation-dcx/issues/14)
+- [x] [DID DHT Manager #9](https://github.com/TBD54566975/incubation-dcx/issues/9)
+- [x] [DCX Server #12](https://github.com/TBD54566975/incubation-dcx/issues/12)
+- [ ] [Credential applicant protocol handlers #19](https://github.com/TBD54566975/incubation-dcx/issues/19)
+- [ ] [Tests #17](https://github.com/TBD54566975/incubation-dcx/issues/17)
+- [ ] [Publish to npmjs #20](https://github.com/TBD54566975/incubation-dcx/issues/20)
 
-### Other PRs
-- [Debugging and cleanup](https://github.com/TBD54566975/incubation-dcx/pull/18)
+### PRs
+- [#5](https://github.com/TBD54566975//incubation-dcx/pull/5)
+- [#18](https://github.com/TBD54566975/incubation-dcx/pull/18)
+- [#15](https://github.com/TBD54566975/incubation-dcx/pull/15)
+- [#10](https://github.com/TBD54566975/incubation-dcx/pull/10)
+- [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
+- [#13](https://github.com/TBD54566975/incubation-dcx/pull/13)
 
 ## Project Resources
 
@@ -186,4 +188,4 @@ const { record: applicationRecord, status: createStatus } =
 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) | Expected behavior for project contributors, promoting a welcoming environment |
 | [CONTRIBUTING.md](./CONTRIBUTING.md)       | Developer guide to build, test, run, access CI, chat, discuss, file issues    |
 | [GOVERNANCE.md](./GOVERNANCE.md)           | Project governance                                                            |
-| [LICENSE](./LICENSE)                       | Apache License, Version 2.0                                                   |
+| [LICENSE](./LICENSE)                       | [![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) |
