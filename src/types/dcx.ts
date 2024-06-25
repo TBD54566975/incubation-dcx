@@ -87,7 +87,11 @@ export type TrustedIssuer = {
 
 export type Provider = {
   name: string;
-  endpoint: string
+  endpoint: string;
+  vc: {
+    id: string;
+    name: string;
+  }
 };
 
 export type Handler =

@@ -14,11 +14,11 @@ import {
   VcDataRequest,
   VcVerification
 } from '../types/dcx.js';
+import { DwnUtils } from '../utils/dwn.js';
 import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
 import { stringifier } from '../utils/index.js';
-import Logger from '../utils/logger.js';
+import { Logger } from '../utils/logger.js';
 import { credentialIssuerProtocol, responseSchema } from './index.js';
-import { DwnUtils } from '../utils/dwn.js';
 
 
 export class ProtocolHandlerUtils {
@@ -126,8 +126,8 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
   public static async issueVerifiableCredential(
     vp: VerifiablePresentation,
     subjectDid: string,
-    manifestName?: string,
     credentialManifest?: CredentialManifest,
+    manifestName?: string,
   ) {
 
     if (!manifestName && !credentialManifest) {
