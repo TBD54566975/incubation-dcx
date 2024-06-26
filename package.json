@@ -1,7 +1,7 @@
 {
-  "name": "dcx",
+  "name": "@formfree/dcx",
   "version": "0.0.1",
-  "description": "Decentralized Credential Exchange: DWN protocol definition for verifiable credential exchange using credential manifests",
+  "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -22,7 +22,7 @@
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/TBD54566975/incubation-dcx.git"
+    "url": "git+https://github.com/TBD54566975/incubation-dcx.git"
   },
   "license": "Apache-2.0",
   "contributors": [
@@ -53,11 +53,13 @@
     "vcs",
     "verifiable credentials",
     "web5",
-    "verifiable credentials issuer"
+    "decentralized credential exchange",
+    "dwn",
+    "dweb node",
+    "dwn protocol"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "engines": {
     "node": ">=18.0.0"
