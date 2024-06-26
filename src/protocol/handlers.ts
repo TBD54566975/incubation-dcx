@@ -162,7 +162,7 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     );
 
     const verifiedCredentials: VerifiableCredential[] = [];
-    
+
     for (const vcJwt of selectedCredentials) {
       Logger.debug('Parsing VC', vcJwt);
       const vc = VerifiableCredential.parseJwt({ vcJwt });
@@ -184,12 +184,12 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     // generate vc
     const outputVc = await VerifiableCredential.create({
       type: Config.VC_NAME,
-      issuer: Web5Manager.connection.did,
+      issuer: Web5Manager.connected.did,
       subject: subjectDid,
       data: vcData,
     });
     // sign vc
-    const signedOutputVc = await outputVc.sign({ did: Web5Manager.connection.bearerDid });
+    const signedOutputVc = await outputVc.sign({ did: Web5Manager.connected.bearerDid });
 
     return {
       fulfillment: {
