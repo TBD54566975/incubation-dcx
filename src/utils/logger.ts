@@ -38,7 +38,6 @@ export class Logger implements Partial<Console> {
 
     public static security(message?: unknown, ...args: unknown[]): void {
         console.warn(chalk.red("security") + ":", message, ...args);
-
     }
 
     public static log(message?: unknown, ...args: unknown[]): void {

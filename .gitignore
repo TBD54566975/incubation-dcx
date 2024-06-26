@@ -15,3 +15,6 @@ CUSTOM-MANIFEST.json
 *key*
 agent.json
 connection.json
+connected.json
+previous.json
+did:dht*.json
