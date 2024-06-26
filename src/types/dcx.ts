@@ -20,7 +20,7 @@ export type VerifiablePresentation = {
 } & AdditionalProperties;
 
 export type VcDataRequest = {
-  vaidSubmissionVcs: VerifiableCredential[]
+  vcs: VerifiableCredential[]
 } | null;
 
 export type DcxConfigType = InstanceType<typeof Config>;
