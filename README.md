@@ -1,5 +1,12 @@
 # Decentralized Credential Exchange (DCX)
 
+## Package Versions
+
+| Name                                                 |                                                                Latest Version                                                                 |
+| ---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: |
+| [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) |
+
+
 Decentralized Credential Exchange (DCX) is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
 
 ## Package
