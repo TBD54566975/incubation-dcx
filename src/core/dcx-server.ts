@@ -50,24 +50,45 @@ export class DcxServer extends Config {
     this.issuers = Web5Manager.issuers = options.issuers ?? {};
   }
 
+  /**
+   * 
+   * @param id Some unique, accessible identifier for the manifest
+   * @param manifest The credential manifest to use
+   */
   public useManifest(id: string, manifest: CredentialManifest): void {
     Web5Manager.manifests[id] = manifest;
   }
 
+  /**
+   * 
+   * @param id Some unique, accessible identifier for the handler
+   * @param handler The handler to use
+   */
   public useHandler(id: string, handler: Handler): void {
     ProtocolHandlers.handlers[id] = handler;
   }
 
+  /**
+   * 
+   * @param id Some unique, accessible identifier for the provider
+   * @param provider The provider to use
+   */
   public useProvider(id: string, provider: Provider): void {
     Web5Manager.providers[id] = provider
   }
 
+  /**
+   * 
+   * @param id Some unique, accessible identifier for the issuer
+   * @param issuer The issuer to use
+   */
   public useIssuer(id: string, issuer: TrustedIssuer): void {
     Web5Manager.issuers[id] = issuer;
   }
 
   /**
    * 
+   * Creates a new password for the DCX server
    * @returns string
    */
   public async createPassword(): Promise<string> {
@@ -86,8 +107,10 @@ export class DcxServer extends Config {
   }
 
   /**
-  * @summary Configures the DCX server by creating a new password, initializing Web5,
+  * 
+  * Configures the DCX server by creating a new password, initializing Web5,
   * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
+  * @returns Promise<void>
   */
   public async setup(): Promise<void> {
     try {
@@ -162,10 +185,10 @@ export class DcxServer extends Config {
     }
   }
 
-
-
   /**
-   * @summary Polls the DWN for incoming records
+   * 
+   * Polls the DWN for incoming records
+   * @returns void
    */
   public async poll(): Promise<void> {
     try {
@@ -176,7 +199,6 @@ export class DcxServer extends Config {
 
       let cursor = await FileSystem.readToJson(DWN_CURSOR);
       const pagination = Objects.isEmptyObject(cursor) ? { limit: 10 } : { limit: 10, cursor };
-
       let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
       while (this.isPolling) {
@@ -188,7 +210,9 @@ export class DcxServer extends Config {
             pagination,
           },
         });
+
         Logger.debug(`Found ${records.length} records`);
+        Logger.debug(`Next cursor ${stringifier(nextCursor)}`)
 
         if (cursor && !records.length) {
           cursor = undefined;
@@ -210,18 +234,23 @@ export class DcxServer extends Config {
         );
 
         Logger.debug(`Read ${recordReads.length} records`);
+
         for (const record of recordReads) {
+
           if (record.id != lastRecordId) {
+
             if (record.protocolPath === 'application') {
-              const applicationManifest: CredentialManifest = Web5Manager.manifests.find(
-                (manifest: CredentialManifest) =>
-                  manifest.presentation_definition.id === record.schema,
+
+              const applicationManifest = Web5Manager.manifests.find(
+                (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
+
               if (!!applicationManifest) {
                 await ProtocolHandlers.processApplicationRecord(record, applicationManifest);
               } else {
-                Logger.debug('Skipped message with protocol path', record.protocolPath);
+                Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
               }
+
               lastRecordId = record.id;
               const overwritten = await FileSystem.overwrite(DWN_LAST_RECORD_ID, lastRecordId);
               Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
@@ -249,6 +278,11 @@ export class DcxServer extends Config {
     }
   }
 
+  /**
+   * 
+   * Stops the DCX server
+   * @returns void
+   */
   public stop(): void {
     Logger.debug('Server stopping...');
     this.isPolling = false;
@@ -257,7 +291,7 @@ export class DcxServer extends Config {
 
   /**
    *  
-   * @summary Starts the DCX server
+   * Starts the DCX server
    * @returns void
    */
   public async start(): Promise<void> {

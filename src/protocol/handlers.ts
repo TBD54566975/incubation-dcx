@@ -142,17 +142,28 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
 
     // filter valid creds
     Logger.debug('Parsing verfiable credentials against verifiable presentation', stringifier(vp));
-    const selectedVcs: string[] = PresentationExchange.selectCredentials({
+    const selectedCredentials: string[] = PresentationExchange.selectCredentials({
       vcJwts: vp.verifiableCredential,
       presentationDefinition: manifest.presentation_definition,
     });
-    Logger.debug(`Found ${selectedVcs.length} Verifiable Credentials`);
+    Logger.debug(`Found ${selectedCredentials.length} Verifiable Credentials`);
+
+    try {
+      PresentationExchange.satisfiesPresentationDefinition({
+        vcJwts: selectedCredentials,
+        presentationDefinition: manifest.presentation_definition
+      });
+    } catch (error: any) {
+      Logger.debug(`VCs do not satisfy Presentation Definition`, error.message);
+    }
 
     const trustedIssuerDids = Config.VC_TRUSTED_ISSUERS.map(
       (trustedIssuer: TrustedIssuer) => trustedIssuer.did,
     );
-    const vaidSubmissionVcs: VerifiableCredential[] = [];
-    for (const vcJwt of selectedVcs) {
+
+    const verifiedCredentials: VerifiableCredential[] = [];
+    
+    for (const vcJwt of selectedCredentials) {
       Logger.debug('Parsing VC', vcJwt);
       const vc = VerifiableCredential.parseJwt({ vcJwt });
       Logger.debug('Parsed VC', stringifier(vc));
@@ -161,13 +172,13 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
       }
       Logger.debug('vcJson', vc.vcDataModel.credentialSubject);
       if (trustedIssuerDids.includes(vc.vcDataModel.issuer)) {
-        vaidSubmissionVcs.push(vc);
+        verifiedCredentials.push(vc);
       }
     }
-    Logger.debug(`Found ${vaidSubmissionVcs.length} valid VCs`);
+    Logger.debug(`Found ${verifiedCredentials.length} valid VCs`);
 
     // request vc data
-    const vcData = await ProtocolHandlers.requestVerifiableCredentialData({ vaidSubmissionVcs });
+    const vcData = await ProtocolHandlers.requestVerifiableCredentialData({ vcs: verifiedCredentials });
     Logger.debug('VC data from provider', stringifier(vcData));
 
     // generate vc
