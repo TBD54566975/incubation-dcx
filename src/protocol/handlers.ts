@@ -4,7 +4,7 @@ import {
   VerifiableCredential,
   VerifiablePresentation
 } from '@web5/credentials';
-import { Config } from '../config.js';
+import { Config } from '../core/config.js';
 import { Web5Manager } from '../core/index.js';
 import {
   AdditionalProperties,

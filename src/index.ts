@@ -1,9 +1,6 @@
-export * from './config.js';
-export * from './protocol/index.js';
 export * from './core/index.js';
-export * from './utils/index.js';
-
+export * from './protocol/index.js';
 export type * from './types/index.js';
-
-import server from './core/dcx-server.js';
+export * from './utils/index.js';
+import server from './core/index.js';
 export default server;
