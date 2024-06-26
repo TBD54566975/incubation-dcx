@@ -149,7 +149,7 @@ export class DcxServer extends Config {
         throw new DcxServerError('Failed to get bearer DID');
       }
       const connectedPortableDid = await connectedBearerDid.export()
-      Web5Manager.connection = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
+      Web5Manager.connected = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
 
       Web5Manager.web5 = web5;
       Web5Manager.agent = agent;
@@ -174,7 +174,7 @@ export class DcxServer extends Config {
         const agentJson = await FileSystem.overwrite('agent.json', stringifier(await Web5Manager.agent.agentDid.export()));
         Logger.info(`agent.json overwritten ${agentJson} to ${agent.agentDid.uri}`);
 
-        const conectionJson = await FileSystem.overwrite('connected.json', stringifier(Web5Manager.connection.portableDid));
+        const conectionJson = await FileSystem.overwrite('connected.json', stringifier(Web5Manager.connected.portableDid));
         Logger.info(`connected.json overwritten ${conectionJson} to ${connectedPortableDid.uri}`);
       }
 

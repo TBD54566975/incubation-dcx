@@ -209,7 +209,7 @@ export class DwnManager {
      * @returns Record | undefined; see {@link Record}
      */
     public static async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<Record | undefined> {
-        unwrittenManifest.issuer.id = Web5Manager.connection.did;
+        unwrittenManifest.issuer.id = Web5Manager.connected.did;
         const { record, status: create } = await Web5Manager.web5.dwn.records.create({
             store: false,
             data: unwrittenManifest,
@@ -299,7 +299,7 @@ export class DwnManager {
  */
 export abstract class Web5Manager extends DwnManager {
     public static web5: Web5;
-    public static connection: DidManager;
+    public static connected: DidManager;
     public static agent: Web5PlatformAgent;
 
     public static manifests: ServerOptionManifests;
