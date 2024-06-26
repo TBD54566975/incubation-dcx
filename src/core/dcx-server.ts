@@ -9,13 +9,14 @@ import { credentialIssuerProtocol } from '../protocol/index.js';
 import {
   CredentialManifest,
   Handler,
+  Issuer,
   Provider,
-  ServerOptionHandlers,
-  ServerOptionIssuers,
-  ServerOptionManifests,
-  ServerOptionProviders,
   ServerOptions,
-  TrustedIssuer
+  UseOptions,
+  UseHandlers,
+  UseIssuers,
+  UseManifests,
+  UseProviders
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
@@ -31,23 +32,58 @@ const defaultConnectOptions = {
   },
 }
 
+type UseType = 'manifests' | 'handlers' | 'providers' | 'issuers';
+
 export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
-  manifests: ServerOptionManifests;
-  handlers: ServerOptionHandlers;
-  providers: ServerOptionProviders;
-  issuers: ServerOptionIssuers;
+
+  serverUse: UseOptions;
+
+  issuers: UseIssuers;
+  handlers: UseHandlers;
+  manifests: UseManifests;
+  providers: UseProviders;
 
   constructor(options: ServerOptions) {
     super();
+
     this.isPolling = false;
     this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
-    // get: (name: string) => this.manifests?.[name] ?? null,
-    this.manifests = Web5Manager.manifests = options.manifests ?? {};
-    this.handlers = ProtocolHandlers.handlers = options.handlers ?? {};
-    this.providers = Web5Manager.providers = options.providers ?? {};
-    this.issuers = Web5Manager.issuers = options.issuers ?? {};
+    // get: (name: string) => this.manifest?.[name] ?? null,
+    this.issuers = options.issuers ?? {};
+    this.handlers = options.handlers ?? {};
+    this.manifests = options.manifests ?? {};
+    this.providers = options.providers ?? {};
+
+    this.serverUse = {
+      issuers: this.issuers,
+      handlers: this.handlers,
+      manifests: this.manifests,
+      providers: this.providers,
+    }
+
+    ProtocolHandlers.handlers = this.handlers;
+    Web5Manager.providers = this.providers;
+    Web5Manager.issuers = this.issuers;
+    Web5Manager.manifests = {
+      ...this.manifests,
+      keys: () => Object.values(this),
+      values: () => Object.values(this)
+    }
+
+
+  }
+
+  /**
+   * 
+   * @param type The type of object to use; must be one of 'handler', 'providers', 'manifest', or 'issuer'
+   * @param id Some unique, accessible identifier for the 'handler', 'providers', 'manifest', or 'issuer' object
+   * @param obj The object to use; see {@link UseOptions}
+   */
+  public use(type: UseType, id: string | number | symbol, obj: UseOptions): void {
+    this.serverUse[type] = this[type] = { ...this.serverUse[type], [id]: obj };
+
   }
 
   /**
@@ -55,7 +91,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    */
-  public useManifest(id: string, manifest: CredentialManifest): void {
+  public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
     Web5Manager.manifests[id] = manifest;
   }
 
@@ -64,7 +100,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    */
-  public useHandler(id: string, handler: Handler): void {
+  public useHandler(id: string | number | symbol, handler: Handler): void {
     ProtocolHandlers.handlers[id] = handler;
   }
 
@@ -73,7 +109,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    */
-  public useProvider(id: string, provider: Provider): void {
+  public useProvider(id: string | number | symbol, provider: Provider): void {
     Web5Manager.providers[id] = provider
   }
 
@@ -82,7 +118,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    */
-  public useIssuer(id: string, issuer: TrustedIssuer): void {
+  public useIssuer(id: string | number | symbol, issuer: Issuer): void {
     Web5Manager.issuers[id] = issuer;
   }
 
@@ -241,7 +277,7 @@ export class DcxServer extends Config {
 
             if (record.protocolPath === 'application') {
 
-              const applicationManifest = Web5Manager.manifests.find(
+              const applicationManifest = this.manifests.values().find(
                 (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
 
@@ -299,7 +335,7 @@ export class DcxServer extends Config {
       await this.setup();
       Logger.debug('Web5 connection initialized', this.isInitialized);
     } catch (error: any) {
-      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      Logger.error(DcxServer.name, 'Failed to setup DCX Server', error?.message);
       Logger.error(DcxServer.name, error);
       this.stop();
     }
@@ -321,7 +357,7 @@ export class DcxServer extends Config {
       this.isPolling = true;
       await this.poll();
     } catch (error: any) {
-      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      Logger.error(DcxServer.name, 'Polling error!', error?.message);
       Logger.error(DcxServer.name, error);
     }
   }

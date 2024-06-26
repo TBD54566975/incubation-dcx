@@ -9,8 +9,8 @@ import { Web5Manager } from '../core/index.js';
 import {
   AdditionalProperties,
   CredentialManifest,
-  ServerOptionHandlers,
-  TrustedIssuer,
+  Issuer,
+  UseHandlers,
   VcDataRequest,
   VcVerification
 } from '../types/dcx.js';
@@ -22,7 +22,7 @@ import { credentialIssuerProtocol, responseSchema } from './index.js';
 
 
 export class ProtocolHandlerUtils {
-  public static handlers: ServerOptionHandlers;
+  public static handlers: UseHandlers;
   /**
    *
    * Verify DCX application VCs
@@ -108,7 +108,7 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
       }
 
       const { status: send } = await record?.send(recordAuthor);
-      Logger.debug(`${this.name}: Sent applicatino response to applicant DWN`, send, create);
+      Logger.debug(`${this.name}: Sent application response to applicant DWN`, send, create);
     } catch (error: any) {
       Logger.error(this.name, error);
       throw error;
@@ -134,7 +134,7 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
       throw new DcxProtocolHandlerError('Must provide either manifest or manifest name');
     }
 
-    const manifest = !!manifestName ? Web5Manager.manifests?.[manifestName] : credentialManifest;
+    const manifest = !!manifestName ? Web5Manager.manifests?.[manifestName] : credentialManifest as CredentialManifest;
 
     if (!manifest) {
       throw new DcxProtocolHandlerError('Manifest not found');
@@ -158,7 +158,7 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     }
 
     const trustedIssuerDids = Config.VC_TRUSTED_ISSUERS.map(
-      (trustedIssuer: TrustedIssuer) => trustedIssuer.did,
+      (trustedIssuer: Issuer) => trustedIssuer.did,
     );
 
     const verifiedCredentials: VerifiableCredential[] = [];

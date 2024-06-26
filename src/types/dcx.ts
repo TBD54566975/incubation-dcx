@@ -31,7 +31,6 @@ export type ManifestOutputDescriptor = {
   schema: string;
 };
 
-export type ManifestFormat = { jwt_vc: { alg: string[] } };
 
 export type ManifestIssuer = {
   id: string;
@@ -58,12 +57,15 @@ export type InputDescriptor = {
   constraints: Constraint;
 };
 
+export type ManifestFormat = {
+  jwt_vc: { alg: string[] }
+};
 export type PresentationDefinition = {
   id: string;
   input_descriptors: InputDescriptor[];
 };
 
-export interface CredentialManifest {
+export type CredentialManifest = {
   id: string;
   name: string;
   description: string;
@@ -80,44 +82,54 @@ export type VcVerification = {
   vc: VcDataModel;
 };
 
-export type TrustedIssuer = {
-  name: string;
-  did: string
-};
-
-export type Provider = {
-  name: string;
-  endpoint: string;
-  vc: {
-    id: string;
-    name: string;
-  }
-};
+export type Manifest = CredentialManifest;
 
 export type Handler =
   | ((...args: any[]) => any)
   | ((...args: any[]) => Promise<any>);
 
-export type ServerOptionHandlers = {
-  [key: string | number | symbol]: Handler
+export type Issuer = { name: string; did: string };
+
+export type Provider = {
+  name: string;
+  endpoint: string;
+  vc: { id: string; name: string; }
 };
 
-export type ServerOptionProviders = {
-  [key: string | number | symbol]: Provider
+
+export type UseManifests = {
+  [key: string | number | symbol]:
+  | Manifest
+  | (() => any)
+  | ((...args: any[]) => any);
+  values: () => Manifest[];
+  keys: () => any[];
+}
+
+export type UseHandlers = {
+  [key: string | number | symbol]: Handler;
+};
+export type UseProviders = {
+  [key: string | number | symbol]: Provider;
+};
+export type UseIssuers = {
+  [key: string | number | symbol]: Issuer;
 };
 
-export type ServerOptionManifests = {
-  [key: string | number | symbol]: CredentialManifest | any;
-  get?(name: string): CredentialManifest | undefined;
-};
+export type UseOptions = {
+  handler?: UseManifests;
+  provider?: UseHandlers;
+  manifest?: UseProviders;
+  issuer?: UseIssuers;
+  [key: string | number | symbol]: any;
+}
+export type UseObject = UseManifests | UseHandlers | UseProviders | UseIssuers;
 
-export type ServerOptionIssuers = {
-  [key: string | number | symbol]: TrustedIssuer
-};
-
+export type ServerOption = { [key: string | number | symbol]: Issuer | Handler | Manifest | Provider; };
 export type ServerOptions = {
-  handlers?: ServerOptionHandlers;
-  providers?: ServerOptionProviders;
-  manifests?: ServerOptionManifests;
-  issuers?: ServerOptionIssuers;
+  handler?: UseManifests & { values(): Manifest[] };
+  provider?: UseHandlers;
+  manifest?: UseProviders;
+  issuer?: UseIssuers;
+  [key: string | number | symbol]: any;
 };
