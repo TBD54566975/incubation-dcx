@@ -201,7 +201,6 @@ server.useManifest('customManifest', {
     }
   }
 );
-
 server.useProvider('localhost', {
     name: 'localhost',
     endpoint: 'http://localhost:3000',
@@ -210,7 +209,6 @@ server.useProvider('localhost', {
         name: 'ATP Report'
     }
 });
-
 server.useIssuer('mx', { name: 'mx', did: 'did:web5:mx' });
 server.useHandler('testHandler', () => console.log("test handler"));
 
@@ -281,13 +279,13 @@ const { record: applicationRecord, status: createStatus } =
   - [PR #13](https://github.com/TBD54566975/incubation-dcx/pull/13)
 - [ ] Credential applicant protocol handlers
   - [Issue #19](https://github.com/TBD54566975/incubation-dcx/issues/19)
-  - [PR #?]()
+  - [PR #]()
 - [ ] Tests
   - [Issue #17](https://github.com/TBD54566975/incubation-dcx/issues/17)
-  - [PR #?]()
+  - [PR #]()
 - [ ] Publish to npmjs
   - [Issue #20](https://github.com/TBD54566975/incubation-dcx/issues/20)
-  - [PR #?]()
+  - [PR #]()
 
 ## Project Resources
 
