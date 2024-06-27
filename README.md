@@ -145,7 +145,85 @@ The DCX protocol and its varying schemas can be found below:
 
 ## Use
 
-```javascript
+### Server
+
+```typescript
+import server from './src/index';
+import CustomManifest from './CUSTOM-MANIFEST.json';
+
+server.useManifest('customManifest', {
+    "id": "dcx-credential-manifest-example",
+    "name": "DCX Credential Manifest Example",
+    "description": "This is an example of a credential manifest used by DCX. This document should be replaced with your own version to satify the requirements of the credentials your DCX server expects as inputs and the desired output credential.",
+    "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
+    "issuer": {
+      "id": "[replaced dynamically]",
+      "name": "example-issuer"
+    },
+    "output_descriptors": [
+      {
+        "id": "example-output-descriptor-id",
+        "name": "Example Output Descriptor Name",
+        "schema": "https://example.com/schemas/ExampleOutputDescriptorSchema"
+      }
+    ],
+    "format": {
+      "jwt_vc": {
+        "alg": ["EdDSA"]
+      }
+    },
+    "presentation_definition": {
+      "id": "example-presentation-definition-id",
+      "input_descriptors": [
+        {
+          "id": "example-presentation-definition-input-descriptor-id",
+          "purpose": "Meant as an example to developers",
+          "constraints": {
+            "fields": [
+              {
+                "path": ["$.type[*]"],
+                "filter": {
+                  "type": "string",
+                  "pattern": "^*$"
+                }
+              },
+              {
+                "path": [
+                  "$.credentialSubject.some.unique.field1",
+                  "$.credentialSubject.some.unique.field2",
+                  "$.credentialSubject.some.unique.fieldn"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+);
+
+server.useProvider('localhost', {
+    name: 'localhost',
+    endpoint: 'http://localhost:3000',
+    vc: {
+        id: 'ATPReport',
+        name: 'ATP Report'
+    }
+});
+
+server.useIssuer('mx', { name: 'mx', did: 'did:web5:mx' });
+server.useHandler('testHandler', () => console.log("test handler"));
+
+await server.start();
+
+process.on('SIGTERM', () => {
+    server.stop();
+});
+```
+
+### Protocol 
+
+```typescript
 // issuer side
 import {
   credentialIssuerProtocol,
