@@ -1,7 +1,6 @@
 import { Web5PlatformAgent } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
-import { assert } from 'console';
 import { exit } from 'process';
 import terminalLink from 'terminal-link';
 import { Config, Objects } from '../index.js';
@@ -9,16 +8,13 @@ import { ProtocolHandlers } from '../protocol/handlers.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
 import {
   CredentialManifest,
+  Gateway,
   Handler,
   Issuer,
   Manifest,
   Provider,
-  ServerOptions,
-  UseHandlers,
-  UseIssuers,
-  UseManifests,
-  UseOption,
-  UseProviders
+  UseOptions,
+  UseOption
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
@@ -34,64 +30,58 @@ const defaultConnectOptions = {
   },
 }
 
-type UseType = 'manifest' | 'handler' | 'provider' | 'issuer';
+type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
 
 export class DcxServer extends Config {
+  [key: string]: any;
+
   isPolling: boolean;
   isInitialized?: boolean;
 
-  issuers: UseIssuers;
-  manifests: UseManifests;
-  providers: UseProviders;
-  handlers: UseHandlers;
+  issuers: UseOption;
+  manifests: UseOption;
+  providers: UseOption;
+  handlers: UseOption;
+  gateways: UseOption;
 
-
-  constructor(options: ServerOptions) {
+  constructor(options: UseOptions = {}) {
     super();
 
     this.isPolling = false;
     this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
 
+    /**
+     * Setup the Web5Manager and the DcxServer with the provided options
+     */
     Web5Manager.issuers = this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
     Web5Manager.manifests = this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
     Web5Manager.providers = this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
-
-    ProtocolHandlers.handlers = this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
+    Web5Manager.gateways = this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
+    ProtocolHandlers.handlers = this.gateways = options.gateways ?? new Map<string | number | symbol, Gateway>();
   }
 
   /**
    * 
-   * @param type The type of object to use; must be one of 'handler', 'providers', 'manifest', or 'issuer'
-   * @param id Some unique, accessible identifier for the 'handler', 'providers', 'manifest', or 'issuer' object
+   * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
+   * @param id Some unique, accessible identifier to map the obj to
    * @param obj The object to use; see {@link UseOption}
    * @example
+   * import server from '@formfree/dcx';
+   * server.use('issuer', 'mx', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
    * {
-   *  "issuers": Map(1){ "mx" => { "name": "mx", "id": "did:web5:mx" } },
+   *  "issuers": Map(1){ "mx" => { "name": "MX Technologies", "id": "did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo" } },
    *  "handlers": Map(1){ "hello" => () => console.log("Hello Web5!") },
    *  "providers": Map(1){ "local" => { "name": "localhost", "endpoint": "http://localhost:3000" } },
    *  "manifests": Map(1){ "EXAMPLE-MANIFEST" => { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
    * }
    * 
    */
-  public use(type: UseType, id: string | number | symbol, obj: any): void {
-    const option = Web5Manager.get(`${type}s`);
-    option.set(id, obj);
-    if (type === "issuer") {
-      // assert(obj instanceof Issuer);
-      this.useIssuer(id, obj as Issuer);
-    } else if (type === "manifest") {
-      // assert(obj instanceof Manifest)
-      this.useManifest(id, obj as Manifest);
-    } else if (type === "provider") {
-      // assert(obj instanceof Provider)
-      this.useProvider(id, obj as Provider);
-    } else if (type === "handler") {
-      // assert(obj instanceof Handler)
-      this.useHandler(id, obj as Handler);
-    } else {
-      throw new DcxServerError(`Invalid use type ${type}`);
+  public use(path: UsePath, id: string | number | symbol, obj: any): void {
+    const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway'];
+    if (!validPaths.includes(path)) {
+      throw new DcxServerError(`Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`);
     }
-    // this[`${type}s`].set(id, obj as any)
+    this[`${path}s`].set(id, obj);
   }
 
   /**
@@ -371,4 +361,9 @@ export class DcxServer extends Config {
   }
 }
 
-export default new DcxServer({});
+
+
+export default DcxServer;
+
+const server = new DcxServer({});
+export { server };

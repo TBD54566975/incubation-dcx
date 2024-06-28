@@ -19,9 +19,7 @@ export type VerifiablePresentation = {
   };
 } & AdditionalProperties;
 
-export type VcDataRequest = {
-  vcs: VerifiableCredential[]
-} | null;
+export type VcDataRequest = { vcs: VerifiableCredential[] } | null;
 
 export type DcxConfigType = InstanceType<typeof Config>;
 
@@ -32,7 +30,7 @@ export type ManifestOutputDescriptor = {
 };
 
 
-export type ManifestIssuer = {
+export type Issuer = {
   id: string;
   name: string;
 };
@@ -70,7 +68,7 @@ export interface CredentialManifest extends AdditionalProperties {
   name: string;
   description: string;
   spec_version: string;
-  issuer: ManifestIssuer;
+  issuer: Issuer;
   output_descriptors: ManifestOutputDescriptor[];
   format: ManifestFormat;
   presentation_definition: PresentationDefinition;
@@ -84,60 +82,61 @@ export type VcVerification = {
 
 // Issuer
 export interface TrustedIssuer extends AdditionalProperties {
+  [key: string | number | symbol]: any;
   name: string;
   id: string;
 }
-export class Issuer implements TrustedIssuer {
-  constructor(public name: string, public id: string) { }
-}
-export type UseIssuers = Map<string | number | symbol, Issuer>;
-
-// { [key: string | number | symbol]: Issuer; };
 
 // Handler
-export type HandlerFunction = (...args: any[]) => any | Promise<any>;
-export class Handler {
-  constructor(public handler: HandlerFunction) { }
+export type Handler = (...args: any[]) => any | Promise<any>;
+export class HandlerType {
+  constructor(public handler: Handler) { }
   call(...args: any[]): any | Promise<any> {
     return this.handler(...args);
   }
 }
-export type UseHandlers = Map<string | number | symbol, Handler>
-//  { [key: string | number | symbol]: Handler; };
 
 // Provider
-export interface VcDataProvider extends AdditionalProperties {
+export interface DataProvider extends AdditionalProperties {
+  [key: string | number | symbol]: any;
   name: string;
   endpoint: string;
   method?: string;
   headers?: Record<string, string>;
 };
-export class Provider implements VcDataProvider {
-  constructor(public name: string, public endpoint: string, public method?: string, public headers?: Record<string, string>) { }
+export class Provider implements DataProvider {
+  constructor(public name: string,
+    public endpoint: string,
+    public method?: string,
+    public headers?: Record<string, string>) { }
 }
-export type UseProviders = Map<string | number | symbol, Provider>
-// { [key: string | number | symbol]: Provider; };
 
 // Manifest
-// export type Manifest = CredentialManifest;
 export class Manifest implements CredentialManifest {
-  constructor(public id: string, public name: string, public description: string, public spec_version: string, public issuer: ManifestIssuer, public output_descriptors: ManifestOutputDescriptor[], public format: ManifestFormat, public presentation_definition: PresentationDefinition) { }
+  constructor(public id: string,
+    public name: string,
+    public description: string,
+    public spec_version: string,
+    public issuer: Issuer,
+    public output_descriptors: ManifestOutputDescriptor[],
+    public format: ManifestFormat,
+    public presentation_definition: PresentationDefinition) { }
 }
-export type UseManifests = Map<string | number | symbol, Manifest>
-// { [key: string | number | symbol]: Manifest; }
+export interface GatewayType extends AdditionalProperties {
+  name: string;
+  uri: string;
+}
+export class Gateway implements GatewayType {
+  constructor(public name: string, public uri: string) { }
+}
+
+export type UseOption = Map<string | number | symbol, any>;
 
 export type UseOptions = {
-  issuers?: UseIssuers;
-  handlers?: UseHandlers;
-  providers?: UseProviders;
-  manifests?: UseManifests;
+  [key: string]: any;
+  issuers?: UseOption;
+  handlers?: UseOption;
+  providers?: UseOption;
+  manifests?: UseOption;
+  gateways?: UseOption;
 }
-
-export type ServerOptions = {
-  issuers?: UseIssuers;
-  handlers?: UseHandlers;
-  providers?: UseProviders;
-  manifests?: UseManifests;
-};
-
-export type UseOption = Issuer | Handler | Manifest | Provider;

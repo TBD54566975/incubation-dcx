@@ -10,8 +10,7 @@ import {
   AdditionalProperties,
   CredentialManifest,
   Issuer,
-  UseHandlers,
-  VcDataRequest,
+  UseOption,
   VcVerification
 } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
@@ -22,7 +21,7 @@ import { credentialIssuerProtocol, responseSchema } from './index.js';
 
 
 export class ProtocolHandlerUtils {
-  public static handlers: UseHandlers;
+  public static handlers: UseOption;
   /**
    *
    * Verify DCX application VCs

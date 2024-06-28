@@ -21,22 +21,12 @@ import {
     PortableDid,
 } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import {
-    credentialIssuerProtocol,
-    ExampleManifest,
-    manifestSchema
-} from '../protocol/index.js';
-import {
-    CredentialManifest,
-    UseIssuers,
-    UseManifests,
-    UseProviders
-} from '../types/dcx.js';
+import { credentialIssuerProtocol, manifestSchema } from '../protocol/index.js';
+import { CredentialManifest, UseOption } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DcxDwnError, DwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
-import { DcxServer } from './dcx-server.js';
 
 /**
  * DidManager handles interactions between the DCX server and the DID
@@ -375,9 +365,10 @@ export class Web5Manager extends DwnManager {
     public static connected: DidManager;
     public static agent: Web5PlatformAgent;
 
-    public static manifests: UseManifests;
-    public static providers: UseProviders;
-    public static issuers: UseIssuers;
+    public static manifests: UseOption;
+    public static providers: UseOption;
+    public static issuers: UseOption;
+    public static gateways: UseOption;
 
     constructor() {
         super();
