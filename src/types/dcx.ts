@@ -65,7 +65,7 @@ export type PresentationDefinition = {
   input_descriptors: InputDescriptor[];
 };
 
-export type CredentialManifest = {
+export interface CredentialManifest extends AdditionalProperties {
   id: string;
   name: string;
   description: string;
@@ -82,54 +82,62 @@ export type VcVerification = {
   vc: VcDataModel;
 };
 
-export type Manifest = CredentialManifest;
+// Issuer
+export interface TrustedIssuer extends AdditionalProperties {
+  name: string;
+  id: string;
+}
+export class Issuer implements TrustedIssuer {
+  constructor(public name: string, public id: string) { }
+}
+export type UseIssuers = Map<string | number | symbol, Issuer>;
 
-export type Handler =
-  | ((...args: any[]) => any)
-  | ((...args: any[]) => Promise<any>);
+// { [key: string | number | symbol]: Issuer; };
 
-export type Issuer = { name: string; did: string };
+// Handler
+export type HandlerFunction = (...args: any[]) => any | Promise<any>;
+export class Handler {
+  constructor(public handler: HandlerFunction) { }
+  call(...args: any[]): any | Promise<any> {
+    return this.handler(...args);
+  }
+}
+export type UseHandlers = Map<string | number | symbol, Handler>
+//  { [key: string | number | symbol]: Handler; };
 
-export type Provider = {
+// Provider
+export interface VcDataProvider extends AdditionalProperties {
   name: string;
   endpoint: string;
-  vc: { id: string; name: string; }
+  method?: string;
+  headers?: Record<string, string>;
 };
-
-
-export type UseManifests = {
-  [key: string | number | symbol]:
-  | Manifest
-  | (() => any)
-  | ((...args: any[]) => any);
-  values: () => Manifest[];
-  keys: () => any[];
+export class Provider implements VcDataProvider {
+  constructor(public name: string, public endpoint: string, public method?: string, public headers?: Record<string, string>) { }
 }
+export type UseProviders = Map<string | number | symbol, Provider>
+// { [key: string | number | symbol]: Provider; };
 
-export type UseHandlers = {
-  [key: string | number | symbol]: Handler;
-};
-export type UseProviders = {
-  [key: string | number | symbol]: Provider;
-};
-export type UseIssuers = {
-  [key: string | number | symbol]: Issuer;
-};
+// Manifest
+// export type Manifest = CredentialManifest;
+export class Manifest implements CredentialManifest {
+  constructor(public id: string, public name: string, public description: string, public spec_version: string, public issuer: ManifestIssuer, public output_descriptors: ManifestOutputDescriptor[], public format: ManifestFormat, public presentation_definition: PresentationDefinition) { }
+}
+export type UseManifests = Map<string | number | symbol, Manifest>
+// { [key: string | number | symbol]: Manifest; }
 
 export type UseOptions = {
-  handler?: UseManifests;
-  provider?: UseHandlers;
-  manifest?: UseProviders;
-  issuer?: UseIssuers;
-  [key: string | number | symbol]: any;
+  issuers?: UseIssuers;
+  handlers?: UseHandlers;
+  providers?: UseProviders;
+  manifests?: UseManifests;
 }
-export type UseObject = UseManifests | UseHandlers | UseProviders | UseIssuers;
 
-export type ServerOption = { [key: string | number | symbol]: Issuer | Handler | Manifest | Provider; };
 export type ServerOptions = {
-  handler?: UseManifests & { values(): Manifest[] };
-  provider?: UseHandlers;
-  manifest?: UseProviders;
-  issuer?: UseIssuers;
-  [key: string | number | symbol]: any;
+  issuers?: UseIssuers;
+  handlers?: UseHandlers;
+  providers?: UseProviders;
+  manifests?: UseManifests;
 };
+
+export type UseOption = Issuer | Handler | Manifest | Provider;

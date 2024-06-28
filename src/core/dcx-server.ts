@@ -1,6 +1,7 @@
 import { Web5PlatformAgent } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
+import { assert } from 'console';
 import { exit } from 'process';
 import terminalLink from 'terminal-link';
 import { Config, Objects } from '../index.js';
@@ -10,12 +11,13 @@ import {
   CredentialManifest,
   Handler,
   Issuer,
+  Manifest,
   Provider,
   ServerOptions,
-  UseOptions,
   UseHandlers,
   UseIssuers,
   UseManifests,
+  UseOption,
   UseProviders
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
@@ -32,58 +34,62 @@ const defaultConnectOptions = {
   },
 }
 
-type UseType = 'manifests' | 'handlers' | 'providers' | 'issuers';
+type UseType = 'manifest' | 'handler' | 'provider' | 'issuer';
 
 export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
 
-  serverUse: UseOptions;
-
   issuers: UseIssuers;
-  handlers: UseHandlers;
   manifests: UseManifests;
   providers: UseProviders;
+  handlers: UseHandlers;
+
 
   constructor(options: ServerOptions) {
     super();
 
     this.isPolling = false;
     this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
-    // get: (name: string) => this.manifest?.[name] ?? null,
-    this.issuers = options.issuers ?? {};
-    this.handlers = options.handlers ?? {};
-    this.manifests = options.manifests ?? {};
-    this.providers = options.providers ?? {};
 
-    this.serverUse = {
-      issuers: this.issuers,
-      handlers: this.handlers,
-      manifests: this.manifests,
-      providers: this.providers,
-    }
+    Web5Manager.issuers = this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
+    Web5Manager.manifests = this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
+    Web5Manager.providers = this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
 
-    ProtocolHandlers.handlers = this.handlers;
-    Web5Manager.providers = this.providers;
-    Web5Manager.issuers = this.issuers;
-    Web5Manager.manifests = {
-      ...this.manifests,
-      keys: () => Object.values(this),
-      values: () => Object.values(this)
-    }
-
-
+    ProtocolHandlers.handlers = this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
   }
 
   /**
    * 
    * @param type The type of object to use; must be one of 'handler', 'providers', 'manifest', or 'issuer'
    * @param id Some unique, accessible identifier for the 'handler', 'providers', 'manifest', or 'issuer' object
-   * @param obj The object to use; see {@link UseOptions}
+   * @param obj The object to use; see {@link UseOption}
+   * @example
+   * {
+   *  "issuers": { "mx": { "name": "mx", "id": "did:web5:mx" } },
+   *  "handlers": { "hello": () => console.log("Hello Web5!") },
+   *  "providers": { "local": { "name": "localhost", "endpoint": "http://localhost:3000" } },
+   *  "manifests": { "EXAMPLE-MANIFEST": { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
+   * }
+   * 
    */
-  public use(type: UseType, id: string | number | symbol, obj: UseOptions): void {
-    this.serverUse[type] = this[type] = { ...this.serverUse[type], [id]: obj };
-
+  public use(type: UseType, id: string | number | symbol, obj: any): void {
+    if (type === "issuer") {
+      // assert(obj instanceof Issuer);
+      this.useIssuer(id, obj as Issuer);
+    } else if (type === "manifest") {
+      // assert(obj instanceof Manifest)
+      this.useManifest(id, obj as Manifest);
+    } else if (type === "provider") {
+      // assert(obj instanceof Provider)
+      this.useProvider(id, obj as Provider);
+    } else if (type === "handler") {
+      // assert(obj instanceof Handler)
+      this.useHandler(id, obj as Handler);
+    } else {
+      throw new DcxServerError(`Invalid use type ${type}`);
+    }
+    // this[`${type}s`].set(id, obj as any)
   }
 
   /**
@@ -92,7 +98,7 @@ export class DcxServer extends Config {
    * @param manifest The credential manifest to use
    */
   public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
-    Web5Manager.manifests[id] = manifest;
+    Web5Manager.manifests.set(id, manifest);
   }
 
   /**
@@ -101,7 +107,7 @@ export class DcxServer extends Config {
    * @param handler The handler to use
    */
   public useHandler(id: string | number | symbol, handler: Handler): void {
-    ProtocolHandlers.handlers[id] = handler;
+    ProtocolHandlers.handlers.set(id, handler)
   }
 
   /**
@@ -110,7 +116,7 @@ export class DcxServer extends Config {
    * @param provider The provider to use
    */
   public useProvider(id: string | number | symbol, provider: Provider): void {
-    Web5Manager.providers[id] = provider
+    Web5Manager.providers.set(id, provider)
   }
 
   /**
@@ -277,7 +283,7 @@ export class DcxServer extends Config {
 
             if (record.protocolPath === 'application') {
 
-              const applicationManifest = this.manifests.values().find(
+              const applicationManifest = Object.values(this.manifests).find(
                 (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
 

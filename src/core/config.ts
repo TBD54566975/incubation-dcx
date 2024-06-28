@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { TrustedIssuer } from '../index.js';
+import { Issuer } from '../index.js';
 dotenv.config();
 export class Config {
   public static PORT = process.env.PORT || 3000;
@@ -23,10 +23,10 @@ export class Config {
     JSON.parse(process.env.VC_TRUSTED_ISSUERS)) || [
       {
         name: 'mx',
-        did: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
+        id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
       },
     ];
-  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map((issuer: TrustedIssuer) => issuer.did);
+  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.did);
 
   // Private class variables
   private _CIPHER_KEY: Buffer = Buffer.from(process.env.CIPHER_KEY || '', 'base64');
