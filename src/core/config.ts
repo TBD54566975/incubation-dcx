@@ -26,7 +26,7 @@ export class Config {
         id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
       },
     ];
-  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.did);
+  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.id);
 
   // Private class variables
   private _CIPHER_KEY: Buffer = Buffer.from(process.env.CIPHER_KEY || '', 'base64');

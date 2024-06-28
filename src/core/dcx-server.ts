@@ -66,14 +66,16 @@ export class DcxServer extends Config {
    * @param obj The object to use; see {@link UseOption}
    * @example
    * {
-   *  "issuers": { "mx": { "name": "mx", "id": "did:web5:mx" } },
-   *  "handlers": { "hello": () => console.log("Hello Web5!") },
-   *  "providers": { "local": { "name": "localhost", "endpoint": "http://localhost:3000" } },
-   *  "manifests": { "EXAMPLE-MANIFEST": { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
+   *  "issuers": Map(1){ "mx" => { "name": "mx", "id": "did:web5:mx" } },
+   *  "handlers": Map(1){ "hello" => () => console.log("Hello Web5!") },
+   *  "providers": Map(1){ "local" => { "name": "localhost", "endpoint": "http://localhost:3000" } },
+   *  "manifests": Map(1){ "EXAMPLE-MANIFEST" => { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
    * }
    * 
    */
   public use(type: UseType, id: string | number | symbol, obj: any): void {
+    const option = Web5Manager.get(`${type}s`);
+    option.set(id, obj);
     if (type === "issuer") {
       // assert(obj instanceof Issuer);
       this.useIssuer(id, obj as Issuer);
@@ -125,7 +127,7 @@ export class DcxServer extends Config {
    * @param issuer The issuer to use
    */
   public useIssuer(id: string | number | symbol, issuer: Issuer): void {
-    Web5Manager.issuers[id] = issuer;
+    Web5Manager.issuers.set(id, issuer);
   }
 
   /**

@@ -242,7 +242,7 @@ export class DwnManager {
     */
     public static async filterManifestRecords(manifestReads: CredentialManifest[]): Promise<CredentialManifest[]> {
         try {
-            return manifestReads.filter(manifestRead => Web5Manager.manifests.values().find(
+            return manifestReads.filter(manifestRead => Object.values(Web5Manager.manifests).find(
                 (manifest: CredentialManifest) => manifest.id === manifestRead.id)
             );
         } catch (error: any) {
@@ -368,7 +368,9 @@ export class DwnManager {
 /**
  * Web5Manager handles interactions between the DCX server and the Web5 platform
  */
-export abstract class Web5Manager extends DwnManager {
+export class Web5Manager extends DwnManager {
+    static [key: string]: any;
+
     public static web5: Web5;
     public static connected: DidManager;
     public static agent: Web5PlatformAgent;
@@ -379,5 +381,13 @@ export abstract class Web5Manager extends DwnManager {
 
     constructor() {
         super();
+    }
+
+    public static get(type: string): any {
+        return this[type];
+    }
+
+    public static set(type: string, obj: any): any {
+        return this[type].set(obj);
     }
 }

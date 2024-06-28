@@ -127,14 +127,14 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
     vp: VerifiablePresentation,
     subjectDid: string,
     credentialManifest?: CredentialManifest,
-    manifestName?: string,
+    manifestId?: string,
   ) {
 
-    if (!manifestName && !credentialManifest) {
+    if (!manifestId && !credentialManifest) {
       throw new DcxProtocolHandlerError('Must provide either manifest or manifest name');
     }
 
-    const manifest = !!manifestName ? Web5Manager.manifests?.[manifestName] : credentialManifest as CredentialManifest;
+    const manifest = !!manifestId ? Web5Manager.manifests.get(manifestId) : credentialManifest as CredentialManifest;
 
     if (!manifest) {
       throw new DcxProtocolHandlerError('Manifest not found');
@@ -157,7 +157,7 @@ export class ProtocolHandlers extends ProtocolHandlerUtils {
       Logger.debug(`VCs do not satisfy Presentation Definition`, error.message);
     }
 
-    const useIssuers = Object.values(Web5Manager.issuers).map((issuer: Issuer) => issuer.did);
+    const useIssuers = Object.values(Web5Manager.issuers).map((issuer: Issuer) => issuer.id);
     const issuerDidSet = new Set<string>([...useIssuers, ...Config.VC_TRUSTED_ISSUER_DIDS]);
 
     const verifiedCredentials: VerifiableCredential[] = [];
