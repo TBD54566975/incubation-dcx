@@ -19,9 +19,7 @@ export type VerifiablePresentation = {
   };
 } & AdditionalProperties;
 
-export type VcDataRequest = {
-  vcs: VerifiableCredential[]
-} | null;
+export type VcDataRequest = { vcs: VerifiableCredential[] } | null;
 
 export type DcxConfigType = InstanceType<typeof Config>;
 
@@ -31,9 +29,8 @@ export type ManifestOutputDescriptor = {
   schema: string;
 };
 
-export type ManifestFormat = { jwt_vc: { alg: string[] } };
 
-export type ManifestIssuer = {
+export type Issuer = {
   id: string;
   name: string;
 };
@@ -58,66 +55,98 @@ export type InputDescriptor = {
   constraints: Constraint;
 };
 
+export type ManifestFormat = {
+  jwt_vc: { alg: string[] }
+};
 export type PresentationDefinition = {
   id: string;
   input_descriptors: InputDescriptor[];
 };
 
-export interface CredentialManifest {
+export interface CredentialManifest extends AdditionalProperties {
   id: string;
   name: string;
   description: string;
   spec_version: string;
-  issuer: ManifestIssuer;
+  issuer: Issuer;
   output_descriptors: ManifestOutputDescriptor[];
   format: ManifestFormat;
   presentation_definition: PresentationDefinition;
 };
 
-export type VcVerification = {
+export type VerifiedCredential = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
 };
 
-export type TrustedIssuer = {
+// Issuer
+export interface TrustedIssuer extends AdditionalProperties {
+  [key: string | number | symbol]: any;
   name: string;
-  did: string
-};
+  id: string;
+}
 
-export type Provider = {
+// Handler
+export type Handler = (...args: any[]) => any | Promise<any>;
+export class HandlerType {
+  constructor(public handler: Handler) { }
+  call(...args: any[]): any | Promise<any> {
+    return this.handler(...args);
+  }
+}
+
+// Provider
+export interface DataProvider extends AdditionalProperties {
+  [key: string | number | symbol]: any;
   name: string;
   endpoint: string;
-  vc: {
-    id: string;
-    name: string;
-  }
+  method?: string;
+  headers?: Record<string, string>;
 };
+export class Provider implements DataProvider {
+  constructor(public name: string,
+    public endpoint: string,
+    public method?: string,
+    public headers?: Record<string, string>) { }
+}
 
-export type Handler =
-  | ((...args: any[]) => any)
-  | ((...args: any[]) => Promise<any>);
+// Manifest
+export class Manifest implements CredentialManifest {
+  constructor(
+    public id: string,
+    public name: string,
+    public description: string,
+    public spec_version: string,
+    public issuer: Issuer,
+    public output_descriptors: ManifestOutputDescriptor[],
+    public format: ManifestFormat,
+    public presentation_definition: PresentationDefinition) { }
+}
+export interface GatewayType extends AdditionalProperties {
+  id: string;
+  uri: string;
+}
+export class Gateway implements GatewayType {
+  constructor(
+    public id: string,
+    public uri: string
+  ) { }
+}
 
-export type ServerOptionHandlers = {
-  [key: string | number | symbol]: Handler
-};
+export type UseIssuers = Map<string | number | symbol, Issuer>;
+export type UseHandlers = Map<string | number | symbol, Handler>;
+export type UseProviders = Map<string | number | symbol, Provider>;
+export type UseManifests = Map<string | number | symbol, Manifest>;
+export type UseGateways = Map<string | number | symbol, Gateway>;
 
-export type ServerOptionProviders = {
-  [key: string | number | symbol]: Provider
-};
+export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways;
 
-export type ServerOptionManifests = {
-  [key: string | number | symbol]: CredentialManifest | any;
-  get?(name: string): CredentialManifest | undefined;
-};
-
-export type ServerOptionIssuers = {
-  [key: string | number | symbol]: TrustedIssuer
-};
-
-export type ServerOptions = {
-  handlers?: ServerOptionHandlers;
-  providers?: ServerOptionProviders;
-  manifests?: ServerOptionManifests;
-  issuers?: ServerOptionIssuers;
-};
+export type UseOptions = {
+  [key: string]: any;
+  issuers?: UseIssuers;
+  handlers?: UseHandlers;
+  providers?: UseProviders;
+  manifests?: UseManifests;
+  gateways?: UseGateways;
+}

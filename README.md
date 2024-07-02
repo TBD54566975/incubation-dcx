@@ -4,10 +4,10 @@ DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) wi
 
 `@formfree/dcx` can be used to bootstrap running a DCX issuer server and provide the following functionality:
 
-1. DCX to DWN server connection - asynchronous communication between issuers and applicants
-2. DCX to DHT gateway connection - asynchronous communication between issuers and DHT gateways
-3. DID DHT key management - import/export/create DID DHT keys
-4. DCX protocol & handlers - integrated with api handlers to facilitate required interactions with DWNs and 3rd parties
+1. Web5 connection: manages connection to the Web5 platform and facilitates all operations
+2. DWN connection: manages connection to local/remote DWN an handles asynchronous communication between issuers and applicants
+3. DID DHT management: manages import, export & creation of DHT DIDs
+4. DCX protocol handlers: implements generic protocol handlers to do VC verification, data requests and VC issuance
 
 The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
@@ -38,7 +38,11 @@ The protocol definition and schemas can be found below:
   - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
 
-## Architecture Diagram
+## Docs & Diagrams
+
+Additional docs & diagram files can be found in the [/docs](/docs) folder.
+
+### Architecture Diagram
 
 - **DCX**: Protocol boundary within which actors communicate
 - **DCX Issuer**: Web server running @web5/dcx and web5-js
@@ -53,7 +57,7 @@ The protocol definition and schemas can be found below:
 
 ### Sequence Diagrams
 
-#### Full Sequence
+#### Full Protocol
 
 <details>
 
@@ -89,7 +93,7 @@ The protocol definition and schemas can be found below:
 
 </details>
 
-#### Issuer Sequence
+#### Issuer Protocol
 
 <details>
 
@@ -109,7 +113,7 @@ The protocol definition and schemas can be found below:
 
 ![dcx-issuer-sequence](./docs/img/dcx-issuer-sequence.png)
 
-#### Applicant Sequence
+#### Applicant Protocol
 
 <details>
 
