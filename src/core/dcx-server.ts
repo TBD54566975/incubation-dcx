@@ -14,7 +14,11 @@ import {
   Manifest,
   Provider,
   UseOptions,
-  UseOption
+  UseIssuers,
+  UseGateways,
+  UseManifests,
+  UseProviders,
+  UseHandlers
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
@@ -38,11 +42,11 @@ export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
 
-  issuers: UseOption;
-  manifests: UseOption;
-  providers: UseOption;
-  handlers: UseOption;
-  gateways: UseOption;
+  public static issuers: UseIssuers;
+  public static manifests: UseManifests;
+  public static providers: UseProviders;
+  public static handlers: UseHandlers;
+  public static gateways: UseGateways;
 
   constructor(options: UseOptions = {}) {
     super();
@@ -53,11 +57,11 @@ export class DcxServer extends Config {
     /**
      * Setup the Web5Manager and the DcxServer with the provided options
      */
-    Web5Manager.issuers = this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
-    Web5Manager.manifests = this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
-    Web5Manager.providers = this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
-    Web5Manager.gateways = this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
-    ProtocolHandlers.handlers = this.gateways = options.gateways ?? new Map<string | number | symbol, Gateway>();
+    this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
+    this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
+    this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
+    this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
+    this.gateways = options.gateways ?? new Map<string | number | symbol, Gateway>();
   }
 
   /**
@@ -66,17 +70,17 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier to map the obj to
    * @param obj The object to use; see {@link UseOption}
    * @example
-   * import server from '@formfree/dcx';
+   * import { server } from '@formfree/dcx';
    * server.use('issuer', 'mx', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
    * {
    *  "issuers": Map(1){ "mx" => { "name": "MX Technologies", "id": "did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo" } },
    *  "handlers": Map(1){ "hello" => () => console.log("Hello Web5!") },
-   *  "providers": Map(1){ "local" => { "name": "localhost", "endpoint": "http://localhost:3000" } },
+   *  "providers": Map(1){ "dev" => { "name": "localhost", "endpoint": "http://localhost:3000" } },
    *  "manifests": Map(1){ "EXAMPLE-MANIFEST" => { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
    * }
    * 
    */
-  public use(path: UsePath, id: string | number | symbol, obj: any): void {
+  public static use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
     const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(`Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`);
@@ -89,8 +93,8 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    */
-  public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
-    Web5Manager.manifests.set(id, manifest);
+  public static useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
+    this.manifests.set(id, manifest);
   }
 
   /**
@@ -98,8 +102,8 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    */
-  public useHandler(id: string | number | symbol, handler: Handler): void {
-    ProtocolHandlers.handlers.set(id, handler)
+  public static useHandler(id: string | number | symbol, handler: Handler): void {
+    this.handlers.set(id, handler)
   }
 
   /**
@@ -107,8 +111,8 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    */
-  public useProvider(id: string | number | symbol, provider: Provider): void {
-    Web5Manager.providers.set(id, provider)
+  public static useProvider(id: string | number | symbol, provider: Provider): void {
+    this.providers.set(id, provider)
   }
 
   /**
@@ -116,8 +120,8 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    */
-  public useIssuer(id: string | number | symbol, issuer: Issuer): void {
-    Web5Manager.issuers.set(id, issuer);
+  public static useIssuer(id: string | number | symbol, issuer: Issuer): void {
+    this.issuers.set(id, issuer);
   }
 
   /**
@@ -232,7 +236,7 @@ export class DcxServer extends Config {
       const DWN_LAST_RECORD_ID = Config.DWN_LAST_RECORD_ID;
 
       let cursor = await FileSystem.readToJson(DWN_CURSOR);
-      const pagination = Objects.isEmptyObject(cursor) ? { limit: 10 } : { limit: 10, cursor };
+      const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
       let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
       while (this.isPolling) {
@@ -275,12 +279,12 @@ export class DcxServer extends Config {
 
             if (record.protocolPath === 'application') {
 
-              const applicationManifest = Object.values(this.manifests).find(
+              const manifest = Object.values(DcxServer.manifests).find(
                 (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
 
-              if (!!applicationManifest) {
-                await ProtocolHandlers.processApplicationRecord(record, applicationManifest);
+              if (!!manifest) {
+                await ProtocolHandlers.processApplicationRecord(record, manifest);
               } else {
                 Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
               }
@@ -308,7 +312,7 @@ export class DcxServer extends Config {
       }
     } catch (error: any) {
       Logger.error(DcxServer.name, error);
-      return error;
+      throw error;
     }
   }
 
@@ -329,28 +333,32 @@ export class DcxServer extends Config {
    * @returns void
    */
   public async start(): Promise<void> {
-    try {
-      await this.setup();
-      Logger.debug('Web5 connection initialized', this.isInitialized);
-    } catch (error: any) {
-      Logger.error(DcxServer.name, 'Failed to setup DCX Server', error?.message);
-      Logger.error(DcxServer.name, error);
-      this.stop();
-    }
-
-    try {
-      const success = await Web5Manager.setup();
-      if (!success) {
-        Logger.warn('Failed to setup DCX DWN');
+    if (!this.isInitialized) {
+      try {
+        await this.setup();
+        Logger.debug('Web5 connection initialized', this.isInitialized);
+      } catch (error: any) {
+        Logger.error(DcxServer.name, 'Failed to setup DCX Server', error?.message);
+        Logger.error(DcxServer.name, error);
+        this.stop();
       }
-    } catch (error: any) {
-      Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
-      Logger.error(DcxServer.name, error);
-      this.stop();
+
+      try {
+        const success = await Web5Manager.setup();
+        if (!success) {
+          Logger.warn('Failed to setup DCX DWN');
+        }
+      } catch (error: any) {
+        Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+        Logger.error(DcxServer.name, error);
+        this.stop();
+      }
     }
 
-    try {
 
+
+
+    try {
       // Start polling for incoming records
       this.isPolling = true;
       await this.poll();

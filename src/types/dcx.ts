@@ -74,7 +74,7 @@ export interface CredentialManifest extends AdditionalProperties {
   presentation_definition: PresentationDefinition;
 };
 
-export type VcVerification = {
+export type VerifiedCredential = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
@@ -113,7 +113,8 @@ export class Provider implements DataProvider {
 
 // Manifest
 export class Manifest implements CredentialManifest {
-  constructor(public id: string,
+  constructor(
+    public id: string,
     public name: string,
     public description: string,
     public spec_version: string,
@@ -123,20 +124,29 @@ export class Manifest implements CredentialManifest {
     public presentation_definition: PresentationDefinition) { }
 }
 export interface GatewayType extends AdditionalProperties {
-  name: string;
+  id: string;
   uri: string;
 }
 export class Gateway implements GatewayType {
-  constructor(public name: string, public uri: string) { }
+  constructor(
+    public id: string,
+    public uri: string
+  ) { }
 }
 
-export type UseOption = Map<string | number | symbol, any>;
+export type UseIssuers = Map<string | number | symbol, Issuer>;
+export type UseHandlers = Map<string | number | symbol, Handler>;
+export type UseProviders = Map<string | number | symbol, Provider>;
+export type UseManifests = Map<string | number | symbol, Manifest>;
+export type UseGateways = Map<string | number | symbol, Gateway>;
+
+export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways;
 
 export type UseOptions = {
   [key: string]: any;
-  issuers?: UseOption;
-  handlers?: UseOption;
-  providers?: UseOption;
-  manifests?: UseOption;
-  gateways?: UseOption;
+  issuers?: UseIssuers;
+  handlers?: UseHandlers;
+  providers?: UseProviders;
+  manifests?: UseManifests;
+  gateways?: UseGateways;
 }

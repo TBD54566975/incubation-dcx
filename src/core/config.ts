@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { Issuer } from '../index.js';
 dotenv.config();
 export class Config {
+  public static NODE_ENV = process.env.NODE_ENV || 'development';
   public static PORT = process.env.PORT || 3000;
   public static EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
   public static EXTERNAL_HOSTNAME = process.env.EXTERNAL_HOSTNAME || 'localhost';
