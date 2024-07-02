@@ -1,6 +1,6 @@
 {
   "name": "@formfree/dcx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
   "main": "./dist/cjs/index.js",
