@@ -1,26 +1,15 @@
 # Decentralized Credential Exchange (DCX)
 
-## Package Versions
+DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`.
 
-| Name                                                 |                                                                Latest Version                                                                 |
-| ---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: |
-| [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) |
-
-
-Decentralized Credential Exchange (DCX) is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package and merge it into the Web5 monorepo under the name `@web5/dcx`, so developers can `npm install @web5/dcx` into any javascript/typescript project and run a DCX server to participate in the DCX protocol.
-
-## Package
-
-The DCX package is a FOSS npm package used to bootstrap running a DCX issuer server. The package handles the connection between the DCX server and its corresponding DWN server and provides the following functionality:
+`@formfree/dcx` can be used to bootstrap running a DCX issuer server and provide the following functionality:
 
 1. DCX to DWN server connection - asynchronous communication between issuers and applicants
 2. DCX to DHT gateway connection - asynchronous communication between issuers and DHT gateways
 3. DID DHT key management - import/export/create DID DHT keys
 4. DCX protocol & handlers - integrated with api handlers to facilitate required interactions with DWNs and 3rd parties
 
-## Protocol
-
-The DCX protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
 [Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
 1. The input credentials required by the issuer
@@ -33,7 +22,7 @@ The DCX protocol is open and permissionless leveraging the benefits of DWNs, Ver
 
 Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
 
-The DCX protocol and its varying schemas can be found below:
+The protocol definition and schemas can be found below:
 
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
@@ -62,7 +51,7 @@ The DCX protocol and its varying schemas can be found below:
 
 ![dcx-architecture](./docs/img/dcx-architecture.png)
 
-## Sequence Diagrams
+### Sequence Diagrams
 
 #### Full Sequence
 
@@ -136,156 +125,169 @@ The DCX protocol and its varying schemas can be found below:
 
 ![dcx-applicant-sequence](./docs/img/dcx-applicant-sequence.png)
 
+
 ## Package Versions
 
 | Name                                                 |                                                                Latest Version                                                                 |
 | ---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: |
-| [@formfree/dcx](/src) | todo |
+| [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) |
+<!-- | [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) | -->
+<!-- | [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) | -->
 
 
-## Use
+## Usage
 
-### Server
+Import the `server` from `@formfree/dcx` and run `.start()` to simply run the server as-is.
+
+```ts
+import { server } from './src/index';
+await server.start();
+```
+
+However, this will be limited to local development since you are required to provide your own credential manifest(s).
+You can leverate the `.use()` method on the server to define custom server options.
+
+### Use Manifest
+
+To define your own manifests, you can leverage `server.use('manifest' ... )` to pass in your own.
+An example manifest can be found [here](./src/protocol/manifests/) to use for accepting and issuing VCs
 
 ```typescript
-import server from './src/index';
 import CustomManifest from './CUSTOM-MANIFEST.json';
+import { server } from './src/index';
 
-server.useManifest('customManifest', {
+// Define manifest in local json file, import and pass into server
+server.use('manifest', CustomManifest.id, CustomManifest);
+
+// Define manifest directly into .use method
+server.use('manifest', 'dcx-credential-manifest-example', {
     "id": "dcx-credential-manifest-example",
     "name": "DCX Credential Manifest Example",
     "description": "This is an example of a credential manifest used by DCX. This document should be replaced with your own version to satify the requirements of the credentials your DCX server expects as inputs and the desired output credential.",
     "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
     "issuer": {
-      "id": "[replaced dynamically]",
-      "name": "example-issuer"
+        "id": "[replaced dynamically]",
+        "name": "example-issuer"
     },
     "output_descriptors": [
-      {
-        "id": "example-output-descriptor-id",
-        "name": "Example Output Descriptor Name",
-        "schema": "https://example.com/schemas/ExampleOutputDescriptorSchema"
-      }
+        {
+            "id": "example-output-descriptor-id",
+            "name": "Example Output Descriptor Name",
+            "schema": "https://example.com/schemas/ExampleOutputDescriptorSchema"
+        }
     ],
     "format": {
-      "jwt_vc": {
-        "alg": ["EdDSA"]
-      }
+        "jwt_vc": {
+            "alg": [
+                "EdDSA"
+            ]
+        }
     },
     "presentation_definition": {
-      "id": "example-presentation-definition-id",
-      "input_descriptors": [
-        {
-          "id": "example-presentation-definition-input-descriptor-id",
-          "purpose": "Meant as an example to developers",
-          "constraints": {
-            "fields": [
-              {
-                "path": ["$.type[*]"],
-                "filter": {
-                  "type": "string",
-                  "pattern": "^*$"
+        "id": "example-presentation-definition-id",
+        "input_descriptors": [
+            {
+                "id": "example-presentation-definition-input-descriptor-id",
+                "purpose": "Meant as an example to developers",
+                "constraints": {
+                    "fields": [
+                        {
+                            "path": [
+                                "$.type[*]"
+                            ],
+                            "filter": {
+                                "type": "string",
+                                "pattern": "^*$"
+                            }
+                        },
+                        {
+                            "path": [
+                                "$.credentialSubject.some.unique.field1",
+                                "$.credentialSubject.some.unique.field2",
+                                "$.credentialSubject.some.unique.fieldn"
+                            ]
+                        }
+                    ]
                 }
-              },
-              {
-                "path": [
-                  "$.credentialSubject.some.unique.field1",
-                  "$.credentialSubject.some.unique.field2",
-                  "$.credentialSubject.some.unique.fieldn"
-                ]
-              }
-            ]
-          }
-        }
-      ]
+            }
+        ]
     }
-  }
+});
+```
+
+### Use Issuer
+
+You can define your own set of trusted issuers using `server.use('issuer' ...`. The list of issuers defined will be used
+when an application is processed. The issuers of the input VCs will be compared to this list. 
+DCX defined 1 default issuer if none are provided. See [Config](./src/core/config.ts) or below example for details.
+
+```ts
+server.use('issuer', 'mx',
+    {
+        name: 'MX Technologies',
+        id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
+    }
 );
-server.useProvider('localhost', {
-    name: 'localhost',
-    endpoint: 'http://localhost:3000',
-    vc: {
-        id: 'ATPReport',
-        name: 'ATP Report'
+```
+
+### Use Provider
+
+You can define your own VC data providers using `server.use('provider' ...`. Ideally, you only define 1 provider, but
+the server can handle multiple for different development contexts (i.e. development, testing, production).
+
+```ts
+// development
+server.use('provider', 'development',
+    {
+        method: 'POST',
+        endpoint: 'http://localhost:4000/api/v1/vc/data'
     }
-});
-server.useIssuer('mx', { name: 'mx', did: 'did:web5:mx' });
-server.useHandler('testHandler', () => console.log("test handler"));
+);
 
-await server.start();
-
-process.on('SIGTERM', () => {
-    server.stop();
-});
+// production
+server.use('provider', 'production',
+     {
+         name: "Some Third Party Provider",
+         method: 'POST',
+         endpoint: 'http://api.provider.com/v1/vc/data',
+         headers: { 'Authorization': `Bearer ${process.env.PROVIDER_AUTHORIZATION_BEARER_TOKEN}`, }
+     }
+);
 ```
 
-### Protocol 
+### Use Handler
 
-```typescript
-// issuer side
-import {
-  credentialIssuerProtocol,
-  manifestSchema,
-} from "@web5/credential-issuance-protocol";
+You can define your own set of protocol handlers using `server.use('handler' ...`. The custom handlers you define should
+either overwrite and/or work with the existing default ones. See [handlers.ts](./src/protocol/handlers.ts) for the inputs/outputs
+expected by the default handlers. Default handler names are: `selectCredentials`, `verifyCredentials`, `requestCredential`, `issueCredential`.
 
-// example use in protocol query
-const { protocols } = await web5.dwn.protocols.query({
-  from: did,
-  message: {
-    filter: {
-      protocol: credentialIssuerProtocol.protocol,
-    },
-  },
-});
-
-// applicant side
-import {
-  credentialApplicantProtocol,
-  manifestSchema,
-  presentationSchema,
-  responseSchema,
-} from "@web5/credential-issuance-protocol";
-
-// example use in write
-const { record: applicationRecord, status: createStatus } =
-  await web5?.web5.dwn.records.create({
-    store: true,
-    data: presentationResult.presentation,
-    message: {
-      recipient: issuerDid,
-      schema: presentationSchema.$id,
-      dataFormat: "application/json",
-      protocol: credentialApplicantProtocol.protocol,
-      protocolPath: "application",
-    },
-  });
+```ts
+const requestCredentialCustom = () => { /* do api request to a provider and return data */ };
+server.use('handler', 'requestCredential', requestCredentialCustom);
 ```
 
-## Issues & PRs
+### Use Gateway
 
-- [x] Create repo with documentation and diagrams
-- [x] Credential issuer protocol handlers
-  - [Issue #11](https://github.com/TBD54566975/incubation-dcx/issues/11)
-  - [PR #5](https://github.com/TBD54566975//incubation-dcx/pull/5)
-  - [PR #18](https://github.com/TBD54566975/incubation-dcx/pull/18)
-- [x] DCX DWN Manager
-  - [Issue #14](https://github.com/TBD54566975/incubation-dcx/issues/14)
-  - [PR #15](https://github.com/TBD54566975/incubation-dcx/pull/15)
-- [x] DID DHT Manager
-  - [Issue #9](https://github.com/TBD54566975/incubation-dcx/issues/9)
-  - [PR #10](https://github.com/TBD54566975/incubation-dcx/pull/10)
-- [x] DCX Server
-  - [Issue #12](https://github.com/TBD54566975/incubation-dcx/issues/12)
-  - [PR #13](https://github.com/TBD54566975/incubation-dcx/pull/13)
-- [ ] Credential applicant protocol handlers
-  - [Issue #19](https://github.com/TBD54566975/incubation-dcx/issues/19)
-  - [PR #]()
-- [ ] Tests
-  - [Issue #17](https://github.com/TBD54566975/incubation-dcx/issues/17)
-  - [PR #]()
-- [ ] Publish to npmjs
-  - [Issue #20](https://github.com/TBD54566975/incubation-dcx/issues/20)
-  - [PR #]()
+You can define your own DHT Gateway using `server.use('gateway' ...`. At the moment, this has no impact.
+DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily toggle between dev envs.
+
+```ts
+// development
+server.use('gateway', 'development',
+    {
+        id: 'localhost',
+        uri: 'http://localhost:8305'
+    }
+);
+
+// production
+server.use('gateway', 'production',
+    {
+        id: 'your-production',
+        uri: 'https://dht.your-production.com'
+    }
+);
+```
 
 ## Project Resources
 
