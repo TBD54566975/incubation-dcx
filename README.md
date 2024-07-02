@@ -217,6 +217,8 @@ server.use('manifest', 'dcx-credential-manifest-example', {
         ]
     }
 });
+
+await server.start();
 ```
 
 ### Use Issuer
@@ -226,12 +228,16 @@ when an application is processed. The issuers of the input VCs will be compared 
 DCX defined 1 default issuer if none are provided. See [Config](./src/core/config.ts) or below example for details.
 
 ```ts
+import { server } from './src/index';
+
 server.use('issuer', 'mx',
     {
         name: 'MX Technologies',
         id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
     }
 );
+
+await server.start();
 ```
 
 ### Use Provider
@@ -240,6 +246,8 @@ You can define your own VC data providers using `server.use('provider' ...`. Ide
 the server can handle multiple for different development contexts (i.e. development, testing, production).
 
 ```ts
+import { server } from './src/index';
+
 // development
 server.use('provider', 'development',
     {
@@ -257,6 +265,8 @@ server.use('provider', 'production',
          headers: { 'Authorization': `Bearer ${process.env.PROVIDER_AUTHORIZATION_BEARER_TOKEN}`, }
      }
 );
+
+await server.start();
 ```
 
 ### Use Handler
@@ -266,8 +276,12 @@ either overwrite and/or work with the existing default ones. See [handlers.ts](.
 expected by the default handlers. Default handler names are: `selectCredentials`, `verifyCredentials`, `requestCredential`, `issueCredential`.
 
 ```ts
+import { server } from './src/index';
+
 const requestCredentialCustom = () => { /* do api request to a provider and return data */ };
 server.use('handler', 'requestCredential', requestCredentialCustom);
+
+await server.start();
 ```
 
 ### Use Gateway
@@ -276,6 +290,8 @@ You can define your own DHT Gateway using `server.use('gateway' ...`. At the mom
 DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily toggle between dev envs.
 
 ```ts
+import { server } from './src/index';
+
 // development
 server.use('gateway', 'development',
     {
@@ -291,6 +307,8 @@ server.use('gateway', 'production',
         uri: 'https://dht.your-production.com'
     }
 );
+
+await server.start();
 ```
 
 ## Project Resources
