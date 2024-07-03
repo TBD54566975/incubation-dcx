@@ -1,6 +1,17 @@
 
-import { DwnResponseStatus, Web5PlatformAgent } from '@web5/agent';
-import { Protocol, ProtocolsQueryResponse, Record, Web5 } from '@web5/api';
+import {
+    DwnPaginationCursor,
+    DwnResponseStatus,
+    Web5PlatformAgent
+} from '@web5/agent';
+import {
+    Protocol,
+    ProtocolsConfigureResponse,
+    ProtocolsQueryResponse,
+    Record,
+    RecordsCreateResponse,
+    Web5
+} from '@web5/api';
 import {
     BearerDid,
     DidDht,
@@ -10,14 +21,18 @@ import {
     PortableDid,
 } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { Config } from '../config.js';
-import { credentialIssuerProtocol, ExampleManifest, manifestSchema } from '../protocol/index.js';
-import { CredentialManifest } from '../types/dcx.js';
-import { DcxDwnError, dwn500Error, DwnError } from '../utils/error.js';
-import Logger from '../utils/logger.js';
+import { credentialIssuerProtocol, manifestSchema } from '../protocol/index.js';
+import { CredentialManifest, Manifest } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
+import { DcxDwnError, DwnError } from '../utils/error.js';
+import { Logger } from '../utils/logger.js';
+import { Config } from './config.js';
+import DcxServer from './dcx-server.js';
 
-export class ConnectedDidManager {
+/**
+ * DidManager handles interactions between the DCX server and the DID
+ */
+export class DidManager {
     public did: string;
     public bearerDid: BearerDid;
     public portableDid: PortableDid;
@@ -41,10 +56,9 @@ export class DidManager extends ConnectedDidManager {
      * @param options The did dht create options object; see {@link DidDhtCreateOptions}
      * @returns BearerDid; see {@link BearerDid}
      */
-    // @handleAsyncErrors
-    public static async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
-        DidManager.bearerDid = await DidDht.create({ options });
-        return DidManager.bearerDid;
+    public async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
+        this.bearerDid = await DidDht.create({ options });
+        return this.bearerDid;
     }
 
     /**
@@ -53,8 +67,7 @@ export class DidManager extends ConnectedDidManager {
      * @param didUri the uri to resolve
      * @returns DidResolutionResult; see {@link DidResolutionResult}
      */
-    // @handleAsyncErrors
-    public static async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
+    public async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
         return await DidDht.resolve(didUri);
     }
 
@@ -63,8 +76,7 @@ export class DidManager extends ConnectedDidManager {
      * @param gatewayUri the uri of the gateway to publish the did to
      * @returns DidRegistrationResult; see {@link DidRegistrationResult}
      */
-    // @handleAsyncErrors
-    public static async publishDidDoc(
+    public async publishDidDoc(
         gatewayUri: string = Config.DHT_GATEWAY_ENDPOINT,
     ): Promise<DidRegistrationResult> {
         return await DidDht.publish({ did: DidManager.bearerDid, gatewayUri });
@@ -76,8 +88,7 @@ export class DidManager extends ConnectedDidManager {
      * @param didFilepath the path to the file containing the portable did object; see {@link PortableDid}
      * @returns BearerDid; see {@link BearerDid}
      */
-    // @handleAsyncErrors
-    public static async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
+    public async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
         const didFileString = (await readFile(didFilepath))?.toString();
         DidManager.portableDid = JSON.parse(didFileString);
         return await DidManager.importPortableDid(DidManager.portableDid);
@@ -88,10 +99,9 @@ export class DidManager extends ConnectedDidManager {
      * @param portableDid a portable did object; see {@link PortableDid}
      * @returns BearerDid; see {@link BearerDid}
      */
-    // @handleAsyncErrors
-    public static async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
-        DidManager.bearerDid = await DidDht.import({ portableDid: DidManager.portableDid ?? portableDid });
-        return DidManager.bearerDid;
+    public async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
+        this.bearerDid = await DidDht.import({ portableDid: this.portableDid ?? portableDid });
+        return this.bearerDid;
     }
 }
 
@@ -100,36 +110,16 @@ export class DidManager extends ConnectedDidManager {
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class DwnManager {
-    /**
-     *
-     * Query credential issuer manifest in DWN
-     * @returns Record[]; see {@link Record}
-     */
-    public static async queryManifests(): Promise<Record[]> {
-        const { records: manifestRecords = [] } = await Web5Manager.web5.dwn.records.query({
-            from: Web5Manager.connectedDid.did,
-            message: {
-                filter: {
-                    schema: manifestSchema.$id,
-                    dataFormat: 'application/json',
-                    protocol: credentialIssuerProtocol.protocol,
-                    protocolPath: 'manifest',
-                },
-            },
-        });
-        return manifestRecords;
-    }
 
     /**
-    *
-    * Query credential issuer protocol in DWN
-    * @returns ProtocolsQueryResponse; see {@link ProtocolsQueryResponse}
-    */
-    public static async queryProtocol(): Promise<Protocol[]> {
+     * 
+     * Query DWN for credential-issuer protocol
+     * @returns Protocol[]; see {@link Protocol}
+     */
+    public static async queryIssuerProtocols(): Promise<ProtocolsQueryResponse> {
         try {
             // Query DWN for credential-issuer protocol
             const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
-                from: Web5Manager.connectedDid.did,
                 message: {
                     filter: {
                         protocol: credentialIssuerProtocol.protocol,
@@ -144,22 +134,20 @@ export class DwnManager {
             }
 
             Logger.debug(`DWN has ${protocols.length} protocols available`);
-            return protocols;
+            return { status: query, protocols };
         } catch (error: any) {
-            Logger.error(`${this.name}: Failed to configure credential issuer protocol`, error);
-            throw new DcxDwnError(error);
+            Logger.error(`${this.name}: Failed to query DWN protocols`, error);
+            throw error;
         }
     }
 
     /**
-    *
-    * Configure credential issuer protocol in DWN
-    * @returns DwnResponseStatus; see {@link DwnResponseStatus}
-    */
-    public static async configureProtocols(): Promise<DwnResponseStatus> {
+     * 
+     * Configure DWN for credential-issuer protocol
+     * @returns DwnResponseStatus; see {@link DwnResponseStatus}
+     */
+    public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
         try {
-            Logger.debug('configureProtocols Web5Manager', Web5Manager)
-
             const { status: configure, protocol } = await Web5Manager.web5.dwn.protocols.configure({
                 message: { definition: credentialIssuerProtocol },
             });
@@ -170,37 +158,64 @@ export class DwnManager {
                 throw new DwnError(code, detail);
             }
 
-            Logger.debug('Configured credential issuer protocol', protocol);
-
-            const { status: send = dwn500Error } = await protocol.send(DidManager.did);
+            const { status: send } = await protocol.send(Web5Manager.connected.did);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
-                Logger.error('DWN protocol send fail', send);
+                Logger.error('DWN protocols send failed', send);
                 throw new DwnError(code, detail);
             }
 
-            Logger.debug('Successfully sent protocol to remote DWN');
-
-            return { status: send };
+            Logger.debug('Sent protocol to remote DWN', send);
+            return { status: send, protocol };
         } catch (error: any) {
-            Logger.error(`${this.name}: Failed to configure credential issuer protocol`, error);
-            throw new DcxDwnError(error);
+            Logger.error(`${this.name}: Failed to configure DWN protocols`, error);
+            throw error;
         }
     }
 
     /**
      *
-     * Find unwritten manifests in DWN
+     * Query DWN for manifest records
+     * @returns Record[]; see {@link Record}
+     */
+    public static async queryManifestRecords(): Promise<DwnResponseStatus & { records: Record[], cursor?: DwnPaginationCursor }> {
+        try {
+            const { status, records: manifestRecords = [], cursor } = await Web5Manager.web5.dwn.records.query({
+                message: {
+                    filter: {
+                        schema: manifestSchema.$id,
+                        dataFormat: 'application/json',
+                        protocol: credentialIssuerProtocol.protocol,
+                        protocolPath: 'manifest',
+                    },
+                },
+            });
+
+            if (DwnUtils.isFailure(status.code)) {
+                const { code, detail } = status;
+                Logger.error('DWN manifest records query failed', status);
+                throw new DwnError(code, detail);
+            }
+
+            return { status, records: manifestRecords, cursor };
+        } catch (error: any) {
+            Logger.warn(error)
+            throw error;
+        }
+    }
+
+    /**
+     *
+     * Filter manifest records
      * @param manifestRecords Record[]; see {@link Record}
      * @returns CredentialManifest[]; see {@link CredentialManifest}
      */
-    public static async filterManifests(manifestRecords: Record[]): Promise<CredentialManifest[]> {
+    public static async readManifestRecordsData(manifestRecords: Record[]): Promise<{ manifests: CredentialManifest[] }> {
         try {
-            const manifestsRead = await Promise.all(
+            const manifests = await Promise.all(
                 manifestRecords.map(async (manifestRecord) => {
                     const { record } = await Web5Manager.web5.dwn.records.read({
-                        from: Web5Manager.connectedDid.did,
                         message: {
                             filter: {
                                 recordId: manifestRecord.id,
@@ -210,116 +225,166 @@ export class DwnManager {
                     return record.data.json();
                 }),
             );
-            Logger.debug(`Read ${manifestsRead.length} manifest records`, manifestsRead);
-            const missingManifests = [ExampleManifest].filter(
-                (manifest) => !manifestsRead.find((manifestRead) => manifestRead?.id === manifest.id),
-            );
-            Logger.debug(`Found ${missingManifests.length} unwritten manifests`);
-            if (!missingManifests.length) {
-                Logger.debug('All manifests have been written to DWN');
-                return [];
-            }
-            return missingManifests;
+            return { manifests }
         } catch (error: any) {
-            Logger.error(`${this.name}: Failed to filter manifest records`, error);
-            throw new DcxDwnError(error);
+            Logger.error(`${this.name}: Failed to filter dwn manifest records`, error);
+            throw error;
+        }
+    }
+
+    /**
+    *
+    * Filter local {@link Manifest} against remote manifest record reads to find missing manifests
+    * @param manifestReads list of {@link CredentialManifest} objects read from the remote DWN; 
+    * @returns list of missing CredentialManifest objects that need writing to remote DWN
+    */
+    public static async filterManifestRecords(manifestReads: CredentialManifest[]): Promise<CredentialManifest[]> {
+        const manifests = Array.from(DcxServer.manifests.values());
+        try {
+            return manifests.filter((manifest: CredentialManifest) => manifestReads.find(
+                (manifestRead: CredentialManifest) => manifest.id !== manifestRead.id)
+            );
+        } catch (error: any) {
+            Logger.error(`${this.name}: Failed to filter dwn manifest records`, error);
+            throw error;
         }
     }
 
     /**
      *
-     * Create missing manifests in DWN
+     * Create missing manifest record
      * @param unwrittenManifest CredentialManifest; see {@link CredentialManifest}
-     * @returns Record; see {@link Record}
+     * @returns Record | undefined; see {@link Record}
      */
-    public static async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<Record | undefined> {
-        unwrittenManifest.issuer.id = Web5Manager.connectedDid.did;
-        const { record, status: create } = await Web5Manager.web5.dwn.records.create({
-            store: false,
-            data: unwrittenManifest,
-            message: {
-                schema: manifestSchema.$id,
-                dataFormat: 'application/json',
-                protocol: credentialIssuerProtocol.protocol,
-                protocolPath: 'manifest',
-                published: true,
-            },
-        });
-        if (!record) {
-            return record;
-        }
+    public static async createMissingManifest(unwrittenManifest: CredentialManifest): Promise<RecordsCreateResponse> {
+        try {
+            unwrittenManifest.issuer.id = Web5Manager.connected.did;
+            const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+                store: false,
+                data: unwrittenManifest,
+                message: {
+                    schema: manifestSchema.$id,
+                    dataFormat: 'application/json',
+                    protocol: credentialIssuerProtocol.protocol,
+                    protocolPath: 'manifest',
+                    published: true,
+                },
+            });
 
+            if (DwnUtils.isFailure(create.code)) {
+                const { code, detail } = create;
+                Logger.error('Failed to create missing manifest record', create);
+                throw new DwnError(code, detail);
+            }
 
-        if (DwnUtils.isFailure(create.code)) {
-            const { code, detail } = create;
-            Logger.error('DWN protocol create fail', create);
-            throw new DwnError(code, detail);
-        }
+            if (!record) {
+                throw new DcxDwnError(`Failed to create missing dwn manifest record: ${unwrittenManifest.id}`);
+            }
 
-        const { status: send } = await record.send(Web5Manager.connectedDid.did);
-        if (DwnUtils.isFailure(send.code)) {
-            const { code, detail } = send;
-            Logger.error('DWN protocol send fail', send);
-            throw new DwnError(code, detail);
+            const { status: send } = await record.send(Web5Manager.connected.did);
+
+            if (DwnUtils.isFailure(send.code)) {
+                const { code, detail } = send;
+                Logger.error(`${this.name}: Failed to send dwn manifest record`, send);
+                throw new DwnError(code, detail);
+            }
+
+            Logger.debug(`Sent protocol to remote dwn`, send);
+            return { status: send, record };
+        } catch (error: any) {
+            throw error;
         }
-        Logger.log('Sent manifest to remote DWN', send);
-        return record;
     }
 
-    public static async createManifests(missingManifests: CredentialManifest[]): Promise<Record[]> {
+    /**
+     * 
+     * Create missing manifests
+     * @param missingManifests CredentialManifest[]; see {@link CredentialManifest}
+     * @returns Record[]; see {@link Record}
+     */
+    public static async createManifestRecords(missingManifests: CredentialManifest[]): Promise<Record[]> {
         try {
-            const manifestRecords = await Promise.all(
+            const createdManifestRecords = await Promise.all(
                 missingManifests.map(
                     async (unwrittenManifest: CredentialManifest) =>
-                        await Web5Manager.createMissingManifest(unwrittenManifest),
+                        (await Web5Manager.createMissingManifest(unwrittenManifest))?.record,
                 ),
             );
-            return manifestRecords.filter((record?: Record) => record !== undefined) as Record[];
+            return createdManifestRecords.filter((record?: Record) => record !== undefined) as Record[];
         } catch (error: any) {
             Logger.error(`${this.name}: Failed to create manifest records`, error);
-            throw new DcxDwnError(error);
+            throw error;
         }
     }
 
     /**
-     *
-     * Setup DWN for credential-issuer protocol
-     * @returns Promise<void>
+     * 
+     * Setup DWN with credential-issuer protocol and manifest records
+     * @returns boolean indicating success or failure
      */
-    public static async setup(): Promise<void> {
+    public static async setup(): Promise<boolean> {
+        Logger.log('Setting up dwn ...')
+        const useManifests = Array.from(DcxServer.manifests.values());
         try {
-            Logger.log('Configuring DWN with DCX protocol ...')
-            const protocols = await Web5Manager.queryProtocol();
-            Logger.log(`Found ${protocols.length} credential-issuer protocols in DWN`);
+            // Query DWN for credential-issuer protocols
+            const { protocols } = await Web5Manager.queryIssuerProtocols();
+            Logger.log(`Found ${protocols.length} dcx issuer protocol(s) in dwn`, protocols);
 
+            // Configure DWN with credential-issuer protocol if not found
             if (!protocols.length) {
-                Logger.log('No dcx protocol manifests found. Configuring ...');
-                const result = await Web5Manager.configureProtocols();
-                Logger.log('Credential-issuer protocol configured in DWN', result);
+                Logger.log('Configuring dwn with dcx issuer protocol ...');
+                const { status, protocol } = await Web5Manager.configureIssuerProtocols();
+                Logger.debug(`Configured credential issuer protocol in dwn: ${status.code} - ${status.detail}`, protocol);
             }
 
-            const records = await Web5Manager.queryManifests();
-            Logger.log(`Found ${records.length} manifests`);
+            // Query DWN for manifest records
+            const { records } = await Web5Manager.queryManifestRecords();
+            Logger.log(`Found ${records.length} dwn manifest records`);
 
-            const unwrittenManifests = await Web5Manager.filterManifests(records);
-            Logger.log(`Found ${unwrittenManifests.length} unwritten manifests`);
+            // Read manifest records data
+            const { manifests } = await Web5Manager.readManifestRecordsData(records);
+            Logger.debug(`Read ${manifests.length} manifest records`, manifests);
 
-            const createdManifests = await Web5Manager.createManifests(unwrittenManifests);
-            Logger.log(`Created ${createdManifests.length} manifests`);
+            // Create missing manifest records
+            if (!manifests.length) {
+                const manifestRecords = await Web5Manager.createManifestRecords(useManifests);
+                Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+                // Filter and create missing manifest records
+            } else {
+                const unwrittenManifests = await Web5Manager.filterManifestRecords(manifests);
+                Logger.debug(`Found ${unwrittenManifests.length} unwritten manifests`);
+                const manifestRecords = await Web5Manager.createManifestRecords(unwrittenManifests);
+                Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+            }
+
+            Logger.log("DWN setup complete!")
+            return true;
         } catch (error: any) {
-            Logger.error('DwnManager.setup failed!', error?.message);
+            Logger.error(`${this.name} failed!`, error);
             throw error;
         }
     }
 }
 
-export abstract class Web5Manager extends DwnManager {
+/**
+ * Web5Manager handles interactions between the DCX server and the Web5 platform
+ */
+export class Web5Manager extends DwnManager {
+    static [key: string]: any;
+
     public static web5: Web5;
+    public static connected: DidManager;
     public static agent: Web5PlatformAgent;
-    public static connectedDid: DidManager;
-    public static manifests: CredentialManifest[] = [];
 
     constructor() {
         super();
+    }
+
+    public static get(type: string): any {
+        return this[type];
+    }
+
+    public static set(type: string, obj: any): any {
+        return this[type].set(obj);
     }
 }

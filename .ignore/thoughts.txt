@@ -1,4 +1,7 @@
-# TODO
+Turn the borrower application response into a VC
+Use that VC as a "token" to get one-time create access to the borrower DWN
+Borrower DWN has gate: requires application VC presenting application response VC, requires valid FF signature
+
 
 - Docs README explaining various concepts and ideas
 - "How to use DCX" instructions
