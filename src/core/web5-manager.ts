@@ -27,7 +27,7 @@ import { DwnUtils } from '../utils/dwn.js';
 import { DcxDwnError, DwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
-import DcxServer from './dcx-server.js';
+import { server } from './dcx-server.js';
 
 /**
  * DidManager handles interactions between the DCX server and the DID
@@ -232,7 +232,7 @@ export class DwnManager {
     * @returns list of missing CredentialManifest objects that need writing to remote DWN
     */
     public static async filterManifestRecords(manifestReads: CredentialManifest[]): Promise<CredentialManifest[]> {
-        const manifests = Array.from(DcxServer.manifests.values());
+        const manifests = Array.from(server.manifests.values());
         try {
             return manifests.filter((manifest: CredentialManifest) => manifestReads.find(
                 (manifestRead: CredentialManifest) => manifest.id !== manifestRead.id)
@@ -317,7 +317,7 @@ export class DwnManager {
      */
     public static async setup(): Promise<boolean> {
         Logger.log('Setting up dwn ...')
-        const useManifests = Array.from(DcxServer.manifests.values());
+        const useManifests = Array.from(server.manifests.values());
         try {
             // Query DWN for credential-issuer protocols
             const { protocols } = await Web5Manager.queryIssuerProtocols();

@@ -6,7 +6,7 @@ import {
   VerifiablePresentation
 } from '@web5/credentials';
 import { Config } from '../core/config.js';
-import { DcxServer, Web5Manager } from '../core/index.js';
+import { DcxServer, server, Web5Manager } from '../core/index.js';
 import {
   CredentialManifest,
   Issuer
@@ -23,10 +23,10 @@ export class ProtocolHandlers {
   | ((...args: any[]) => any);
 
   constructor() {
-    this.selectCredentials = DcxServer.handlers.get('selectCredentials') ?? ProtocolHandlers.selectCredentials;
-    this.verifyCredentials = DcxServer.handlers.get('verifyCredentials') ?? ProtocolHandlers.verifyCredentials
-    this.requestCredential = DcxServer.handlers.get('requestCredential') ?? ProtocolHandlers.requestCredential;
-    this.issueCredential = DcxServer.handlers.get('issueCredential') ?? ProtocolHandlers.issueCredential;
+    this.selectCredentials = server.handlers.get('selectCredentials') ?? ProtocolHandlers.selectCredentials;
+    this.verifyCredentials = server.handlers.get('verifyCredentials') ?? ProtocolHandlers.verifyCredentials
+    this.requestCredential = server.handlers.get('requestCredential') ?? ProtocolHandlers.requestCredential;
+    this.issueCredential = server.handlers.get('issueCredential') ?? ProtocolHandlers.issueCredential;
   }
 
   /**
@@ -144,7 +144,7 @@ export class ProtocolHandlers {
    * @returns The response from the VC data provider
    */
   public static async requestCredential(body: { vcs: VerifiableCredential[] } | {}): Promise<any> {
-    const providers = DcxServer.providers;
+    const providers = server.providers;
     const provider = providers.get(Config.NODE_ENV) ?? providers.get(0) ?? Array.from(providers.values()).shift();
 
     if (!provider) {

@@ -1,5 +1,5 @@
-import { Web5PlatformAgent } from '@web5/agent';
-import { Record, Web5 } from '@web5/api';
+import { HdIdentityVault, Web5PlatformAgent } from '@web5/agent';
+import { DwnApi, Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { exit } from 'process';
 import terminalLink from 'terminal-link';
@@ -26,6 +26,7 @@ import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DidManager, Web5Manager } from './web5-manager.js';
+import { Web5UserAgent } from '@web5/user-agent';
 
 const defaultConnectOptions = {
   sync: '30s',
@@ -37,22 +38,22 @@ const defaultConnectOptions = {
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
 
 export class DcxServer extends Config {
-  [key: string]: any;
+  // [key: string]: any;
 
   isPolling: boolean;
   isInitialized?: boolean;
 
-  public static issuers: UseIssuers;
-  public static manifests: UseManifests;
-  public static providers: UseProviders;
-  public static handlers: UseHandlers;
-  public static gateways: UseGateways;
+  issuers: UseIssuers;
+  manifests: UseManifests;
+  providers: UseProviders;
+  handlers: UseHandlers;
+  gateways: UseGateways;
 
   constructor(options: UseOptions = {}) {
     super();
 
     this.isPolling = false;
-    this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
+    this.isInitialized = false;
 
     /**
      * Setup the Web5Manager and the DcxServer with the provided options
@@ -80,7 +81,7 @@ export class DcxServer extends Config {
    * }
    * 
    */
-  public static use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
+  public use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
     const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(`Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`);
@@ -93,7 +94,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    */
-  public static useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
+  public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
     this.manifests.set(id, manifest);
   }
 
@@ -102,7 +103,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    */
-  public static useHandler(id: string | number | symbol, handler: Handler): void {
+  public useHandler(id: string | number | symbol, handler: Handler): void {
     this.handlers.set(id, handler)
   }
 
@@ -111,7 +112,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    */
-  public static useProvider(id: string | number | symbol, provider: Provider): void {
+  public useProvider(id: string | number | symbol, provider: Provider): void {
     this.providers.set(id, provider)
   }
 
@@ -120,7 +121,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    */
-  public static useIssuer(id: string | number | symbol, issuer: Issuer): void {
+  public useIssuer(id: string | number | symbol, issuer: Issuer): void {
     this.issuers.set(id, issuer);
   }
 
@@ -144,6 +145,13 @@ export class DcxServer extends Config {
     }
   }
 
+  public async firstSetup(recoveryPhrase: string): Promise<void> {
+    Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
+    Logger.security('New Web5 recovery phrase saved to recovery.key');
+    Logger.security('Set .env WEB5_CONNECT_RECOVERY_PHRASE to this recovery.key to reuse this Web5 data');
+    await FileSystem.overwrite('recovery.key', recoveryPhrase);
+  }
+
   /**
   * 
   * Configures the DCX server by creating a new password, initializing Web5,
@@ -164,56 +172,54 @@ export class DcxServer extends Config {
       }
 
       Logger.debug('Initializing Web5 connection ... ');
-      const web5ConnectOptions = !this.WEB5_CONNECT_RECOVERY_PHRASE
-        ? {
-          ...defaultConnectOptions,
-          password: this.WEB5_CONNECT_PASSWORD
-        } : {
-          ...defaultConnectOptions,
-          password: this.WEB5_CONNECT_PASSWORD,
-          recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        };
 
-      const {
-        web5,
-        did: connectedDid,
-        recoveryPhrase: newPhrase
-      } = await Web5.connect(web5ConnectOptions);
 
-      const agent = web5.agent as Web5PlatformAgent
+      const agentVault = new HdIdentityVault();
+      const recoveryPhrase = await agentVault.initialize({
+        password: this.WEB5_CONNECT_PASSWORD,
+        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+        techPreview: {
+          dwnEndpoints: Config.DWN_ENDPOINTS
+        },
+      });
+      Logger.log("recoveryPhrase", recoveryPhrase);
+      const agentDid = await agentVault.getDid();
+      Logger.log("agentDid", agentDid);
 
-      const { did: connectedBearerDid } = await agent.identity.get({ didUri: connectedDid }) ?? {};
-      if (!connectedBearerDid) {
-        throw new DcxServerError('Failed to get bearer DID');
-      }
-      const connectedPortableDid = await connectedBearerDid.export()
-      Web5Manager.connected = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
+      // const agent = await Web5UserAgent.create({ agentDid, }) as Web5PlatformAgent;
+      // Logger.log("agent", agent);
 
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = agent;
+      // const dwn = new DwnApi({ agent, connectedDid: agentDid.uri });
 
-      if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newPhrase) {
-        Logger.info('First launch detected!')
 
-        Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
-        Logger.security('New Web5 recovery phrase saved to recovery.key');
-        Logger.security(`Set WEB5_CONNECT_RECOVERY_PHRASE = ${newPhrase} to reuse Web5 data`);
+      // await agent.sync.registerIdentity({ did: agentDid.uri });
+      // const web5ConnectOptions = !this.WEB5_CONNECT_RECOVERY_PHRASE
+      //   ? {
+      //     ...defaultConnectOptions,
+      //     password: this.WEB5_CONNECT_PASSWORD
+      //   } : {
+      //     ...defaultConnectOptions,
+      //     password: this.WEB5_CONNECT_PASSWORD,
+      //     recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+      //   };
 
-        const recoveryKey = await FileSystem.overwrite('recovery.key', newPhrase);
-        Logger.security(`recovery.key overwritten ${recoveryKey}`);
+      // const connect = await Web5.connect(web5ConnectOptions);
+      // connect.web5.dwn
 
-        Logger.info(
-          'New Web5 connection created!',
-          `\n    1. Agent DID ${terminalLink('Web5 User Agent', 'https://www.npmjs.com/package/@web5/user-agent')}; see agent.json` +
-          `\n    2. Connected DID; see connected.json` +
-          '\n    3. Recovery Phrase; see recovery.key'
-        );
+      // const agent = web5.agent as Web5PlatformAgent
 
-        const agentJson = await FileSystem.overwrite('agent.json', stringifier(await Web5Manager.agent.agentDid.export()));
-        Logger.info(`agent.json overwritten ${agentJson} to ${agent.agentDid.uri}`);
+      // const { did: connectedBearerDid } = await agent.identity.get({ didUri: connectedDid }) ?? {};
+      // if (!connectedBearerDid) {
+      //   throw new DcxServerError('Failed to get bearer DID');
+      // }
+      // const connectedPortableDid = await connectedBearerDid.export()
+      // Web5Manager.connected = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
 
-        const conectionJson = await FileSystem.overwrite('connected.json', stringifier(Web5Manager.connected.portableDid));
-        Logger.info(`connected.json overwritten ${conectionJson} to ${connectedPortableDid.uri}`);
+      // Web5Manager.web5 = web5;
+      // Web5Manager.agent = agent;
+
+      if (recoveryPhrase !== this.WEB5_CONNECT_RECOVERY_PHRASE) {
+        await this.firstSetup(recoveryPhrase);
       }
 
       this.isInitialized = true;
@@ -279,7 +285,7 @@ export class DcxServer extends Config {
 
             if (record.protocolPath === 'application') {
 
-              const manifest = Object.values(DcxServer.manifests).find(
+              const manifest = Object.values(this.manifests).find(
                 (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
 
@@ -333,7 +339,9 @@ export class DcxServer extends Config {
    * @returns void
    */
   public async start(): Promise<void> {
+
     if (!this.isInitialized) {
+
       try {
         await this.setup();
         Logger.debug('Web5 connection initialized', this.isInitialized);
@@ -343,35 +351,37 @@ export class DcxServer extends Config {
         this.stop();
       }
 
-      try {
-        const success = await Web5Manager.setup();
-        if (!success) {
-          Logger.warn('Failed to setup DCX DWN');
-        }
-      } catch (error: any) {
-        Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
-        Logger.error(DcxServer.name, error);
-        this.stop();
-      }
+      // Logger.log('this', this);
+      // Logger.log('~~~~~~~~~~~~~~~~~~~~~~~');
+      // Logger.log('~~~~~~~~~~~~~~~~~~~~~~~');
+      // Logger.log('DCX Server', DcxServer);
+      // try {
+      //   const success = await Web5Manager.setup();
+      //   if (!success) {
+      //     Logger.warn('Failed to setup DCX DWN');
+      //   }
+      // } catch (error: any) {
+      //   Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
+      //   Logger.error(DcxServer.name, error);
+      //   this.stop();
+      // }
     }
 
 
 
 
-    try {
-      // Start polling for incoming records
-      this.isPolling = true;
-      await this.poll();
-    } catch (error: any) {
-      Logger.error(DcxServer.name, 'Polling error!', error?.message);
-      Logger.error(DcxServer.name, error);
-    }
+    // try {
+    //   // Start polling for incoming records
+    //   this.isPolling = true;
+    //   await this.poll();
+    // } catch (error: any) {
+    //   Logger.error(DcxServer.name, 'Polling error!', error?.message);
+    //   Logger.error(DcxServer.name, error);
+    // }
   }
 }
 
-
-
-export default DcxServer;
-
 const server = new DcxServer({});
 export { server };
+
+export default DcxServer;
