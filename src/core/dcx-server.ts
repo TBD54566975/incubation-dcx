@@ -160,6 +160,12 @@ export class DcxServer extends Config {
   */
   public async setup(): Promise<void> {
     try {
+      const vaultPassword = this.WEB5_CONNECT_PASSWORD;
+      const vaultRecoveryPhrase = this.WEB5_CONNECT_RECOVERY_PHRASE;
+      if (!vaultPassword || !vaultRecoveryPhrase) {
+
+      }
+
       if (!this.WEB5_CONNECT_PASSWORD) {
         Logger.security('No WEB5_CONNECT_PASSWORD detected!');
         Logger.security('New Web5 password saved to password.key')
@@ -178,45 +184,14 @@ export class DcxServer extends Config {
       const recoveryPhrase = await agentVault.initialize({
         password: this.WEB5_CONNECT_PASSWORD,
         recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-        techPreview: {
-          dwnEndpoints: Config.DWN_ENDPOINTS
-        },
       });
-      Logger.log("recoveryPhrase", recoveryPhrase);
+
       const agentDid = await agentVault.getDid();
-      Logger.log("agentDid", agentDid);
+      const agent = await Web5UserAgent.create({ agentDid });
+      const web5 = new Web5({ agent, connectedDid: agentDid.uri });
 
-      // const agent = await Web5UserAgent.create({ agentDid, }) as Web5PlatformAgent;
-      // Logger.log("agent", agent);
-
-      // const dwn = new DwnApi({ agent, connectedDid: agentDid.uri });
-
-
-      // await agent.sync.registerIdentity({ did: agentDid.uri });
-      // const web5ConnectOptions = !this.WEB5_CONNECT_RECOVERY_PHRASE
-      //   ? {
-      //     ...defaultConnectOptions,
-      //     password: this.WEB5_CONNECT_PASSWORD
-      //   } : {
-      //     ...defaultConnectOptions,
-      //     password: this.WEB5_CONNECT_PASSWORD,
-      //     recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-      //   };
-
-      // const connect = await Web5.connect(web5ConnectOptions);
-      // connect.web5.dwn
-
-      // const agent = web5.agent as Web5PlatformAgent
-
-      // const { did: connectedBearerDid } = await agent.identity.get({ didUri: connectedDid }) ?? {};
-      // if (!connectedBearerDid) {
-      //   throw new DcxServerError('Failed to get bearer DID');
-      // }
-      // const connectedPortableDid = await connectedBearerDid.export()
-      // Web5Manager.connected = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
-
-      // Web5Manager.web5 = web5;
-      // Web5Manager.agent = agent;
+      Web5Manager.web5 = web5;
+      Web5Manager.agent = agent;
 
       if (recoveryPhrase !== this.WEB5_CONNECT_RECOVERY_PHRASE) {
         await this.firstSetup(recoveryPhrase);

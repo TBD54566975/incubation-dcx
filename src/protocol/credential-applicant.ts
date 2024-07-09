@@ -5,7 +5,7 @@ import { schema as applicationSchema } from './schemas/application.js';
 
 export const protocol = {
   // applicant protocol is a subset of exchange protocol
-  protocol: 'https://tblend.io/protocol/credential-exchange',
+  protocol: 'https://dcx.io/protocol/credential-exchange',
   published: false,
   types: {
     application: {
