@@ -1,13 +1,10 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`.
+DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`, which can be used to bootstrap running a DCX issuer server and provide the following functionality:
 
-`@formfree/dcx` can be used to bootstrap running a DCX issuer server and provide the following functionality:
-
-1. Web5 connection: manages connection to the Web5 platform and facilitates all operations
-2. DWN connection: manages connection to local/remote DWN an handles asynchronous communication between issuers and applicants
-3. DID DHT management: manages import, export & creation of DHT DIDs
-4. DCX protocol handlers: implements generic protocol handlers to do VC verification, data requests and VC issuance
+- Web5/DWN: manages connection to the Web5 platform and facilitates all operations between issuer and applicant DWNs
+- DID management: manages import, export & creation of DHT-method DIDs
+- Protocol handlers: implements generic handler logic to interact with the protocol (Verifiable Presentation verification, VC data requests and VC issuance)
 
 The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
