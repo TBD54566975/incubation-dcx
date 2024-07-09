@@ -36,11 +36,22 @@ export class DidManager {
     public did: string;
     public bearerDid: BearerDid;
     public portableDid: PortableDid;
+    public gatwayUri: string = Config.DHT_GATEWAY_ENDPOINT
+        ?? DcxServer.gateways.get(Config.NODE_ENV)
+        ?? Array.from(DcxServer.gateways.values())[0]
 
     constructor(did: string, bearerDid: BearerDid, portableDid: PortableDid) {
-        this.did = did;
         this.bearerDid = bearerDid;
         this.portableDid = portableDid;
+        this.did = did;
+
+        if (!(this.did || this.bearerDid || this.portableDid)) {
+            (async () => {
+                this.bearerDid = await DidManager.createBearerDid({})
+                this.portableDid = await this.bearerDid.export()
+                this.did = this.bearerDid.uri;
+            })();
+        }
     }
 
     /**
@@ -49,9 +60,8 @@ export class DidManager {
      * @param options The did dht create options object; see {@link DidDhtCreateOptions}
      * @returns BearerDid; see {@link BearerDid}
      */
-    public async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
-        this.bearerDid = await DidDht.create({ options });
-        return this.bearerDid;
+    public static async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
+        return await DidDht.create({ options });
     }
 
     /**
@@ -60,7 +70,7 @@ export class DidManager {
      * @param didUri the uri to resolve
      * @returns DidResolutionResult; see {@link DidResolutionResult}
      */
-    public async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
+    public static async resolveDidDoc(didUri: string): Promise<DidResolutionResult> {
         return await DidDht.resolve(didUri);
     }
 
@@ -70,7 +80,7 @@ export class DidManager {
      * @returns DidRegistrationResult; see {@link DidRegistrationResult}
      */
     public async publishDidDoc(
-        gatewayUri: string = Config.DHT_GATEWAY_ENDPOINT,
+        gatewayUri: string = this.gatwayUri,
     ): Promise<DidRegistrationResult> {
         return await DidDht.publish({ did: this.bearerDid, gatewayUri });
     }
