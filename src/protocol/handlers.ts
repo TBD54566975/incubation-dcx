@@ -6,7 +6,7 @@ import {
   VerifiablePresentation,
 } from '@web5/credentials';
 import { Config } from '../core/config.js';
-import { DcxServer, server, Web5Manager } from '../core/index.js';
+import { server, Web5Manager } from '../core/index.js';
 import { CredentialManifest, Issuer } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
@@ -59,7 +59,7 @@ export class ProtocolHandlers {
           continue;
         }
 
-        const useIssuers = Object.values(DcxServer.issuers).map((issuer: Issuer) => issuer.id);
+        const useIssuers = Object.values(server.issuers).map((issuer: Issuer) => issuer.id);
         const issuerDidSet = new Set<string>([...useIssuers, ...Config.VC_TRUSTED_ISSUER_DIDS]);
 
         if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
