@@ -1,8 +1,8 @@
-import { HdIdentityVault, Web5PlatformAgent } from '@web5/agent';
-import { DwnApi, Record, Web5 } from '@web5/api';
+import { AgentCryptoApi, AgentDidApi, AgentDwnApi, AgentIdentityApi, AgentKeyManager, AgentSyncApi, DidInterface, DidRequest, DidResponse, DwnInterface, DwnResponse, HdIdentityVault, IdentityVault, ProcessDwnRequest, ProcessVcRequest, SendDwnRequest, SendVcRequest, VcResponse, Web5Agent, Web5PlatformAgent, Web5Rpc } from '@web5/agent';
+import { Record, Web5 } from '@web5/api';
+import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
 import { exit } from 'process';
-import terminalLink from 'terminal-link';
 import { Config, Objects } from '../index.js';
 import { ProtocolHandlers } from '../protocol/handlers.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
@@ -13,20 +13,19 @@ import {
   Issuer,
   Manifest,
   Provider,
-  UseOptions,
-  UseIssuers,
   UseGateways,
+  UseHandlers,
+  UseIssuers,
   UseManifests,
-  UseProviders,
-  UseHandlers
+  UseOptions,
+  UseProviders
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
-import { DidManager, Web5Manager } from './web5-manager.js';
-import { Web5UserAgent } from '@web5/user-agent';
+import { Web5Manager } from './web5-manager.js';
 
 const defaultConnectOptions = {
   sync: '30s',
@@ -36,7 +35,6 @@ const defaultConnectOptions = {
 }
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
-
 export class DcxServer extends Config {
   // [key: string]: any;
 
@@ -131,77 +129,54 @@ export class DcxServer extends Config {
    * @returns string
    */
   public async createPassword(): Promise<string> {
-    try {
-      const mnemonic = generateMnemonic(128).split(' ');
-      const words: string[] = [];
-      for (let i = 0; i < 6; i++) {
-        const rand = Math.floor(Math.random() * mnemonic.length);
-        words.push(mnemonic[rand]);
-      }
-      return words.join(' ');
-    } catch (error: any) {
-      Logger.error(DcxServer.name, error);
-      throw error;
+    const mnemonic = generateMnemonic(128).split(' ');
+    const words: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      const rand = Math.floor(Math.random() * mnemonic.length);
+      words.push(mnemonic[rand]);
     }
-  }
-
-  public async firstSetup(recoveryPhrase: string): Promise<void> {
-    Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
-    Logger.security('New Web5 recovery phrase saved to recovery.key');
-    Logger.security('Set .env WEB5_CONNECT_RECOVERY_PHRASE to this recovery.key to reuse this Web5 data');
-    await FileSystem.overwrite('recovery.key', recoveryPhrase);
+    return words.join(' ');
   }
 
   /**
-  * 
-  * Configures the DCX server by creating a new password, initializing Web5,
-  * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
-  * @returns Promise<void>
-  */
-  public async setup(): Promise<void> {
-    try {
-      const vaultPassword = this.WEB5_CONNECT_PASSWORD;
-      const vaultRecoveryPhrase = this.WEB5_CONNECT_RECOVERY_PHRASE;
-      if (!vaultPassword || !vaultRecoveryPhrase) {
+   * 
+   * Configures the DCX server by creating a new password, initializing Web5,
+   * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
+   * @returns Promise<void>
+   */
+  public async initialize(): Promise<void> {
+    if (!this.WEB5_CONNECT_PASSWORD) {
+      Logger.security('No WEB5_CONNECT_PASSWORD detected!');
+      Logger.security('New Web5 password saved to password.key')
 
-      }
-
-      if (!this.WEB5_CONNECT_PASSWORD) {
-        Logger.security('No WEB5_CONNECT_PASSWORD detected!');
-        Logger.security('New Web5 password saved to password.key')
-        Logger.security('Be sure to set WEB5_CONNECT_PASSWORD in .env going forward')
-        const password = await this.createPassword();
-        this.WEB5_CONNECT_PASSWORD = password;
-        Logger.debug('New password created', password);
-        const overwritten = await FileSystem.overwrite('password.key', password);
-        Logger.debug(`password.key overwritten ${overwritten}`, password);
-      }
-
-      Logger.debug('Initializing Web5 connection ... ');
-
-
-      const agentVault = new HdIdentityVault();
-      const recoveryPhrase = await agentVault.initialize({
-        password: this.WEB5_CONNECT_PASSWORD,
-        recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-      });
-
-      const agentDid = await agentVault.getDid();
-      const agent = await Web5UserAgent.create({ agentDid });
-      const web5 = new Web5({ agent, connectedDid: agentDid.uri });
-
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = agent;
-
-      if (recoveryPhrase !== this.WEB5_CONNECT_RECOVERY_PHRASE) {
-        await this.firstSetup(recoveryPhrase);
-      }
-
-      this.isInitialized = true;
-    } catch (error: any) {
-      Logger.error(DcxServer.name, error);
-      throw error;
+      this.WEB5_CONNECT_PASSWORD = await this.createPassword();
+      Logger.debug('New password created', this.WEB5_CONNECT_PASSWORD);
+      await FileSystem.overwrite('password.key', this.WEB5_CONNECT_PASSWORD);
     }
+
+    Logger.debug('Initializing Web5 ... ');
+
+    const agentVault = new HdIdentityVault();
+    const recoveryPhrase = await agentVault.initialize({
+      password: this.WEB5_CONNECT_PASSWORD,
+      recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+    });
+
+    const agentDid = await agentVault.getDid();
+    Web5Manager.agent = await Web5UserAgent.create({ agentDid, agentVault });
+
+    if (await Web5Manager.agent.firstLaunch()) {
+      Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
+      Logger.security('New Web5 recovery phrase saved to recovery.key');
+
+      await FileSystem.overwrite('recovery.key', recoveryPhrase);
+      await Web5Manager.agent.initialize({ password: this.WEB5_CONNECT_PASSWORD, recoveryPhrase });
+    }
+
+    await Web5Manager.agent.start({ password: this.WEB5_CONNECT_PASSWORD });
+    Web5Manager.web5 = new Web5({ agent: Web5Manager.agent, connectedDid: agentDid.uri });
+
+    this.isInitialized = true;
   }
 
   /**
@@ -210,91 +185,87 @@ export class DcxServer extends Config {
    * @returns void
    */
   public async poll(): Promise<void> {
-    try {
-      Logger.debug('DCX Server polling!');
+    Logger.debug('DCX Server polling!');
 
-      const DWN_CURSOR = Config.DWN_CURSOR;
-      const DWN_LAST_RECORD_ID = Config.DWN_LAST_RECORD_ID;
+    const DWN_CURSOR = Config.DWN_CURSOR;
+    const DWN_LAST_RECORD_ID = Config.DWN_LAST_RECORD_ID;
 
-      let cursor = await FileSystem.readToJson(DWN_CURSOR);
-      const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
-      let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
+    let cursor = await FileSystem.readToJson(DWN_CURSOR);
+    const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
+    let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
-      while (this.isPolling) {
-        const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
-          message: {
-            filter: {
-              protocol: credentialIssuerProtocol.protocol,
-            },
-            pagination,
+    while (this.isPolling) {
+      const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
+        message: {
+          filter: {
+            protocol: credentialIssuerProtocol.protocol,
           },
-        });
+          pagination,
+        },
+      });
 
-        Logger.debug(`Found ${records.length} records`);
-        Logger.debug(`Next cursor ${stringifier(nextCursor)}`)
+      Logger.debug(`Found ${records.length} records`);
+      Logger.debug(`Next cursor ${stringifier(nextCursor)}`)
 
-        if (cursor && !records.length) {
-          cursor = undefined;
-        }
+      if (cursor && !records.length) {
+        cursor = undefined;
+      }
 
-        const recordIds = records.map((record: { id: any }) => record.id);
+      const recordIds = records.map((record: { id: any }) => record.id);
 
-        const recordReads: Record[] = await Promise.all(
-          recordIds.map(async (recordId: string) => {
-            const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
-              message: {
-                filter: {
-                  recordId,
-                },
+      const recordReads: Record[] = await Promise.all(
+        recordIds.map(async (recordId: string) => {
+          const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
+            message: {
+              filter: {
+                recordId,
               },
-            });
-            return record;
-          }),
-        );
+            },
+          });
+          return record;
+        }),
+      );
 
-        Logger.debug(`Read ${recordReads.length} records`);
+      Logger.debug(`Read ${recordReads.length} records`);
 
-        for (const record of recordReads) {
+      for (const record of recordReads) {
 
-          if (record.id != lastRecordId) {
+        if (record.id != lastRecordId) {
 
-            if (record.protocolPath === 'application') {
+          if (record.protocolPath === 'application') {
 
-              const manifest = Object.values(this.manifests).find(
-                (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
-              );
+            const manifest = Object.values(this.manifests).find(
+              (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
+            );
 
-              if (!!manifest) {
-                await ProtocolHandlers.processApplicationRecord(record, manifest);
-              } else {
-                Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
-              }
-
-              lastRecordId = record.id;
-              const overwritten = await FileSystem.overwrite(DWN_LAST_RECORD_ID, lastRecordId);
-              Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
+            if (!!manifest) {
+              await ProtocolHandlers.processApplicationRecord(record, manifest);
+            } else {
+              Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
             }
-          } else {
-            await Time.sleep();
+
+            lastRecordId = record.id;
+            const overwritten = await FileSystem.overwrite(DWN_LAST_RECORD_ID, lastRecordId);
+            Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
           }
-        }
-
-        if (nextCursor) {
-          Logger.debug('Updated cursor for next query', nextCursor);
-          cursor = nextCursor;
-          const overwritten = await FileSystem.overwrite(DWN_CURSOR, cursor);
-          Logger.debug(`${DWN_CURSOR} overwritten ${overwritten}`, cursor);
-        }
-
-        if (!recordReads.length) {
-          Logger.debug('No records found!', recordReads.length);
+        } else {
           await Time.sleep();
         }
       }
-    } catch (error: any) {
-      Logger.error(DcxServer.name, error);
-      throw error;
+
+      if (nextCursor) {
+        Logger.debug('Updated cursor for next query', nextCursor);
+        cursor = nextCursor;
+        const overwritten = await FileSystem.overwrite(DWN_CURSOR, cursor);
+        Logger.debug(`${DWN_CURSOR} overwritten ${overwritten}`, cursor);
+      }
+
+      if (!recordReads.length) {
+        Logger.debug('No records found!', recordReads.length);
+        await Time.sleep();
+      }
     }
+
   }
 
   /**
@@ -314,45 +285,22 @@ export class DcxServer extends Config {
    * @returns void
    */
   public async start(): Promise<void> {
+    try {
 
-    if (!this.isInitialized) {
-
-      try {
-        await this.setup();
-        Logger.debug('Web5 connection initialized', this.isInitialized);
-      } catch (error: any) {
-        Logger.error(DcxServer.name, 'Failed to setup DCX Server', error?.message);
-        Logger.error(DcxServer.name, error);
-        this.stop();
+      if (!this.isInitialized) {
+        await this.initialize();
+        Logger.debug('Web5 initialized', this.isInitialized);
+        await Web5Manager.setup();
       }
 
-      // Logger.log('this', this);
-      // Logger.log('~~~~~~~~~~~~~~~~~~~~~~~');
-      // Logger.log('~~~~~~~~~~~~~~~~~~~~~~~');
-      // Logger.log('DCX Server', DcxServer);
-      // try {
-      //   const success = await Web5Manager.setup();
-      //   if (!success) {
-      //     Logger.warn('Failed to setup DCX DWN');
-      //   }
-      // } catch (error: any) {
-      //   Logger.error(DcxServer.name, 'Failed to setup DCX DWN', error?.message);
-      //   Logger.error(DcxServer.name, error);
-      //   this.stop();
-      // }
+      this.isPolling = true;
+      await this.poll();
+
+    } catch (error: any) {
+      Logger.error('DcxServer: Failed to start DCX Server');
+      Logger.error(DcxServer.name, error);
+      this.stop();
     }
-
-
-
-
-    // try {
-    //   // Start polling for incoming records
-    //   this.isPolling = true;
-    //   await this.poll();
-    // } catch (error: any) {
-    //   Logger.error(DcxServer.name, 'Polling error!', error?.message);
-    //   Logger.error(DcxServer.name, error);
-    // }
   }
 }
 

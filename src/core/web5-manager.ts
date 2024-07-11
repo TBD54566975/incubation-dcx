@@ -315,7 +315,7 @@ export class DwnManager {
      * Setup DWN with credential-issuer protocol and manifest records
      * @returns boolean indicating success or failure
      */
-    public static async setup(): Promise<boolean> {
+    public static async setup(): Promise<void> {
         Logger.log('Setting up dwn ...')
         const useManifests = Array.from(server.manifests.values());
         try {
@@ -351,7 +351,6 @@ export class DwnManager {
             }
 
             Logger.log("DWN setup complete!")
-            return true;
         } catch (error: any) {
             Logger.error(`${this.name} failed!`, error);
             throw error;
