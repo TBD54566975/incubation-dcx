@@ -1,6 +1,6 @@
 export const dwn500Error = {
   code: 500,
-  detail: 'DWN server error'
+  detail: 'DWN server error',
 };
 export class DcxError extends Error {
   constructor(
@@ -37,7 +37,10 @@ export class DcxProtocolHandlerError extends DcxError {
 }
 
 export class DwnError extends Error {
-  constructor(public code: number, public message: string) {
+  constructor(
+    public code: number,
+    public message: string,
+  ) {
     super(`${code} - ${message}`);
     this.name = 'DwnError';
   }

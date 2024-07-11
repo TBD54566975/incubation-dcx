@@ -93,7 +93,7 @@ export class FileSystem {
       const exists = await FileSystem.exists(path);
       if (!exists) {
         const file = await open(path, 'a', 0o700);
-        await file.appendFile(data, 'utf-8');;
+        await file.appendFile(data, 'utf-8');
         await file.close();
         return true;
       }

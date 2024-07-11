@@ -21,12 +21,14 @@ export class Config {
   public static VC_DATA_PROVIDER_ENDPOINT = process.env.VC_DATA_PROVIDER_ENDPOINT || '';
   public static VC_TRUSTED_ISSUERS = (process.env.VC_TRUSTED_ISSUERS &&
     JSON.parse(process.env.VC_TRUSTED_ISSUERS)) || [
-      {
-        name: 'mx',
-        id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
-      },
-    ];
-  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.id);
+    {
+      name: 'mx',
+      id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
+    },
+  ];
+  public static VC_TRUSTED_ISSUER_DIDS = Config.VC_TRUSTED_ISSUERS.map(
+    (issuer: Issuer) => issuer.id,
+  );
 
   // Private class variables
   private _CIPHER_KEY: Buffer = Buffer.from(process.env.CIPHER_KEY || '', 'base64');

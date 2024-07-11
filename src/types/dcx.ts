@@ -29,7 +29,6 @@ export type ManifestOutputDescriptor = {
   schema: string;
 };
 
-
 export type Issuer = {
   id: string;
   name: string;
@@ -56,7 +55,7 @@ export type InputDescriptor = {
 };
 
 export type ManifestFormat = {
-  jwt_vc: { alg: string[] }
+  jwt_vc: { alg: string[] };
 };
 export type PresentationDefinition = {
   id: string;
@@ -72,7 +71,7 @@ export interface CredentialManifest extends AdditionalProperties {
   output_descriptors: ManifestOutputDescriptor[];
   format: ManifestFormat;
   presentation_definition: PresentationDefinition;
-};
+}
 
 export type VerifiedCredential = {
   issuer: string;
@@ -90,7 +89,7 @@ export interface TrustedIssuer extends AdditionalProperties {
 // Handler
 export type Handler = (...args: any[]) => any | Promise<any>;
 export class HandlerType {
-  constructor(public handler: Handler) { }
+  constructor(public handler: Handler) {}
   call(...args: any[]): any | Promise<any> {
     return this.handler(...args);
   }
@@ -103,12 +102,14 @@ export interface DataProvider extends AdditionalProperties {
   endpoint: string;
   method?: string;
   headers?: Record<string, string>;
-};
+}
 export class Provider implements DataProvider {
-  constructor(public name: string,
+  constructor(
+    public name: string,
     public endpoint: string,
     public method?: string,
-    public headers?: Record<string, string>) { }
+    public headers?: Record<string, string>,
+  ) {}
 }
 
 // Manifest
@@ -121,7 +122,8 @@ export class Manifest implements CredentialManifest {
     public issuer: Issuer,
     public output_descriptors: ManifestOutputDescriptor[],
     public format: ManifestFormat,
-    public presentation_definition: PresentationDefinition) { }
+    public presentation_definition: PresentationDefinition,
+  ) {}
 }
 export interface GatewayType extends AdditionalProperties {
   id: string;
@@ -130,8 +132,8 @@ export interface GatewayType extends AdditionalProperties {
 export class Gateway implements GatewayType {
   constructor(
     public id: string,
-    public uri: string
-  ) { }
+    public uri: string,
+  ) {}
 }
 
 export type UseIssuers = Map<string | number | symbol, Issuer>;
@@ -149,4 +151,4 @@ export type UseOptions = {
   providers?: UseProviders;
   manifests?: UseManifests;
   gateways?: UseGateways;
-}
+};

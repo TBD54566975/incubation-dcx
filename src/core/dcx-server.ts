@@ -1,4 +1,4 @@
-import { AgentCryptoApi, AgentDidApi, AgentDwnApi, AgentIdentityApi, AgentKeyManager, AgentSyncApi, DidInterface, DidRequest, DidResponse, DwnInterface, DwnResponse, HdIdentityVault, IdentityVault, ProcessDwnRequest, ProcessVcRequest, SendDwnRequest, SendVcRequest, VcResponse, Web5Agent, Web5PlatformAgent, Web5Rpc } from '@web5/agent';
+import { HdIdentityVault } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
@@ -18,7 +18,7 @@ import {
   UseIssuers,
   UseManifests,
   UseOptions,
-  UseProviders
+  UseProviders,
 } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
@@ -30,9 +30,9 @@ import { Web5Manager } from './web5-manager.js';
 const defaultConnectOptions = {
   sync: '30s',
   techPreview: {
-    dwnEndpoints: Config.DWN_ENDPOINTS
+    dwnEndpoints: Config.DWN_ENDPOINTS,
   },
-}
+};
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
 export class DcxServer extends Config {
@@ -64,7 +64,7 @@ export class DcxServer extends Config {
   }
 
   /**
-   * 
+   *
    * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
    * @param id Some unique, accessible identifier to map the obj to
    * @param obj The object to use; see {@link UseOption}
@@ -77,18 +77,22 @@ export class DcxServer extends Config {
    *  "providers": Map(1){ "dev" => { "name": "localhost", "endpoint": "http://localhost:3000" } },
    *  "manifests": Map(1){ "EXAMPLE-MANIFEST" => { "id": "EXAMPLE-MANIFEST", "name": "DCX Credential Manifest Example" ... } }
    * }
-   * 
+   *
    */
   public use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
     const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway'];
     if (!validPaths.includes(path)) {
-      throw new DcxServerError(`Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`);
+      throw new DcxServerError(
+        `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
+      );
     }
     this[`${path}s`].set(id, obj);
   }
 
   /**
-   * 
+   *
+   * Sets the manifest to use
+   *
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    */
@@ -97,25 +101,29 @@ export class DcxServer extends Config {
   }
 
   /**
-   * 
+   *
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    */
   public useHandler(id: string | number | symbol, handler: Handler): void {
-    this.handlers.set(id, handler)
+    this.handlers.set(id, handler);
   }
 
   /**
-   * 
+   *
+   * Sets the provider to use
+   *
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    */
   public useProvider(id: string | number | symbol, provider: Provider): void {
-    this.providers.set(id, provider)
+    this.providers.set(id, provider);
   }
 
   /**
-   * 
+   *
+   * Sets the issuer to use
+   *
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    */
@@ -124,8 +132,9 @@ export class DcxServer extends Config {
   }
 
   /**
-   * 
+   *
    * Creates a new password for the DCX server
+   *
    * @returns string
    */
   public async createPassword(): Promise<string> {
@@ -139,15 +148,15 @@ export class DcxServer extends Config {
   }
 
   /**
-   * 
+   *
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
-   * @returns Promise<void>
+   *
    */
   public async initialize(): Promise<void> {
     if (!this.WEB5_CONNECT_PASSWORD) {
       Logger.security('No WEB5_CONNECT_PASSWORD detected!');
-      Logger.security('New Web5 password saved to password.key')
+      Logger.security('New Web5 password saved to password.key');
 
       this.WEB5_CONNECT_PASSWORD = await this.createPassword();
       Logger.debug('New password created', this.WEB5_CONNECT_PASSWORD);
@@ -166,7 +175,7 @@ export class DcxServer extends Config {
     Web5Manager.agent = await Web5UserAgent.create({ agentDid, agentVault });
 
     if (await Web5Manager.agent.firstLaunch()) {
-      Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!')
+      Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!');
       Logger.security('New Web5 recovery phrase saved to recovery.key');
 
       await FileSystem.overwrite('recovery.key', recoveryPhrase);
@@ -180,9 +189,9 @@ export class DcxServer extends Config {
   }
 
   /**
-   * 
+   *
    * Polls the DWN for incoming records
-   * @returns void
+   *
    */
   public async poll(): Promise<void> {
     Logger.debug('DCX Server polling!');
@@ -205,7 +214,7 @@ export class DcxServer extends Config {
       });
 
       Logger.debug(`Found ${records.length} records`);
-      Logger.debug(`Next cursor ${stringifier(nextCursor)}`)
+      Logger.debug(`Next cursor ${stringifier(nextCursor)}`);
 
       if (cursor && !records.length) {
         cursor = undefined;
@@ -229,13 +238,11 @@ export class DcxServer extends Config {
       Logger.debug(`Read ${recordReads.length} records`);
 
       for (const record of recordReads) {
-
         if (record.id != lastRecordId) {
-
           if (record.protocolPath === 'application') {
-
             const manifest = Object.values(this.manifests).find(
-              (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
+              (manifest: CredentialManifest) =>
+                manifest.presentation_definition.id === record.schema,
             );
 
             if (!!manifest) {
@@ -265,11 +272,10 @@ export class DcxServer extends Config {
         await Time.sleep();
       }
     }
-
   }
 
   /**
-   * 
+   *
    * Stops the DCX server
    * @returns void
    */
@@ -280,13 +286,12 @@ export class DcxServer extends Config {
   }
 
   /**
-   *  
+   *
    * Starts the DCX server
    * @returns void
    */
   public async start(): Promise<void> {
     try {
-
       if (!this.isInitialized) {
         await this.initialize();
         Logger.debug('Web5 initialized', this.isInitialized);
@@ -295,7 +300,6 @@ export class DcxServer extends Config {
 
       this.isPolling = true;
       await this.poll();
-
     } catch (error: any) {
       Logger.error('DcxServer: Failed to start DCX Server');
       Logger.error(DcxServer.name, error);
