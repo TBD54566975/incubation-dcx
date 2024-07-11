@@ -22,7 +22,7 @@ import { DwnUtils } from '../utils/dwn.js';
 import { DcxDwnError, DwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
-import { server } from './dcx-server.js';
+import { server } from './server.js';
 import { manifestSchema } from '../schemas/index.js';
 
 /**

@@ -1,5 +1,5 @@
 import { VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { Config } from '../server/config.js';
+import { Config } from '../dcx/config.js';
 
 export type AdditionalProperties = Record<string, any>;
 
