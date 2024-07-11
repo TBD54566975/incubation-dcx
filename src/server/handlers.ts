@@ -12,7 +12,8 @@ import { DwnUtils } from '../utils/dwn.js';
 import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
 import { Objects, stringifier } from '../utils/index.js';
 import { Logger } from '../utils/logger.js';
-import { responseSchema, credentialIssuerProtocol } from '../protocol/index.js';
+import { credentialIssuerProtocol } from '../protocol/index.js';
+import { responseSchema } from '../schemas/index.js';
 
 
 export class ProtocolHandlers {

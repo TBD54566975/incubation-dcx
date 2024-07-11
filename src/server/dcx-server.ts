@@ -185,7 +185,7 @@ export class DcxServer extends Config {
     await Web5Manager.agent.start({ password: this.WEB5_CONNECT_PASSWORD });
     Web5Manager.web5 = new Web5({ agent: Web5Manager.agent, connectedDid: agentDid.uri });
 
-    this.isInitialized = true;
+    this._isInitialized = true;
   }
 
   /**
@@ -203,7 +203,7 @@ export class DcxServer extends Config {
     const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
     let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
-    while (this.isPolling) {
+    while (this._isPolling) {
       const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
         message: {
           filter: {
@@ -281,7 +281,7 @@ export class DcxServer extends Config {
    */
   public stop(): void {
     Logger.debug('Server stopping...');
-    this.isPolling = false;
+    this._isPolling = false;
     exit(0);
   }
 
@@ -292,13 +292,13 @@ export class DcxServer extends Config {
    */
   public async start(): Promise<void> {
     try {
-      if (!this.isInitialized) {
+      if (!this._isInitialized) {
         await this.initialize();
-        Logger.debug('Web5 initialized', this.isInitialized);
+        Logger.debug('Web5 initialized', this._isInitialized);
         await Web5Manager.setup();
       }
 
-      this.isPolling = true;
+      this._isPolling = true;
       await this.poll();
     } catch (error: any) {
       Logger.error('DcxServer: Failed to start DCX Server');

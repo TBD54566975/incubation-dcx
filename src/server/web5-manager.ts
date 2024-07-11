@@ -16,13 +16,14 @@ import {
   PortableDid,
 } from '@web5/dids';
 import { readFile } from 'fs/promises';
-import { credentialIssuerProtocol, manifestSchema } from '../protocol/index.js';
+import { credentialIssuerProtocol } from '../protocol/index.js';
 import { CredentialManifest, Manifest } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DcxDwnError, DwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
 import { server } from './dcx-server.js';
+import { manifestSchema } from '../schemas/index.js';
 
 /**
  * DidManager handles interactions between the DCX server and the DID
