@@ -3,8 +3,8 @@ import { Record, Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
 import { exit } from 'process';
-import { Config, Objects } from '../index.js';
-import { ProtocolHandlers } from '../protocol/handlers.js';
+import { Config, Objects, ProtocolHandlers } from '../index.js';
+
 import { credentialIssuerProtocol } from '../protocol/index.js';
 import {
   CredentialManifest,
@@ -38,8 +38,8 @@ type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
 export class DcxServer extends Config {
   // [key: string]: any;
 
-  isPolling: boolean;
-  isInitialized?: boolean;
+  _isPolling: boolean;
+  _isInitialized?: boolean;
 
   issuers: UseIssuers;
   manifests: UseManifests;
@@ -50,8 +50,8 @@ export class DcxServer extends Config {
   constructor(options: UseOptions = {}) {
     super();
 
-    this.isPolling = false;
-    this.isInitialized = false;
+    this._isPolling = false;
+    this._isInitialized = false;
 
     /**
      * Setup the Web5Manager and the DcxServer with the provided options

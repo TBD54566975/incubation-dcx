@@ -5,14 +5,15 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { Config } from '../core/config.js';
-import { server, Web5Manager } from '../core/index.js';
+import { Config } from './config.js';
+import { server, Web5Manager } from './index.js';
 import { CredentialManifest, Issuer } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
 import { Objects, stringifier } from '../utils/index.js';
 import { Logger } from '../utils/logger.js';
-import { credentialIssuerProtocol, responseSchema } from './index.js';
+import { responseSchema, credentialIssuerProtocol } from '../protocol/index.js';
+
 
 export class ProtocolHandlers {
   [key: string | number | symbol]: (() => Promise<any>) | ((...args: any[]) => any);

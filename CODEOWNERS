@@ -1,0 +1,9 @@
+# This CODEOWNERS file denotes the project leads
+# and encodes their responsibilities for code review.
+
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+# The format is described: https://github.blog/2017-07-06-introducing-code-owners/
+
+# These owners will be the default owners for all directories in the repo that do not have a designated owner.
+* @bnonni @ianpatton
