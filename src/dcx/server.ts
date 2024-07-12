@@ -26,17 +26,11 @@ import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { Web5Manager } from './web5-manager.js';
-
-const defaultConnectOptions = {
-  sync: '30s',
-  techPreview: {
-    dwnEndpoints: Config.DWN_ENDPOINTS,
-  },
-};
+import { DwnManager } from './dwn-manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
 export class DcxServer extends Config {
-  // [key: string]: any;
+  static [key: string]: any;
 
   _isPolling: boolean;
   _isInitialized?: boolean;
@@ -179,6 +173,7 @@ export class DcxServer extends Config {
       Logger.security('New Web5 recovery phrase saved to recovery.key');
 
       await FileSystem.overwrite('recovery.key', recoveryPhrase);
+      // add dwnEndpoints to agent.initialize once merged
       await Web5Manager.agent.initialize({ password: this.WEB5_CONNECT_PASSWORD, recoveryPhrase });
     }
 
@@ -295,7 +290,7 @@ export class DcxServer extends Config {
       if (!this._isInitialized) {
         await this.initialize();
         Logger.debug('Web5 initialized', this._isInitialized);
-        await Web5Manager.setup();
+        await DwnManager.setup();
       }
 
       this._isPolling = true;

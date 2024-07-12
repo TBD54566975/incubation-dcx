@@ -62,7 +62,7 @@ export class ProtocolHandlers {
         }
 
         const useIssuers = Object.values(server.issuers).map((issuer: Issuer) => issuer.id);
-        const issuerDidSet = new Set<string>([...useIssuers, ...Config.VC_TRUSTED_ISSUER_DIDS]);
+        const issuerDidSet = new Set<string>([...useIssuers, ...Config.DEFAULT_TRUSTED_ISSUER_DIDS]);
 
         if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
           continue;

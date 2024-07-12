@@ -12,9 +12,9 @@ export class DcxError extends Error {
   }
 }
 
-export class DidManagerError extends DcxError {
+export class DidDhtManagerError extends DcxError {
   constructor(public error: any) {
-    super(error, 'DidManagerError');
+    super(error, 'DidDhtManagerError');
   }
 }
 
@@ -57,8 +57,8 @@ export function handleDcxErrors(target: any, propertyKey: any, descriptor?: any)
     } catch (error) {
       console.error(`${propertyKey}`, 'Failed', error);
       switch (true) {
-        case error instanceof DidManagerError:
-          throw new DidManagerError(error);
+        case error instanceof DidDhtManagerError:
+          throw new DidDhtManagerError(error);
         case error instanceof DcxServerError:
           throw new DcxServerError(error);
         case error instanceof DcxDwnError:

@@ -14,7 +14,7 @@
     "build": "npm run clean && npm run build:esm",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "dev": "npx run build && tsx dist/esm/src/index.js",
+    "dev": "npm run build && tsx tests/server.ts",
     "format": "npx prettier --write ./src/**/**/**/*",
     "workflow": "npm ci && npm run build --if-present && npm test"
   },
