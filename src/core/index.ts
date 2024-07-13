@@ -1,4 +1,4 @@
-export * from './web5-manager.js';
+export * from './dcx-manager.js';
 export * from './config.js';
 export * from './dcx-server.js';
 

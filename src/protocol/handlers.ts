@@ -6,7 +6,7 @@ import {
   VerifiablePresentation
 } from '@web5/credentials';
 import { Config } from '../core/config.js';
-import { DcxServer, Web5Manager } from '../core/index.js';
+import { DcxManager, server } from '../core/index.js';
 import {
   CredentialManifest,
   Issuer
@@ -23,10 +23,10 @@ export class ProtocolHandlers {
   | ((...args: any[]) => any);
 
   constructor() {
-    this.selectCredentials = DcxServer.handlers.get('selectCredentials') ?? ProtocolHandlers.selectCredentials;
-    this.verifyCredentials = DcxServer.handlers.get('verifyCredentials') ?? ProtocolHandlers.verifyCredentials
-    this.requestCredential = DcxServer.handlers.get('requestCredential') ?? ProtocolHandlers.requestCredential;
-    this.issueCredential = DcxServer.handlers.get('issueCredential') ?? ProtocolHandlers.issueCredential;
+    this.selectCredentials = server.handlers.get('selectCredentials') ?? ProtocolHandlers.selectCredentials;
+    this.verifyCredentials = server.handlers.get('verifyCredentials') ?? ProtocolHandlers.verifyCredentials
+    this.requestCredential = server.handlers.get('requestCredential') ?? ProtocolHandlers.requestCredential;
+    this.issueCredential = server.handlers.get('issueCredential') ?? ProtocolHandlers.issueCredential;
   }
 
   /**
@@ -60,7 +60,7 @@ export class ProtocolHandlers {
           continue;
         }
 
-        const useIssuers = Object.values(DcxServer.issuers).map((issuer: Issuer) => issuer.id);
+        const useIssuers = Object.values(server.issuers).map((issuer: Issuer) => issuer.id);
         const issuerDidSet = new Set<string>([...useIssuers, ...Config.VC_TRUSTED_ISSUER_DIDS]);
 
         if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -113,12 +113,12 @@ export class ProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject: subjectDid,
-      issuer: Web5Manager.connected.did,
+      issuer: DcxManager.dcxAgent.agentDid.uri,
       type: manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: Web5Manager.connected.bearerDid });
+    const signed = await vc.sign({ did: DcxManager.dcxAgent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
@@ -144,7 +144,7 @@ export class ProtocolHandlers {
    * @returns The response from the VC data provider
    */
   public static async requestCredential(body: { vcs: VerifiableCredential[] } | {}): Promise<any> {
-    const providers = DcxServer.providers;
+    const providers = server.providers;
     const provider = providers.get(Config.NODE_ENV) ?? providers.get(0) ?? Array.from(providers.values()).shift();
 
     if (!provider) {
@@ -201,7 +201,7 @@ export class ProtocolHandlers {
 
       const vc = await ProtocolHandlers.issueCredential(data, recordAuthor, manifest);
 
-      const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+      const { record, status: create } = await DcxManager.web5.dwn.records.create({
         data: vc,
         store: false,
         message: {
