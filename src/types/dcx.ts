@@ -89,7 +89,7 @@ export interface TrustedIssuer extends AdditionalProperties {
 // Handler
 export type Handler = (...args: any[]) => any | Promise<any>;
 export class HandlerType {
-  constructor(public handler: Handler) {}
+  constructor(public handler: Handler) { }
   call(...args: any[]): any | Promise<any> {
     return this.handler(...args);
   }
@@ -109,7 +109,7 @@ export class Provider implements DataProvider {
     public endpoint: string,
     public method?: string,
     public headers?: Record<string, string>,
-  ) {}
+  ) { }
 }
 
 // Manifest
@@ -123,7 +123,7 @@ export class Manifest implements CredentialManifest {
     public output_descriptors: ManifestOutputDescriptor[],
     public format: ManifestFormat,
     public presentation_definition: PresentationDefinition,
-  ) {}
+  ) { }
 }
 export interface GatewayType extends AdditionalProperties {
   id: string;
@@ -133,16 +133,24 @@ export class Gateway implements GatewayType {
   constructor(
     public id: string,
     public uri: string,
-  ) {}
+  ) { }
+}
+
+export class Dwn implements AdditionalProperties {
+  constructor(
+    public id: string,
+    public endpoints: string[],
+  ) { }
 }
 
 export type UseIssuers = Map<string | number | symbol, Issuer>;
 export type UseHandlers = Map<string | number | symbol, Handler>;
 export type UseProviders = Map<string | number | symbol, Provider>;
 export type UseManifests = Map<string | number | symbol, Manifest>;
-export type UseGateways = Map<string | number | symbol, Gateway>;
+export type UseGateways = Gateway[];
+export type UseDwns = Dwn[];
 
-export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways;
+export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways | UseDwns;
 
 export type UseOptions = {
   [key: string]: any;

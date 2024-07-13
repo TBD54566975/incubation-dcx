@@ -8,7 +8,7 @@ import { DwnUtils } from "../utils/dwn.js";
 import { DwnError, DcxDwnError } from "../utils/error.js";
 import { Logger } from "../utils/logger.js";
 import { Time } from "../utils/time.js";
-import { Web5Manager } from "./web5-manager.js";
+import { DcxManager } from "./manager.js";
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
@@ -20,11 +20,11 @@ export class DwnManager {
      */
     public static sync(): void {
         Logger.debug('Syncing dwn ...');
-        Web5Manager.agent.sync.startSync({ interval: '1ms' });
+        DcxManager.dcxAgent.sync.startSync({ interval: '1ms' });
 
         Time.sleep(1000);
 
-        Web5Manager.agent.sync.stopSync();
+        DcxManager.dcxAgent.sync.stopSync();
         Logger.debug('Syncing done!');
     }
     /**
@@ -34,7 +34,7 @@ export class DwnManager {
     public static async queryIssuerProtocols(): Promise<ProtocolsQueryResponse> {
         try {
             // Query DWN for credential-issuer protocol
-            const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
+            const { status: query, protocols = [] } = await DcxManager.web5.dwn.protocols.query({
                 message: {
                     filter: {
                         protocol: credentialIssuerProtocol.protocol,
@@ -62,7 +62,7 @@ export class DwnManager {
      */
     public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
         try {
-            const { status: configure, protocol } = await Web5Manager.web5.dwn.protocols.configure({
+            const { status: configure, protocol } = await DcxManager.web5.dwn.protocols.configure({
                 message: { definition: credentialIssuerProtocol },
             });
 
@@ -72,7 +72,7 @@ export class DwnManager {
                 throw new DwnError(code, detail);
             }
 
-            const { status: send } = await protocol.send(Web5Manager.agent.agentDid.uri);
+            const { status: send } = await protocol.send(DcxManager.dcxAgent.agentDid.uri);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
@@ -100,7 +100,7 @@ export class DwnManager {
                 status,
                 records: manifestRecords = [],
                 cursor,
-            } = await Web5Manager.web5.dwn.records.query({
+            } = await DcxManager.web5.dwn.records.query({
                 message: {
                     filter: {
                         schema: manifestSchema.$id,
@@ -135,7 +135,7 @@ export class DwnManager {
         try {
             const manifests = await Promise.all(
                 manifestRecords.map(async (manifestRecord) => {
-                    const { record } = await Web5Manager.web5.dwn.records.read({
+                    const { record } = await DcxManager.web5.dwn.records.read({
                         message: {
                             filter: {
                                 recordId: manifestRecord.id,
@@ -180,8 +180,8 @@ export class DwnManager {
         unwrittenManifest: CredentialManifest,
     ): Promise<RecordsCreateResponse> {
         try {
-            unwrittenManifest.issuer.id = Web5Manager.agent.agentDid.uri;
-            const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+            unwrittenManifest.issuer.id = DcxManager.dcxAgent.agentDid.uri;
+            const { record, status: create } = await DcxManager.web5.dwn.records.create({
                 store: false,
                 data: unwrittenManifest,
                 message: {
@@ -205,7 +205,7 @@ export class DwnManager {
                 );
             }
 
-            const { status: send } = await record.send(Web5Manager.agent.agentDid.uri);
+            const { status: send } = await record.send(DcxManager.dcxAgent.agentDid.uri);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;

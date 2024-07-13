@@ -17,12 +17,14 @@ server.use('issuer', 'mx',
     }
 );
 
-server.use('gateway', 'dev',
+server.use('gateway', 'development',
     {
         id: 'localhost',
         uri: 'http://localhost:8305'
     }
 );
+
+server.use('gateway', { id: 'localhost', uri: 'http://localhost:8305' });
 
 await server.start();
 

@@ -8,7 +8,8 @@ export class Config {
 
   public static DWN_LAST_RECORD_ID = process.env.DWN_LAST_RECORD_ID ?? `${process.cwd()}/lastRecordId`;
   public static DWN_CURSOR = process.env.DWN_CURSOR ?? `${process.cwd()}/cursor.json`;
-  public static DEFAULT_GATEWAY_URI = 'https://diddht.tbddev.org';
+  public static DEFAULT_DWN_ENDPOINTS = ['https://dwn.formfree.com/'];
+  public static DEFAULT_GATEWAY_URI = 'https://diddht.tbddev.org/';
   public static DEFAULT_TRUSTED_ISSUERS = [
     {
       name: 'mx',
