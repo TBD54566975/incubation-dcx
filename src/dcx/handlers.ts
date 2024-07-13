@@ -119,12 +119,12 @@ export class ProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject: subjectDid,
-      issuer: Web5Manager.connected.did,
+      issuer: Web5Manager.agent.agentDid.uri,
       type: manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: Web5Manager.connected.bearerDid });
+    const signed = await vc.sign({ did: Web5Manager.agent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {

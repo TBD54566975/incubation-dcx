@@ -1,4 +1,6 @@
-import { HdIdentityVault } from '@web5/agent';
+import { argv } from "process";
+
+import { Web5PlatformAgent } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { generateMnemonic } from 'bip39';
@@ -25,15 +27,16 @@ import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
-import { Web5Manager } from './web5-manager.js';
 import { DwnManager } from './dwn-manager.js';
+import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway';
-export class DcxServer extends Config {
+export class DcxServer {
   static [key: string]: any;
 
-  _isPolling: boolean;
-  _isInitialized?: boolean;
+  _isPolling: boolean = false;
+  _isInitialized: boolean = false;
+  _isNewAgent: boolean = argv.slice(2).some(arg => ['--new-agent', '-n'].includes(arg));
 
   issuers: UseIssuers;
   manifests: UseManifests;
@@ -42,10 +45,6 @@ export class DcxServer extends Config {
   gateways: UseGateways;
 
   constructor(options: UseOptions = {}) {
-    super();
-
-    this._isPolling = false;
-    this._isInitialized = false;
 
     /**
      * Setup the Web5Manager and the DcxServer with the provided options
@@ -142,44 +141,188 @@ export class DcxServer extends Config {
   }
 
   /**
+   * 
+   * Checks the state of the password and recovery phrase
+   * @param firstLaunch A boolean indicating if this is the first launch of the agent
+   * @returns void
+   * @throws DcxServerError 
+   * 
+   * first launch means DATA folder does not exist
+   * if no data folder, no password and no recovery phrase, create new password and initialize new agent
+   * if no data folder, no password and recovery phrase, throw error bc password is unique to recovery phrase
+   * if no data folder, password and no recovery phrase, warn user and provide option to create new agent
+   * if no data folder, password and recovery phrase, initialize new agent
+   * 
+   * if data folder, no password and no recovery phrase, throw error bc password needed to unlock data folder
+   * if data folder, no password and recovery phrase, throw error bc password is requried to unlock data folder
+   * if data folder, password and no recovery phrase, warn user and attempt data folder unlock with password
+   * if data folder, password and recovery phrase, attempt data folder unlock with password
+   */
+  public async checkWeb5Config(firstLaunch: boolean): Promise<void> {
+    const web5Password = Config.WEB5_PASSWORD;
+    const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
+    // If no password and recovery phrase, throw error since password is unique to recovery phrase
+    if (!web5Password && web5RecoveryPhrase) {
+      // TODO: consider trying to recover, catching the error and prompting the user to change the password
+      throw new DcxServerError(
+        'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD! ' +
+        'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+        'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.'
+      );
+      // If password and no recovery phrase, warn user and provide option to create new agent
+    } else if (web5Password && !web5RecoveryPhrase) {
+      if (!this._isNewAgent) {
+        Logger.warn(
+          'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE! ' +
+          'WEB5_PASSWORD is used to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+          'Setting WEB5_PASSWORD without WEB5_RECOVERY_PHRASE will create a new agent locked by WEB5_PASSWORD. ' +
+          'If this is intended, please run DCX with flag `--new-agent` to bypass this warning. To recover an existing ' +
+          'agent, please set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.'
+        );
+        this.stop();
+      }
+      if (!firstLaunch) {
+        throw new DcxServerError(
+          'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
+          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+          'to create a new agent.'
+        )
+      }
+    } else if (!(web5Password && web5RecoveryPhrase)) {
+      if (!firstLaunch) {
+        throw new DcxServerError(
+          'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
+          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+          'to create a new agent.'
+        )
+      }
+      // Notify the user, create a new password and save it to password.key
+      Logger.security(
+        'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found! ' +
+        'New WEB5_PASSWORD saved to password.key file. ' +
+        'New WEB5_RECOVERY_PHRASE saved to recovery.key file.'
+      );
+      const password = await this.createPassword();
+      await FileSystem.overwrite('password.key', password);
+      Config.WEB5_PASSWORD = password;
+    }
+  }
+
+  /**
    *
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
    *
    */
   public async initialize(): Promise<void> {
-    if (!this.WEB5_CONNECT_PASSWORD) {
-      Logger.security('No WEB5_CONNECT_PASSWORD detected!');
-      Logger.security('New Web5 password saved to password.key');
-
-      this.WEB5_CONNECT_PASSWORD = await this.createPassword();
-      Logger.debug('New password created', this.WEB5_CONNECT_PASSWORD);
-      await FileSystem.overwrite('password.key', this.WEB5_CONNECT_PASSWORD);
-    }
-
+    const web5Password = Config.WEB5_PASSWORD;
+    const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
     Logger.debug('Initializing Web5 ... ');
 
-    const agentVault = new HdIdentityVault();
-    const recoveryPhrase = await agentVault.initialize({
-      password: this.WEB5_CONNECT_PASSWORD,
-      recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
-    });
+    // Create a new Web5UserAgent instance
+    const agent = await Web5UserAgent.create();
 
-    const agentDid = await agentVault.getDid();
-    Web5Manager.agent = await Web5UserAgent.create({ agentDid, agentVault });
+    // Check if this is the first launch of the agent
+    const noDataFolder = await agent.firstLaunch()
+    /**
+     * first launch means DATA folder does not exist
+     * 
+     * if no data folder
+     *      and no password
+     *            and no recovery phrase, create new password and initialize new agent
+     *            and recovery phrase, throw error bc password is unique to recovery phrase
+     *      and password
+     *            and no recovery phrase, warn user and provide option to create new agent
+     *            and recovery phrase, initialize new agent
+     * 
+     * if data folder
+     *      and no password
+     *            and no recovery phrase, throw error bc password needed to unlock data folder
+     *            and recovery phrase, throw error bc password is requried to unlock data folder
+     *      and password
+     *            and no recovery phrase, warn user and attempt data folder unlock with password
+     *            and recovery phrase, attempt data folder unlock with password
+     */
 
-    if (await Web5Manager.agent.firstLaunch()) {
-      Logger.security('No WEB5_CONNECT_RECOVERY_PHRASE detected!');
-      Logger.security('New Web5 recovery phrase saved to recovery.key');
 
-      await FileSystem.overwrite('recovery.key', recoveryPhrase);
-      // add dwnEndpoints to agent.initialize once merged
-      await Web5Manager.agent.initialize({ password: this.WEB5_CONNECT_PASSWORD, recoveryPhrase });
+    if (noDataFolder && !web5Password && !web5RecoveryPhrase) {
+      Logger.warn('First launch detected! Creating new agent ...');
+
+      if (!web5Password && web5RecoveryPhrase) {
+        // TODO: consider trying to recover, catching the error and prompting the user to change the password
+        throw new DcxServerError(
+          'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD! ' +
+          'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+          'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.'
+        );
+        // If password and no recovery phrase, warn user and provide option to create new agent
+      } else if (web5Password && !web5RecoveryPhrase) {
+        if (!this._isNewAgent) {
+          Logger.warn(
+            'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE! ' +
+            'WEB5_PASSWORD is used to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+            'Setting WEB5_PASSWORD without WEB5_RECOVERY_PHRASE will create a new agent locked by WEB5_PASSWORD. ' +
+            'If this is intended, please run DCX with flag `--new-agent` to bypass this warning. To recover an existing ' +
+            'agent, please set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.'
+          );
+          this.stop();
+        }
+        if (!noDataFolder) {
+          throw new DcxServerError(
+            'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
+            'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+            'to create a new agent.'
+          )
+        }
+      } else if (!(web5Password && web5RecoveryPhrase)) {
+        if (!noDataFolder) {
+          throw new DcxServerError(
+            'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
+            'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+            'to create a new agent.'
+          )
+        }
+        // Notify the user, create a new password and save it to password.key
+        Logger.security(
+          'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found! ' +
+          'New WEB5_PASSWORD saved to password.key file. ' +
+          'New WEB5_RECOVERY_PHRASE saved to recovery.key file.'
+        );
+        const password = await this.createPassword();
+        await FileSystem.overwrite('password.key', password);
+        Config.WEB5_PASSWORD = password;
+      }
+    } else {
+
     }
 
-    await Web5Manager.agent.start({ password: this.WEB5_CONNECT_PASSWORD });
-    Web5Manager.web5 = new Web5({ agent: Web5Manager.agent, connectedDid: agentDid.uri });
+    // Check if the vault is locked
+    // const isLocked = agent.vault.isLocked();
 
+    // Check the state of the password and recovery phrase
+    // If both password and recovery phrase exist, continue with server initialize
+    // Note: the password must be correct for the given recovery phrase
+    await this.checkWeb5Config(firstLaunch);
+
+    // Check if this is the first launch of the agent
+    if (firstLaunch) {
+      // Initialize the agent, set the environment variable and save the recovery phrase
+      Config.WEB5_RECOVERY_PHRASE = await agent.initialize({
+        password: Config.WEB5_PASSWORD,
+        recoveryPhrase: Config.WEB5_RECOVERY_PHRASE
+      });
+      await FileSystem.overwrite('recovery.key', Config.WEB5_RECOVERY_PHRASE);
+    }
+
+    // Start the agent and create a new Web5 instance
+    await agent.start({ password: Config.WEB5_PASSWORD });
+    const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
+
+    // Set the Web5Manager properties
+    Web5Manager.web5 = web5;
+    Web5Manager.agent = agent as Web5PlatformAgent;
+
+    // Set the server initialized flag
     this._isInitialized = true;
   }
 
@@ -189,7 +332,7 @@ export class DcxServer extends Config {
    *
    */
   public async poll(): Promise<void> {
-    Logger.debug('DCX Server polling!');
+    Logger.debug('DCX server starting ...');
 
     const DWN_CURSOR = Config.DWN_CURSOR;
     const DWN_LAST_RECORD_ID = Config.DWN_LAST_RECORD_ID;
@@ -275,7 +418,7 @@ export class DcxServer extends Config {
    * @returns void
    */
   public stop(): void {
-    Logger.debug('Server stopping...');
+    Logger.debug('DCX server stopping...');
     this._isPolling = false;
     exit(0);
   }
@@ -296,8 +439,7 @@ export class DcxServer extends Config {
       this._isPolling = true;
       await this.poll();
     } catch (error: any) {
-      Logger.error('DcxServer: Failed to start DCX Server');
-      Logger.error(DcxServer.name, error);
+      Logger.error(error);
       this.stop();
     }
   }

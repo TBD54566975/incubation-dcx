@@ -19,24 +19,25 @@ export class Config {
     (issuer: Issuer) => issuer.id,
   );
 
-  // Secrets
-  private _WEB5_CONNECT_PASSWORD: string = process.env.WEB5_CONNECT_PASSWORD || '';
-  get WEB5_CONNECT_PASSWORD(): string {
-    return this._WEB5_CONNECT_PASSWORD;
+  // Web5 password
+  private static _WEB5_PASSWORD: string = process.env.WEB5_PASSWORD ?? '';
+  static get WEB5_PASSWORD(): string {
+    return this._WEB5_PASSWORD;
   }
-  set WEB5_CONNECT_PASSWORD(password: string) {
-    this._WEB5_CONNECT_PASSWORD = password;
-  }
-
-  private _WEB5_CONNECT_RECOVERY_PHRASE: string = process.env.WEB5_CONNECT_RECOVERY_PHRASE || '';
-  get WEB5_CONNECT_RECOVERY_PHRASE(): string {
-    return this._WEB5_CONNECT_RECOVERY_PHRASE;
-  }
-  set WEB5_CONNECT_RECOVERY_PHRASE(recoveryPhrase: string) {
-    this._WEB5_CONNECT_RECOVERY_PHRASE = recoveryPhrase;
+  static set WEB5_PASSWORD(password: string) {
+    this._WEB5_PASSWORD = password;
   }
 
-  get Config(): Config {
+  // Web5 recovery phrase
+  private static _WEB5_RECOVERY_PHRASE: string = process.env.WEB5_RECOVERY_PHRASE ?? '';
+  static get WEB5_RECOVERY_PHRASE(): string {
+    return this._WEB5_RECOVERY_PHRASE;
+  }
+  static set WEB5_RECOVERY_PHRASE(recoveryPhrase: string) {
+    this._WEB5_RECOVERY_PHRASE = recoveryPhrase;
+  }
+
+  static get Config(): Config {
     return this;
   }
 }

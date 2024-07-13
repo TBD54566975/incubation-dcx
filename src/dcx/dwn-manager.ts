@@ -1,6 +1,6 @@
 import { DwnResponseStatus, DwnPaginationCursor } from "@web5/agent";
-import { ProtocolsQueryResponse, ProtocolsConfigureResponse, RecordsCreateResponse } from "@web5/api";
-import { server } from "sinon";
+import { ProtocolsQueryResponse, ProtocolsConfigureResponse, RecordsCreateResponse, Record } from "@web5/api";
+import { server } from "./index.js";
 import { credentialIssuerProtocol } from "../protocol/index.js";
 import { manifestSchema } from "../schemas/index.js";
 import { CredentialManifest } from "../types/dcx.js";
@@ -72,7 +72,7 @@ export class DwnManager {
                 throw new DwnError(code, detail);
             }
 
-            const { status: send } = await protocol.send(Web5Manager.connected.did);
+            const { status: send } = await protocol.send(Web5Manager.agent.agentDid.uri);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
@@ -83,7 +83,7 @@ export class DwnManager {
             Logger.debug('Sent protocol to remote DWN', send);
             return { status: send, protocol };
         } catch (error: any) {
-            Logger.error(`${this.name}: Failed to configure DWN protocols`, error);
+            Logger.error(`${this.name}: Failed to configure DWN protocols:`, error);
             throw error;
         }
     }
@@ -180,7 +180,7 @@ export class DwnManager {
         unwrittenManifest: CredentialManifest,
     ): Promise<RecordsCreateResponse> {
         try {
-            unwrittenManifest.issuer.id = Web5Manager.connected.did;
+            unwrittenManifest.issuer.id = Web5Manager.agent.agentDid.uri;
             const { record, status: create } = await Web5Manager.web5.dwn.records.create({
                 store: false,
                 data: unwrittenManifest,
@@ -205,7 +205,7 @@ export class DwnManager {
                 );
             }
 
-            const { status: send } = await record.send(Web5Manager.connected.did);
+            const { status: send } = await record.send(Web5Manager.agent.agentDid.uri);
 
             if (DwnUtils.isFailure(send.code)) {
                 const { code, detail } = send;
