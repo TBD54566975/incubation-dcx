@@ -25,7 +25,11 @@ import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
-import { DidManager, Web5Manager } from './web5-manager.js';
+import { DidManager, DwnManager, DcxManager } from './dcx-manager.js';
+import { Web5UserAgent } from '@web5/user-agent';
+import { Did, DidDht } from '@web5/dids';
+import { DcxIdentityVault } from './dcx-identity-vault.js';
+import { DcxAgent } from './dcx-agent.js';
 
 const defaultConnectOptions = {
   sync: '30s',
@@ -42,20 +46,20 @@ export class DcxServer extends Config {
   isPolling: boolean;
   isInitialized?: boolean;
 
-  public static issuers: UseIssuers;
-  public static manifests: UseManifests;
-  public static providers: UseProviders;
-  public static handlers: UseHandlers;
-  public static gateways: UseGateways;
+  issuers: UseIssuers;
+  manifests: UseManifests;
+  providers: UseProviders;
+  handlers: UseHandlers;
+  gateways: UseGateways;
 
   constructor(options: UseOptions = {}) {
     super();
 
     this.isPolling = false;
-    this.isInitialized = !!this.WEB5_CONNECT_RECOVERY_PHRASE;
+    this.isInitialized = false;
 
     /**
-     * Setup the Web5Manager and the DcxServer with the provided options
+     * Setup the DcxManager and the DcxServer with the provided options
      */
     this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
     this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
@@ -80,7 +84,7 @@ export class DcxServer extends Config {
    * }
    * 
    */
-  public static use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
+  public use(path: UsePath, id: string | number | symbol = 'default', obj: any): void {
     const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(`Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`);
@@ -93,7 +97,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    */
-  public static useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
+  public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
     this.manifests.set(id, manifest);
   }
 
@@ -102,7 +106,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    */
-  public static useHandler(id: string | number | symbol, handler: Handler): void {
+  public useHandler(id: string | number | symbol, handler: Handler): void {
     this.handlers.set(id, handler)
   }
 
@@ -111,7 +115,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    */
-  public static useProvider(id: string | number | symbol, provider: Provider): void {
+  public useProvider(id: string | number | symbol, provider: Provider): void {
     this.providers.set(id, provider)
   }
 
@@ -120,7 +124,7 @@ export class DcxServer extends Config {
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    */
-  public static useIssuer(id: string | number | symbol, issuer: Issuer): void {
+  public useIssuer(id: string | number | symbol, issuer: Issuer): void {
     this.issuers.set(id, issuer);
   }
 
@@ -163,7 +167,46 @@ export class DcxServer extends Config {
         Logger.debug(`password.key overwritten ${overwritten}`, password);
       }
 
+      const agentDid = await DidDht.create({
+        options: {
+          verificationMethods: [
+            {
+              algorithm: 'Ed25519',
+              id: 'sig',
+              purposes: ['assertionMethod', 'authentication']
+            },
+          ],
+          services: [
+            {
+              id: 'dwn',
+              type: 'DecentralizedWebNode',
+              serviceEndpoint: Config.DWN_ENDPOINTS,
+              enc: '#enc',
+              sig: '#sig',
+            }
+          ],
+        }
+      });
+
+      const agentVault = new DcxIdentityVault();
+
+      const userAgent = await DcxAgent.create({ agentDid, agentVault });
+
+      if (await userAgent.firstLaunch()) {
+        await userAgent.initialize({
+          password: this.WEB5_CONNECT_PASSWORD,
+          recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE
+        });
+      }
+
+      await userAgent.start({
+        password: this.WEB5_CONNECT_PASSWORD
+      });
+
+      await userAgent.sync.registerIdentity({ did: userAgent.agentDid.uri });
+
       Logger.debug('Initializing Web5 connection ... ');
+
       const web5ConnectOptions = !this.WEB5_CONNECT_RECOVERY_PHRASE
         ? {
           ...defaultConnectOptions,
@@ -171,26 +214,15 @@ export class DcxServer extends Config {
         } : {
           ...defaultConnectOptions,
           password: this.WEB5_CONNECT_PASSWORD,
-          recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE,
+          recoveryPhrase: this.WEB5_CONNECT_RECOVERY_PHRASE
         };
 
-      const {
-        web5,
-        did: connectedDid,
-        recoveryPhrase: newPhrase
-      } = await Web5.connect(web5ConnectOptions);
-
+      const { web5, recoveryPhrase: newPhrase } = await Web5.connect({
+        ...web5ConnectOptions,
+        agent: userAgent,
+        connectedDid: userAgent.agentDid.uri
+      });
       const agent = web5.agent as Web5PlatformAgent
-
-      const { did: connectedBearerDid } = await agent.identity.get({ didUri: connectedDid }) ?? {};
-      if (!connectedBearerDid) {
-        throw new DcxServerError('Failed to get bearer DID');
-      }
-      const connectedPortableDid = await connectedBearerDid.export()
-      Web5Manager.connected = new DidManager(connectedDid, connectedBearerDid, connectedPortableDid);
-
-      Web5Manager.web5 = web5;
-      Web5Manager.agent = agent;
 
       if (!this.WEB5_CONNECT_RECOVERY_PHRASE && newPhrase) {
         Logger.info('First launch detected!')
@@ -209,13 +241,16 @@ export class DcxServer extends Config {
           '\n    3. Recovery Phrase; see recovery.key'
         );
 
-        const agentJson = await FileSystem.overwrite('agent.json', stringifier(await Web5Manager.agent.agentDid.export()));
+        const agentJson = await FileSystem.overwrite('agent.json', stringifier(await DcxManager.dcxAgent.agentDid.export()));
         Logger.info(`agent.json overwritten ${agentJson} to ${agent.agentDid.uri}`);
-
-        const conectionJson = await FileSystem.overwrite('connected.json', stringifier(Web5Manager.connected.portableDid));
-        Logger.info(`connected.json overwritten ${conectionJson} to ${connectedPortableDid.uri}`);
       }
 
+      DcxManager.web5 = web5;
+      DcxManager.dcxAgent = agent;
+      DcxManager.connected = new DidManager(agent.agentDid.uri, agent.agentDid, await agent.agentDid.export());
+      console.log('DcxManager.web5', DcxManager.web5);
+      console.log('DcxManager.dcxAgent', DcxManager.dcxAgent);
+      console.log('DcxManager.connected', DcxManager.connected);
       this.isInitialized = true;
     } catch (error: any) {
       Logger.error(DcxServer.name, error);
@@ -230,7 +265,7 @@ export class DcxServer extends Config {
    */
   public async poll(): Promise<void> {
     try {
-      Logger.debug('DCX Server polling!');
+      Logger.debug('DCX Server polling!', DcxManager.web5);
 
       const DWN_CURSOR = Config.DWN_CURSOR;
       const DWN_LAST_RECORD_ID = Config.DWN_LAST_RECORD_ID;
@@ -240,7 +275,7 @@ export class DcxServer extends Config {
       let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
       while (this.isPolling) {
-        const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
+        const { records = [], cursor: nextCursor } = await DcxManager.web5.dwn.records.query({
           message: {
             filter: {
               protocol: credentialIssuerProtocol.protocol,
@@ -260,7 +295,7 @@ export class DcxServer extends Config {
 
         const recordReads: Record[] = await Promise.all(
           recordIds.map(async (recordId: string) => {
-            const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
+            const { record }: { record: Record } = await DcxManager.web5.dwn.records.read({
               message: {
                 filter: {
                   recordId,
@@ -279,7 +314,7 @@ export class DcxServer extends Config {
 
             if (record.protocolPath === 'application') {
 
-              const manifest = Object.values(DcxServer.manifests).find(
+              const manifest = Object.values(this.manifests).find(
                 (manifest: CredentialManifest) => manifest.presentation_definition.id === record.schema
               );
 
@@ -344,7 +379,7 @@ export class DcxServer extends Config {
       }
 
       try {
-        const success = await Web5Manager.setup();
+        const success = await DwnManager.setup();
         if (!success) {
           Logger.warn('Failed to setup DCX DWN');
         }
