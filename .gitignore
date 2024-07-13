@@ -11,8 +11,6 @@ local-test.ts
 # Secrets
 CUSTOM-MANIFEST.json
 .env
-*keys*
-*key*
 agent.json
 connection.json
 connected.json
@@ -20,3 +18,6 @@ previous.json
 did:dht*.json
 test-server.ts
 .ignore
+
+password.key
+recovery.key
