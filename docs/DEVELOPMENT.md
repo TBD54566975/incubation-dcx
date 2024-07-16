@@ -2,7 +2,7 @@
 
 ## Issues & PRs
 
-Below is a current list of issues and PRs that track along the development roadmap
+Below is a current list of issues and PRs that track development
 
 - [x] Credential issuer protocol handlers
   - [Issue #11](https://github.com/TBD54566975/incubation-dcx/issues/11)

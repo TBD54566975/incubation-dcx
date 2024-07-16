@@ -1,6 +1,6 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
 [Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
 1. The input credentials required by the issuer
@@ -13,42 +13,36 @@ DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifi
 
 Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
 
-The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`, which can be used to bootstrap running a DCX server and provide the following functionality:
-
-- Manages connection to the Web5 platform and facilitates all operations between issuer and applicant DWNs
-- Manages import, export & creation of DHT-method DIDs
-- Implements generic protocol handlers to facilitate Verifiable Presentation and Verifiable Credential issuance
-
-The protocol definition and schemas can be found below:
-
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
   - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
 
-[Schemas](./src/protocol/schemas/)
-  - [`src/protocol/schemas/invoice.ts`](./src/protocol/schemas/invoice.ts) defines the schema for invoice records
-  - [`src/protocol/schemas/manifest.ts`](./src/protocol/schemas/manifest.ts) defines schema for manifest records
-  - [`src/protocol/schemas/application.ts`](./src/protocol/schemas/application.ts) defines schema for application records
-  - [`src/protocol/schemas/response.ts`](./src/protocol/schemas/response.ts) defines schema for response records
+[Record Schemas](./src/schemas/)
+  - [`src/schemas/invoice.ts`](./src/schemas/invoice.ts) defines the schema for invoice records
+  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) defines schema for manifest records
+  - [`src/schemas/application.ts`](./src/schemas/application.ts) defines schema for application records
+  - [`src/schemas/response.ts`](./src/schemas/response.ts) defines schema for response records
 
-[Manifests](./src/protocol/manifests/)
-  - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
+[Credential Manifests](./EXAMPLE-MANIFEST.json)
+  - [`EXAMPLE-MANIFEST.json`](./EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
+  - See [Usage](#Usage) for how to provide manifests
 
 ## Docs & Diagrams
 
 Additional docs & diagram files can be found in the [/docs](/docs) folder.
 
+- [DEVELOPMENT.md](./docs/DEVELOPMENT.md) Lists current issues and PRs
+- [SUMMARY.md](./docs/SUMMARY.md) Shorter summary about DCX
+
 ### Architecture Diagram
 
+#### Actors
 - **DCX**: Protocol boundary within which actors communicate
 - **DCX Issuer**: Web server running @web5/dcx and web5-js
 - **Issuer DWN**: DCX Issuer's DWN server running dwn-sdk-js
 - **DCX Applicant**: User client application running @web5/dcx and web5-js
 - **Applicant DWN**: DCX Applicant's DWN server running dwn-sdk-js
-- [web5-js](https://github.com/TBD54566975/web5-js)
-- [@web5/dcx](https://github.com/TBD54566975/incubation-dcx)
-- [dwn-sdk-js](https://github.com/TBD54566975/dwn-sdk-js)
 
 ![dcx-architecture](./docs/img/dcx-architecture.png)
 
@@ -141,12 +135,28 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 Import the `server` from `@formfree/dcx` and run `.start()` to simply run the server as-is.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@formfree/dcx';
 await server.start();
 ```
 
-However, this will be limited to local development since you are required to provide your own credential manifest(s).
-You can leverate the `.use()` method on the server to define custom server options.
+You can also import the `DcxServer` class and pass options to customize the server
+```ts
+import DcxServer from "@formfree/dcx";
+
+const server = new DcxServer({
+    issuers: new Map([['issuer1', { name: 'issuer1', id: 'did:dht:issuer123xyz' }]]),
+    manifests: new Map([/* Define your custom manifest entries */]),
+    providers: new Map([/* Define your custom providers entries */]),
+    handlers: new Map([/* Define your custom handlers entries */]),
+    gateways: new Map([/* Define your custom gateways entries */])
+});
+
+await server.start();
+```
+
+However, using the server this was alone is limited to local development.
+To customize local dev and/or prepare for prod, you must provide your own credential manifest(s).
+You can leverate the `.use()` method on the server to define custom server options like custom manifests.
 
 ### Use Manifest
 
@@ -155,12 +165,12 @@ An example manifest can be found [here](./src/protocol/manifests/) to use for ac
 
 ```typescript
 import CustomManifest from './CUSTOM-MANIFEST.json';
-import { server } from './src/index';
+import { server } from '@formfree/dcx';
 
 // Define manifest in local json file, import and pass into server
 server.use('manifest', CustomManifest.id, CustomManifest);
 
-// Define manifest directly into .use method
+// Or define manifest directly into .use method
 server.use('manifest', 'dcx-credential-manifest-example', {
     "id": "dcx-credential-manifest-example",
     "name": "DCX Credential Manifest Example",
@@ -275,7 +285,9 @@ expected by the default handlers. Default handler names are: `selectCredentials`
 ```ts
 import { server } from './src/index';
 
-const requestCredentialCustom = () => { /* do api request to a provider and return data */ };
+async function requestCredentialCustom(){ 
+    return await fetch('http://api.example.com/v1/vc-data', /* ... */)
+};
 server.use('handler', 'requestCredential', requestCredentialCustom);
 
 await server.start();
@@ -306,6 +318,24 @@ server.use('gateway', 'production',
 );
 
 await server.start();
+```
+
+Putting it all together into 1 example
+
+```ts
+import CustomManifest from './CUSTOM-MANIFEST.json';
+import { server } from '@formfree/dcx';
+
+server.use('manifest', CustomManifest.id, CustomManifest);
+server.use('issuer', 'mx', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
+server.use('handler', 'requestCredential', () => { return await fetch('http://api.example.com/v1/vc-data', /* ... */) });
+server.use('gateway', 'development', { id: 'localhost', uri: 'http://localhost:8305' });
+
+await server.start();
+
+process.on('SIGTERM', () => {
+    server.stop();
+});
 ```
 
 ## Project Resources

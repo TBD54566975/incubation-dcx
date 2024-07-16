@@ -223,14 +223,12 @@ export class Cipher extends StreamCipher {
    */
   public async encrypt(key: Buffer, initVector: Buffer, plaintext: string): Promise<string> {
     switch (this.algorithm) {
-      case undefined || null:
-        throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
         return Cipher.aes256CbcEncrypt(key, initVector, plaintext);
       case CipherAlgorightm.AES_256_CTR:
         return Cipher.aes256CtrEncrypt(key, initVector, plaintext);
       default:
-        throw new Error('Algorithm not supported');
+        throw new Error('Algorithm not set or unsupported');
     }
   }
 
@@ -243,14 +241,12 @@ export class Cipher extends StreamCipher {
    */
   public async decrypt(key: Buffer, initVector: Buffer, ciphertext: string): Promise<string> {
     switch (this.algorithm) {
-      case undefined || null:
-        throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
         return Cipher.aes256CbcDecrypt(key, initVector, ciphertext);
       case CipherAlgorightm.AES_256_CTR:
         return Cipher.aes256CtrDecrypt(key, initVector, ciphertext);
       default:
-        throw new Error('Algorithm not supported');
+        throw new Error('Algorithm not set or unsupported');
     }
   }
 
@@ -278,7 +274,7 @@ export class Cipher extends StreamCipher {
    */
   public static aes256CbcDecrypt(key: Buffer, initVector: Buffer, cipher: string): string {
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, initVector);
-    let decrypted = decipher.update(Buffer.from(cipher, 'base64'));
+    const decrypted = decipher.update(Buffer.from(cipher, 'base64'));
     return Buffer.concat([decrypted, decipher.final()]).toString('utf8');
   }
 
@@ -305,7 +301,7 @@ export class Cipher extends StreamCipher {
    */
   public static aes256CtrDecrypt(key: Buffer, initVector: Buffer, cipher: string): string {
     const decipher = crypto.createDecipheriv('aes-256-ctr', key, initVector);
-    let decrypted = decipher.update(Buffer.from(cipher, 'base64'));
+    const decrypted = decipher.update(Buffer.from(cipher, 'base64'));
     return Buffer.concat([decrypted, decipher.final()]).toString('utf8');
   }
 }

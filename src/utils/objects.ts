@@ -33,7 +33,7 @@ export class Objects implements Object {
     }
 
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         if (!this.isEmptyObjectDeep(obj[key])) {
           return false;
         }
@@ -41,5 +41,15 @@ export class Objects implements Object {
     }
 
     return true;
+  }
+
+  /**
+   *
+   * Check if an object is an array
+   * @param obj The object to check if it is an array
+   * @returns A boolean indicating if the object is an array
+   */
+  public static isArray(obj: any): boolean {
+    return Array.isArray(obj);
   }
 }

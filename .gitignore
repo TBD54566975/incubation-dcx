@@ -11,12 +11,7 @@ local-test.ts
 # Secrets
 CUSTOM-MANIFEST.json
 .env
-agent.json
-connection.json
-connected.json
-previous.json
 did:dht*.json
-test-server.ts
 .ignore
 
 password.key
