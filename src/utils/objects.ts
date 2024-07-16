@@ -33,7 +33,7 @@ export class Objects implements Object {
     }
 
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         if (!this.isEmptyObjectDeep(obj[key])) {
           return false;
         }

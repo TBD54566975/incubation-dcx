@@ -4,8 +4,8 @@ import { DidDhtManager } from './did-dht-manager.js';
 import { DcxIdentityVault } from './identity-vault.js';
 
 /**
-* DcxManager handles interactions between the DCX server and the Web5 platform
-*/
+ * DcxManager handles interactions between the DCX server and the Web5 platform
+ */
 export abstract class DcxManager {
   public static web5: Web5;
   public static connected: DidDhtManager;

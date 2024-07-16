@@ -1,10 +1,10 @@
 export const dwn500Error = {
-  code: 500,
-  detail: 'DWN server error',
+  code   : 500,
+  detail : 'DWN server error',
 };
 export class DcxError extends Error {
   constructor(error: any, name: string) {
-    super(error)
+    super(error);
     this.name = name;
   }
 }

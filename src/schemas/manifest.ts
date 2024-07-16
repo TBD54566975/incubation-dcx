@@ -1,9 +1,9 @@
 export const schema = {
-  $schema: 'http://json-schema.org/draft-07/schema',
-  $id: 'https://dcx.io/protocol/credential-issuance/schemas/manifest',
-  title: 'Credential Manifest',
-  type: 'object',
-  properties: {
+  $schema    : 'http://json-schema.org/draft-07/schema',
+  $id        : 'https://dcx.io/protocol/credential-issuance/schemas/manifest',
+  title      : 'Credential Manifest',
+  type       : 'object',
+  properties : {
     id: {
       type: 'string',
     },
@@ -17,9 +17,9 @@ export const schema = {
       type: 'string',
     },
     issuer: {
-      type: 'object',
-      required: ['id'],
-      properties: {
+      type       : 'object',
+      required   : ['id'],
+      properties : {
         id: {
           type: 'string',
         },
@@ -33,11 +33,11 @@ export const schema = {
       additionalProperties: false,
     },
     output_descriptors: {
-      type: 'array',
-      items: {
-        type: 'object',
-        required: ['id', 'schema'],
-        properties: {
+      type  : 'array',
+      items : {
+        type       : 'object',
+        required   : ['id', 'schema'],
+        properties : {
           id: {
             type: 'string',
           },
@@ -51,8 +51,8 @@ export const schema = {
             type: 'string',
           },
           display: {
-            type: 'object',
-            properties: {
+            type       : 'object',
+            properties : {
               title: {
                 $ref: 'https://identity.foundation/wallet-rendering/schemas/display-mapping-object.json',
               },
@@ -63,8 +63,8 @@ export const schema = {
                 $ref: 'https://identity.foundation/wallet-rendering/schemas/display-mapping-object.json',
               },
               properties: {
-                type: 'array',
-                items: {
+                type  : 'array',
+                items : {
                   $ref: 'https://identity.foundation/wallet-rendering/schemas/labeled-display-mapping-object.json',
                 },
               },
@@ -85,7 +85,7 @@ export const schema = {
       $ref: 'https://identity.foundation/claim-format-registry/schemas/presentation-definition-claim-format-designations.json',
     },
   },
-  required: ['id', 'spec_version', 'issuer', 'output_descriptors'],
-  additionalProperties: false,
+  required             : ['id', 'spec_version', 'issuer', 'output_descriptors'],
+  additionalProperties : false,
 };
 export type ManifestSchema = typeof schema;

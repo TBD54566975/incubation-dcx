@@ -92,14 +92,14 @@ export type Handler = { id: string; callback: (...args: any[]) => any | Promise<
 // Provider
 export interface DataProvider extends AdditionalProperties {
   [key: string | number | symbol]: any;
-  name: string;
+  id: string;
   endpoint: string;
   method?: string;
   headers?: Record<string, string>;
 }
 export class Provider implements DataProvider {
   constructor(
-    public name: string,
+    public id: string,
     public endpoint: string,
     public method?: string,
     public headers?: Record<string, string>,
@@ -133,7 +133,6 @@ export type UseManifests = Manifest[];
 export type UseProviders = Provider[];
 // Map<string | number | symbol, Provider>;
 export type UseHandlers = Handler[];
-// Map<string | number | symbol, Handler>;
 export type UseGateways = string[];
 //  Map<string | number | symbol, Gateways>;
 export type UseDwns = string[];
@@ -151,7 +150,7 @@ export type UseOptions = {
   [key: string]: any;
   manifests?: UseManifests;
   providers?: UseProviders;
-  
+
   issuers?: UseIssuers;
   gateways?: UseGateways;
   dwns?: UseDwns;

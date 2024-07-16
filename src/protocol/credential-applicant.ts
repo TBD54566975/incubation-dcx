@@ -5,43 +5,43 @@ import { schema as applicationSchema } from '../schemas/application.js';
 
 export const protocol = {
   // applicant protocol is a subset of exchange protocol
-  protocol: 'https://dcx.io/protocol/credential-exchange',
-  published: false,
-  types: {
+  protocol  : 'https://dcx.io/protocol/credential-exchange',
+  published : false,
+  types     : {
     application: {
-      schema: applicationSchema.$id,
-      dataFormats: ['application/json'],
+      schema      : applicationSchema.$id,
+      dataFormats : ['application/json'],
     },
     invoice: {
-      schema: invoiceSchema.$id,
-      dataFormats: ['application/json'],
+      schema      : invoiceSchema.$id,
+      dataFormats : ['application/json'],
     },
     manifest: {
-      schema: manifestSchema.$id,
-      dataFormats: ['application/json'],
+      schema      : manifestSchema.$id,
+      dataFormats : ['application/json'],
     },
     response: {
-      schema: responseSchema.$id,
-      dataFormats: ['application/json'],
+      schema      : responseSchema.$id,
+      dataFormats : ['application/json'],
     },
   },
   structure: {
     // issuers publish manifests to describe the data they can provide
-    manifest: {},
+    manifest    : {},
     // applicants can apply for a credential
-    application: {
+    application : {
       // a credential response might be sent in response to an application
       response: {
         $actions: [
           {
-            who: 'recipient',
-            of: 'application',
-            can: ['create', 'update'],
+            who : 'recipient',
+            of  : 'application',
+            can : ['create', 'update'],
           },
           {
-            who: 'author',
-            of: 'application',
-            can: ['read'],
+            who : 'author',
+            of  : 'application',
+            can : ['read'],
           },
         ],
       },
@@ -49,14 +49,14 @@ export const protocol = {
       invoice: {
         $actions: [
           {
-            who: 'recipient',
-            of: 'application',
-            can: ['create', 'update'],
+            who : 'recipient',
+            of  : 'application',
+            can : ['create', 'update'],
           },
           {
-            who: 'author',
-            of: 'application',
-            can: ['read'],
+            who : 'author',
+            of  : 'application',
+            can : ['read'],
           },
         ],
       },

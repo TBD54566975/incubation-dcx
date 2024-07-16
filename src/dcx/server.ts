@@ -24,11 +24,11 @@ export class DcxServer {
   _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
 
   useOptions: UseOptions = {
-    manifests: [],
-    providers: [],
-    gateways: Config.DEFAULT_GATEWAY_URIS,
-    dwns: Config.DEFAULT_DWN_ENDPOINTS,
-    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
+    manifests : [],
+    providers : [],
+    gateways  : Config.DEFAULT_GATEWAY_URIS,
+    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
+    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -85,7 +85,7 @@ export class DcxServer {
         this.useOptions[path].push(obj);
       }
     } else if (stringPaths.includes(path)) {
-      if (!!obj) {
+      if (obj) {
         this.useOptions[path].push(obj);
       }
     } else {
@@ -265,8 +265,8 @@ export class DcxServer {
     }
 
     return {
-      password: web5Password,
-      recoveryPhrase: web5RecoveryPhrase,
+      password       : web5Password,
+      recoveryPhrase : web5RecoveryPhrase,
     };
   }
 
@@ -376,13 +376,17 @@ export class DcxServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = Object.values(this.useOptions.manifests!).find(
+            const manifest = this.useOptions.manifests!.find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );
 
-            if (!!manifest) {
-              await ProtocolHandlers.processApplicationRecord(record, manifest);
+            if (manifest) {
+              await ProtocolHandlers.processApplicationRecord(
+                record,
+                manifest,
+                manifest.output_descriptors[0].id,
+              );
             } else {
               Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
             }
