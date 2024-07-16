@@ -44,7 +44,7 @@ export class DidDhtManager {
      * @returns DidRegistrationResult; see {@link DidRegistrationResult}
      */
     public async publishDidDoc(gatewayUri: string): Promise<DidRegistrationResult> {
-        gatewayUri ??= server.gateways.get('default')?.uri ?? Config.DEFAULT_GATEWAY_URI;
+        gatewayUri ??= server.gateways.get('gateways')?.[0] ?? Config.DEFAULT_GATEWAY_URI;
         return await DidDht.publish({ did: this.bearerDid, gatewayUri });
     }
 

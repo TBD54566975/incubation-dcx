@@ -1,12 +1,12 @@
 import { argv } from "process";
 import { exit } from 'process';
 import { generateMnemonic } from 'bip39';
-import { Record, Web5 } from '@web5/api';
+import { getTechPreviewDwnEndpoints, Record, Web5 } from '@web5/api';
 
 import {
   CredentialManifest,
-  Dwn,
-  Gateway,
+  Dwns,
+  Gateways,
   Handler,
   Issuer,
   Manifest,
@@ -43,8 +43,8 @@ export class DcxServer {
   manifests: UseManifests;
   providers: UseProviders;
   handlers: UseHandlers;
-  dwns: UseDwns;
   gateways: UseGateways;
+  dwns: UseDwns;
 
   constructor(options: UseOptions = {}) {
 
@@ -66,8 +66,8 @@ export class DcxServer {
     this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
     this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
     this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
-    this.dwns = options.dwns ?? [];
-    this.gateways = options.gateways ?? []
+    this.gateways = options.gateways ?? new Map<string, Gateways>();
+    this.dwns = options.dwns ?? new Map<string, Gateways>();
   }
 
   /**
@@ -80,7 +80,7 @@ export class DcxServer {
    * @example see README.md for usage information
    * 
    */
-  public use(path: UsePath, id?: string | number | symbol, obj: any): void {
+  public use(path: UsePath, obj: any, id: string | number | symbol = Config.NODE_ENV): void {
     const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway', 'dwn'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
@@ -100,7 +100,7 @@ export class DcxServer {
         break;
       case 'gateway':
       case 'dwn':
-        this[`${path}s`].push(obj);
+        this[`${path}s`].set(`${path}s`, obj);
         break;
       default:
         throw new DcxServerError(`Invalid server.use() name: ${path}`);
@@ -159,28 +159,26 @@ export class DcxServer {
 
   /**
   *
-  * Sets the dwn to use
+  * Sets the dwns to use
   *
-  * @param id Some unique, accessible identifier for the issuer
   * @param dwn The dwn to use
   * @example see README.md for usage information
   * 
   */
-  public useDwn(id: string | number | symbol, dwn: Dwn): void {
-    this.dwns.set(id, dwn);
+  public useDwn(dwn: Dwns): void {
+    this.dwns.set('dwns', dwn);
   }
 
   /**
   *
-  * Sets the gateway to use
+  * Sets the gateways to use
   *
-  * @param id Some unique, accessible identifier for the issuer
   * @param gateway The gateway to use'
   * @example see README.md for usage information
   * 
   */
-  public useGateway(id: string | number | symbol, gateway: Gateway): void {
-    this.gateways.set(id, gateway);
+  public useGateway(gateway: Gateways): void {
+    this.gateways.set('gateways', gateway);
   }
 
   /**
@@ -294,7 +292,8 @@ export class DcxServer {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.dwns.get(Config.NODE_ENV)?.endpoints ?? ;
+    const tbdDwnEndpoints = await getTechPreviewDwnEndpoints();
+    const dwnEndpoints = this.dwns.get('dwns') ?? [...Config.DEFAULT_DWN_ENDPOINTS, ...tbdDwnEndpoints];
     const startParams = { password };
     const initializeParams = !recoveryPhrase ? { ...startParams, dwnEndpoints } : { ...startParams, recoveryPhrase, dwnEndpoints };
 

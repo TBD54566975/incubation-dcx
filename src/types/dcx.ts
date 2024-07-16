@@ -129,26 +129,15 @@ export interface GatewayType extends AdditionalProperties {
   id: string;
   uri: string;
 }
-export class Gateway implements GatewayType {
-  constructor(
-    public id: string,
-    public uri: string,
-  ) { }
-}
-
-export class Dwn implements AdditionalProperties {
-  constructor(
-    public id: string,
-    public endpoints: string[],
-  ) { }
-}
+export type Gateways = string[];
+export type Dwns = string[];
 
 export type UseIssuers = Map<string | number | symbol, Issuer>;
 export type UseHandlers = Map<string | number | symbol, Handler>;
 export type UseProviders = Map<string | number | symbol, Provider>;
 export type UseManifests = Map<string | number | symbol, Manifest>;
-export type UseGateways = Gateway[];
-export type UseDwns = Dwn[];
+export type UseGateways = Map<string | number | symbol, Gateways>;
+export type UseDwns = Map<string | number | symbol, Dwns>;
 
 export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways | UseDwns;
 
@@ -159,4 +148,5 @@ export type UseOptions = {
   providers?: UseProviders;
   manifests?: UseManifests;
   gateways?: UseGateways;
+  dwns?: UseDwns;
 };
