@@ -1,34 +1,18 @@
-import { argv } from "process";
-import { exit } from 'process';
-import { generateMnemonic } from 'bip39';
 import { getTechPreviewDwnEndpoints, Record, Web5 } from '@web5/api';
+import { generateMnemonic } from 'bip39';
+import { argv, exit } from 'process';
 
-import {
-  CredentialManifest,
-  Dwns,
-  Gateways,
-  Handler,
-  Issuer,
-  Manifest,
-  Provider,
-  UseDwns,
-  UseGateways,
-  UseHandlers,
-  UseIssuers,
-  UseManifests,
-  UseOptions,
-  UseProviders,
-} from '../types/dcx.js';
 import { Config, Objects, ProtocolHandlers } from '../index.js';
 import { credentialIssuerProtocol } from '../protocol/index.js';
+import { CredentialManifest, Handler, Issuer, Provider, UseOptions } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
 import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
-import { DcxAgent } from "./agent.js";
+import { DcxAgent } from './agent.js';
 import { DwnManager } from './dwn-manager.js';
-import { DcxIdentityVault } from "./identity-vault.js";
+import { DcxIdentityVault } from './identity-vault.js';
 import { DcxManager } from './manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
@@ -37,21 +21,21 @@ export class DcxServer {
 
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isNewAgent: boolean = argv.slice(2).some(arg => ['--new-agent', '-n'].includes(arg));
+  _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
 
-  issuers: UseIssuers;
-  manifests: UseManifests;
-  providers: UseProviders;
-  handlers: UseHandlers;
-  gateways: UseGateways;
-  dwns: UseDwns;
+  useOptions: UseOptions = {
+    manifests: [],
+    providers: [],
+    gateways: Config.DEFAULT_GATEWAY_URIS,
+    dwns: Config.DEFAULT_DWN_ENDPOINTS,
+    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
+  };
 
-  constructor(options: UseOptions = {}) {
-
+  constructor(options: UseOptions = this.useOptions ?? {}) {
     /**
-     * 
+     *
      * Setup the DcxManager and the DcxServer with the provided options
-     * 
+     *
      * @param options The options to use for the DcxServer
      * @param options.issuers The issuers to use
      * @param options.manifests The manifests to use
@@ -60,50 +44,52 @@ export class DcxServer {
      * @param options.dwns The dwns to use
      * @param options.gateways The gateways to use
      * @example see README.md for usage information
-     * 
+     *
      */
-    this.issuers = options.issuers ?? new Map<string | number | symbol, Issuer>();
-    this.manifests = options.manifests ?? new Map<string | number | symbol, Manifest>();
-    this.providers = options.providers ?? new Map<string | number | symbol, Provider>();
-    this.handlers = options.handlers ?? new Map<string | number | symbol, Handler>();
-    this.gateways = options.gateways ?? new Map<string, Gateways>();
-    this.dwns = options.dwns ?? new Map<string, Gateways>();
+    this.useOptions.manifests = options.manifests ?? [];
+    this.useOptions.providers = options.providers ?? [];
+
+    this.useOptions.issuers = options.issuers ?? Config.DEFAULT_TRUSTED_ISSUERS;
+    this.useOptions.gateways = options.gateways ?? Config.DEFAULT_GATEWAY_URIS;
+    this.useOptions.dwns = options.dwns ?? Config.DEFAULT_DWN_ENDPOINTS;
+
+    this.useOptions.handlers = options.handlers ?? [];
   }
 
   /**
    *
    * Sets the server options
-   * 
+   *
    * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
    * @param id Some unique, accessible identifier to map the obj to
    * @param obj The object to use; see {@link UseOption}
    * @example see README.md for usage information
-   * 
+   *
    */
-  public use(path: UsePath, obj: any, id: string | number | symbol = Config.NODE_ENV): void {
-    const validPaths = ['issuer', 'manifest', 'provider', 'handler', 'gateway', 'dwn'];
+  public use(path: UsePath, obj: any): void {
+    const objectPaths = ['issuer', 'manifest', 'provider', 'handler'];
+    const stringPaths = ['gateway', 'dwn'];
+    const validPaths = [...objectPaths, ...stringPaths];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
-        `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`
+        `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
       );
     }
 
-    switch (path) {
-      case 'issuer':
-      case 'manifest':
-      case 'provider':
-      case 'handler':
-        if (!id) {
-          throw new DcxServerError(`Invalid id: ${id}`);
-        }
-        this[`${path}s`].set(id, obj);
-        break;
-      case 'gateway':
-      case 'dwn':
-        this[`${path}s`].set(`${path}s`, obj);
-        break;
-      default:
-        throw new DcxServerError(`Invalid server.use() name: ${path}`);
+    if (!this.useOptions[path] || !this.useOptions[path].length) {
+      this.useOptions[path] = [];
+    }
+
+    if (objectPaths.includes(path)) {
+      if (!(Objects.isEmptyObject(obj) && Objects.isEmptyObjectDeep(obj))) {
+        this.useOptions[path].push(obj);
+      }
+    } else if (stringPaths.includes(path)) {
+      if (!!obj) {
+        this.useOptions[path].push(obj);
+      }
+    } else {
+      throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
   }
 
@@ -114,10 +100,13 @@ export class DcxServer {
    * @param id Some unique, accessible identifier for the manifest
    * @param manifest The credential manifest to use
    * @example see README.md for usage information
-   * 
+   *
    */
-  public useManifest(id: string | number | symbol, manifest: CredentialManifest): void {
-    this.manifests.set(id, manifest);
+  public useManifest(manifest: CredentialManifest): void {
+    if (!this.useOptions.manifests || !this.useOptions.manifests.length) {
+      this.useOptions.manifests = [];
+    }
+    this.useOptions.manifests.push(manifest);
   }
 
   /**
@@ -125,10 +114,13 @@ export class DcxServer {
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
    * @example see README.md for usage information
-   * 
+   *
    */
-  public useHandler(id: string | number | symbol, handler: Handler): void {
-    this.handlers.set(id, handler);
+  public useHandler(handler: Handler): void {
+    if (!this.useOptions.handlers || !this.useOptions.handlers.length) {
+      this.useOptions.handlers = [];
+    }
+    this.useOptions.handlers.push(handler);
   }
 
   /**
@@ -138,10 +130,13 @@ export class DcxServer {
    * @param id Some unique, accessible identifier for the provider
    * @param provider The provider to use
    * @example see README.md for usage information
-   * 
+   *
    */
-  public useProvider(id: string | number | symbol, provider: Provider): void {
-    this.providers.set(id, provider);
+  public useProvider(provider: Provider): void {
+    if (!this.useOptions.providers || !this.useOptions.providers.length) {
+      this.useOptions.providers = [];
+    }
+    this.useOptions.providers.push(provider);
   }
 
   /**
@@ -151,34 +146,43 @@ export class DcxServer {
    * @param id Some unique, accessible identifier for the issuer
    * @param issuer The issuer to use
    * @example see README.md for usage information
-   * 
+   *
    */
-  public useIssuer(id: string | number | symbol, issuer: Issuer): void {
-    this.issuers.set(id, issuer);
+  public useIssuer(issuer: Issuer): void {
+    if (!this.useOptions.issuers || !this.useOptions.issuers.length) {
+      this.useOptions.issuers = [];
+    }
+    this.useOptions.issuers.push(issuer);
   }
 
   /**
-  *
-  * Sets the dwns to use
-  *
-  * @param dwn The dwn to use
-  * @example see README.md for usage information
-  * 
-  */
-  public useDwn(dwn: Dwns): void {
-    this.dwns.set('dwns', dwn);
+   *
+   * Sets the dwns to use
+   *
+   * @param dwn The dwn to use
+   * @example see README.md for usage information
+   *
+   */
+  public useDwn(dwn: string): void {
+    if (!this.useOptions.dwns || !this.useOptions.dwns.length) {
+      this.useOptions.dwns = [];
+    }
+    this.useOptions.dwns.push(dwn);
   }
 
   /**
-  *
-  * Sets the gateways to use
-  *
-  * @param gateway The gateway to use'
-  * @example see README.md for usage information
-  * 
-  */
-  public useGateway(gateway: Gateways): void {
-    this.gateways.set('gateways', gateway);
+   *
+   * Sets the gateways to use
+   *
+   * @param gateway The gateway to use'
+   * @example see README.md for usage information
+   *
+   */
+  public useGateway(gateway: string): void {
+    if (!this.useOptions.gateways || !this.useOptions.gateways.length) {
+      this.useOptions.gateways = [];
+    }
+    this.useOptions.gateways.push(gateway);
   }
 
   /**
@@ -186,7 +190,7 @@ export class DcxServer {
    * Creates a new password for the DCX server
    *
    * @returns string
-   * 
+   *
    */
   public async createPassword(): Promise<string> {
     const mnemonic = generateMnemonic(128).split(' ');
@@ -199,15 +203,17 @@ export class DcxServer {
   }
 
   /**
-   * 
+   *
    * Checks the state of the password and recovery phrase
-   * 
+   *
    * @param firstLaunch A boolean indicating if this is the first launch of the agent
    * @returns { password: string, recoveryPhrase?: string }
-   * @throws DcxServerError 
-   * 
+   * @throws DcxServerError
+   *
    */
-  public async checkWeb5Config(firstLaunch: boolean): Promise<{ password: string, recoveryPhrase?: string }> {
+  public async checkWeb5Config(
+    firstLaunch: boolean,
+  ): Promise<{ password: string; recoveryPhrase?: string }> {
     const web5Password = Config.WEB5_PASSWORD;
     const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
 
@@ -217,8 +223,8 @@ export class DcxServer {
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       Logger.security(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New WEB5_PASSWORD saved to password.key file. ' +
-        'New WEB5_RECOVERY_PHRASE saved to recovery.key file.'
+          'New WEB5_PASSWORD saved to password.key file. ' +
+          'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       );
       const password = await this.createPassword();
       await FileSystem.overwrite('password.key', password);
@@ -229,41 +235,40 @@ export class DcxServer {
     if (firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on first launch! ' +
-        'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
-        'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.'
+          'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+          'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.',
       );
     }
 
     if (!firstLaunch && !web5Password && !web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
-        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-        'to create a new password and recovery phrase.'
+          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+          'to create a new password and recovery phrase.',
       );
     }
 
     if (!firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on non-first launch! ' +
-        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-        'to create a new recovery phrase with the given password.'
+          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+          'to create a new recovery phrase with the given password.',
       );
     }
 
     if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
       Logger.warn(
         'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
-        'Attempting to unlock the vault with WEB5_PASSWORD.'
+          'Attempting to unlock the vault with WEB5_PASSWORD.',
       );
       return { password: web5Password };
     }
 
     return {
       password: web5Password,
-      recoveryPhrase: web5RecoveryPhrase
+      recoveryPhrase: web5RecoveryPhrase,
     };
   }
-
 
   /**
    *
@@ -271,7 +276,7 @@ export class DcxServer {
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
    *
    * @returns void
-   * 
+   *
    */
   public async initialize(): Promise<void> {
     Logger.debug('Initializing Web5 ... ');
@@ -283,7 +288,7 @@ export class DcxServer {
     const agent = await DcxAgent.create({ agentVault });
 
     // Check if this is the first launch of the agent
-    const firstLaunch = await agent.firstLaunch()
+    const firstLaunch = await agent.firstLaunch();
 
     // TODO: consider checking if vault is locked
     // const isLocked = agent.vault.isLocked();
@@ -293,9 +298,12 @@ export class DcxServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const tbdDwnEndpoints = await getTechPreviewDwnEndpoints();
-    const dwnEndpoints = this.dwns.get('dwns') ?? [...Config.DEFAULT_DWN_ENDPOINTS, ...tbdDwnEndpoints];
+    const dwnEndpoints = this.useOptions.dwns!;
+    dwnEndpoints.push(...tbdDwnEndpoints);
     const startParams = { password };
-    const initializeParams = !recoveryPhrase ? { ...startParams, dwnEndpoints } : { ...startParams, recoveryPhrase, dwnEndpoints };
+    const initializeParams = !recoveryPhrase
+      ? { ...startParams, dwnEndpoints }
+      : { ...startParams, recoveryPhrase, dwnEndpoints };
 
     // Initialize the agent with the options
     if (firstLaunch) {
@@ -368,7 +376,7 @@ export class DcxServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = Object.values(this.manifests).find(
+            const manifest = Object.values(this.useOptions.manifests!).find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );

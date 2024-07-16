@@ -87,13 +87,7 @@ export interface TrustedIssuer extends AdditionalProperties {
 }
 
 // Handler
-export type Handler = (...args: any[]) => any | Promise<any>;
-export class HandlerType {
-  constructor(public handler: Handler) { }
-  call(...args: any[]): any | Promise<any> {
-    return this.handler(...args);
-  }
-}
+export type Handler = { id: string; callback: (...args: any[]) => any | Promise<any> };
 
 // Provider
 export interface DataProvider extends AdditionalProperties {
@@ -109,7 +103,7 @@ export class Provider implements DataProvider {
     public endpoint: string,
     public method?: string,
     public headers?: Record<string, string>,
-  ) { }
+  ) {}
 }
 
 // Manifest
@@ -123,30 +117,44 @@ export class Manifest implements CredentialManifest {
     public output_descriptors: ManifestOutputDescriptor[],
     public format: ManifestFormat,
     public presentation_definition: PresentationDefinition,
-  ) { }
+  ) {}
 }
 export interface GatewayType extends AdditionalProperties {
   id: string;
   uri: string;
 }
-export type Gateways = string[];
-export type Dwns = string[];
+// export type Gateways = ;
+// export type Dwns = ;
 
-export type UseIssuers = Map<string | number | symbol, Issuer>;
-export type UseHandlers = Map<string | number | symbol, Handler>;
-export type UseProviders = Map<string | number | symbol, Provider>;
-export type UseManifests = Map<string | number | symbol, Manifest>;
-export type UseGateways = Map<string | number | symbol, Gateways>;
-export type UseDwns = Map<string | number | symbol, Dwns>;
+export type UseIssuers = Issuer[];
+// Map<string | number | symbol, Issuer>;
+export type UseManifests = Manifest[];
+// Map<string | number | symbol, Manifest>;
+export type UseProviders = Provider[];
+// Map<string | number | symbol, Provider>;
+export type UseHandlers = Handler[];
+// Map<string | number | symbol, Handler>;
+export type UseGateways = string[];
+//  Map<string | number | symbol, Gateways>;
+export type UseDwns = string[];
+// Map<string | number | symbol, Dwns>;
 
-export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways | UseDwns;
+export type UseOption =
+  | UseIssuers
+  | UseHandlers
+  | UseProviders
+  | UseManifests
+  | UseGateways
+  | UseDwns;
 
 export type UseOptions = {
   [key: string]: any;
-  issuers?: UseIssuers;
-  handlers?: UseHandlers;
-  providers?: UseProviders;
   manifests?: UseManifests;
+  providers?: UseProviders;
+  
+  issuers?: UseIssuers;
   gateways?: UseGateways;
   dwns?: UseDwns;
+
+  handlers?: UseHandlers;
 };

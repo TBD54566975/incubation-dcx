@@ -248,7 +248,10 @@ export class DwnManager {
      */
     public static async setup(): Promise<void> {
         Logger.log('Setting up dwn ...');
-        const useManifests = Array.from(server.manifests.values());
+        const useManifests = server.useOptions.manifests;
+        if(!useManifests) {
+            throw new DcxDwnError('Manifests not provided');
+        }
         try {
             // Query DWN for credential-issuer protocols
             const { protocols } = await DwnManager.queryIssuerProtocols();
