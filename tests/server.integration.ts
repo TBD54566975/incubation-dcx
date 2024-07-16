@@ -1,12 +1,11 @@
 import DcxServer from '../src/dcx/index.js';
-import CustomManifest from '../CUSTOM-MANIFEST.json';
+import ExampleManifest from '../EXAMPLE-MANIFEST.json';
 const server = new DcxServer({});
-server._
-server.use('manifest', CustomManifest);
+server.use('manifest', ExampleManifest);
 
 server.use('provider',
   {
-    id: CustomManifest.output_descriptors[0].id,
+    id: ExampleManifest.output_descriptors[0].id,
     method: 'POST',
     endpoint: 'http://localhost:4000/api/v1/vc/data'
   }
