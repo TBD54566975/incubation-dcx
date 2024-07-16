@@ -1,6 +1,6 @@
 {
   "name": "@formfree/dcx",
-  "version": "0.1.2",
+  "version": "0.0.4",
   "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -18,7 +18,10 @@
     "lint:fix": "eslint . --fix",
     "dev": "npm run build && tsx tests/server.ts",
     "format": "npx prettier --write ./src/**/**/**/*",
-    "workflow": "npm ci && npm run build --if-present && npm test"
+    "workflow": "npm ci && npm run build --if-present && npm test",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
