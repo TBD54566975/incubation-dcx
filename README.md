@@ -1,12 +1,6 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`, which can be used to bootstrap running a DCX issuer server and provide the following functionality:
-
-- Web5/DWN: manages connection to the Web5 platform and facilitates all operations between issuer and applicant DWNs
-- DID management: manages import, export & creation of DHT-method DIDs
-- Protocol handlers: implements generic handler logic to interact with the protocol (Verifiable Presentation verification, VC data requests and VC issuance)
-
-The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
 [Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
 1. The input credentials required by the issuer
@@ -19,19 +13,25 @@ The protocol is open and permissionless leveraging the benefits of DWNs, Verifia
 
 Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
 
+The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`, which can be used to bootstrap running a DCX server and provide the following functionality:
+
+- Manages connection to the Web5 platform and facilitates all operations between issuer and applicant DWNs
+- Manages import, export & creation of DHT-method DIDs
+- Implements generic protocol handlers to facilitate Verifiable Presentation and Verifiable Credential issuance
+
 The protocol definition and schemas can be found below:
 
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
   - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
 
-[Protocol Schemas](./src/protocol/schemas/)
+[Schemas](./src/protocol/schemas/)
   - [`src/protocol/schemas/invoice.ts`](./src/protocol/schemas/invoice.ts) defines the schema for invoice records
   - [`src/protocol/schemas/manifest.ts`](./src/protocol/schemas/manifest.ts) defines schema for manifest records
   - [`src/protocol/schemas/application.ts`](./src/protocol/schemas/application.ts) defines schema for application records
   - [`src/protocol/schemas/response.ts`](./src/protocol/schemas/response.ts) defines schema for response records
 
-[Protocol Manifests](./src/protocol/manifests/)
+[Manifests](./src/protocol/manifests/)
   - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
 
