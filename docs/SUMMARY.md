@@ -1,6 +1,6 @@
 # Summary
 
-The Decentralized Credential Exchange (DCX) project creates a new DWeb Node procotol and implements it via and software package to facilitate the decentralized exchange of credentials between applicants and issuers. The DCX protocol is open and permissionless leveraging the benefits of DWeb Nodes, Verifiable Credentials and many other powerful Web5 primitives.
+The Decentralized Credential Exchange (DCX) project creates a new DWeb Node procotol to facilitate the decentralized exchange of credentials between applicants and issuers. The DCX protocol is open and permissionless leveraging the benefits of DWeb Nodes, Verifiable Credentials and many other powerful Web5 primitives.
 
 The DCX project will find its first application within the consumer lending industry providing a myriad of improvements for all those involved: borrowers, lenders and data aggregators. DCX achieves these improvements by leveraging the strengths of Web5 -- specifically, the power of VCs. There are 16.7M Americans who can provably service a loan but are excluded based on credit scores alone. Borrowers participating in DCX will hold VCs that indicate not just their credit score but also their Ability to Pay (ATP) score -- a metric used in place of status quo credit reporting systems. ATP unlocks financial sovereignty for more people and helps borrowers more effectively monitor their financial health.
 
