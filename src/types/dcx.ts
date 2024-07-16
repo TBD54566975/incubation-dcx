@@ -1,5 +1,5 @@
 import { VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { Config } from '../core/config.js';
+import { Config } from '../dcx/config.js';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -29,7 +29,6 @@ export type ManifestOutputDescriptor = {
   schema: string;
 };
 
-
 export type Issuer = {
   id: string;
   name: string;
@@ -56,7 +55,7 @@ export type InputDescriptor = {
 };
 
 export type ManifestFormat = {
-  jwt_vc: { alg: string[] }
+  jwt_vc: { alg: string[] };
 };
 export type PresentationDefinition = {
   id: string;
@@ -72,7 +71,7 @@ export interface CredentialManifest extends AdditionalProperties {
   output_descriptors: ManifestOutputDescriptor[];
   format: ManifestFormat;
   presentation_definition: PresentationDefinition;
-};
+}
 
 export type VerifiedCredential = {
   issuer: string;
@@ -88,27 +87,23 @@ export interface TrustedIssuer extends AdditionalProperties {
 }
 
 // Handler
-export type Handler = (...args: any[]) => any | Promise<any>;
-export class HandlerType {
-  constructor(public handler: Handler) { }
-  call(...args: any[]): any | Promise<any> {
-    return this.handler(...args);
-  }
-}
+export type Handler = { id: string; callback: (...args: any[]) => any | Promise<any> };
 
 // Provider
 export interface DataProvider extends AdditionalProperties {
   [key: string | number | symbol]: any;
-  name: string;
+  id: string;
   endpoint: string;
   method?: string;
   headers?: Record<string, string>;
-};
+}
 export class Provider implements DataProvider {
-  constructor(public name: string,
+  constructor(
+    public id: string,
     public endpoint: string,
     public method?: string,
-    public headers?: Record<string, string>) { }
+    public headers?: Record<string, string>,
+  ) {}
 }
 
 // Manifest
@@ -121,32 +116,44 @@ export class Manifest implements CredentialManifest {
     public issuer: Issuer,
     public output_descriptors: ManifestOutputDescriptor[],
     public format: ManifestFormat,
-    public presentation_definition: PresentationDefinition) { }
+    public presentation_definition: PresentationDefinition,
+  ) {}
 }
 export interface GatewayType extends AdditionalProperties {
   id: string;
   uri: string;
 }
-export class Gateway implements GatewayType {
-  constructor(
-    public id: string,
-    public uri: string
-  ) { }
-}
+// export type Gateways = ;
+// export type Dwns = ;
 
-export type UseIssuers = Map<string | number | symbol, Issuer>;
-export type UseHandlers = Map<string | number | symbol, Handler>;
-export type UseProviders = Map<string | number | symbol, Provider>;
-export type UseManifests = Map<string | number | symbol, Manifest>;
-export type UseGateways = Map<string | number | symbol, Gateway>;
+export type UseIssuers = Issuer[];
+// Map<string | number | symbol, Issuer>;
+export type UseManifests = Manifest[];
+// Map<string | number | symbol, Manifest>;
+export type UseProviders = Provider[];
+// Map<string | number | symbol, Provider>;
+export type UseHandlers = Handler[];
+export type UseGateways = string[];
+//  Map<string | number | symbol, Gateways>;
+export type UseDwns = string[];
+// Map<string | number | symbol, Dwns>;
 
-export type UseOption = UseIssuers | UseHandlers | UseProviders | UseManifests | UseGateways;
+export type UseOption =
+  | UseIssuers
+  | UseHandlers
+  | UseProviders
+  | UseManifests
+  | UseGateways
+  | UseDwns;
 
 export type UseOptions = {
   [key: string]: any;
-  issuers?: UseIssuers;
-  handlers?: UseHandlers;
-  providers?: UseProviders;
   manifests?: UseManifests;
+  providers?: UseProviders;
+
+  issuers?: UseIssuers;
   gateways?: UseGateways;
-}
+  dwns?: UseDwns;
+
+  handlers?: UseHandlers;
+};

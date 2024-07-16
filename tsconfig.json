@@ -4,10 +4,9 @@
             "DOM",
             "ES2022",
         ],
-        "target": "ES6",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "allowJs": true,
+        "target": "ES2017",
+        "module": "ESNext",
+        "moduleResolution": "node",
         "strict": true,
         "declaration": true,
         "declarationMap": true,
@@ -16,6 +15,12 @@
         "resolveJsonModule": true,
         "declarationDir": "dist/types",
         "outDir": "dist/esm",
+        "baseUrl": ".",
+        "paths": {
+            "#util/*": [
+                "node_modules/uint8arraylist/node_modules/uint8arrays/dist/src/*"
+            ]
+        }
     },
     "include": [
         "src"

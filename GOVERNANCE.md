@@ -2,9 +2,11 @@
 
 <!-- TOC -->
 
-* [Contributors](#contributors)
-* [Maintainers](#maintainers)
-* [Governance Committee](#governance-committee)
+- [TBD Open Source Project Governance](#tbd-open-source-project-governance)
+  - [Contributors](#contributors)
+  - [Maintainers](#maintainers)
+    - [Maintainer activities](#maintainer-activities)
+  - [Governance Committee](#governance-committee)
 
 <!-- /TOC -->
 
