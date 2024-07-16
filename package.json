@@ -8,7 +8,9 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
-    "test": "node -r tsx tests/server.integration.ts",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:e2e": "tsx tests/server.integration.ts -t",
+    "test:unit": "echo TODO: Add unit tests && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc",
     "build": "npm run clean && npm run build:esm",
