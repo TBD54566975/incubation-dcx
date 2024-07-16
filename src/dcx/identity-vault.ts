@@ -21,6 +21,7 @@ import {
   isPortableDid,
 } from '../utils/identity-vault.js';
 import { isEmptyString } from '../utils/string.js';
+import { Logger } from '../utils/logger.js';
 
 export type DcxIdentityVaultInitializeParams = {
   /**
@@ -56,6 +57,11 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
   constructor({ keyDerivationWorkFactor, store }: IdentityVaultParams = {}) {
     this._keyDerivationWorkFactor = keyDerivationWorkFactor ?? 210_000;
     this._store = store ?? new MemoryStore<string, string>();
+  }
+
+  changePassword(params: { oldPassword: string; newPassword: string; }): Promise<void> {
+    Logger.debug('DcxIdentityVault: Changing password...', params);
+    throw new Error('Method not implemented.');
   }
 
   public async getStatus(): Promise<IdentityVaultStatus> {
@@ -210,62 +216,6 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
   async backup(): Promise<IdentityVaultBackup> {
     throw new Error('Method not implemented.');
-  }
-
-  async changePassword({
-    oldPassword,
-    newPassword,
-  }: {
-    oldPassword: string;
-    newPassword: string;
-  }): Promise<void> {
-    // Verify the identity vault has already been initialized.
-    if ((await this.isInitialized()) === false) {
-      throw new Error(
-        'DcxIdentityVault: Unable to proceed with the change password operation because the ' +
-          'identity vault has not been initialized. Please ensure the vault is properly ' +
-          'initialized with a secure password before trying again.',
-      );
-    }
-
-    // Lock the vault.
-    await this.lock();
-
-    // Retrieve the content encryption key (CEK) record as a compact JWE from the data store.
-    const cekJwe = await this.getStoredContentEncryptionKey();
-
-    // Decrypt the compact JWE using the given `oldPassword` to verify it is correct.
-    let contentEncryptionKey: Jwk;
-    let newCekJwe: string;
-    try {
-      const { plaintext: contentEncryptionKeyBytes, protectedHeader } = await CompactJwe.decrypt({
-        jwe        : cekJwe,
-        key        : Convert.string(oldPassword).toUint8Array(),
-        crypto     : this.crypto,
-        keyManager : new LocalKeyManager(),
-      });
-
-      contentEncryptionKey = Convert.uint8Array(contentEncryptionKeyBytes).toObject() as Jwk;
-
-      // Re-encrypt the vault content encryption key (CEK) using the new password.
-      newCekJwe = await CompactJwe.encrypt({
-        key        : Convert.string(newPassword).toUint8Array(),
-        protectedHeader, // Re-use the protected header from the original JWE.
-        plaintext  : Convert.object(contentEncryptionKey).toUint8Array(),
-        crypto     : this.crypto,
-        keyManager : new LocalKeyManager(),
-      });
-    } catch (error: any) {
-      throw new Error(
-        `DcxIdentityVault: Unable to change the vault password due to an incorrectly entered old password.`,
-      );
-    }
-
-    // Update the vault with the new CEK JWE.
-    await this._store.set('contentEncryptionKey', newCekJwe);
-
-    // Update the vault CEK in memory, effectively unlocking the vault.
-    this._contentEncryptionKey = contentEncryptionKey;
   }
 
   async generateMnemonic(): Promise<string> {

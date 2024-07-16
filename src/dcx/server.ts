@@ -22,13 +22,14 @@ export class DcxServer {
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
   _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
+  _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
-    manifests : [],
-    providers : [],
-    gateways  : Config.DEFAULT_GATEWAY_URIS,
-    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
-    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
+    manifests: [],
+    providers: [],
+    gateways: Config.DEFAULT_GATEWAY_URIS,
+    dwns: Config.DEFAULT_DWN_ENDPOINTS,
+    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -223,8 +224,8 @@ export class DcxServer {
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       Logger.security(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-          'New WEB5_PASSWORD saved to password.key file. ' +
-          'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
+        'New WEB5_PASSWORD saved to password.key file. ' +
+        'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       );
       const password = await this.createPassword();
       await FileSystem.overwrite('password.key', password);
@@ -235,38 +236,38 @@ export class DcxServer {
     if (firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on first launch! ' +
-          'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
-          'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.',
+        'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
+        'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.',
       );
     }
 
     if (!firstLaunch && !web5Password && !web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
-          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-          'to create a new password and recovery phrase.',
+        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+        'to create a new password and recovery phrase.',
       );
     }
 
     if (!firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
         'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on non-first launch! ' +
-          'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-          'to create a new recovery phrase with the given password.',
+        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+        'to create a new recovery phrase with the given password.',
       );
     }
 
     if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
       Logger.warn(
         'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
-          'Attempting to unlock the vault with WEB5_PASSWORD.',
+        'Attempting to unlock the vault with WEB5_PASSWORD.',
       );
       return { password: web5Password };
     }
 
     return {
-      password       : web5Password,
-      recoveryPhrase : web5RecoveryPhrase,
+      password: web5Password,
+      recoveryPhrase: web5RecoveryPhrase,
     };
   }
 
@@ -350,7 +351,14 @@ export class DcxServer {
       });
 
       Logger.debug(`Found ${records.length} records`);
-      Logger.debug(`Next cursor ${stringifier(nextCursor)}`);
+      if (nextCursor) {
+        Logger.debug(`Next cursor update for next query`, stringifier(nextCursor));
+        cursor = nextCursor;
+        const overwritten = await FileSystem.overwrite(DWN_CURSOR, cursor);
+        Logger.debug(`${DWN_CURSOR} overwritten ${overwritten}`, cursor);
+      } else {
+        Logger.debug(`Next cursor not found!`);
+      }
 
       if (cursor && !records.length) {
         cursor = undefined;
@@ -372,6 +380,15 @@ export class DcxServer {
       );
 
       Logger.debug(`Read ${recordReads.length} records`);
+
+      if (!recordReads.length) {
+        Logger.debug('No records found!', recordReads.length);
+        if (this._isTest) {
+          Logger.debug('Test Complete! Stopping DCX server ...');
+          this.stop();
+        }
+        await Time.sleep();
+      }
 
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
@@ -398,18 +415,6 @@ export class DcxServer {
         } else {
           await Time.sleep();
         }
-      }
-
-      if (nextCursor) {
-        Logger.debug('Updated cursor for next query', nextCursor);
-        cursor = nextCursor;
-        const overwritten = await FileSystem.overwrite(DWN_CURSOR, cursor);
-        Logger.debug(`${DWN_CURSOR} overwritten ${overwritten}`, cursor);
-      }
-
-      if (!recordReads.length) {
-        Logger.debug('No records found!', recordReads.length);
-        await Time.sleep();
       }
     }
   }
