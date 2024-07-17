@@ -8,11 +8,12 @@ import {
   IdentityVaultParams,
   IdentityVaultStatus,
   LocalKeyManager,
+  Web5Agent,
 } from '@web5/agent';
 import { Convert, KeyValueStore, MemoryStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
-import { BearerDid, DidDht } from '@web5/dids';
-import { HDKey } from 'ed25519-keygen/hdkey';
+import { BearerDid, DidDht, PortableDid } from '@web5/dids';
+import { HARDENED_OFFSET, HDKey } from 'ed25519-keygen/hdkey';
 import { CompactJwe } from '../../node_modules/@web5/agent/src/prototyping/crypto/jose/jwe-compact.js';
 import { DeterministicKeyGenerator } from '../../node_modules/@web5/agent/src/utils-internal.js';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../utils/identity-vault.js';
 import { isEmptyString } from '../utils/string.js';
 import { Logger } from '../utils/logger.js';
+import { DcxAgent } from './agent.js';
 
 export type DcxIdentityVaultInitializeParams = {
   /**
@@ -68,9 +70,9 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     const storedStatus = await this._store.get('vaultStatus');
     if (!storedStatus) {
       return {
-        initialized : false,
-        lastBackup  : null,
-        lastRestore : null,
+        initialized: false,
+        lastBackup: null,
+        lastRestore: null,
       };
     }
 
@@ -87,8 +89,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     if (!didJwe) {
       throw new Error(
         'DcxIdentityVault: Unable to retrieve the DID record from the vault. Please check the ' +
-          'vault status and if the problem persists consider re-initializing the vault and ' +
-          'restoring the contents from a previous backup.',
+        'vault status and if the problem persists consider re-initializing the vault and ' +
+        'restoring the contents from a previous backup.',
       );
     }
 
@@ -102,10 +104,10 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
     const didJwe = await this.getStoredDid();
     const { plaintext: portableDidBytes } = await CompactJwe.decrypt({
-      jwe        : didJwe,
-      key        : this._contentEncryptionKey!,
-      crypto     : this.crypto,
-      keyManager : new LocalKeyManager(),
+      jwe: didJwe,
+      key: this._contentEncryptionKey!,
+      crypto: this.crypto,
+      keyManager: new LocalKeyManager(),
     });
 
     const portableDid = Convert.uint8Array(portableDidBytes).toObject();
@@ -157,8 +159,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     } catch {
       throw new Error(
         'DcxIdentityVault: The restore operation cannot proceed because the existing vault ' +
-          'contents are missing or inaccessible. If the problem persists consider re-initializing ' +
-          'the vault and retrying the restore.',
+        'contents are missing or inaccessible. If the problem persists consider re-initializing ' +
+        'the vault and retrying the restore.',
       );
     }
 
@@ -182,7 +184,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
       throw new Error(
         'DcxIdentityVault: Restore operation failed due to invalid backup data or an incorrect ' +
-          'password. Please verify the password is correct for the provided backup and try again.',
+        'password. Please verify the password is correct for the provided backup and try again.',
       );
     }
 
@@ -200,10 +202,10 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     // Decrypt the compact JWE.
     try {
       const { plaintext: contentEncryptionKeyBytes } = await CompactJwe.decrypt({
-        jwe        : cekJwe,
-        key        : Convert.string(password).toUint8Array(),
-        crypto     : this.crypto,
-        keyManager : new LocalKeyManager(),
+        jwe: cekJwe,
+        key: Convert.string(password).toUint8Array(),
+        crypto: this.crypto,
+        keyManager: new LocalKeyManager(),
       });
       const contentEncryptionKey = Convert.uint8Array(contentEncryptionKeyBytes).toObject() as Jwk;
 
@@ -220,6 +222,68 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
   async generateMnemonic(): Promise<string> {
     return generateMnemonic(wordlist, 128);
+  }
+
+  async generateChildDid({ dwnEndpoints, recoveryPhrase, agent }: { dwnEndpoints: string[], recoveryPhrase: string, agent: DcxAgent }): Promise<PortableDid> {
+
+    if (!await this.isInitialized()) {
+      throw new Error(`DcxIdentityVault: Vault has not been initialized.`);
+    }
+
+    if (this.isLocked()) {
+      throw new Error(`DcxIdentityVault: Vault has not been unlocked.`);
+    }
+
+    const rootSeed = await mnemonicToSeed(recoveryPhrase);
+    const rootHdKey = HDKey.fromMasterSeed(rootSeed);
+
+    const identityHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/0'`);
+    const signingHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/1'`);
+
+    const identityHdChildKey = identityHdKey.deriveChild(HARDENED_OFFSET + 1);
+    const identityHdChildPrivateKey = await this.crypto.bytesToPrivateKey({
+      algorithm: 'Ed25519',
+      privateKeyBytes: identityHdChildKey.privateKey,
+    });
+
+    const signingHdChildKey = signingHdKey.deriveChild(HARDENED_OFFSET + 1);
+    const signingHdChildPrivateKey = await this.crypto.bytesToPrivateKey({
+      algorithm: 'Ed25519',
+      privateKeyBytes: signingHdChildKey.privateKey,
+    });
+
+    const deterministicKeyGenerator = new DeterministicKeyGenerator();
+    await deterministicKeyGenerator.addPredefinedKeys({
+      privateKeys: [identityHdChildPrivateKey, signingHdChildPrivateKey],
+    });
+
+    const childDid = await DidDht.create({
+      keyManager: deterministicKeyGenerator,
+      options: {
+        verificationMethods: [
+          {
+            algorithm: 'Ed25519',
+            id: 'sig',
+            purposes: ['assertionMethod', 'authentication'],
+          },
+        ],
+        services: [
+          {
+            id: 'dwn',
+            type: 'DecentralizedWebNode',
+            serviceEndpoint: dwnEndpoints,
+            enc: '#enc',
+            sig: '#sig',
+          },
+        ],
+      },
+    });
+
+    const portableChildDid = await childDid.export();
+    await agent.did.import({ portableDid: portableChildDid });
+    await agent.sync.registerIdentity({ did: portableChildDid.uri });
+
+    return childDid;
   }
 
   public async initialize({
@@ -250,7 +314,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     if (!validateMnemonic(recoveryPhrase, wordlist)) {
       throw new Error(
         'DcxIdentityVault: The provided recovery phrase is invalid. Please ensure that the ' +
-          'recovery phrase is a correctly formatted series of 12 words.',
+        'recovery phrase is a correctly formatted series of 12 words.',
       );
     }
     const rootSeed = await mnemonicToSeed(recoveryPhrase);
@@ -259,47 +323,47 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     const vaultHdKey = rootHdKey.derive(`m/44'/0'/0'/0'/0'`);
 
     const contentEncryptionKey = await this.crypto.deriveKey({
-      algorithm           : 'HKDF-512', // key derivation function
-      baseKeyBytes        : vaultHdKey.privateKey, // input keying material
-      salt                : '', // empty salt because private key is sufficiently random
-      info                : 'vault_cek', // non-secret application specific information
-      derivedKeyAlgorithm : 'A256GCM', // derived key algorithm
+      algorithm: 'HKDF-512', // key derivation function
+      baseKeyBytes: vaultHdKey.privateKey, // input keying material
+      salt: '', // empty salt because private key is sufficiently random
+      info: 'vault_cek', // non-secret application specific information
+      derivedKeyAlgorithm: 'A256GCM', // derived key algorithm
     });
 
     const saltInput = await this.crypto.deriveKeyBytes({
-      algorithm    : 'HKDF-512', // key derivation function
-      baseKeyBytes : vaultHdKey.publicKey, // input keying material
-      salt         : '', // empty salt because public key is sufficiently random
-      info         : 'vault_unlock_salt', // non-secret application specific information
-      length       : 256, // derived key length, in bits
+      algorithm: 'HKDF-512', // key derivation function
+      baseKeyBytes: vaultHdKey.publicKey, // input keying material
+      salt: '', // empty salt because public key is sufficiently random
+      info: 'vault_unlock_salt', // non-secret application specific information
+      length: 256, // derived key length, in bits
     });
 
     const cekJwe = await CompactJwe.encrypt({
-      key             : Convert.string(password).toUint8Array(),
-      protectedHeader : {
-        alg : 'PBES2-HS512+A256KW',
-        enc : 'A256GCM',
-        cty : 'text/plain',
-        p2c : this._keyDerivationWorkFactor,
-        p2s : Convert.uint8Array(saltInput).toBase64Url(),
+      key: Convert.string(password).toUint8Array(),
+      protectedHeader: {
+        alg: 'PBES2-HS512+A256KW',
+        enc: 'A256GCM',
+        cty: 'text/plain',
+        p2c: this._keyDerivationWorkFactor,
+        p2s: Convert.uint8Array(saltInput).toBase64Url(),
       },
-      plaintext  : Convert.object(contentEncryptionKey).toUint8Array(),
-      crypto     : this.crypto,
-      keyManager : new LocalKeyManager(),
+      plaintext: Convert.object(contentEncryptionKey).toUint8Array(),
+      crypto: this.crypto,
+      keyManager: new LocalKeyManager(),
     });
 
     await this._store.set('contentEncryptionKey', cekJwe);
 
     const identityHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/0'`);
     const identityPrivateKey = await this.crypto.bytesToPrivateKey({
-      algorithm       : 'Ed25519',
-      privateKeyBytes : identityHdKey.privateKey,
+      algorithm: 'Ed25519',
+      privateKeyBytes: identityHdKey.privateKey,
     });
 
     const signingHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/1'`);
     const signingPrivateKey = await this.crypto.bytesToPrivateKey({
-      algorithm       : 'Ed25519',
-      privateKeyBytes : signingHdKey.privateKey,
+      algorithm: 'Ed25519',
+      privateKeyBytes: signingHdKey.privateKey,
     });
 
     const deterministicKeyGenerator = new DeterministicKeyGenerator();
@@ -308,22 +372,22 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     });
 
     const did = await DidDht.create({
-      keyManager : deterministicKeyGenerator,
-      options    : {
+      keyManager: deterministicKeyGenerator,
+      options: {
         verificationMethods: [
           {
-            algorithm : 'Ed25519',
-            id        : 'sig',
-            purposes  : ['assertionMethod', 'authentication'],
+            algorithm: 'Ed25519',
+            id: 'sig',
+            purposes: ['assertionMethod', 'authentication'],
           },
         ],
         services: [
           {
-            id              : 'dwn',
-            type            : 'DecentralizedWebNode',
-            serviceEndpoint : dwnEndpoints,
-            enc             : '#enc',
-            sig             : '#sig',
+            id: 'dwn',
+            type: 'DecentralizedWebNode',
+            serviceEndpoint: dwnEndpoints,
+            enc: '#enc',
+            sig: '#sig',
           },
         ],
       },
@@ -332,15 +396,15 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     const portableDid = await did.export();
 
     const didJwe = await CompactJwe.encrypt({
-      key             : contentEncryptionKey,
-      plaintext       : Convert.object(portableDid).toUint8Array(),
-      protectedHeader : {
-        alg : 'dir',
-        enc : 'A256GCM',
-        cty : 'json',
+      key: contentEncryptionKey,
+      plaintext: Convert.object(portableDid).toUint8Array(),
+      protectedHeader: {
+        alg: 'dir',
+        enc: 'A256GCM',
+        cty: 'json',
       },
-      crypto     : this.crypto,
-      keyManager : new LocalKeyManager(),
+      crypto: this.crypto,
+      keyManager: new LocalKeyManager(),
     });
 
     // Store the compact JWE in the data store.
@@ -379,8 +443,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     if (!cekJwe) {
       throw new Error(
         'DcxIdentityVault: Unable to retrieve the Content Encryption Key record from the vault. ' +
-          'Please check the vault status and if the problem persists consider re-initializing the ' +
-          'vault and restoring the contents from a previous backup.',
+        'Please check the vault status and if the problem persists consider re-initializing the ' +
+        'vault and restoring the contents from a previous backup.',
       );
     }
 

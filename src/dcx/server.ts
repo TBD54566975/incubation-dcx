@@ -21,7 +21,6 @@ export class DcxServer {
 
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {

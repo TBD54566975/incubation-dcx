@@ -26,7 +26,11 @@ export const protocol = {
     },
   },
   structure: {
-    // issuers publish manifests to describe the data they can provide
+    /**
+     * Issuers publish manifests
+     * to describe the data they
+     * can provide
+     */
     manifest: {
       $actions: [
         {
@@ -48,7 +52,8 @@ export const protocol = {
           can : ['read'],
         },
       ],
-      // a credential response might be sent in response to an application
+      // a credential response might be
+      // sent in response to an application
       response: {
         $actions: [
           {
