@@ -7,7 +7,7 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-     "clean": "rimraf dist",
+    "clean": "rimraf dist",
     "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
     "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
@@ -68,6 +68,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@dvcx/common": "^0.0.2",
     "@web5/agent": "^0.3.8",
     "@web5/api": "^0.9.4",
     "@web5/common": "^1.0.1",
