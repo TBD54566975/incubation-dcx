@@ -19,7 +19,7 @@ import {
   stringifier,
   Time,
   FileSystem
-} from '../../common/index.js';
+} from '@dcx/common';
 import { IssuerProtocolHandlers } from './handlers.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';

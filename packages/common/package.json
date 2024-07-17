@@ -8,15 +8,17 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "pnpm clean && pnpm build:esm",
-    "build:esm": "rimraf dist/esm dist/types && pnpm tsc -p tsconfig.json",
+    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
+    "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "workflow": "pnpm ci && pnpm run build --if-present && pnpm test",
     "publish:patch": "pnpm version patch && pnpm publish",
     "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:major": "pnpm version major && pnpm publish"
+    "publish:major": "pnpm version major && pnpm publish",
+    "test:e2e": "tsx tests/server.integration.ts -t",
+    "test:unit": "echo TODO: Add unit tests && exit 0"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
@@ -42,7 +44,8 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "keywords": [
@@ -65,18 +68,21 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@noble/ciphers": "0.4.1",
     "@scure/bip39": "^1.3.0",
-    "@tbd54566975/dwn-sdk-js": "^0.4.3",
-    "@web5/agent": "^0.3.8",
-    "@web5/api": "^0.9.4",
-    "@web5/common": "^1.0.1",
-    "@web5/credentials": "^1.0.2",
-    "@web5/crypto": "^1.0.1",
-    "@web5/dids": "^1.1.0",
-    "@web5/user-agent": "^0.3.8",
+    "@tbd54566975/dwn-sdk-js": "0.4.0",
+    "@web5/agent": "0.4.0",
+    "@web5/api": "0.9.4",
+    "@web5/common": "1.0.0",
+    "@web5/credentials": "1.0.4",
+    "@web5/crypto": "1.0.0",
+    "@web5/dids": "1.1.0",
+    "@web5/user-agent": "0.4.0",
     "bip39": "^3.1.0",
     "ed25519-keygen": "^0.6.2",
-    "ms": "^2.1.3"
+    "isomorphic-ws": "^5.0.0",
+    "ms": "^2.1.3",
+    "readable-web-to-node-stream": "^3.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.7.0",
@@ -84,6 +90,7 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/eslint": "^8.56.10",
     "@types/mocha": "^10.0.6",
+    "@types/ms": "^0.7.34",
     "@types/node": "^20.14.7",
     "@types/readable-stream": "^4.0.14",
     "@typescript-eslint/eslint-plugin": "^7.16.1",

@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
+    "build": "pnpm --recursive --stream build",
     "test": "npm run test:unit && npm run test:e2e",
     "test:node": "pnpm --recursive test:node",
     "test:e2e": "echo TODO: Add unit tests && exit 0",
