@@ -134,7 +134,7 @@ export type UseProviders = Provider[];
 // Map<string | number | symbol, Provider>;
 export type UseHandlers = Handler[];
 export type UseGateways = string[];
-//  Map<string | number | symbol, Gateways>;
+// Map<string | number | symbol, Gateways>;
 export type UseDwns = string[];
 // Map<string | number | symbol, Dwns>;
 
