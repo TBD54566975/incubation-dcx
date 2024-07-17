@@ -1,6 +1,6 @@
 {
   "name": "@dcx/common",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Common library for @dcx/issuer and @dcx/applicant",
   "type": "module",
   "main": "./dist/cjs/index.js",

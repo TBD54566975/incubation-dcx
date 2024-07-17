@@ -12,7 +12,9 @@ jobs:
         with:
           node-version: '20.x'
       - run: npx pnpm install --frozen-lockfile
-      - run: npx pnpm build
+      - run: npx pnpm build:applicant
+      - run: npx pnpm build:common
+      - run: npx pnpm build:issuer
       - run: npx pnpm test
 
   # publish:
