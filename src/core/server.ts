@@ -11,9 +11,8 @@ import { stringifier } from '../utils/json.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DcxAgent } from './agent.js';
-import { DwnManager } from './dwn-manager.js';
+import { Web5Manager } from './web5-manager.js';
 import { DcxIdentityVault } from './identity-vault.js';
-import { DcxManager } from './manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
 export default class DcxServer {
@@ -36,7 +35,7 @@ export default class DcxServer {
   constructor(options: UseOptions = this.useOptions ?? {}) {
     /**
      *
-     * Setup the DcxManager and the DcxServer with the provided options
+     * Setup the DcxServer with the provided options
      *
      * @param options The options to use for the DcxServer
      * @param options.issuers The issuers to use; array
@@ -310,10 +309,13 @@ export default class DcxServer {
     await agent.start(startParams);
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
-    // Set the DcxManager properties
-    DcxManager.web5 = web5;
-    DcxManager.dcxAgent = agent;
-    DcxManager.dcxAgentVault = agentVault;
+    // await agent.sync.
+    // Set the Web5Manager properties
+    Web5Manager.web5 = web5;
+    Web5Manager.dcxAgent = agent;
+    Web5Manager.dcxAgentVault = agentVault;
+
+    Web5Manager.sync();
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -335,7 +337,7 @@ export default class DcxServer {
     let lastRecordId = await FileSystem.readToString(DWN_LAST_RECORD_ID);
 
     while (this._isPolling) {
-      const { records = [], cursor: nextCursor } = await DcxManager.web5.dwn.records.query({
+      const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
         message: {
           filter: {
             protocol: credentialIssuerProtocol.protocol,
@@ -362,7 +364,7 @@ export default class DcxServer {
 
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
-          const { record }: { record: Record } = await DcxManager.web5.dwn.records.read({
+          const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
             message: {
               filter: {
                 recordId,
@@ -434,7 +436,7 @@ export default class DcxServer {
       if (!this._isInitialized) {
         await this.initialize();
         Logger.debug('Web5 initialized', this._isInitialized);
-        await DwnManager.setup();
+        await Web5Manager.setup();
       }
 
       this._isPolling = true;
@@ -446,4 +448,4 @@ export default class DcxServer {
   }
 }
 
-export const server = new DcxServer({});
+export const server = new DcxServer();

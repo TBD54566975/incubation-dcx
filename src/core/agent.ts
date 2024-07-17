@@ -4,7 +4,6 @@ import {
   AgentDwnApi,
   AgentIdentityApi,
   AgentKeyManager,
-  AgentSyncApi,
   DidInterface,
   DidRequest,
   DidResponse,
@@ -28,6 +27,7 @@ import { LevelStore } from '@web5/common';
 import { BearerDid, DidDht, DidJwk, DidResolverCacheLevel } from '@web5/dids';
 import { AgentInitializeParams } from '@web5/user-agent';
 import { DcxIdentityVault } from './identity-vault.js';
+import { DcxAgentSyncApi } from './sync.js';
 
 export type DcxAgentInitializeParams = {
   /**
@@ -69,7 +69,7 @@ export type DcxAgentParams<TKeyManager extends AgentKeyManager = LocalKeyManager
   /** Remote procedure call (RPC) client used to communicate with other Web5 services. */
   rpcClient: Web5Rpc;
   /** Facilitates data synchronization of DWN records between nodes. */
-  syncApi: AgentSyncApi;
+  syncApi: DcxAgentSyncApi;
 };
 
 export class DcxAgent<TKeyManager extends AgentKeyManager = LocalKeyManager>
@@ -81,7 +81,7 @@ implements Web5PlatformAgent<TKeyManager>
   public identity: AgentIdentityApi<TKeyManager>;
   public keyManager: TKeyManager;
   public rpc: Web5Rpc;
-  public sync: AgentSyncApi;
+  public sync: DcxAgentSyncApi;
   public vault: DcxIdentityVault;
 
   private _agentDid?: BearerDid;
@@ -157,7 +157,7 @@ implements Web5PlatformAgent<TKeyManager>
 
     rpcClient ??= new Web5RpcClient();
 
-    syncApi ??= new AgentSyncApi({ syncEngine: new SyncEngineLevel({ dataPath }) });
+    syncApi ??= new DcxAgentSyncApi({ syncEngine: new SyncEngineLevel({ dataPath }) });
 
     // Instantiate the Agent using the provided or default components.
     return new DcxAgent({

@@ -13,7 +13,7 @@ import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
 import { Objects, stringifier } from '../utils/index.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
-import DcxServer, { DcxManager, server } from './index.js';
+import DcxServer, { server, Web5Manager } from './index.js';
 
 export class ProtocolHandlers {
   constructor() {
@@ -121,12 +121,12 @@ export class ProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject : subjectDid,
-      issuer  : DcxManager.dcxAgent.agentDid.uri,
+      issuer  : Web5Manager.dcxAgent.agentDid.uri,
       type    : manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: DcxManager.dcxAgent.agentDid });
+    const signed = await vc.sign({ did: Web5Manager.dcxAgent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
@@ -212,7 +212,7 @@ export class ProtocolHandlers {
 
       const vc = await ProtocolHandlers.issueCredential(data, recordAuthor, manifest);
 
-      const { record, status: create } = await DcxManager.web5.dwn.records.create({
+      const { record, status: create } = await Web5Manager.web5.dwn.records.create({
         data    : vc,
         store   : false,
         message : {
