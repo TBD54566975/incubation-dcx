@@ -77,10 +77,6 @@ export class DcxServer {
       );
     }
 
-    if (!this.useOptions[path] || !this.useOptions[path].length) {
-      this.useOptions[path] = [];
-    }
-
     if (objectPaths.includes(path)) {
       if (!(Objects.isEmptyObject(obj) && Objects.isEmptyObjectDeep(obj))) {
         this.useOptions[path].push(obj);
