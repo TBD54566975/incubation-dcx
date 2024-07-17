@@ -277,7 +277,6 @@ export class DcxServer {
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
-
     // Create a new DcxAgent instance
     const agent = await DcxAgent.create({ agentVault });
 
