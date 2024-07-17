@@ -5,14 +5,13 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { credentialIssuerProtocol } from '../protocol/index.js';
-import { responseSchema } from '../schemas/index.js';
-import { CredentialManifest, Handler, Issuer } from '../types/dcx.js';
-import { DwnUtils } from '../utils/dwn.js';
-import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
-import { Objects, stringifier } from '../utils/index.js';
-import { Logger } from '../utils/logger.js';
-import { Config } from './config.js';
+import { credentialIssuerProtocol } from './protocol/index.js';
+import { responseSchema } from '../common/schemas/index.js';
+import { CredentialManifest, Handler, Issuer } from '../common/types/dcx.js';
+import { DwnUtils } from '../common/utils/dwn.js';
+import { DcxProtocolHandlerError, DwnError } from '../common/utils/error.js';
+import { Objects, stringifier, Logger } from '../common/utils/index.js';
+import { Config } from '../common/core/config.js';
 import DcxServer, { DcxManager, server } from './index.js';
 
 export class IssuerProtocolHandlers {

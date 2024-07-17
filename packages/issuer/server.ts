@@ -2,14 +2,15 @@ import { getTechPreviewDwnEndpoints, Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { argv, exit } from 'process';
 
-import { Config, Objects, ProtocolHandlers } from '../index.js';
-import { credentialIssuerProtocol } from '../protocol/index.js';
-import { CredentialManifest, Handler, Issuer, Provider, UseOptions } from '../types/dcx.js';
-import { DcxServerError } from '../utils/error.js';
-import { FileSystem } from '../utils/file-system.js';
-import { stringifier } from '../utils/json.js';
-import { Logger } from '../utils/logger.js';
-import { Time } from '../utils/time.js';
+import { Config, Objects } from '../common/index.js';
+import { IssuerProtocolHandlers } from './handlers.js';
+import { credentialIssuerProtocol } from '../common/protocol/index.js';
+import { CredentialManifest, Handler, Issuer, Provider, UseOptions } from '../common/types/dcx.js';
+import { DcxServerError } from '../common/utils/error.js';
+import { FileSystem } from '../common/utils/file-system.js';
+import { stringifier } from '../common/utils/json.js';
+import { Logger } from '../common/utils/logger.js';
+import { Time } from '../common/utils/time.js';
 import { DcxAgent } from './agent.js';
 import { DwnManager } from './dwn-manager.js';
 import { DcxIdentityVault } from './identity-vault.js';
@@ -25,12 +26,12 @@ export class DcxServer {
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
-    handlers: [],
-    manifests: [],
-    providers: [],
-    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways: Config.DEFAULT_GATEWAY_URIS,
-    dwns: Config.DEFAULT_DWN_ENDPOINTS,
+    handlers  : [],
+    manifests : [],
+    providers : [],
+    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
+    gateways  : Config.DEFAULT_GATEWAY_URIS,
+    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -260,8 +261,8 @@ export class DcxServer {
     }
 
     return {
-      password: web5Password,
-      recoveryPhrase: web5RecoveryPhrase,
+      password       : web5Password,
+      recoveryPhrase : web5RecoveryPhrase,
     };
   }
 
