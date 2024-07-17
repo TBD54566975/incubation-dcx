@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
-
   "workspaces": [
     "packages/applicant",
     "packages/issuer",
@@ -15,7 +14,6 @@
     "test:node": "pnpm --recursive test:node",
     "test:e2e": "echo TODO: Add unit tests && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0",
-    "build": "pnpm --recursive --stream build",
     "workflow": "pnpm install --frozen-lockfile && pnpm run build --if-present && npm test",
     "publish:patch": "npm version patch && npm publish",
     "publish:minor": "npm version minor && npm publish",
@@ -37,17 +35,17 @@
     }
   ],
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.7",
     "@eslint/js": "^9.7.0",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@npmcli/package-json": "5.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "audit-ci": "^7.1.0",
     "chai": "^5.1.1",
     "eslint": "^8.57.0",
     "eslint-plugin-mocha": "^10.4.3",
-    "rimraf": "^5.0.7",
-    "@changesets/changelog-github": "^0.5.0",
-    "@npmcli/package-json": "5.0.0",
-    "audit-ci": "^7.0.1",
-    "npkill": "0.11.3"
+    "npkill": "0.11.3",
+    "rimraf": "^5.0.9"
   },
   "pnpm": {
     "overrides": {

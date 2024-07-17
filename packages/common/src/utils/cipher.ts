@@ -1,6 +1,10 @@
 import crypto from 'crypto';
 import { Readable } from '@web5/common';
-import { CipherAlgorightm } from '../src/types/cipher.js';
+
+export enum CipherAlgorightm {
+  AES_256_CBC = 'aes-256-cbc',
+  AES_256_CTR = 'aes-256-ctr',
+}
 
 export class StreamCipher {
   algorithm: CipherAlgorightm;

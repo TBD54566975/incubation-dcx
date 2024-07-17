@@ -1,7 +1,5 @@
 import dotenv from 'dotenv';
-import { Issuer } from '../types/dcx.js';
-import { IssuerConfig } from '../../issuer/index.js';
-
+import { Issuer } from './index.js';
 dotenv.config();
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
@@ -14,7 +12,7 @@ export class Config {
       id   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo',
     },
   ];
-  public static DEFAULT_TRUSTED_ISSUER_DIDS = IssuerConfig.DEFAULT_TRUSTED_ISSUERS.map(
+  public static DEFAULT_TRUSTED_ISSUER_DIDS = Config.DEFAULT_TRUSTED_ISSUERS.map(
     (issuer: Issuer) => issuer.id,
   );
 
