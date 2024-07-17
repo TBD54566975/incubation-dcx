@@ -11,7 +11,7 @@ DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifi
 > 
 > A Credential Manifest is a document, hosted by an Issuer and consumed by User Agents, codifying the credentials that it issues in terms of pre-requisites and inputs. These can be static or dynamic, but their form and usage are detailed in this specification.
 
-Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
+Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the [Architecture Diagram](#architecture-diagram) and [Sequence Diagram](#sequence-diagram) sections below.
 
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
@@ -46,13 +46,13 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 
 ![dcx-architecture](./docs/img/dcx-architecture.png)
 
-### Sequence Diagrams
+### Sequence Diagram
 
 #### Full Protocol
 
 <details>
 
-1.  DCX Issuer configures Issuer DWN with dcx protocol: credential-issuer and credential-applicant
+1.  DCX Issuer configures Issuer DWN with dcx protocol
 2.  DCX Issuer creates credential manifest record in Issuer DWN
 3.  DCX Issuer creates subscription to Issuer DWN
 4.  DCX Applicant creates subscription to Applicant DWN 
@@ -141,14 +141,17 @@ await server.start();
 
 You can also import the `DcxServer` class and pass options to customize the server
 ```ts
-import DcxServer from "@formfree/dcx";
+import DcxServer, ExampleManifest from "@formfree/dcx";
+const server = new DcxServer();
 
 const server = new DcxServer({
-    issuers: new Map([['issuer1', { name: 'issuer1', id: 'did:dht:issuer123xyz' }]]),
-    manifests: new Map([/* Define your custom manifest entries */]),
-    providers: new Map([/* Define your custom providers entries */]),
-    handlers: new Map([/* Define your custom handlers entries */]),
-    gateways: new Map([/* Define your custom gateways entries */])
+    manifests: [ExampleManifest],
+    providers: [{
+        id: ExampleManifest.output_descriptors[0].id,
+        method: 'POST',
+        endpoint: 'http://localhost:4000/api/v1/vc/data'
+    }],
+    dwns: ['http://localhost:3000/']
 });
 
 await server.start();
@@ -164,14 +167,15 @@ To define your own manifests, you can leverage `server.use('manifest' ... )` to 
 An example manifest can be found [here](./src/protocol/manifests/) to use for accepting and issuing VCs
 
 ```typescript
-import CustomManifest from './CUSTOM-MANIFEST.json';
+import ExampleManifest from '../EXAMPLE-MANIFEST.json';
+
 import { server } from '@formfree/dcx';
 
 // Define manifest in local json file, import and pass into server
-server.use('manifest', CustomManifest.id, CustomManifest);
+server.use('manifest', ExampleManifest);
 
 // Or define manifest directly into .use method
-server.use('manifest', 'dcx-credential-manifest-example', {
+server.use('manifest',  {
     "id": "dcx-credential-manifest-example",
     "name": "DCX Credential Manifest Example",
     "description": "This is an example of a credential manifest used by DCX. This document should be replaced with your own version to satify the requirements of the credentials your DCX server expects as inputs and the desired output credential.",
@@ -225,6 +229,18 @@ server.use('manifest', 'dcx-credential-manifest-example', {
     }
 });
 
+// Define provider that your DCX will make API calls to for VC data
+server.use('provider',
+  {
+    id: ExampleManifest.output_descriptors[0].id,
+    method: 'POST',
+    endpoint: 'http://localhost:4000/api/v1/vc/data'
+  }
+);
+
+// Define a list of DWN Endpoints
+server.use('dwn', 'http://localhost:3000/');
+
 await server.start();
 ```
 
@@ -237,7 +253,7 @@ DCX defined 1 default issuer if none are provided. See [Config](./src/core/confi
 ```ts
 import { server } from './src/index';
 
-server.use('issuer', 'mx',
+server.use('issuer',
     {
         name: 'MX Technologies',
         id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
@@ -256,7 +272,7 @@ the server can handle multiple for different development contexts (i.e. developm
 import { server } from './src/index';
 
 // development
-server.use('provider', 'development',
+server.use('provider',
     {
         method: 'POST',
         endpoint: 'http://localhost:4000/api/v1/vc/data'
@@ -264,7 +280,7 @@ server.use('provider', 'development',
 );
 
 // production
-server.use('provider', 'production',
+server.use('provider',
      {
          name: "Some Third Party Provider",
          method: 'POST',
@@ -302,20 +318,7 @@ DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily t
 import { server } from './src/index';
 
 // development
-server.use('gateway', 'development',
-    {
-        id: 'localhost',
-        uri: 'http://localhost:8305'
-    }
-);
-
-// production
-server.use('gateway', 'production',
-    {
-        id: 'your-production',
-        uri: 'https://dht.your-production.com'
-    }
-);
+server.use('gateway', 'http://localhost:8305');
 
 await server.start();
 ```
@@ -323,13 +326,16 @@ await server.start();
 Putting it all together into 1 example
 
 ```ts
-import CustomManifest from './CUSTOM-MANIFEST.json';
+import ExampleManifest from './EXAMPLE-MANIFEST.json';
 import { server } from '@formfree/dcx';
 
-server.use('manifest', CustomManifest.id, CustomManifest);
-server.use('issuer', 'mx', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
-server.use('handler', 'requestCredential', () => { return await fetch('http://api.example.com/v1/vc-data', /* ... */) });
-server.use('gateway', 'development', { id: 'localhost', uri: 'http://localhost:8305' });
+server.use('manifest', ExampleManifest);
+server.use('issuer', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
+async function requestCredentialCustom(){ 
+    return await fetch('http://api.example.com/v1/vc-data', /* ... */)
+};
+server.use('handler', 'requestCredential', requestCredentialCustom);
+server.use('gateway', 'http://localhost:8305');
 
 await server.start();
 

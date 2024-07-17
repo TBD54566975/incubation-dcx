@@ -25,11 +25,12 @@ export class DcxServer {
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
+    handlers: [],
     manifests: [],
     providers: [],
+    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
     gateways: Config.DEFAULT_GATEWAY_URIS,
     dwns: Config.DEFAULT_DWN_ENDPOINTS,
-    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -38,12 +39,12 @@ export class DcxServer {
      * Setup the DcxManager and the DcxServer with the provided options
      *
      * @param options The options to use for the DcxServer
-     * @param options.issuers The issuers to use
-     * @param options.manifests The manifests to use
-     * @param options.providers The providers to use
-     * @param options.handlers The handlers to use
-     * @param options.dwns The dwns to use
-     * @param options.gateways The gateways to use
+     * @param options.issuers The issuers to use; array
+     * @param options.manifests The manifests to use; array
+     * @param options.providers The providers to use; array
+     * @param options.handlers The handlers to use; array
+     * @param options.dwns The dwns to use; array
+     * @param options.gateways The gateways to use; array
      * @example see README.md for usage information
      *
      */
@@ -68,27 +69,18 @@ export class DcxServer {
    *
    */
   public use(path: UsePath, obj: any): void {
-    const objectPaths = ['issuer', 'manifest', 'provider', 'handler'];
-    const stringPaths = ['gateway', 'dwn'];
-    const validPaths = [...objectPaths, ...stringPaths];
+    const validPaths = ['gateway', 'dwn', 'issuer', 'manifest', 'provider', 'handler'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
         `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
       );
     }
 
-    if (!this.useOptions[path] || !this.useOptions[path].length) {
-      this.useOptions[path] = [];
-    }
-
-    if (objectPaths.includes(path)) {
-      if (!(Objects.isEmptyObject(obj) && Objects.isEmptyObjectDeep(obj))) {
-        this.useOptions[path].push(obj);
+    if (validPaths.includes(path)) {
+      if (!this.useOptions[path]) {
+        this.useOptions[path] = [];
       }
-    } else if (stringPaths.includes(path)) {
-      if (obj) {
-        this.useOptions[path].push(obj);
-      }
+      this.useOptions[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -111,6 +103,8 @@ export class DcxServer {
   }
 
   /**
+   *
+   * Sets the handler to use
    *
    * @param id Some unique, accessible identifier for the handler
    * @param handler The handler to use
