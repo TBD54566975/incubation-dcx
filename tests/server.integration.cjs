@@ -1,7 +1,7 @@
-const dcx = require('./dist/cjs/index.js');
-const ExampleManifest = require('./EXAMPLE-MANIFEST.json');
+const dcx = require('../dist/cjs/index');
+const ExampleManifest = require('../EXAMPLE-MANIFEST.json');
 
-const server = new dcx.DcxServer();
+const server = dcx.server;
 
 server.use('manifest', ExampleManifest);
 server.use('provider',

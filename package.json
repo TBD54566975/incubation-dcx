@@ -95,10 +95,8 @@
   "scripts": {
     "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:esm:e2e": "tsx tests/server.integration.ts -t",
-    "test:esm:unit": "echo TODO: Add cjs unit tests && exit 0",
-    "test:cjs:e2e": "node tests/server.integration.cjs -t",
-    "test:cjs:unit": "echo TODO: Add unit tests && exit 0",
+    "test:e2e": "tsx tests/server.integration.ts -t && node tests/server.integration.cjs -t",
+    "test:unit": "echo TODO: Add unit tests && exit 0",
     "clean": "rimraf dist",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "build:esm": "rimraf dist/esm dist/types && tsc",
