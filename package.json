@@ -6,23 +6,6 @@
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
-  "scripts": {
-    "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:e2e": "tsx tests/server.integration.ts -t",
-    "test:unit": "echo TODO: Add unit tests && exit 0",
-    "clean": "rimraf dist",
-    "build:esm": "rimraf dist/esm dist/types && tsc",
-    "build": "npm run clean && npm run build:esm",
-    "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
-    "dev": "npm run build && tsx tests/server.ts",
-    "format": "npx prettier --write ./src/**/**/**/*",
-    "workflow": "npm ci && npm run build --if-present && npm test",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish"
-  },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
   "repository": {
@@ -108,5 +91,23 @@
     "tsx": "^4.11.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.16.1"
+  },
+  "scripts": {
+    "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:e2e": "tsx tests/server.integration.ts -t && node tests/server.integration.cjs -t",
+    "test:unit": "echo TODO: Add unit tests && exit 0",
+    "clean": "rimraf dist",
+    "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
+    "build:esm": "rimraf dist/esm dist/types && tsc",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "dev": "npm run build && tsx tests/server.ts",
+    "format": "npx prettier --write ./src/**/**/**/*",
+    "workflow": "npm ci && npm run build --if-present && npm test",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish"
   }
 }

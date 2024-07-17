@@ -16,7 +16,7 @@ import { DcxIdentityVault } from './identity-vault.js';
 import { DcxManager } from './manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
-export class DcxServer {
+export default class DcxServer {
   static [key: string]: any;
 
   _isPolling: boolean = false;
@@ -25,12 +25,12 @@ export class DcxServer {
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
-    handlers: [],
-    manifests: [],
-    providers: [],
-    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways: Config.DEFAULT_GATEWAY_URIS,
-    dwns: Config.DEFAULT_DWN_ENDPOINTS,
+    handlers  : [],
+    manifests : [],
+    providers : [],
+    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
+    gateways  : Config.DEFAULT_GATEWAY_URIS,
+    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -260,8 +260,8 @@ export class DcxServer {
     }
 
     return {
-      password: web5Password,
-      recoveryPhrase: web5RecoveryPhrase,
+      password       : web5Password,
+      recoveryPhrase : web5RecoveryPhrase,
     };
   }
 
@@ -446,7 +446,4 @@ export class DcxServer {
   }
 }
 
-const server = new DcxServer({});
-export { server };
-
-export default DcxServer;
+export const server = new DcxServer({});
