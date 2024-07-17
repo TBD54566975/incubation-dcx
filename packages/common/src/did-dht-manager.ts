@@ -6,9 +6,8 @@ import {
   DidResolutionResult,
   PortableDid,
 } from '@web5/dids';
-import { FileSystem } from '../utils/file-system.js';
+import { FileSystem } from './utils/file-system.js';
 import { Config } from './config.js';
-import IssuerServer from '../../issuer/server.js';
 
 /**
  * DidDhtManager handles interactions between the DCX server and the DID
@@ -51,7 +50,7 @@ export class DidDhtManager {
    * @returns DidRegistrationResult; see {@link DidRegistrationResult}
    */
   public async publishDidDoc(gatewayUri: string): Promise<DidRegistrationResult> {
-    gatewayUri ??= IssuerServer.useOptions.gateways?.[0] ?? Config.DEFAULT_GATEWAY_URIS[0];
+    gatewayUri ??= Config.DEFAULT_GATEWAY_URIS[0];
     return await DidDht.publish({ did: this.bearerDid, gatewayUri });
   }
 

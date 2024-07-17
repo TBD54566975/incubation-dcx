@@ -27,7 +27,7 @@ import {
 import { LevelStore } from '@web5/common';
 import { BearerDid, DidDht, DidJwk, DidResolverCacheLevel } from '@web5/dids';
 import { AgentInitializeParams } from '@web5/user-agent';
-import { DcxIdentityVault } from './identity-vault.js';
+import { DcxIdentityVault } from './index.js';
 
 export type DcxAgentInitializeParams = {
   /**

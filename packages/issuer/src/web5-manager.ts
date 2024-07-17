@@ -6,7 +6,7 @@ import {
   Record,
   Web5,
 } from '@web5/api';
-import { DcxAgent, DcxIdentityVault } from '../common/index.js';
+import { DcxAgent, DcxIdentityVault } from '../../common/index.js';
 import { credentialIssuerProtocol } from './index.js';
 import IssuerServer from './server.js';
 import {
@@ -17,7 +17,7 @@ import {
   Logger,
   CredentialManifest,
   manifestSchema
-} from '../common/index.js';
+} from '../../common/index.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN

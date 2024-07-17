@@ -14,7 +14,7 @@ import {
   Time,
   DcxDwnError,
   manifestSchema, DcxAgent, DcxIdentityVault
-} from '../common/index.js';
+} from '../../common/src/index.js';
 import { credentialApplicantProtocol } from './index.js';
 import ApplicantServer from './server.js';
 

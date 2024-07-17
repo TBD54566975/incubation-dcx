@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Readable } from '@web5/common';
-import { CipherAlgorightm } from '../types/cipher.js';
+import { CipherAlgorightm } from '../src/types/cipher.js';
 
 export class StreamCipher {
   algorithm: CipherAlgorightm;

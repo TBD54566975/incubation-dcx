@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Config } from '../common/index.js';
+import { Config } from '../../common/src/index.js';
 dotenv.config();
 
 export class IssuerConfig extends Config {

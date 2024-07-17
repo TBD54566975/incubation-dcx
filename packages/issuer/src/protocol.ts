@@ -1,8 +1,8 @@
-import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '../common/index.js';
+import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '../../common/index.js';
 
 export const protocol = {
-  // applicant protocol is a subset of exchange protocol
-  protocol  : 'https://dcx.io/protocol/credential-applicant',
+  // issuer protocol is a subset of exchange protocol
+  protocol  : 'https://dcx.io/protocol/credential-issuer',
   published : false,
   types     : {
     application: {
@@ -24,9 +24,27 @@ export const protocol = {
   },
   structure: {
     // issuers publish manifests to describe the data they can provide
-    manifest    : {},
+    manifest: {
+      $actions: [
+        {
+          who : 'anyone',
+          can : ['read'],
+        },
+      ],
+    },
     // applicants can apply for a credential
-    application : {
+    application: {
+      $actions: [
+        {
+          who : 'anyone',
+          can : ['create'],
+        },
+        {
+          who : 'author',
+          of  : 'application',
+          can : ['read'],
+        },
+      ],
       // a credential response might be sent in response to an application
       response: {
         $actions: [

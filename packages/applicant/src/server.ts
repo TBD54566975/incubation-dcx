@@ -13,7 +13,7 @@ import {
   DcxIdentityVault,
   DcxAgent,
   FileSystem
-} from '../common/index.js';
+} from '../../common/src/index.js';
 import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';

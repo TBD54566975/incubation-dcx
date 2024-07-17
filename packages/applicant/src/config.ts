@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Config } from '../common/index.js';
+import { Config } from '../../common/src/index.js';
 
 export class ApplicantConfig extends Config {
   constructor() {

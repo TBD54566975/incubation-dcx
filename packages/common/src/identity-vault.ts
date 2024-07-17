@@ -13,15 +13,16 @@ import { Convert, KeyValueStore, MemoryStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
 import { BearerDid, DidDht } from '@web5/dids';
 import { HDKey } from 'ed25519-keygen/hdkey';
-import { CompactJwe } from '../../../node_modules/@web5/agent/src/prototyping/crypto/jose/jwe-compact.js';
-import { DeterministicKeyGenerator } from '../../../node_modules/@web5/agent/src/utils-internal.js';
+import { CompactJwe } from '../node_modules/@web5/agent/src/prototyping/crypto/jose/jwe-compact.js';
+import { DeterministicKeyGenerator } from '../node_modules/@web5/agent/src/utils-internal.js';
+
 import {
   isIdentityVaultBackup,
   isIdentityVaultStatus,
   isPortableDid,
-} from '../utils/identity-vault.js';
-import { isEmptyString } from '../utils/string.js';
-import { Logger } from '../utils/logger.js';
+  isEmptyString,
+  Logger
+} from './index.js';
 
 export type DcxIdentityVaultInitializeParams = {
   /**
