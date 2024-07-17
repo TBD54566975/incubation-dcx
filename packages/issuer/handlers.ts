@@ -5,14 +5,21 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { credentialIssuerProtocol } from './protocol/index.js';
-import { responseSchema } from '../common/schemas/index.js';
-import { CredentialManifest, Handler, Issuer } from '../common/types/dcx.js';
-import { DwnUtils } from '../common/utils/dwn.js';
-import { DcxProtocolHandlerError, DwnError } from '../common/utils/error.js';
-import { Objects, stringifier, Logger } from '../common/utils/index.js';
-import { Config } from '../common/core/config.js';
-import DcxServer, { DcxManager, server } from './index.js';
+import { IssuerConfig, Web5Manager, credentialIssuerProtocol } from './index.js';
+import {
+  DwnUtils,
+  CredentialManifest,
+  Handler,
+  Issuer,
+  DcxProtocolHandlerError,
+  DwnError,
+  responseSchema,
+  Objects,
+  stringifier,
+  Logger,
+  Provider
+} from '../common/index.js';
+import IssuerServer from './server.js';
 
 export class IssuerProtocolHandlers {
   constructor() {
@@ -27,7 +34,7 @@ export class IssuerProtocolHandlers {
   }
 
   public static findHandler(id: string): (...args: any[]) => any | Promise<any> | undefined {
-    const handler = DcxServer.useOptions.handlers.find((handler: Handler) => handler.id === id);
+    const handler = IssuerServer.useOptions.handlers.find((handler: Handler) => handler.id === id);
     return handler?.callback;
   }
 
@@ -43,44 +50,39 @@ export class IssuerProtocolHandlers {
     manifest: CredentialManifest,
     subjectDid: string,
   ): Promise<VerifiableCredential[]> {
-    try {
-      PresentationExchange.satisfiesPresentationDefinition({
-        vcJwts,
-        presentationDefinition: manifest.presentation_definition,
-      });
+    PresentationExchange.satisfiesPresentationDefinition({
+      vcJwts,
+      presentationDefinition: manifest.presentation_definition,
+    });
 
-      const verifiedCredentials = [];
+    const verifiedCredentials: VerifiableCredential[] = [];
 
-      for (const vcJwt of vcJwts) {
-        Logger.debug('Parsing credential ...', vcJwt);
+    for (const vcJwt of vcJwts) {
+      Logger.debug('Parsing credential ...', vcJwt);
 
-        const vc = VerifiableCredential.parseJwt({ vcJwt });
-        Logger.debug('Parsed credential', stringifier(vc));
+      const vc = VerifiableCredential.parseJwt({ vcJwt });
+      Logger.debug('Parsed credential', stringifier(vc));
 
-        if (vc.subject !== subjectDid) {
-          Logger.debug(`Credential subject ${vc.subject} doesn't match subjectDid ${subjectDid}`);
-          continue;
-        }
-
-        const issuers = DcxServer.issuers.map((issuer: Issuer) => issuer.id);
-        const issuerDidSet = new Set<string>([...issuers, ...Config.DEFAULT_TRUSTED_ISSUER_DIDS]);
-
-        if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
-          continue;
-        }
-
-        const verified = await VerifiableCredential.verify({ vcJwt });
-        if (!verified || Objects.isEmptyObject(verified)) {
-          Logger.debug('Credential verification failed');
-          continue;
-        }
-        verifiedCredentials.push(vc);
+      if (vc.subject !== subjectDid) {
+        Logger.debug(`Credential subject ${vc.subject} doesn't match subjectDid ${subjectDid}`);
+        continue;
       }
-      return verifiedCredentials;
-    } catch (error) {
-      Logger.error(IssuerProtocolHandlers.name, error);
-      throw error;
+
+      const issuers = IssuerServer.issuers.map((issuer: Issuer) => issuer.id);
+      const issuerDidSet = new Set<string>([...issuers, ...IssuerConfig.DEFAULT_TRUSTED_ISSUER_DIDS]);
+
+      if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
+        continue;
+      }
+
+      const verified = await VerifiableCredential.verify({ vcJwt });
+      if (!verified || Objects.isEmptyObject(verified)) {
+        Logger.debug('Credential verification failed');
+        continue;
+      }
+      verifiedCredentials.push(vc);
     }
+    return verifiedCredentials;
   }
 
   /**
@@ -120,12 +122,12 @@ export class IssuerProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject : subjectDid,
-      issuer  : DcxManager.dcxAgent.agentDid.uri,
+      issuer  : Web5Manager.issuerAgent.agentDid.uri,
       type    : manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: DcxManager.dcxAgent.agentDid });
+    const signed = await vc.sign({ did: Web5Manager.issuerAgent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
@@ -154,8 +156,8 @@ export class IssuerProtocolHandlers {
     body: { vcs: VerifiableCredential[] } | {},
     id: string,
   ): Promise<any> {
-    const providers = server.useOptions.providers!;
-    const provider = providers.find((provider) => provider.id === id);
+    const providers = IssuerServer.useOptions.providers!;
+    const provider = providers.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -190,61 +192,57 @@ export class IssuerProtocolHandlers {
     manifest: CredentialManifest,
     providerId: string,
   ): Promise<DwnResponseStatus> {
-    try {
-      Logger.debug('Processing application record', stringifier(applicationRecord));
 
-      // Parse the JSON VP from the application record; this will contain the credentials
-      const vp: VerifiablePresentation = await applicationRecord.data.json();
-      Logger.debug('Application record verifiable presentation', stringifier(vp));
+    Logger.debug('Processing application record', stringifier(applicationRecord));
 
-      // Select valid credentials against the manifest
-      const vcJwts = IssuerProtocolHandlers.selectCredentials(vp, manifest);
-      Logger.debug(`Selected ${vcJwts.length} credentials`);
+    // Parse the JSON VP from the application record; this will contain the credentials
+    const vp: VerifiablePresentation = await applicationRecord.data.json();
+    Logger.debug('Application record verifiable presentation', stringifier(vp));
 
-      const recordAuthor = applicationRecord.author;
-      const verified = await IssuerProtocolHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
-      Logger.debug(`Verified ${verified.length} credentials`);
+    // Select valid credentials against the manifest
+    const vcJwts = IssuerProtocolHandlers.selectCredentials(vp, manifest);
+    Logger.debug(`Selected ${vcJwts.length} credentials`);
 
-      // request vc data
-      const data = await IssuerProtocolHandlers.requestCredential({ vcs: verified }, providerId);
-      Logger.debug('VC data from provider', stringifier(data));
+    const recordAuthor = applicationRecord.author;
+    const verified = await IssuerProtocolHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
+    Logger.debug(`Verified ${verified.length} credentials`);
 
-      const vc = await IssuerProtocolHandlers.issueCredential(data, recordAuthor, manifest);
+    // request vc data
+    const data = await IssuerProtocolHandlers.requestCredential({ vcs: verified }, providerId);
+    Logger.debug('VC data from provider', stringifier(data));
 
-      const { record, status: create } = await DcxManager.web5.dwn.records.create({
-        data    : vc,
-        store   : false,
-        message : {
-          schema       : responseSchema.$id,
-          protocol     : credentialIssuerProtocol.protocol,
-          dataFormat   : 'application/json',
-          protocolPath : 'application/response',
-        },
-      });
+    const vc = await IssuerProtocolHandlers.issueCredential(data, recordAuthor, manifest);
 
-      if (DwnUtils.isFailure(create.code)) {
-        const { code, detail } = create;
-        Logger.error(`${this.name}: DWN records create failed`, create);
-        throw new DwnError(code, detail);
-      }
+    const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+      data    : vc,
+      store   : false,
+      message : {
+        schema       : responseSchema.$id,
+        protocol     : credentialIssuerProtocol.protocol,
+        dataFormat   : 'application/json',
+        protocolPath : 'application/response',
+      },
+    });
 
-      if (!record) {
-        throw new DcxProtocolHandlerError('Failed to create application response record.');
-      }
-
-      const { status: send } = await record?.send(recordAuthor);
-      if (DwnUtils.isFailure(send.code)) {
-        const { code, detail } = send;
-        Logger.error(`${this.name}: DWN records send failed`, send);
-        throw new DwnError(code, detail);
-      }
-
-      Logger.debug(`${this.name}: Sent application response to applicant DWN`, send, create);
-
-      return { status: send };
-    } catch (error: any) {
-      Logger.error(this.name, error);
-      throw error;
+    if (DwnUtils.isFailure(create.code)) {
+      const { code, detail } = create;
+      Logger.error(`${this.name}: DWN records create failed`, create);
+      throw new DwnError(code, detail);
     }
+
+    if (!record) {
+      throw new DcxProtocolHandlerError('Failed to create application response record.');
+    }
+
+    const { status: send } = await record?.send(recordAuthor);
+    if (DwnUtils.isFailure(send.code)) {
+      const { code, detail } = send;
+      Logger.error(`${this.name}: DWN records send failed`, send);
+      throw new DwnError(code, detail);
+    }
+
+    Logger.debug(`${this.name}: Sent application response to applicant DWN`, send, create);
+
+    return { status: send };
   }
 }

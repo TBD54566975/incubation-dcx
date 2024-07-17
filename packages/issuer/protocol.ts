@@ -1,15 +1,12 @@
-import { schema as responseSchema } from '../schemas/response.js';
-import { schema as invoiceSchema } from '../schemas/invoice.js';
-import { schema as manifestSchema } from '../schemas/manifest.js';
-import { schema as presentationSchema } from '../schemas/application.js';
+import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '../common/index.js';
 
 export const protocol = {
   // issuer protocol is a subset of exchange protocol
-  protocol  : 'https://dcx.io/protocol/credential-exchange',
+  protocol  : 'https://dcx.io/protocol/credential-issuer',
   published : false,
   types     : {
     application: {
-      schema      : presentationSchema.$id,
+      schema      : applicationSchema.$id,
       dataFormats : ['application/json'],
     },
     invoice: {

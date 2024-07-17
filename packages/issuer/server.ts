@@ -1,23 +1,29 @@
-import { getTechPreviewDwnEndpoints, Record, Web5 } from '@web5/api';
+import { Record } from '@web5/api';
+import { getTechPreviewDwnEndpoints, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { argv, exit } from 'process';
 
-import { Config, Objects } from '../common/index.js';
+import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
+import {
+  UseOptions,
+  Config,
+  DcxServerError,
+  CredentialManifest,
+  Handler,
+  Provider,
+  Issuer,
+  Logger,
+  DcxIdentityVault,
+  DcxAgent,
+  Objects,
+  stringifier,
+  Time,
+  FileSystem
+} from '../common/index.js';
 import { IssuerProtocolHandlers } from './handlers.js';
-import { credentialIssuerProtocol } from '../common/protocol/index.js';
-import { CredentialManifest, Handler, Issuer, Provider, UseOptions } from '../common/types/dcx.js';
-import { DcxServerError } from '../common/utils/error.js';
-import { FileSystem } from '../common/utils/file-system.js';
-import { stringifier } from '../common/utils/json.js';
-import { Logger } from '../common/utils/logger.js';
-import { Time } from '../common/utils/time.js';
-import { DcxAgent } from './agent.js';
-import { DwnManager } from './dwn-manager.js';
-import { DcxIdentityVault } from './identity-vault.js';
-import { DcxManager } from './manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
-export class DcxServer {
+export default class IssuerServer {
   static [key: string]: any;
 
   _isPolling: boolean = false;
@@ -312,9 +318,9 @@ export class DcxServer {
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
-    DcxManager.web5 = web5;
-    DcxManager.dcxAgent = agent;
-    DcxManager.dcxAgentVault = agentVault;
+    Web5Manager.web5 = web5;
+    Web5Manager.issuerAgent = agent;
+    Web5Manager.issuerAgentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -328,15 +334,15 @@ export class DcxServer {
   public async poll(): Promise<void> {
     Logger.debug('DCX server starting ...');
 
-    const CURSOR = Config.CURSOR;
-    const LAST_RECORD_ID = Config.LAST_RECORD_ID;
+    const CURSOR = IssuerConfig.CURSOR;
+    const LAST_RECORD_ID = IssuerConfig.LAST_RECORD_ID;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
     let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
 
     while (this._isPolling) {
-      const { records = [], cursor: nextCursor } = await DcxManager.web5.dwn.records.query({
+      const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
         message: {
           filter: {
             protocol: credentialIssuerProtocol.protocol,
@@ -363,7 +369,7 @@ export class DcxServer {
 
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
-          const { record }: { record: Record } = await DcxManager.web5.dwn.records.read({
+          const { record }: { record: Record } = await Web5Manager.web5.dwn.records.read({
             message: {
               filter: {
                 recordId,
@@ -394,7 +400,7 @@ export class DcxServer {
             );
 
             if (manifest) {
-              await ProtocolHandlers.processApplicationRecord(
+              await IssuerProtocolHandlers.processApplicationRecord(
                 record,
                 manifest,
                 manifest.output_descriptors[0].id,
@@ -435,7 +441,7 @@ export class DcxServer {
       if (!this._isInitialized) {
         await this.initialize();
         Logger.debug('Web5 initialized', this._isInitialized);
-        await DwnManager.setup();
+        await Web5Manager.setup();
       }
 
       this._isPolling = true;
@@ -447,7 +453,4 @@ export class DcxServer {
   }
 }
 
-const server = new DcxServer({});
-export { server };
-
-export default DcxServer;
+export const server = new IssuerServer();

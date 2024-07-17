@@ -1,11 +1,8 @@
-import { schema as responseSchema } from '../schemas/response.js';
-import { schema as invoiceSchema } from '../schemas/invoice.js';
-import { schema as manifestSchema } from '../schemas/manifest.js';
-import { schema as applicationSchema } from '../schemas/application.js';
+import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '../common/index.js';
 
 export const protocol = {
   // applicant protocol is a subset of exchange protocol
-  protocol  : 'https://dcx.io/protocol/credential-exchange',
+  protocol  : 'https://dcx.io/protocol/credential-applicant',
   published : false,
   types     : {
     application: {

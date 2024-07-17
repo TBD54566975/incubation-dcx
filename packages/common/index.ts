@@ -1,9 +1,7 @@
-export * from './core/agent.js';
-export * from './core/config.js';
-export * from './core/did-dht-manager.js';
-export * from './core/dwn-manager.js';
-export * from './core/identity-vault.js';
-export * from './core/manager.js';
+export * from './agent.js';
+export * from './config.js';
+export * from './did-dht-manager.js';
+export * from './identity-vault.js';
 
 export { schema as applicationSchema } from './schemas/application.js';
 export { schema as responseSchema } from './schemas/response.js';

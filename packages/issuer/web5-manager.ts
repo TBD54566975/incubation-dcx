@@ -4,30 +4,39 @@ import {
   ProtocolsConfigureResponse,
   RecordsCreateResponse,
   Record,
+  Web5,
 } from '@web5/api';
-import { server } from './index.js';
-import { credentialIssuerProtocol } from '../protocol/index.js';
-import { manifestSchema } from '../schemas/index.js';
-import { CredentialManifest } from '../types/dcx.js';
-import { DwnUtils } from '../utils/dwn.js';
-import { DwnError, DcxDwnError } from '../utils/error.js';
-import { Logger } from '../utils/logger.js';
-import { Time } from '../utils/time.js';
-import { DcxManager } from './manager.js';
+import { DcxAgent, DcxIdentityVault } from '../common/index.js';
+import { credentialIssuerProtocol } from './index.js';
+import IssuerServer from './server.js';
+import {
+  DwnUtils,
+  DwnError,
+  DcxDwnError,
+  Time,
+  Logger,
+  CredentialManifest,
+  manifestSchema
+} from '../common/index.js';
+
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
-export class DwnManager {
+export class Web5Manager {
+  public static web5: Web5;
+  public static issuerAgent: DcxAgent;
+  public static issuerAgentVault: DcxIdentityVault;
+
   /**
    * Sync DWN
    */
   public static sync(): void {
     Logger.debug('Syncing dwn ...');
-    DcxManager.dcxAgent.sync.startSync({ interval: '1ms' });
+    Web5Manager.issuerAgent.sync.startSync({ interval: '1ms' });
 
     Time.sleep(1000);
 
-    DcxManager.dcxAgent.sync.stopSync();
+    Web5Manager.issuerAgent.sync.stopSync();
     Logger.debug('Syncing done!');
   }
   /**
@@ -37,7 +46,7 @@ export class DwnManager {
   public static async queryIssuerProtocols(): Promise<ProtocolsQueryResponse> {
     try {
       // Query DWN for credential-issuer protocol
-      const { status: query, protocols = [] } = await DcxManager.web5.dwn.protocols.query({
+      const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
         message: {
           filter: {
             protocol: credentialIssuerProtocol.protocol,
@@ -65,7 +74,7 @@ export class DwnManager {
    */
   public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
     try {
-      const { status: configure, protocol } = await DcxManager.web5.dwn.protocols.configure({
+      const { status: configure, protocol } = await Web5Manager.web5.dwn.protocols.configure({
         message: { definition: credentialIssuerProtocol },
       });
 
@@ -75,7 +84,7 @@ export class DwnManager {
         throw new DwnError(code, detail);
       }
 
-      const { status: send } = await protocol.send(DcxManager.dcxAgent.agentDid.uri);
+      const { status: send } = await protocol.send(Web5Manager.issuerAgent.agentDid.uri);
 
       if (DwnUtils.isFailure(send.code)) {
         const { code, detail } = send;
@@ -103,7 +112,7 @@ export class DwnManager {
         status,
         records: manifestRecords = [],
         cursor,
-      } = await DcxManager.web5.dwn.records.query({
+      } = await Web5Manager.web5.dwn.records.query({
         message: {
           filter: {
             schema       : manifestSchema.$id,
@@ -138,7 +147,7 @@ export class DwnManager {
     try {
       const manifests = await Promise.all(
         manifestRecords.map(async (manifestRecord) => {
-          const { record } = await DcxManager.web5.dwn.records.read({
+          const { record } = await Web5Manager.web5.dwn.records.read({
             message: {
               filter: {
                 recordId: manifestRecord.id,
@@ -163,7 +172,7 @@ export class DwnManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = server.useOptions.manifests;
+    const useManifests = IssuerServer.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -185,8 +194,8 @@ export class DwnManager {
   public static async createMissingManifest(
     unwrittenManifest: CredentialManifest,
   ): Promise<RecordsCreateResponse> {
-    unwrittenManifest.issuer.id = DcxManager.dcxAgent.agentDid.uri;
-    const { record, status: create } = await DcxManager.web5.dwn.records.create({
+    unwrittenManifest.issuer.id = Web5Manager.issuerAgent.agentDid.uri;
+    const { record, status: create } = await Web5Manager.web5.dwn.records.create({
       store   : false,
       data    : unwrittenManifest,
       message : {
@@ -210,7 +219,7 @@ export class DwnManager {
       );
     }
 
-    const { status: send } = await record.send(DcxManager.dcxAgent.agentDid.uri);
+    const { status: send } = await record.send(Web5Manager.issuerAgent.agentDid.uri);
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
