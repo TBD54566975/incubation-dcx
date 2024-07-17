@@ -1,5 +1,5 @@
 {
-  "name": "@dcx/issuer",
+  "name": "@dvcx/issuer",
   "version": "0.0.6",
   "description": "DCX Issuer protocol and server",
   "type": "module",
@@ -60,6 +60,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@dvcx/common": "^0.0.2",
     "@web5/agent": "^0.3.8",
     "@web5/api": "^0.9.4",
     "@web5/common": "^1.0.1",
