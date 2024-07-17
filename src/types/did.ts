@@ -20,7 +20,7 @@ export class PortableDidBuilder implements PortableDid {
   }
 }
 
-export type DidManagerConfig = {
+export type DidDhtManagerConfig = {
   did: string;
   bearerDid: BearerDid;
   portableDid: PortableDid;

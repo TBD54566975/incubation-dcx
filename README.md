@@ -1,15 +1,6 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol proposal (implemented as a npm package) with the purpose of facilitating the decentralized exchange of credentials between applicants, issuers and data providers. is both a protocol and a software package. The DCX protocol defines a process for verifiable credential exchange between user agents and issuers via DWN protocols. The DCX package is a FOSS npm package that implements the protocol in addition to a "credentials in, credentials out" asynchronous web server that manages protocol interactions between user agents and DWN servers. The goal of this project is to implement a well documented, abstractly designed npm package to make participation in the dcx protocol as simple as running `npm install @formfree/dcx`.
-
-`@formfree/dcx` can be used to bootstrap running a DCX issuer server and provide the following functionality:
-
-1. Web5 connection: manages connection to the Web5 platform and facilitates all operations
-2. DWN connection: manages connection to local/remote DWN an handles asynchronous communication between issuers and applicants
-3. DID DHT management: manages import, export & creation of DHT DIDs
-4. DCX protocol handlers: implements generic protocol handlers to do VC verification, data requests and VC issuance
-
-The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between  applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
 
 [Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
 1. The input credentials required by the issuer
@@ -20,48 +11,48 @@ The protocol is open and permissionless leveraging the benefits of DWNs, Verifia
 > 
 > A Credential Manifest is a document, hosted by an Issuer and consumed by User Agents, codifying the credentials that it issues in terms of pre-requisites and inputs. These can be static or dynamic, but their form and usage are detailed in this specification.
 
-Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the diagrams in the [Architecture](#architecture) and [Sequence](#sequence) sections below.
-
-The protocol definition and schemas can be found below:
+Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the [Architecture Diagram](#architecture-diagram) and [Sequence Diagram](#sequence-diagram) sections below.
 
 [Protocol](./src/protocol/)
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
   - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
 
-[Protocol Schemas](./src/protocol/schemas/)
-  - [`src/protocol/schemas/invoice.ts`](./src/protocol/schemas/invoice.ts) defines the schema for invoice records
-  - [`src/protocol/schemas/manifest.ts`](./src/protocol/schemas/manifest.ts) defines schema for manifest records
-  - [`src/protocol/schemas/application.ts`](./src/protocol/schemas/application.ts) defines schema for application records
-  - [`src/protocol/schemas/response.ts`](./src/protocol/schemas/response.ts) defines schema for response records
+[Record Schemas](./src/schemas/)
+  - [`src/schemas/invoice.ts`](./src/schemas/invoice.ts) defines the schema for invoice records
+  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) defines schema for manifest records
+  - [`src/schemas/application.ts`](./src/schemas/application.ts) defines schema for application records
+  - [`src/schemas/response.ts`](./src/schemas/response.ts) defines schema for response records
 
-[Protocol Manifests](./src/protocol/manifests/)
-  - [`src/protocol/manifests/EXAMPLE-MANIFEST.json`](./src/protocol/manifests/EXAMPLE-MANIFEST.json) defines an example manifest
+[Credential Manifests](./EXAMPLE-MANIFEST.json)
+  - [`EXAMPLE-MANIFEST.json`](./EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
+  - See [Usage](#Usage) for how to provide manifests
 
 ## Docs & Diagrams
 
 Additional docs & diagram files can be found in the [/docs](/docs) folder.
 
+- [DEVELOPMENT.md](./docs/DEVELOPMENT.md) Lists current issues and PRs
+- [SUMMARY.md](./docs/SUMMARY.md) Shorter summary about DCX
+
 ### Architecture Diagram
 
+#### Actors
 - **DCX**: Protocol boundary within which actors communicate
 - **DCX Issuer**: Web server running @web5/dcx and web5-js
 - **Issuer DWN**: DCX Issuer's DWN server running dwn-sdk-js
 - **DCX Applicant**: User client application running @web5/dcx and web5-js
 - **Applicant DWN**: DCX Applicant's DWN server running dwn-sdk-js
-- [web5-js](https://github.com/TBD54566975/web5-js)
-- [@web5/dcx](https://github.com/TBD54566975/incubation-dcx)
-- [dwn-sdk-js](https://github.com/TBD54566975/dwn-sdk-js)
 
 ![dcx-architecture](./docs/img/dcx-architecture.png)
 
-### Sequence Diagrams
+### Sequence Diagram
 
 #### Full Protocol
 
 <details>
 
-1.  DCX Issuer configures Issuer DWN with dcx protocol: credential-issuer and credential-applicant
+1.  DCX Issuer configures Issuer DWN with dcx protocol
 2.  DCX Issuer creates credential manifest record in Issuer DWN
 3.  DCX Issuer creates subscription to Issuer DWN
 4.  DCX Applicant creates subscription to Applicant DWN 
@@ -144,12 +135,31 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 Import the `server` from `@formfree/dcx` and run `.start()` to simply run the server as-is.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@formfree/dcx';
 await server.start();
 ```
 
-However, this will be limited to local development since you are required to provide your own credential manifest(s).
-You can leverate the `.use()` method on the server to define custom server options.
+You can also import the `DcxServer` class and pass options to customize the server
+```ts
+import DcxServer, ExampleManifest from "@formfree/dcx";
+const server = new DcxServer();
+
+const server = new DcxServer({
+    manifests: [ExampleManifest],
+    providers: [{
+        id: ExampleManifest.output_descriptors[0].id,
+        method: 'POST',
+        endpoint: 'http://localhost:4000/api/v1/vc/data'
+    }],
+    dwns: ['http://localhost:3000/']
+});
+
+await server.start();
+```
+
+However, using the server this was alone is limited to local development.
+To customize local dev and/or prepare for prod, you must provide your own credential manifest(s).
+You can leverate the `.use()` method on the server to define custom server options like custom manifests.
 
 ### Use Manifest
 
@@ -157,14 +167,15 @@ To define your own manifests, you can leverage `server.use('manifest' ... )` to 
 An example manifest can be found [here](./src/protocol/manifests/) to use for accepting and issuing VCs
 
 ```typescript
-import CustomManifest from './CUSTOM-MANIFEST.json';
-import { server } from './src/index';
+import ExampleManifest from '../EXAMPLE-MANIFEST.json';
+
+import { server } from '@formfree/dcx';
 
 // Define manifest in local json file, import and pass into server
-server.use('manifest', CustomManifest.id, CustomManifest);
+server.use('manifest', ExampleManifest);
 
-// Define manifest directly into .use method
-server.use('manifest', 'dcx-credential-manifest-example', {
+// Or define manifest directly into .use method
+server.use('manifest',  {
     "id": "dcx-credential-manifest-example",
     "name": "DCX Credential Manifest Example",
     "description": "This is an example of a credential manifest used by DCX. This document should be replaced with your own version to satify the requirements of the credentials your DCX server expects as inputs and the desired output credential.",
@@ -218,6 +229,18 @@ server.use('manifest', 'dcx-credential-manifest-example', {
     }
 });
 
+// Define provider that your DCX will make API calls to for VC data
+server.use('provider',
+  {
+    id: ExampleManifest.output_descriptors[0].id,
+    method: 'POST',
+    endpoint: 'http://localhost:4000/api/v1/vc/data'
+  }
+);
+
+// Define a list of DWN Endpoints
+server.use('dwn', 'http://localhost:3000/');
+
 await server.start();
 ```
 
@@ -230,7 +253,7 @@ DCX defined 1 default issuer if none are provided. See [Config](./src/core/confi
 ```ts
 import { server } from './src/index';
 
-server.use('issuer', 'mx',
+server.use('issuer',
     {
         name: 'MX Technologies',
         id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
@@ -249,7 +272,7 @@ the server can handle multiple for different development contexts (i.e. developm
 import { server } from './src/index';
 
 // development
-server.use('provider', 'development',
+server.use('provider',
     {
         method: 'POST',
         endpoint: 'http://localhost:4000/api/v1/vc/data'
@@ -257,7 +280,7 @@ server.use('provider', 'development',
 );
 
 // production
-server.use('provider', 'production',
+server.use('provider',
      {
          name: "Some Third Party Provider",
          method: 'POST',
@@ -278,7 +301,9 @@ expected by the default handlers. Default handler names are: `selectCredentials`
 ```ts
 import { server } from './src/index';
 
-const requestCredentialCustom = () => { /* do api request to a provider and return data */ };
+async function requestCredentialCustom(){ 
+    return await fetch('http://api.example.com/v1/vc-data', /* ... */)
+};
 server.use('handler', 'requestCredential', requestCredentialCustom);
 
 await server.start();
@@ -293,22 +318,30 @@ DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily t
 import { server } from './src/index';
 
 // development
-server.use('gateway', 'development',
-    {
-        id: 'localhost',
-        uri: 'http://localhost:8305'
-    }
-);
-
-// production
-server.use('gateway', 'production',
-    {
-        id: 'your-production',
-        uri: 'https://dht.your-production.com'
-    }
-);
+server.use('gateway', 'http://localhost:8305');
 
 await server.start();
+```
+
+Putting it all together into 1 example
+
+```ts
+import ExampleManifest from './EXAMPLE-MANIFEST.json';
+import { server } from '@formfree/dcx';
+
+server.use('manifest', ExampleManifest);
+server.use('issuer', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
+async function requestCredentialCustom(){ 
+    return await fetch('http://api.example.com/v1/vc-data', /* ... */)
+};
+server.use('handler', 'requestCredential', requestCredentialCustom);
+server.use('gateway', 'http://localhost:8305');
+
+await server.start();
+
+process.on('SIGTERM', () => {
+    server.stop();
+});
 ```
 
 ## Project Resources
