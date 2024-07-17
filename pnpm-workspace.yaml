@@ -1,0 +1,4 @@
+packages:
+  - 'packages/applicant'
+  - 'packages/common'
+  - 'packages/issuer'

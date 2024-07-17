@@ -1,13 +1,25 @@
 {
-  "name": "@formfree/dcx",
-  "version": "0.0.6",
+  "name": "dcx-monorepo",
+  "version": "0.0.1",
   "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
-  "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
-  "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
+  "workspaces": [
+    "packages/applicant",
+    "packages/issuer",
+    "packages/common"
+  ],
+  "scripts": {
+    "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
+    "build": "pnpm --recursive --stream build",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:node": "pnpm --recursive test:node",
+    "test:e2e": "echo TODO: Add unit tests && exit 0",
+    "test:unit": "echo TODO: Add unit tests && exit 0",
+    "workflow": "pnpm install --frozen-lockfile && pnpm run build --if-present && npm test",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TBD54566975/incubation-dcx.git"
@@ -23,91 +35,23 @@
       "url": "https://github.com/ianpatton"
     }
   ],
-  "files": [
-    "dist",
-    "src"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js"
-    }
-  },
-  "keywords": [
-    "decentralized",
-    "decentralized-applications",
-    "decentralized-identity",
-    "decentralized-web",
-    "vcs",
-    "verifiable credentials",
-    "web5",
-    "decentralized credential exchange",
-    "dwn",
-    "dweb node",
-    "dwn protocol"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@web5/agent": "^0.3.8",
-    "@web5/api": "^0.9.4",
-    "@web5/common": "^1.0.1",
-    "@web5/credentials": "^1.0.2",
-    "@web5/crypto": "^1.0.1",
-    "@web5/crypto-aws-kms": "^1.0.1",
-    "@web5/dids": "^1.1.0",
-    "@web5/identity-agent": "^0.3.8",
-    "@web5/proxy-agent": "^0.3.8",
-    "@web5/user-agent": "^0.3.8",
-    "bip39": "^3.1.0",
-    "ms": "^2.1.3"
-  },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.7",
     "@eslint/js": "^9.7.0",
-    "@types/chai": "^4.3.16",
-    "@types/eslint": "^8.56.10",
-    "@types/mocha": "^10.0.6",
-    "@types/ms": "^0.7.34",
-    "@types/node": "^20.14.7",
-    "@types/pako": "^2.0.3",
-    "@types/readable-stream": "^4.0.14",
-    "@types/sinon": "^17.0.3",
-    "@types/ws": "^8.5.11",
-    "@typescript-eslint/eslint-plugin": "^7.11.0",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@npmcli/package-json": "5.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "audit-ci": "^7.1.0",
     "chai": "^5.1.1",
-    "chalk": "^5.3.0",
-    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-mocha": "^10.4.3",
-    "globals": "^15.8.0",
-    "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
-    "terminal-link": "^3.0.0",
-    "tsx": "^4.11.0",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.16.1"
+    "npkill": "0.11.3",
+    "rimraf": "^5.0.9"
   },
-  "scripts": {
-    "gen-cipher-key": "openssl rand -base64 32 >> cipher.key",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:e2e": "tsx tests/server.integration.ts -t && node tests/server.integration.cjs -t",
-    "test:unit": "echo TODO: Add unit tests && exit 0",
-    "clean": "rimraf dist",
-    "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
-    "build:esm": "rimraf dist/esm dist/types && tsc",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
-    "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
-    "dev": "npm run build && tsx tests/server.ts",
-    "format": "npx prettier --write ./src/**/**/**/*",
-    "workflow": "npm ci && npm run build --if-present && npm test",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish"
+  "pnpm": {
+    "overrides": {
+      "express@<4.19.2": ">=4.19.2",
+      "ws@<8.17.1": ">=8.17.1"
+    }
   }
 }
