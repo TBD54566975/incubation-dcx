@@ -1,6 +1,6 @@
 {
   "name": "dcx-monorepo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
   "type": "module",
   "workspaces": [
