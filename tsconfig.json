@@ -1,17 +1,26 @@
 {
     "compilerOptions": {
-        "allowJs": true,
+        "lib": [
+            "DOM",
+            "ES2022",
+        ],
+        "target": "ES2017",
+        "module": "ESNext",
+        "moduleResolution": "node",
         "strict": true,
         "declaration": true,
         "declarationMap": true,
-        "target": "ES2017",
-        "module": "NodeNext",
         "sourceMap": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "moduleResolution": "NodeNext",
         "declarationDir": "dist/types",
         "outDir": "dist/esm",
+        "baseUrl": ".",
+        "paths": {
+            "#util/*": [
+                "node_modules/uint8arraylist/node_modules/uint8arrays/dist/src/*"
+            ]
+        }
     },
     "include": [
         "src"

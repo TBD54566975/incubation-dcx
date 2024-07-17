@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { Readable } from '@web5/common';
 import { CipherAlgorightm } from '../types/cipher.js';
 
-export class StreamCiphering {
+export class StreamCipher {
   algorithm: CipherAlgorightm;
   constructor(algorithm: CipherAlgorightm) {
     this.algorithm = algorithm;
@@ -15,12 +15,16 @@ export class StreamCiphering {
    * @param plaintextStream the plaintext stream to encrypt
    * @returns the encrypted stream
    */
-  public async encryptStream(key: Buffer, initVector: Buffer, plaintextStream: Readable): Promise<Readable> {
+  public async encryptStream(
+    key: Buffer,
+    initVector: Buffer,
+    plaintextStream: Readable,
+  ): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return await StreamCiphering.aes256CbcEncryptStream(key, initVector, plaintextStream);
+        return await StreamCipher.aes256CbcEncryptStream(key, initVector, plaintextStream);
       case CipherAlgorightm.AES_256_CTR:
-        return await StreamCiphering.aes256CtrEncryptStream(key, initVector, plaintextStream);
+        return await StreamCipher.aes256CtrEncryptStream(key, initVector, plaintextStream);
       default:
         throw new Error('Algorithm not supported');
     }
@@ -33,12 +37,16 @@ export class StreamCiphering {
    * @param cipherStream the cipher stream to decrypt
    * @returns the decrypted stream
    */
-  public async decryptStream(key: Buffer, initVector: Buffer, cipherStream: Readable): Promise<Readable> {
+  public async decryptStream(
+    key: Buffer,
+    initVector: Buffer,
+    cipherStream: Readable,
+  ): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return StreamCiphering.aes256CbcDecryptStream(key, initVector, cipherStream);
+        return StreamCipher.aes256CbcDecryptStream(key, initVector, cipherStream);
       case CipherAlgorightm.AES_256_CTR:
-        return StreamCiphering.aes256CtrDecryptStream(key, initVector, cipherStream);
+        return StreamCipher.aes256CtrDecryptStream(key, initVector, cipherStream);
       default:
         throw new Error('Algorithm unset or not supported');
     }
@@ -65,7 +73,7 @@ export class StreamCiphering {
     const cipher = crypto.createCipheriv('aes-256-cbc', key, initVector);
 
     const cipherStream = new Readable({
-      read(): void { },
+      read(): void {},
     });
 
     plaintextStream.on('data', (chunk: crypto.BinaryLike) => {
@@ -101,7 +109,7 @@ export class StreamCiphering {
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, initVector);
 
     const plaintextStream = new Readable({
-      read(): void { },
+      read(): void {},
     });
 
     cipherStream.on('data', (chunk: NodeJS.ArrayBufferView) => {
@@ -121,7 +129,6 @@ export class StreamCiphering {
 
     return plaintextStream;
   }
-
 
   /**
    * aes-256-ctr
@@ -144,7 +151,7 @@ export class StreamCiphering {
     const cipher = crypto.createCipheriv('aes-256-ctr', key, initVector);
 
     const cipherStream = new Readable({
-      read(): void { },
+      read(): void {},
     });
 
     plaintextStream.on('data', (chunk: crypto.BinaryLike) => {
@@ -166,12 +173,12 @@ export class StreamCiphering {
   }
 
   /**
-    * Decrypts the given cipher stream using aes-256-ctr algorithm.
-    * @param key the encryption key
-    * @param initVector the initialization vector
-    * @param cipherStream the cipher stream to decrypt
-    * @returns the decrypted stream
-    */
+   * Decrypts the given cipher stream using aes-256-ctr algorithm.
+   * @param key the encryption key
+   * @param initVector the initialization vector
+   * @param cipherStream the cipher stream to decrypt
+   * @returns the decrypted stream
+   */
   public static async aes256CtrDecryptStream(
     key: Buffer,
     initVector: Buffer,
@@ -180,7 +187,7 @@ export class StreamCiphering {
     const decipher = crypto.createDecipheriv('aes-256-ctr', key, initVector);
 
     const plaintextStream = new Readable({
-      read(): void { },
+      read(): void {},
     });
 
     cipherStream.on('data', (chunk: NodeJS.ArrayBufferView) => {
@@ -202,8 +209,7 @@ export class StreamCiphering {
   }
 }
 
-
-export class Ciphering extends StreamCiphering {
+export class Cipher extends StreamCipher {
   constructor(algorithm: CipherAlgorightm) {
     super(algorithm);
   }
@@ -217,14 +223,12 @@ export class Ciphering extends StreamCiphering {
    */
   public async encrypt(key: Buffer, initVector: Buffer, plaintext: string): Promise<string> {
     switch (this.algorithm) {
-      case undefined || null:
-        throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
-        return Ciphering.aes256CbcEncrypt(key, initVector, plaintext);
+        return Cipher.aes256CbcEncrypt(key, initVector, plaintext);
       case CipherAlgorightm.AES_256_CTR:
-        return Ciphering.aes256CtrEncrypt(key, initVector, plaintext);
+        return Cipher.aes256CtrEncrypt(key, initVector, plaintext);
       default:
-        throw new Error('Algorithm not supported');
+        throw new Error('Algorithm not set or unsupported');
     }
   }
 
@@ -237,27 +241,24 @@ export class Ciphering extends StreamCiphering {
    */
   public async decrypt(key: Buffer, initVector: Buffer, ciphertext: string): Promise<string> {
     switch (this.algorithm) {
-      case undefined || null:
-        throw new Error('Algorithm not set');
       case CipherAlgorightm.AES_256_CBC:
-        return Ciphering.aes256CbcDecrypt(key, initVector, ciphertext);
+        return Cipher.aes256CbcDecrypt(key, initVector, ciphertext);
       case CipherAlgorightm.AES_256_CTR:
-        return Ciphering.aes256CtrDecrypt(key, initVector, ciphertext);
+        return Cipher.aes256CtrDecrypt(key, initVector, ciphertext);
       default:
-        throw new Error('Algorithm not supported');
+        throw new Error('Algorithm not set or unsupported');
     }
   }
 
-
   // AES-256-CBC
   /**
-   * 
+   *
    * @param key the encryption key
    * @param plaintext the plaintext message
    * @param initVector the initialization vector
    * @returns the encrypted message in base64 format using aes-256-cbc algorithm
    */
-  public static aes256CbcEncrypt(key: Buffer, initVector: Buffer, plaintext: string,): string {
+  public static aes256CbcEncrypt(key: Buffer, initVector: Buffer, plaintext: string): string {
     const cipher = crypto.createCipheriv('aes-256-cbc', key, initVector);
     let encryptedBuff = cipher.update(plaintext, 'utf8');
     encryptedBuff = Buffer.concat([encryptedBuff, cipher.final()]);
@@ -265,7 +266,7 @@ export class Ciphering extends StreamCiphering {
   }
 
   /**
-   * 
+   *
    * @param key the encryption key
    * @param cipher the encrypted message
    * @param initVector the initialization vector
@@ -273,18 +274,18 @@ export class Ciphering extends StreamCiphering {
    */
   public static aes256CbcDecrypt(key: Buffer, initVector: Buffer, cipher: string): string {
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, initVector);
-    let decrypted = decipher.update(Buffer.from(cipher, 'base64'));
+    const decrypted = decipher.update(Buffer.from(cipher, 'base64'));
     return Buffer.concat([decrypted, decipher.final()]).toString('utf8');
   }
 
   // AES-256-CTR
   /**
-    * 
-    * @param key the encryption key
-    * @param plaintext the plaintext message
-    * @param initVector the initialization vector
-    * @returns the encrypted message in base64 format using aes-256-ctr algorithm
-    */
+   *
+   * @param key the encryption key
+   * @param plaintext the plaintext message
+   * @param initVector the initialization vector
+   * @returns the encrypted message in base64 format using aes-256-ctr algorithm
+   */
   public static aes256CtrEncrypt(key: Buffer, initVector: Buffer, plaintext: string): string {
     const cipher = crypto.createCipheriv('aes-256-ctr', key, initVector);
     let encryptedBuff = cipher.update(plaintext, 'utf8');
@@ -293,14 +294,14 @@ export class Ciphering extends StreamCiphering {
   }
 
   /**
-   * 
+   *
    * @param key the encryption key
    * @param cipher the encrypted message in format: initVector:cipher
    * @returns the decrypted message in utf-8 format using aes-256-ctr algorithm
    */
   public static aes256CtrDecrypt(key: Buffer, initVector: Buffer, cipher: string): string {
     const decipher = crypto.createDecipheriv('aes-256-ctr', key, initVector);
-    let decrypted = decipher.update(Buffer.from(cipher, 'base64'));
+    const decrypted = decipher.update(Buffer.from(cipher, 'base64'));
     return Buffer.concat([decrypted, decipher.final()]).toString('utf8');
   }
 }
