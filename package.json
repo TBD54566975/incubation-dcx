@@ -1,7 +1,7 @@
 {
-  "name": "dcx-monorepo",
+  "name": "dvcx",
   "version": "0.0.1",
-  "description": "Decentralized Credential Exchange (DCX): A DWN protocol for decentrlized exchange of verifiable credentials",
+  "description": "DVCX: Decentralized Verifiable Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
     "packages/applicant",
