@@ -11,7 +11,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-      - run: pnpm install --frozen-lockfile
+      - run: npx pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm test
 
