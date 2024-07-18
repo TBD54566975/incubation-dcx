@@ -65,7 +65,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@dvcx/common": "^0.0.2",
+    "@dvcx/common": "^0.0.3",
     "@web5/agent": "^0.3.8",
     "@web5/api": "^0.9.4",
     "@web5/common": "^1.0.1",
