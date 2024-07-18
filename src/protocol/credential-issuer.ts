@@ -5,7 +5,8 @@ import { schema as presentationSchema } from '../schemas/application.js';
 
 export const protocol = {
   // issuer protocol is a subset of exchange protocol
-  protocol  : 'https://dcx.io/protocol/credential-exchange',
+  // used on server side to interact with applicant & issuer dwn
+  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-issuer.json',
   published : false,
   types     : {
     application: {

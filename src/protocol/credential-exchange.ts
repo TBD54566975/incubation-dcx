@@ -4,9 +4,8 @@ import { schema as manifestSchema } from '../schemas/manifest.js';
 import { schema as applicationSchema } from '../schemas/application.js';
 
 export const protocol = {
-  // applicant protocol is a subset of exchange protocol
-  // used on client side to interact with applicant & issuer dwn
-  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-applicant.json',
+  // full exchange protocol
+  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-exchange.json',
   published : false,
   types     : {
     application: {
@@ -27,40 +26,77 @@ export const protocol = {
     },
   },
   structure: {
-    // issuers publish manifests to describe the data they can provide
-    manifest    : {},
-    // applicants can apply for a credential
-    application : {
-      // a credential response might be sent in response to an application
+    manifest: {
+      $actions: [
+        {
+          who : 'anyone',
+          can : [
+            'read'
+          ]
+        },
+        {
+          who : 'author',
+          of  : 'manifest',
+          can : [
+            'update'
+          ]
+        }
+      ]
+    },
+    application: {
+      $actions: [
+        {
+          who : 'anyone',
+          can : [
+            'create'
+          ]
+        },
+        {
+          who : 'author',
+          of  : 'application',
+          can : [
+            'read'
+          ]
+        }
+      ],
       response: {
         $actions: [
           {
             who : 'recipient',
             of  : 'application',
-            can : ['create', 'update'],
+            can : [
+              'create',
+              'update'
+            ]
           },
           {
             who : 'author',
             of  : 'application',
-            can : ['read'],
-          },
-        ],
+            can : [
+              'read'
+            ]
+          }
+        ]
       },
-      // an invoice might be sent in response to an application
       invoice: {
         $actions: [
           {
             who : 'recipient',
             of  : 'application',
-            can : ['create', 'update'],
+            can : [
+              'create',
+              'update'
+            ]
           },
           {
             who : 'author',
             of  : 'application',
-            can : ['read'],
-          },
-        ],
-      },
-    },
+            can : [
+              'read'
+            ]
+          }
+        ]
+      }
+    }
   },
 };
