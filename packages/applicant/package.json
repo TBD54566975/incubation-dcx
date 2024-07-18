@@ -1,6 +1,6 @@
 {
   "name": "@dvcx/applicant",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DCX Applicant protocol and server",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -14,9 +14,6 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm run test",
-    "publish:patch": "pnpm version patch && pnpm publish",
-    "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:major": "pnpm version major && pnpm publish",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0"
