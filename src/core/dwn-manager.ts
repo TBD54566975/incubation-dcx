@@ -249,7 +249,6 @@ export class DwnManager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    Logger.debug('DcxServer.useOptions', server.useOptions);
     const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');

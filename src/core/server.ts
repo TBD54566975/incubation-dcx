@@ -67,7 +67,6 @@ export default class DcxServer {
    *
    */
   public use(path: UsePath, obj: any): void {
-    Logger.debug('use path, obj', path, obj);
     const validPaths = ['gateway', 'dwn', 'issuer', 'manifest', 'provider', 'handler'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
@@ -76,13 +75,10 @@ export default class DcxServer {
     }
 
     if (validPaths.includes(path)) {
-      Logger.debug('validPaths.includes(path)', validPaths.includes(path));
       if (!this.useOptions[path]) {
         this.useOptions[path] = [];
       }
-      Logger.debug('this.useOptions1', this.useOptions);
       this.useOptions[path].push(obj);
-      Logger.debug('this.useOptions2', this.useOptions);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
