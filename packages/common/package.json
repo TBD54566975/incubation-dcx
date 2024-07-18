@@ -13,7 +13,7 @@
     "build:cjs": "echo TODO",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "workflow": "pnpm ci && pnpm run build --if-present && pnpm test",
+    "workflow": "pnpm install --frozen-lockfile && pnpm run build && pnpm test",
     "publish:patch": "pnpm version patch && pnpm publish",
     "publish:minor": "pnpm version minor && pnpm publish",
     "publish:major": "pnpm version major && pnpm publish",

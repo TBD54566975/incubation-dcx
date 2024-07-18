@@ -1,6 +1,10 @@
+import * as path from 'path';
+const rootDir = path.resolve(__dirname, '../../../');
+const filePath = path.join(rootDir, '.env');
+
 import dotenv from 'dotenv';
-import { Issuer } from './index.js';
-dotenv.config();
+import {Issuer} from './index.js';
+dotenv.config({path: filePath});
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
 
