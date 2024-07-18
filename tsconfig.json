@@ -1,20 +1,18 @@
 {
     "compilerOptions": {
       "lib": [
-        "DOM",
-        "ES2022",
+        "dom",
+        "es2022",
       ],
       "allowJs": true,
       "strict": true,
       "declaration": true,
       "declarationMap": true,
-      "target": "ES2017",
-      "module": "NodeNext", // Required for enabling JavaScript import assertion support
+      "target": "es2017",
+      "module": "nodenext",
       "sourceMap": true,
-      // `NodeNext` will throw compilation errors if relative import paths are missing file extension
-      // reference: https://devblogs.microsoft.com/typescript/announcing-typescript-4-7/#ecmascript-module-support-in-node-js
       "esModuleInterop": true,
       "resolveJsonModule": true,
-      "moduleResolution": "NodeNext"
+      "moduleResolution": "node"
     }
   }

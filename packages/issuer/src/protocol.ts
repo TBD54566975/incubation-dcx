@@ -1,4 +1,4 @@
-import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '../../common/index.js';
+import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dvcx/common';
 
 export const protocol = {
   // issuer protocol is a subset of exchange protocol

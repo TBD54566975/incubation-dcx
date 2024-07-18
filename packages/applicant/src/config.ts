@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Config } from '../../common/src/index.js';
+import { Issuer } from '@dvcx/common';
 
 export class ApplicantConfig extends Config {
   constructor() {

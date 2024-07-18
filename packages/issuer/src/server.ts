@@ -1,5 +1,4 @@
-import { Record } from '@web5/api';
-import { getTechPreviewDwnEndpoints, Web5 } from '@web5/api';
+import { getTechPreviewDwnEndpoints, Web5, Record } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { argv, exit } from 'process';
 
@@ -19,7 +18,7 @@ import {
   stringifier,
   Time,
   FileSystem
-} from '@dcx/common';
+} from '@dvcx/common';
 import { IssuerProtocolHandlers } from './handlers.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
@@ -452,5 +451,3 @@ export default class IssuerServer {
     }
   }
 }
-
-export const server = new IssuerServer();

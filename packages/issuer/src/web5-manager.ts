@@ -6,7 +6,7 @@ import {
   Record,
   Web5,
 } from '@web5/api';
-import { DcxAgent, DcxIdentityVault } from '@dcx/common';
+import { DcxAgent, DcxIdentityVault } from '@dvcx/common';
 import { credentialIssuerProtocol } from './index.js';
 import IssuerServer from './server.js';
 import {
@@ -17,7 +17,7 @@ import {
   Logger,
   CredentialManifest,
   manifestSchema
-} from '@dcx/common';
+} from '@dvcx/common';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
@@ -259,7 +259,7 @@ export class Web5Manager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    const useManifests = server.useOptions.manifests;
+    const useManifests = IssuerServer.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
