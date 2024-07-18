@@ -11,7 +11,8 @@ import { DwnError, DcxDwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DcxManager } from './manager.js';
-import DcxServer, { credentialIssuerProtocol, manifestSchema } from 'src/index.js';
+import { credentialIssuerProtocol, manifestSchema } from 'src/index.js';
+import { server } from 'src/index.js';
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
@@ -161,7 +162,7 @@ export class DwnManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = DcxServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -248,7 +249,8 @@ export class DwnManager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    const useManifests = DcxServer.useOptions.manifests;
+    Logger.debug('DcxServer.useOptions', server.useOptions);
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
