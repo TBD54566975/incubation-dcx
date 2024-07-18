@@ -9,19 +9,28 @@ import {
 import { FileSystem } from '../utils/file-system.js';
 import { Config } from './config.js';
 import DcxServer from './server.js';
+import { LocalKeyManager } from '@web5/crypto';
 
 /**
  * DidDhtManager handles interactions between the DCX server and the DID
  */
 export class DidDhtManager {
-  public did: string;
-  public bearerDid: BearerDid;
-  public portableDid: PortableDid;
+  static did: string;
+  bearerDid: BearerDid;
 
-  constructor(did: string, bearerDid: BearerDid, portableDid: PortableDid) {
-    this.did = did;
+  constructor(bearerDid: BearerDid) {
     this.bearerDid = bearerDid;
-    this.portableDid = portableDid;
+    DidDhtManager.did  = bearerDid.uri;
+  }
+
+  async initKeyManagement(portableDid: PortableDid) {
+    portableDid ??= await this.getPortableDid();
+    // Determine which key manager to use based on the environment
+    const keyManager = new LocalKeyManager() as any;
+    // Create a new DID
+    return !portableDid
+      ? await this.createBearerDid(keyManager)
+      : await this.importPortableDid({ portableDid, keyManager });
   }
 
   /**
@@ -33,6 +42,10 @@ export class DidDhtManager {
   public async createBearerDid(options: DidDhtCreateOptions<any>): Promise<BearerDid> {
     this.bearerDid = await DidDht.create({ options });
     return this.bearerDid;
+  }
+
+  public async getPortableDid(): Promise<PortableDid> {
+    return this.bearerDid.export();
   }
 
   /**
@@ -62,8 +75,9 @@ export class DidDhtManager {
    * @returns BearerDid; see {@link BearerDid}
    */
   public async importPortableDidFromFile(didFilepath: string): Promise<BearerDid> {
-    this.portableDid = await FileSystem.readToJson(didFilepath);
-    return await this.importPortableDid(this.portableDid);
+    const portableDid = await FileSystem.readToJson(didFilepath);
+    this.bearerDid = await this.importPortableDid({ portableDid });
+    return this.bearerDid;
   }
 
   /**
@@ -71,8 +85,10 @@ export class DidDhtManager {
    * @param portableDid a portable did object; see {@link PortableDid}
    * @returns BearerDid; see {@link BearerDid}
    */
-  public async importPortableDid(portableDid: PortableDid): Promise<BearerDid> {
-    this.bearerDid = await DidDht.import({ portableDid: this.portableDid ?? portableDid });
+  public async importPortableDid(params: { portableDid?: PortableDid, keyManager?: LocalKeyManager }): Promise<BearerDid> {
+    params.portableDid ??= await this.getPortableDid();
+    params.keyManager ??= new LocalKeyManager();
+    this.bearerDid = await DidDht.import({ portableDid: params.portableDid, keyManager: params.keyManager });
     return this.bearerDid;
   }
 }
