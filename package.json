@@ -1,12 +1,11 @@
 {
   "name": "dvcx",
-  "version": "0.0.4",
   "description": "DVCX: Decentralized Verifiable Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
     "packages/applicant",
-    "packages/issuer",
-    "packages/common"
+    "packages/common",
+    "packages/issuer"
   ],
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
@@ -17,9 +16,9 @@
     "test:common": "pnpm --filter common run test",
     "test:issuer": "pnpm --filter issuer run test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish"
+    "publish:patch": "pnpm version patch && pnpm publish",
+    "publish:minor": "pnpm version minor && pnpm publish",
+    "publish:major": "pnpm version major && pnpm publish"
   },
   "repository": {
     "type": "git",
@@ -48,11 +47,5 @@
     "eslint-plugin-mocha": "^10.4.3",
     "npkill": "0.11.3",
     "rimraf": "^5.0.9"
-  },
-  "pnpm": {
-    "overrides": {
-      "express@<4.19.2": ">=4.19.2",
-      "ws@<8.17.1": ">=8.17.1"
-    }
   }
 }
