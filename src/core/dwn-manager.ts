@@ -5,15 +5,13 @@ import {
   RecordsCreateResponse,
   Record,
 } from '@web5/api';
-import { server } from './index.js';
-import { credentialIssuerProtocol } from '../protocol/index.js';
-import { manifestSchema } from '../schemas/index.js';
 import { CredentialManifest } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DwnError, DcxDwnError } from '../utils/error.js';
 import { Logger } from '../utils/logger.js';
 import { Time } from '../utils/time.js';
 import { DcxManager } from './manager.js';
+import DcxServer, { credentialIssuerProtocol, manifestSchema } from 'src/index.js';
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
@@ -163,7 +161,7 @@ export class DwnManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = server.useOptions.manifests;
+    const useManifests = DcxServer.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -250,7 +248,7 @@ export class DwnManager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    const useManifests = server.useOptions.manifests;
+    const useManifests = DcxServer.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }

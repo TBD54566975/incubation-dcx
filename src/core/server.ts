@@ -1,9 +1,7 @@
 import { getTechPreviewDwnEndpoints, Record, Web5 } from '@web5/api';
 import { generateMnemonic } from 'bip39';
 import { argv, exit } from 'process';
-
-import { Config, Objects, ProtocolHandlers } from '../index.js';
-import { credentialIssuerProtocol } from '../protocol/index.js';
+import { Config, credentialIssuerProtocol, Objects, ProtocolHandlers } from '../index.js';
 import { CredentialManifest, Handler, Issuer, Provider, UseOptions } from '../types/dcx.js';
 import { DcxServerError } from '../utils/error.js';
 import { FileSystem } from '../utils/file-system.js';
