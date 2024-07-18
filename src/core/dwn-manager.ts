@@ -162,7 +162,7 @@ export class DwnManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = DcxServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -249,7 +249,7 @@ export class DwnManager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    const useManifests = DcxServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
