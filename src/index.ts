@@ -35,5 +35,4 @@ export * from './utils/time.js';
 import DcxServer from './core/server.js';
 export default DcxServer;
 
-import { server } from './core/server.js';
-export { server };
+export const server = new DcxServer();

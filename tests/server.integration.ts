@@ -1,7 +1,5 @@
-import DcxServer from '../src/index.js';
+import {server} from '../src/index.js';
 import ExampleManifest from '../EXAMPLE-MANIFEST.json';
-
-const server = new DcxServer();
 
 server.use('manifest', ExampleManifest);
 server.use('provider',

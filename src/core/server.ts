@@ -443,5 +443,3 @@ export default class DcxServer {
     }
   }
 }
-
-export const server = new DcxServer({});
