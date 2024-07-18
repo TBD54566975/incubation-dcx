@@ -1,19 +1,16 @@
 import { DwnResponseStatus } from '@web5/agent';
 import { Record } from '@web5/api';
-import {
-  PresentationExchange,
-  VerifiableCredential,
-  VerifiablePresentation,
-} from '@web5/credentials';
-import { credentialIssuerProtocol } from '../protocol/index.js';
-import { responseSchema } from '../schemas/index.js';
-import { CredentialManifest, Handler, Issuer } from '../types/dcx.js';
+import { PresentationExchange, VerifiableCredential, VerifiablePresentation } from '@web5/credentials';
+import { credentialIssuerProtocol, responseSchema } from 'src/index.js';
+import { stringifier } from 'src/utils/json.js';
+import { Objects } from 'src/utils/objects.js';
+import { CredentialManifest, Handler, Issuer, Provider } from '../types/dcx.js';
 import { DwnUtils } from '../utils/dwn.js';
 import { DcxProtocolHandlerError, DwnError } from '../utils/error.js';
-import { Objects, stringifier } from '../utils/index.js';
 import { Logger } from '../utils/logger.js';
 import { Config } from './config.js';
-import DcxServer, { DcxManager, server } from './index.js';
+import { DcxManager } from './manager.js';
+import DcxServer from './server.js';
 
 export class ProtocolHandlers {
   constructor() {
@@ -155,8 +152,8 @@ export class ProtocolHandlers {
     body: { vcs: VerifiableCredential[] } | {},
     id: string,
   ): Promise<any> {
-    const providers = server.useOptions.providers!;
-    const provider = providers.find((provider) => provider.id === id);
+    const providers = DcxServer.useOptions.providers!;
+    const provider = providers.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
