@@ -7,11 +7,14 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "test": "echo TODO: Add unit tests && exit 0",
+    "test": "pnpm run test:unit && pnpm run test:e2e",
+    "test:e2e": "echo TODO: Add e2e test && exit 0",
+    "test:unit": "echo TODO: Add unit tests && exit 0",
     "clean": "rimraf dist",
     "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
-    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs"
+    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",

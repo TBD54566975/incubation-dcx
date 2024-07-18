@@ -13,11 +13,11 @@
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "workflow": "pnpm ci && pnpm run build --if-present && pnpm test",
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm run test",
     "publish:patch": "pnpm version patch && pnpm publish",
     "publish:minor": "pnpm version minor && pnpm publish",
     "publish:major": "pnpm version major && pnpm publish",
-    "test": "npm run test:unit && npm run test:e2e",
+    "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0"
   },
