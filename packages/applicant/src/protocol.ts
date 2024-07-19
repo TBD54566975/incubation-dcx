@@ -2,7 +2,8 @@ import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from
 
 export const protocol = {
   // applicant protocol is a subset of exchange protocol
-  protocol  : 'https://dcx.io/protocol/credential-applicant',
+  // used on client side to interact with applicant & issuer dwn
+  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-applicant.json',
   published : false,
   types     : {
     application: {

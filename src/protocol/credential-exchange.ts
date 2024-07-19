@@ -1,9 +1,11 @@
-import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dvcx/common';
+import { schema as responseSchema } from '../schemas/response.js';
+import { schema as invoiceSchema } from '../schemas/invoice.js';
+import { schema as manifestSchema } from '../schemas/manifest.js';
+import { schema as applicationSchema } from '../schemas/application.js';
 
 export const protocol = {
-  // issuer protocol is a subset of exchange protocol
-  // used on server side to interact with applicant & issuer dwn
-  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-issuer.json',
+  // full exchange protocol
+  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-exchange.json',
   published : false,
   types     : {
     application: {
@@ -24,58 +26,77 @@ export const protocol = {
     },
   },
   structure: {
-    // issuers publish manifests to describe the data they can provide
     manifest: {
       $actions: [
         {
           who : 'anyone',
-          can : ['read'],
+          can : [
+            'read'
+          ]
         },
-      ],
+        {
+          who : 'author',
+          of  : 'manifest',
+          can : [
+            'update'
+          ]
+        }
+      ]
     },
-    // applicants can apply for a credential
     application: {
       $actions: [
         {
           who : 'anyone',
-          can : ['create'],
+          can : [
+            'create'
+          ]
         },
         {
           who : 'author',
           of  : 'application',
-          can : ['read'],
-        },
+          can : [
+            'read'
+          ]
+        }
       ],
-      // a credential response might be sent in response to an application
       response: {
         $actions: [
           {
             who : 'recipient',
             of  : 'application',
-            can : ['create', 'update'],
+            can : [
+              'create',
+              'update'
+            ]
           },
           {
             who : 'author',
             of  : 'application',
-            can : ['read'],
-          },
-        ],
+            can : [
+              'read'
+            ]
+          }
+        ]
       },
-      // an invoice might be sent in response to an application
       invoice: {
         $actions: [
           {
             who : 'recipient',
             of  : 'application',
-            can : ['create', 'update'],
+            can : [
+              'create',
+              'update'
+            ]
           },
           {
             who : 'author',
             of  : 'application',
-            can : ['read'],
-          },
-        ],
-      },
-    },
+            can : [
+              'read'
+            ]
+          }
+        ]
+      }
+    }
   },
 };

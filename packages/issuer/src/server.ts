@@ -2,7 +2,6 @@ import { Web5, Record } from '@web5/api';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { argv, exit } from 'process';
-
 import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
 import {
   UseOptions,
