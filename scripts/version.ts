@@ -1,11 +1,10 @@
-import chalk from 'chalk';
 import { version as root } from '../package.json';
 import { version as applicant } from '../packages/applicant/package.json';
 import { version as common } from '../packages/common/package.json';
 import { version as issuer } from '../packages/issuer/package.json';
 
-import { promises as fs } from 'fs';
 import { execSync } from 'child_process';
+import { promises as fs } from 'fs';
 import * as path from 'path';
 
 const semvers = { root, applicant, common, issuer }
@@ -52,7 +51,7 @@ async function updateVersion(packagePath: string, releaseType: string) {
       semvers.issuer = newVersion;
       break;
     case '@dvcx/protocol':
-      semvers.common = newVersion;
+      semvers.root = newVersion;
       break;
   }
 
@@ -90,7 +89,6 @@ async function version() {
 }
 
 version()
-  .then(process.exit(0))
   .catch(err => {
     console.error(err);
     process.exit(1);
