@@ -14,7 +14,7 @@
     "test": "pnpm --recursive test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "version": "tsx scripts/version.ts",
-    "publish": "pnpm --recursive publish"
+    "publish": "tsx scripts/publish.ts"
   },
   "repository": {
     "type": "git",
