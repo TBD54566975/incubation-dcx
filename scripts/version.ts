@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { version as root } from '../package.json';
 import { version as applicant } from '../packages/applicant/package.json';
 import { version as common } from '../packages/common/package.json';
@@ -40,7 +41,6 @@ async function updateVersion(packagePath: string, releaseType: string) {
 
   await writePackageJson(packagePath, packageJson);
 
-  console.log(`Updated ${packageJson.name} to version ${newVersion}`);
   switch (packageJson.name) {
     case '@dvcx/applicant':
       semvers.applicant = newVersion;
@@ -55,13 +55,17 @@ async function updateVersion(packagePath: string, releaseType: string) {
       semvers.common = newVersion;
       break;
   }
+
+  console.log(`Updated ${packageJson.name} to version ${newVersion}`);
 }
 
 async function version() {
   const args = process.argv.slice(2);
-  const releaseType = args[0];
+  const releaseTypes = ['patch', 'minor', 'major'];
+  const releaseType = args.find(arg => releaseTypes.find(releaseType => releaseType === arg));
+  const doGit = args.some(arg => ['--git', '-g'].includes(arg));
 
-  if (!['patch', 'minor', 'major'].includes(releaseType)) {
+  if (!releaseType) {
     throw new Error('Invalid argument. Use "patch", "minor", or "major".');
   }
 
@@ -76,9 +80,13 @@ async function version() {
     await updateVersion(packagePath, releaseType);
   }
 
-  execSync('git add .', { stdio: 'inherit' });
-  execSync(`git commit -m "chore: bump versions to ${releaseType}"`, { stdio: 'inherit' });
-  execSync(`git tag -a "v${semvers.root}" -m "${releaseType} release v${semvers.root}"`, { stdio: 'inherit' });
+  console.log('Package versions updated:', semvers);
+
+  if (doGit) {
+    execSync('git add .', { stdio: 'inherit' });
+    execSync(`git commit -m "chore: bump versions to ${releaseType}"`, { stdio: 'inherit' });
+    execSync(`git tag -a "v${releaseType}" -m "Release ${releaseType}"`, { stdio: 'inherit' });
+  }
 }
 
 version().catch(err => {
