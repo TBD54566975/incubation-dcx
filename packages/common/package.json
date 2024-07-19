@@ -1,0 +1,99 @@
+{
+  "name": "@dvcx/common",
+  "version": "0.0.6",
+  "description": "Common library for @dcx/issuer and @dcx/applicant",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
+    "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
+    "build:cjs": "echo TODO",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major",
+    "publish": "pnpm publish",
+    "test": "pnpm run test:unit && pnpm run test:e2e",
+    "test:e2e": "echo TODO: Add e2e test && exit 0",
+    "test:unit": "echo TODO: Add unit tests && exit 0"
+  },
+  "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
+  "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TBD54566975/incubation-dcx.git"
+  },
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Bryan Nonni",
+      "url": "https://github.com/bnonni"
+    },
+    {
+      "name": "Ian Patton",
+      "url": "https://github.com/ianpatton"
+    }
+  ],
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "keywords": [
+    "decentralized",
+    "decentralized-applications",
+    "decentralized-identity",
+    "decentralized-web",
+    "vcs",
+    "verifiable credentials",
+    "web5",
+    "decentralized credential exchange",
+    "dwn",
+    "dweb node",
+    "dwn protocol"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@dvcx/common": "^0.0.4",
+    "@noble/ciphers": "0.5.3",
+    "@scure/bip39": "^1.3.0",
+    "@tbd54566975/dwn-sdk-js": "^0.4.4",
+    "@web5/agent": "^0.4.1",
+    "@web5/api": "^0.10.0",
+    "@web5/common": "^1.0.2",
+    "@web5/credentials": "^1.0.4",
+    "@web5/crypto": "^1.0.2",
+    "@web5/dids": "^1.1.2",
+    "@web5/user-agent": "^0.4.1",
+    "ed25519-keygen": "^0.6.2",
+    "isomorphic-ws": "^5.0.0",
+    "ms": "^2.1.3",
+    "readable-web-to-node-stream": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/ms": "^0.7.34",
+    "@types/node": "^20.14.11",
+    "@types/ws": "^8.5.11",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.23.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.3"
+  }
+}
