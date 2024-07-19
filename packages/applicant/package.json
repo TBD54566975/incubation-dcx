@@ -1,6 +1,6 @@
 {
   "name": "@dvcx/applicant",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "DCX Applicant protocol and server",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -16,10 +16,7 @@
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "test": "pnpm test:unit && pnpm test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
-    "test:unit": "echo TODO: Add unit tests && exit 0",
-    "version:patch": "pnpm version patch",
-    "version:minor": "pnpm version minor",
-    "version:major": "pnpm version major"
+    "test:unit": "echo TODO: Add unit tests && exit 0"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",

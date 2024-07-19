@@ -1,6 +1,6 @@
 {
   "name": "@dvcx/common",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Common library for @dcx/issuer and @dcx/applicant",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -14,9 +14,6 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "version:patch": "pnpm version patch",
-    "version:minor": "pnpm version minor",
-    "version:major": "pnpm version major",
     "publish": "pnpm publish",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
