@@ -1,6 +1,6 @@
 {
   "name": "@dvcx/protocol",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DVCX: Decentralized Verifiable Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
