@@ -1,5 +1,6 @@
 {
   "name": "@dvcx/protocol",
+  "version": "0.0.1",
   "description": "DVCX: Decentralized Verifiable Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
@@ -12,9 +13,9 @@
     "build": "pnpm --recursive --stream build",
     "test": "pnpm --recursive test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "version:patch": "pnpm version patch",
-    "version:minor": "pnpm version minor",
-    "version:major": "pnpm version major",
+    "version:patch": "pnpm --recursive version patch",
+    "version:minor": "pnpm --recursive version minor",
+    "version:major": "pnpm --recursive version major",
     "publish": "pnpm --recursive publish"
   },
   "repository": {
@@ -46,6 +47,5 @@
       "express@<4.19.2": ">=4.19.2",
       "ws@<8.17.1": ">=8.17.1"
     }
-  },
-  "version": "0.0.1"
+  }
 }

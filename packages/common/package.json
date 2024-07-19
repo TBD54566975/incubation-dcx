@@ -14,9 +14,10 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "publish:patch": "pnpm version patch && pnpm publish",
-    "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:major": "pnpm version major && pnpm publish",
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major",
+    "publish": "pnpm publish",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0"
