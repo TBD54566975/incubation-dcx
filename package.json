@@ -9,11 +9,12 @@
     "packages/issuer"
   ],
   "scripts": {
-    "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
+    "clean": "pnpm --recursive clean && rm -rf node_modules",
     "build": "pnpm --recursive --stream build",
     "test": "pnpm --recursive test",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "version": "tsx scripts/version.ts"
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
+    "version": "tsx scripts/version.ts",
+    "publish": "pnpm --recursive publish"
   },
   "repository": {
     "type": "git",
