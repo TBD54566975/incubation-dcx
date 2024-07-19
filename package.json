@@ -22,6 +22,25 @@
     "type": "git",
     "url": "git+https://github.com/TBD54566975/incubation-dcx.git"
   },
+  "keywords": [
+    "decentralized",
+    "decentralized-applications",
+    "decentralized-identity",
+    "decentralized-web",
+    "vcs",
+    "verifiable credentials",
+    "web5",
+    "decentralized credential exchange",
+    "dwn",
+    "dweb node",
+    "dwn protocol"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "license": "Apache-2.0",
   "contributors": [
     {
