@@ -8,13 +8,12 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
-    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
+    "build": "pnpm run build:esm && pnpm run build:cjs",
     "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
     "build:cjs": "echo TODO",
-    "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "publish": "pnpm publish",
+    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
+    "lint:fix": "eslint . --fix -c ../../eslint.config.js",
+    "workflow": "pnpm install --frozen-lockfile && pnpm run build && pnpm run test",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0"
