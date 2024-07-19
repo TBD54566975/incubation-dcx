@@ -13,9 +13,9 @@
     "build": "pnpm --recursive --stream build",
     "test": "pnpm --recursive test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "version:patch": "pnpm --recursive version patch",
-    "version:minor": "pnpm --recursive version minor",
-    "version:major": "pnpm --recursive version major",
+    "version:patch": "pnpm --recursive version:patch",
+    "version:minor": "pnpm --recursive version:minor",
+    "version:major": "pnpm --recursive version:major",
     "publish": "pnpm --recursive publish"
   },
   "repository": {
