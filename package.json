@@ -1,15 +1,15 @@
 {
-  "name": "dvcx",
-  "version": "0.0.1",
+  "name": "@dvcx/protocol",
   "description": "DVCX: Decentralized Verifiable Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
     "packages/applicant",
-    "packages/issuer",
-    "packages/common"
+    "packages/common",
+    "packages/issuer"
   ],
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
+    "build": "pnpm --recursive --stream build",
     "build:applicant": "pnpm --filter applicant run build",
     "build:common": "pnpm --filter common run build",
     "build:issuer": "pnpm --filter issuer run build",
@@ -17,9 +17,9 @@
     "test:common": "pnpm --filter common run test",
     "test:issuer": "pnpm --filter issuer run test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish"
+    "publish:patch": "pnpm version patch && pnpm publish",
+    "publish:minor": "pnpm version minor && pnpm publish",
+    "publish:major": "pnpm version major && pnpm publish"
   },
   "repository": {
     "type": "git",
@@ -40,19 +40,13 @@
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.7",
     "@eslint/js": "^9.7.0",
-    "@npmcli/package-json": "5.0.0",
+    "@npmcli/package-json": "^5.2.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "audit-ci": "^7.1.0",
     "chai": "^5.1.1",
     "eslint": "^8.57.0",
     "eslint-plugin-mocha": "^10.4.3",
-    "npkill": "0.11.3",
+    "npkill": "^0.11.3",
     "rimraf": "^5.0.9"
-  },
-  "pnpm": {
-    "overrides": {
-      "express@<4.19.2": ">=4.19.2",
-      "ws@<8.17.1": ">=8.17.1"
-    }
   }
 }

@@ -3,7 +3,6 @@ const rootDir = path.resolve(__dirname, '../../../');
 const filePath = path.join(rootDir, '.env');
 
 import dotenv from 'dotenv';
-import {Issuer} from './index.js';
 dotenv.config({path: filePath});
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
@@ -17,7 +16,7 @@ export class Config {
     },
   ];
   public static DEFAULT_TRUSTED_ISSUER_DIDS = Config.DEFAULT_TRUSTED_ISSUERS.map(
-    (issuer: Issuer) => issuer.id,
+    (issuer) => issuer.id,
   );
 
   // Web5 password
