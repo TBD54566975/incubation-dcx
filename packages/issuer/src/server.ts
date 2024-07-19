@@ -1,26 +1,25 @@
-import { Web5, Record } from '@web5/api';
-import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
-import { argv, exit } from 'process';
-
-import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
 import {
-  UseOptions,
   Config,
-  DcxServerError,
   CredentialManifest,
+  DcxAgent,
+  DcxIdentityVault,
+  DcxServerError,
+  FileSystem,
   Handler,
-  Provider,
   Issuer,
   Logger,
-  DcxIdentityVault,
-  DcxAgent,
   Objects,
+  Provider,
   stringifier,
   Time,
-  FileSystem
+  UseOptions
 } from '@dvcx/common';
+import { generateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
+import { Record, Web5 } from '@web5/api';
+import { argv, exit } from 'process';
 import { IssuerProtocolHandlers } from './handlers.js';
+import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
 export default class IssuerServer {
@@ -32,12 +31,12 @@ export default class IssuerServer {
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
-    handlers  : [],
-    manifests : [],
-    providers : [],
-    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways  : Config.DEFAULT_GATEWAY_URIS,
-    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
+    handlers: [],
+    manifests: [],
+    providers: [],
+    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
+    gateways: Config.DEFAULT_GATEWAY_URIS,
+    dwns: Config.DEFAULT_DWN_ENDPOINTS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -204,6 +203,10 @@ export default class IssuerServer {
     return words.join(' ');
   }
 
+  public async createRecoveryPhrase(): Promise<string> {
+    return generateMnemonic(wordlist, 128);
+  }
+
   /**
    *
    * Checks the state of the password and recovery phrase
@@ -267,8 +270,8 @@ export default class IssuerServer {
     }
 
     return {
-      password       : web5Password,
-      recoveryPhrase : web5RecoveryPhrase,
+      password: web5Password,
+      recoveryPhrase: web5RecoveryPhrase,
     };
   }
 

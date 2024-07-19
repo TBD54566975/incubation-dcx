@@ -1,6 +1,6 @@
 {
   "name": "@dvcx/common",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Common library for @dcx/issuer and @dcx/applicant",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -14,9 +14,10 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "publish:patch": "pnpm version patch && pnpm publish",
-    "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:major": "pnpm version major && pnpm publish",
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major",
+    "publish": "pnpm publish",
     "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:e2e": "echo TODO: Add e2e test && exit 0",
     "test:unit": "echo TODO: Add unit tests && exit 0"
@@ -86,18 +87,13 @@
     "readable-web-to-node-stream": "^3.0.2"
   },
   "devDependencies": {
-    "@types/eslint": "^8.56.10",
     "@types/ms": "^0.7.34",
     "@types/node": "^20.14.11",
     "@types/ws": "^8.5.11",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
     "chalk": "^5.3.0",
     "dotenv": "^16.4.5",
     "esbuild": "^0.23.0",
-    "eslint": "^9.7.0",
     "rimraf": "^6.0.1",
-    "source-map-loader": "^5.0.0",
     "typescript": "^5.5.3"
   }
 }

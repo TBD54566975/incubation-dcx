@@ -1,6 +1,8 @@
+export type ManifestSchema = typeof schema;
+
 export const schema = {
+  $id        : 'https://formfree.github.io/.well-known/schemas/dvcx/manifest.json',
   $schema    : 'http://json-schema.org/draft-07/schema',
-  $id        : 'https://dcx.io/protocol/credential-issuance/schemas/manifest',
   title      : 'Credential Manifest',
   type       : 'object',
   properties : {
@@ -88,4 +90,3 @@ export const schema = {
   required             : ['id', 'spec_version', 'issuer', 'output_descriptors'],
   additionalProperties : false,
 };
-export type ManifestSchema = typeof schema;

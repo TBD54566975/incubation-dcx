@@ -26,6 +26,7 @@
     "npm.packageManager": "pnpm",
     "editor.codeActionsOnSave": {
       "source.fixAll": "always"
-    }
+    },
+    "typescript.tsdk": "applicant/node_modules/typescript/lib"
   }
 }

@@ -1,6 +1,6 @@
 export const schema = {
+  $id        : 'https://formfree.github.io/.well-known/schemas/dvcx/response.json',
   $schema    : 'http://json-schema.org/draft-07/schema#',
-  $id        : 'https://dcx.io/protocol/credential-issuance/schemas/response',
   title      : 'Credential Response',
   type       : 'object',
   properties : {
