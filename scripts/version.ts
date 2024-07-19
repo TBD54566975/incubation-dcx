@@ -51,7 +51,7 @@ async function updateVersion(packagePath: string, releaseType: string) {
       semvers.issuer = newVersion;
       break;
     case '@dvcx/protocol':
-      semvers.common = newVersion;
+      semvers.root = newVersion;
       break;
   }
 
