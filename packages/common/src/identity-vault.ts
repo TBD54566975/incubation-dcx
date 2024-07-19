@@ -13,14 +13,13 @@ import { Convert, KeyValueStore, MemoryStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
 import { BearerDid, DidDht } from '@web5/dids';
 import { HDKey } from 'ed25519-keygen/hdkey';
-import { CompactJwe } from '../node_modules/@web5/agent/src/prototyping/crypto/jose/jwe-compact.js';
-import { DeterministicKeyGenerator } from '../node_modules/@web5/agent/src/utils-internal.js';
-
+import { CompactJwe } from '@web5/agent/src/prototyping/crypto/jose/jwe-compact.js';
+import { DeterministicKeyGenerator } from '@web5/agent/src/utils-internal.js';
 import {
+  isEmptyString,
   isIdentityVaultBackup,
   isIdentityVaultStatus,
   isPortableDid,
-  isEmptyString,
   Logger
 } from './index.js';
 
@@ -40,6 +39,12 @@ export type DcxIdentityVaultInitializeParams = {
    * during the initialization process.
    */
   recoveryPhrase?: string;
+
+  /**
+   * An array of Decentralized Web Node (DWN) endpoints associated with the DID.
+   * 
+   * The DWN endpoints are used to resolve the DID and interact with the DID Document.
+   */
   dwnEndpoints: string[];
 };
 

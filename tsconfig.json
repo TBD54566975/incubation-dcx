@@ -9,12 +9,7 @@
       "sourceMap": true,
       "esModuleInterop": true,
       "resolveJsonModule": true,
-      "baseUrl": ".",
-      "paths": {
-          "#util/*": [
-              "node_modules/uint8arraylist/node_modules/uint8arrays/dist/src/*"
-          ]
-      }
+      "baseUrl": "."
   },
   "include": [
       "src"

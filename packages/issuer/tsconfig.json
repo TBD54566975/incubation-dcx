@@ -3,20 +3,6 @@
   "compilerOptions": {
     "declarationDir": "dist/types",
     "outDir": "dist/esm",
-    "lib": [
-      "dom",
-      "es2022",
-    ],
-    "allowJs": true,
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "target": "es2017",
-    "module": "nodenext",
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node"
   },
   "include": [
     "src"

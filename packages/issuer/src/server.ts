@@ -1,5 +1,6 @@
-import { getTechPreviewDwnEndpoints, Web5, Record } from '@web5/api';
-import { generateMnemonic } from 'bip39';
+import { Web5, Record } from '@web5/api';
+import { generateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
 import { argv, exit } from 'process';
 
 import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
@@ -194,7 +195,7 @@ export default class IssuerServer {
    *
    */
   public async createPassword(): Promise<string> {
-    const mnemonic = generateMnemonic(128).split(' ');
+    const mnemonic = generateMnemonic(wordlist, 128).split(' ');
     const words: string[] = [];
     for (let i = 0; i < 6; i++) {
       const rand = Math.floor(Math.random() * mnemonic.length);
@@ -298,9 +299,8 @@ export default class IssuerServer {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const tbdDwnEndpoints = await getTechPreviewDwnEndpoints();
     const dwnEndpoints = this.useOptions.dwns!;
-    dwnEndpoints.push(...tbdDwnEndpoints);
+    dwnEndpoints.push(...Config.DEFAULT_DWN_ENDPOINTS);
     const startParams = { password };
     const initializeParams = !recoveryPhrase
       ? { ...startParams, dwnEndpoints }
