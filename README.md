@@ -1,6 +1,8 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+DCX is a new Decentralized Web Nodes (DWN) protocol that facilitates the decentralized exchange of borrower data for lender money seurely and privately and a npm package that implements the protocol as a one-click server solution. 
+
+As an open, permissionless, "credentials in, credentials out" asynchronous web server, DCX leverages the strongest Web5 primitives: DWNs, Verifiable Credentials (VCs), Credential Manifests, Verifiable Presentations and Presentation Exchange amongst  other important Web5 primitives. DCX facilitates decentralized credential exchange by performing CRUD operations on both applicant and issuer DWNs. Different DWN record schemas represent various messages sent between actors, detailing the VCs required as inputs and outputs for the DCX server.
 
 [Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
 1. The input credentials required by the issuer

@@ -30,18 +30,21 @@ module.exports = [
     ],
     ignores: [
       '**/*.d.ts',
-      '**/*.json'
     ],
     rules: {
       'no-unsafe-optional-chaining': 'off',
-      'no-undef': 'off',
       'key-spacing': [
         'error',
         {
-          'align': {
+          'singleLine': {
+            'beforeColon': false,
             'afterColon': true,
+          },
+          'align': {
             'beforeColon': true,
-            'on': 'colon'
+            'afterColon': true,
+            'on': 'colon',
+            'mode': 'minimum'
           }
         }
       ],
@@ -50,39 +53,37 @@ module.exports = [
         'single',
         { 'allowTemplateLiterals': true }
       ],
-      'semi': ['error', 'always'],
-      'indent': ['error', 2, { 'SwitchCase': 1 }],
-      'no-unused-vars': 'off',
-      'prefer-const': 'off',
-      '@typescript-eslint/no-unused-vars': [
+      'semi'                              : ['error', 'always'],
+      'indent'                            : ['error', 2, { 'SwitchCase': 1 }],
+      'no-unused-vars'                    : 'off',
+      'prefer-const'                      : 'off',
+      '@typescript-eslint/no-unused-vars' : [
         'error',
         {
-          'vars': 'all',
-          'args': 'after-used',
-          'ignoreRestSiblings': true,
-          'argsIgnorePattern': '^_',
-          'varsIgnorePattern': '^_'
+          'vars'               : 'all',
+          'args'               : 'after-used',
+          'ignoreRestSiblings' : true,
+          'argsIgnorePattern'  : '^_',
+          'varsIgnorePattern'  : '^_'
         }
       ],
-      'no-dupe-class-members': 'off',
-      'no-trailing-spaces': ['error'],
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      'mocha/no-exclusive-tests': 'warn',
-      'mocha/no-setup-in-describe': 'off',
-      'mocha/no-mocha-arrows': 'off',
-      'mocha/max-top-level-suites': 'off',
-      'mocha/no-identical-title': 'off',
-      'mocha/no-pending-tests': 'off',
-      'mocha/no-skipped-tests': 'off',
-      'mocha/no-sibling-hooks': 'off',
+      'no-dupe-class-members'                    : 'off',
+      'no-trailing-spaces'                       : ['error'],
+      '@typescript-eslint/no-explicit-any'       : 'off',
+      '@typescript-eslint/no-non-null-assertion' : 'off',
+      '@typescript-eslint/ban-ts-comment'        : 'off',
+      'mocha/no-exclusive-tests'                 : 'warn',
+      'mocha/no-setup-in-describe'               : 'off',
+      'mocha/no-mocha-arrows'                    : 'off',
+      'mocha/max-top-level-suites'               : 'off',
+      'mocha/no-identical-title'                 : 'off',
+      'mocha/no-pending-tests'                   : 'off',
+      'mocha/no-skipped-tests'                   : 'off',
     }
   }, {
     ignores: [
       '**/*.js',
       '**/*.cjs',
-      '**/*.mjs',
-      '**/*.json'
+      '**/*.mjs'
     ],
   }];
