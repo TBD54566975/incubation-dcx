@@ -9,7 +9,7 @@
     "packages/issuer"
   ],
   "scripts": {
-    "clean": "pnpm --recursive clean && rm -rf node_modules",
+    "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "build": "pnpm --recursive --stream build",
     "test": "pnpm --recursive test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
@@ -61,8 +61,7 @@
     "eslint": "^8.56.0",
     "globals": "^15.8.0",
     "mocha": "^10.6.0",
-    "npkill": "^0.12.2",
-    "typescript-eslint": "^7.16.1"
+    "npkill": "^0.12.2"
   },
   "pnpm": {
     "overrides": {
