@@ -15,9 +15,6 @@
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "version:patch": "pnpm version patch",
-    "version:minor": "pnpm version minor",
-    "version:major": "pnpm version major",
     "publish": "pnpm publish"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
