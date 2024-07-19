@@ -3,7 +3,7 @@ const rootDir = path.resolve(__dirname, '../../../');
 const filePath = path.join(rootDir, '.env');
 
 import dotenv from 'dotenv';
-dotenv.config({path: filePath});
+dotenv.config({ path: filePath });
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
 

@@ -36,10 +36,15 @@ module.exports = [
       'key-spacing': [
         'error',
         {
+          'singleLine': {
+            'beforeColon': false,
+            'afterColon': true,
+          },
           'align': {
-            'afterColon'  : true,
-            'beforeColon' : true,
-            'on'          : 'colon'
+            'beforeColon': true,
+            'afterColon': true,
+            'on': 'colon',
+            'mode': 'minimum'
           }
         }
       ],

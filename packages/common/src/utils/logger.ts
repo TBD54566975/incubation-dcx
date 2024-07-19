@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import chalk from 'chalk';
 
 enum Env {
