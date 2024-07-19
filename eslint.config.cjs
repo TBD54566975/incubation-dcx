@@ -30,11 +30,9 @@ module.exports = [
     ],
     ignores: [
       '**/*.d.ts',
-      '**/*.json'
     ],
     rules: {
       'no-unsafe-optional-chaining': 'off',
-      'no-undef': 'off',
       'key-spacing': [
         'error',
         {
