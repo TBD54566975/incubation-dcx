@@ -11,13 +11,11 @@
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "build": "pnpm --recursive --stream build",
     "test": "pnpm --recursive test",
-    "test:applicant": "pnpm --filter applicant test",
-    "test:common": "pnpm --filter common test",
-    "test:issuer": "pnpm --filter issuer test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build:applicant && pnpm build:common && pnpm build:issuer && pnpm test",
-    "publish:patch": "pnpm version patch && pnpm publish",
-    "publish:minor": "pnpm version minor && pnpm publish",
-    "publish:major": "pnpm version major && pnpm publish"
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major",
+    "publish": "pnpm --recursive publish"
   },
   "repository": {
     "type": "git",
