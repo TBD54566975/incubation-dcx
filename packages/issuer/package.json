@@ -80,13 +80,9 @@
     "ed25519-keygen": "^0.6.2"
   },
   "devDependencies": {
-    "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.11",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
     "dotenv": "^16.4.5",
     "esbuild": "^0.23.0",
-    "eslint": "^9.7.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.5.3"
   }
