@@ -19,8 +19,7 @@
     "test:unit": "echo TODO: Add unit tests && exit 0",
     "version:patch": "pnpm version patch",
     "version:minor": "pnpm version minor",
-    "version:major": "pnpm version major",
-    "publish": "pnpm publish"
+    "version:major": "pnpm version major"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
