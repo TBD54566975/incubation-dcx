@@ -49,7 +49,18 @@ export class Objects implements Object {
    * @param obj The object to check if it is an array
    * @returns A boolean indicating if the object is an array
    */
-  public static isArray(obj: any): boolean {
-    return Array.isArray(obj);
+  public static isArray(arr: any): boolean {
+    return Array.isArray(arr);
+  }
+
+  /**
+   * 
+   * Check if an object is an empty array
+   * 
+   * @param obj The object to check if it is an empty array
+   * @returns A boolean indicating if the object is an empty array
+   */
+  public static isEmptyArray(arr: any): boolean {
+    return !arr || arr.length === 0;
   }
 }

@@ -66,8 +66,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@dvcx/common": "^0.0.4",
-    "@noble/ciphers": "0.5.3",
+    "@dvcx/common": "workspace:*",
+    "@noble/ciphers": "0.4.1",
     "@scure/bip39": "^1.3.0",
     "@tbd54566975/dwn-sdk-js": "^0.4.4",
     "@web5/agent": "^0.4.1",

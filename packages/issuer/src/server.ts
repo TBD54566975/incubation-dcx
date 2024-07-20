@@ -8,14 +8,14 @@ import {
   Handler,
   Issuer,
   Logger,
+  Mnemonic,
   Objects,
   Provider,
   stringifier,
   Time,
-  UseOptions
+  UseOptions,
 } from '@dvcx/common';
-import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 import { IssuerProtocolHandlers } from './handlers.js';
@@ -31,12 +31,12 @@ export default class IssuerServer {
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
-    handlers: [],
-    manifests: [],
-    providers: [],
-    issuers: Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways: Config.DEFAULT_GATEWAY_URIS,
-    dwns: Config.DEFAULT_DWN_ENDPOINTS,
+    handlers  : [],
+    manifests : [],
+    providers : [],
+    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
+    gateways  : Config.DEFAULT_GATEWAY_URIS,
+    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
   };
 
   constructor(options: UseOptions = this.useOptions ?? {}) {
@@ -186,25 +186,11 @@ export default class IssuerServer {
     this.useOptions.gateways.push(gateway);
   }
 
-  /**
-   *
-   * Creates a new password for the DCX server
-   *
-   * @returns string
-   *
-   */
-  public async createPassword(): Promise<string> {
-    const mnemonic = generateMnemonic(wordlist, 128).split(' ');
-    const words: string[] = [];
-    for (let i = 0; i < 6; i++) {
-      const rand = Math.floor(Math.random() * mnemonic.length);
-      words.push(mnemonic[rand]);
-    }
-    return words.join(' ');
-  }
-
-  public async createRecoveryPhrase(): Promise<string> {
-    return generateMnemonic(wordlist, 128);
+  public static async createVaultAgent(params: IdentityVaultParams = {}): Promise<{ agent: DcxAgent; agentVault: DcxIdentityVault }> {
+    // Create a new DcxIdentityVault instance, a new DcxAgent instance and return them
+    const agentVault = new DcxIdentityVault(params);
+    const agent = await DcxAgent.create({ agentVault });
+    return { agentVault, agent };
   }
 
   /**
@@ -217,7 +203,7 @@ export default class IssuerServer {
    *
    */
   public async checkWeb5Config(
-    firstLaunch: boolean,
+    firstLaunch: boolean
   ): Promise<{ password: string; recoveryPhrase?: string }> {
     const web5Password = Config.WEB5_PASSWORD;
     const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
@@ -225,16 +211,19 @@ export default class IssuerServer {
     // TODO: consider generating a new recovery phrase if one is not provided
     // Config.WEB5_RECOVERY_PHRASE = generateMnemonic(128);
 
-    if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
+    if (firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       Logger.security(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
         'New WEB5_PASSWORD saved to password.key file. ' +
         'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       );
-      const password = await this.createPassword();
+      const password = await Mnemonic.createPassword();
+      const recoveryPhrase = await Mnemonic.createRecoveryPhrase();
       await FileSystem.overwrite('password.key', password);
+      await FileSystem.overwrite('recovery.key', recoveryPhrase);
       Config.WEB5_PASSWORD = password;
-      return { password };
+      Config.WEB5_RECOVERY_PHRASE = recoveryPhrase;
+      return { password, recoveryPhrase };
     }
 
     if (firstLaunch && !web5Password && web5RecoveryPhrase) {
@@ -245,7 +234,7 @@ export default class IssuerServer {
       );
     }
 
-    if (!firstLaunch && !web5Password && !web5RecoveryPhrase) {
+    if (!firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       throw new DcxServerError(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
         'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
@@ -270,9 +259,14 @@ export default class IssuerServer {
     }
 
     return {
-      password: web5Password,
-      recoveryPhrase: web5RecoveryPhrase,
+      password       : web5Password,
+      recoveryPhrase : web5RecoveryPhrase,
     };
+  }
+
+  public static async getTrustedIssuers(): Promise<Issuer[]> {
+    const response = await fetch(Config.DEFAULT_ENDPOINTS.ISSUERS);
+    return await response.json();
   }
 
   /**
@@ -280,17 +274,12 @@ export default class IssuerServer {
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
    *
-   * @returns void
-   *
    */
   public async initialize(): Promise<void> {
     Logger.debug('Initializing Web5 ... ');
 
-    // Create a new DcxIdentityVault instance
-    const agentVault = new DcxIdentityVault();
-
-    // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ agentVault });
+    // Create a new DcxIdentityVault instance and a new DcxAgent instance
+    const { agent, agentVault } = await IssuerServer.createVaultAgent();
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();
@@ -302,8 +291,10 @@ export default class IssuerServer {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.useOptions.dwns!;
-    dwnEndpoints.push(...Config.DEFAULT_DWN_ENDPOINTS);
+    const dwnEndpoints = !this.useOptions.dwns || !this.useOptions.dwns.length
+      ? Config.DEFAULT_DWN_ENDPOINTS
+      : [...this.useOptions.dwns, ...Config.DEFAULT_DWN_ENDPOINTS];
+
     const startParams = { password };
     const initializeParams = !recoveryPhrase
       ? { ...startParams, dwnEndpoints }
@@ -319,10 +310,14 @@ export default class IssuerServer {
     await agent.start(startParams);
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
-    // Set the DcxManager properties
+    await DwnRegistrar.registerTenant(dwnEndpoints[0], agent.agentDid.uri);
+
+    // Set the Web5Manager properties
     Web5Manager.web5 = web5;
     Web5Manager.issuerAgent = agent;
     Web5Manager.issuerAgentVault = agentVault;
+
+    await getTrustedIssuers();
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -448,7 +443,7 @@ export default class IssuerServer {
 
       this._isPolling = true;
       await this.poll();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error(error);
       this.stop();
     }
