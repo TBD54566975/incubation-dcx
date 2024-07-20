@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-      "target": "ES2017",
-      "module": "ESNext",
-      "moduleResolution": "Node",
-      "strict": true,
-      "declaration": true,
-      "declarationMap": true,
-      "sourceMap": true,
-      "esModuleInterop": true,
-      "resolveJsonModule": true,
-      "baseUrl": "."
+    "target": "es2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "baseUrl": "."
   }
 }
