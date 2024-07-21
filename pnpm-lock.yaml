@@ -52,7 +52,7 @@ importers:
 
   packages/applicant:
     dependencies:
-      '@dvcx/common':
+      '@dcx-protocol/common':
         specifier: workspace:*
         version: link:../common
       '@noble/ciphers':
@@ -119,7 +119,7 @@ importers:
 
   packages/common:
     dependencies:
-      '@dvcx/common':
+      '@dcx-protocol/common':
         specifier: workspace:*
         version: 'link:'
       '@noble/ciphers':
@@ -192,7 +192,7 @@ importers:
 
   packages/issuer:
     dependencies:
-      '@dvcx/common':
+      '@dcx-protocol/common':
         specifier: workspace:*
         version: link:../common
       '@noble/ciphers':

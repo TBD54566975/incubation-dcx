@@ -1,8 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Config } from '../../common/src/index.js';
-import { Issuer } from '@dvcx/common';
+import { Config } from '@dcx-protocol/common';
 
 export class ApplicantConfig extends Config {
   constructor() {
@@ -15,11 +14,6 @@ export class ApplicantConfig extends Config {
 
   public static LAST_RECORD_ID = process.env.LAST_RECORD_ID ?? `${process.cwd()}/lastRecordId`;
   public static CURSOR = process.env.CURSOR ?? `${process.cwd()}/cursor.json`;
-
-  public static DEFAULT_DWN_ENDPOINTS = ['https://dwn.formfree.com/'];
-  public static DEFAULT_GATEWAY_URIS = ['https://diddht.tbddev.org/'];
-  public static DEFAULT_TRUSTED_ISSUERS = [{ name: 'mx', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'},];
-  public static DEFAULT_TRUSTED_ISSUER_DIDS = ApplicantConfig.DEFAULT_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.id);
 
   static get ApplicantConfig(): ApplicantConfig {
     return this;

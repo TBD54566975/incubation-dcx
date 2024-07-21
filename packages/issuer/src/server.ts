@@ -14,7 +14,7 @@ import {
   stringifier,
   Time,
   UseOptions,
-} from '@dvcx/common';
+} from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
@@ -316,8 +316,6 @@ export default class IssuerServer {
     Web5Manager.web5 = web5;
     Web5Manager.issuerAgent = agent;
     Web5Manager.issuerAgentVault = agentVault;
-
-    await getTrustedIssuers();
 
     // Set the server initialized flag
     this._isInitialized = true;

@@ -1,21 +1,10 @@
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { FileSystem } from './utils/file-system';
+import { Issuer } from './types/dcx';
 
-const packageJsonExists = await FileSystem.exists(path.resolve(process.cwd(), 'package.json')) ;
-let filePath;
-if(packageJsonExists){
-  const rootDir = path.resolve(__dirname, '../../../');
-  filePath = path.join(rootDir, '.env');
-} else {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const rootDir = path.resolve(__dirname, '../../../');
-  filePath = path.join(rootDir, '.env');
-}
+const rootDir = path.resolve(__dirname, '../../../');
+const filePath = path.join(rootDir, '.env');
 dotenv.config({ path: filePath });
-
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
   public static TBD_DWN_ENDPOINT = 'https://dwn.formfree.com/';
@@ -33,7 +22,13 @@ export class Config {
   };
   public static DEFAULT_DWN_ENDPOINTS = [Config.DEFAULT_ENDPOINTS.FF.DWN, Config.DEFAULT_ENDPOINTS.TBD.DWN];
   public static DEFAULT_GATEWAY_URIS = [Config.DEFAULT_ENDPOINTS.FF.GATEWAY, Config.DEFAULT_ENDPOINTS.TBD.GATEWAY];
-
+  public static DEFAULT_TRUSTED_ISSUERS = [
+    {
+      'name' : 'mx',
+      'id'   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
+    }
+  ];
+  public static DEFAULT_TRUSTED_ISSUER_DIDS = Config.DEFAULT_TRUSTED_ISSUERS.map((issuer: Issuer) => issuer.id);
   // Web5 password
   private static _WEB5_PASSWORD: string = process.env.WEB5_PASSWORD ?? '';
   static get WEB5_PASSWORD(): string {

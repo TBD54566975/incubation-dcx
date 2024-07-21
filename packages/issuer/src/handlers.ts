@@ -18,7 +18,7 @@ import {
   stringifier,
   Logger,
   Provider
-} from '@dvcx/common';
+} from '@dcx-protocol/common';
 import IssuerServer from './server.js';
 
 export class IssuerProtocolHandlers {

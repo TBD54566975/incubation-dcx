@@ -7,7 +7,7 @@ import { execSync } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-const semvers = { root, applicant, common, issuer }
+const semvers = { root, applicant, common, issuer };
 
 async function readPackageJson(packagePath: string) {
   const data = await fs.readFile(packagePath, 'utf-8');
@@ -40,19 +40,14 @@ async function updateVersion(packagePath: string, releaseType: string) {
 
   await writePackageJson(packagePath, packageJson);
 
-  switch (packageJson.name) {
-    case '@dvcx/applicant':
-      semvers.applicant = newVersion;
-      break;
-    case '@dvcx/common':
-      semvers.common = newVersion;
-      break;
-    case '@dvcx/issuer':
-      semvers.issuer = newVersion;
-      break;
-    case '@dvcx/protocol':
-      semvers.root = newVersion;
-      break;
+  if (packageJson.name.includes('root')) {
+    semvers.root = newVersion;
+  } else if (packageJson.name.includes('applicant')) {
+    semvers.applicant = newVersion;
+  } else if (packageJson.name.includes('common')) {
+    semvers.common = newVersion;
+  } else if (packageJson.name.includes('issuer')) {
+    semvers.issuer = newVersion;
   }
 
   console.log(`Updated ${packageJson.name} to version ${newVersion}`);
