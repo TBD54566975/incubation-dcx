@@ -53,14 +53,14 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.7",
-    "@eslint/js": "^8.56.0",
+    "@eslint/js": "^8.57.0",
     "@npmcli/package-json": "^5.2.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
     "audit-ci": "^7.1.0",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "globals": "^15.8.0",
-    "mocha": "^10.6.0",
+    "mocha": "^10.6.1",
     "npkill": "^0.12.2"
   },
   "pnpm": {
@@ -68,5 +68,8 @@
       "express@<4.19.2": ">=4.19.2",
       "ws@<8.17.1": ">=8.17.1"
     }
+  },
+  "dependencies": {
+    "typescript-eslint": "^7.16.1"
   }
 }
