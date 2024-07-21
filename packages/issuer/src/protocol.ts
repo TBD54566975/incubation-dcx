@@ -1,9 +1,9 @@
-import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dvcx/common';
+import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dcx-protocol/common';
 
 export const protocol = {
   // issuer protocol is a subset of exchange protocol
   // used on server side to interact with applicant & issuer dwn
-  protocol  : 'https://formfree.github.io/.well-known/protocols/dvcx/credential-issuer.json',
+  protocol  : 'https://formfree.github.io/.well-known/protocols/dcx/credential-issuer.json',
   published : false,
   types     : {
     application: {

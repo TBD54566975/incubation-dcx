@@ -11,6 +11,6 @@ esbuild.build({
 esbuild.build({
   ...browserConfig,
   format     : 'iife',
-  globalName : 'Web5Agent',
+  globalName : 'DcxIssuer',
   outfile    : 'dist/browser.js',
 });
