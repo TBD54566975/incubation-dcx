@@ -360,7 +360,7 @@ export default class IssuerServer {
         cursor = undefined;
       }
 
-      const recordIds = records.map((record: { id: any }) => record.id);
+      const recordIds = records.map((record: Record) => record.id);
 
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
@@ -441,7 +441,7 @@ export default class IssuerServer {
 
       this._isPolling = true;
       await this.poll();
-    } catch (error: unknown) {
+    } catch (error: any) {
       Logger.error(error);
       this.stop();
     }
