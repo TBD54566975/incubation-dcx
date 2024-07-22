@@ -19,14 +19,17 @@ Applicants pull these manifest records from the issuer's DWN, so they can unders
   - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
   - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
 
-[Record Schemas](./src/schemas/)
-  - [`src/schemas/invoice.ts`](./src/schemas/invoice.ts) defines the schema for invoice records
-  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) defines schema for manifest records
-  - [`src/schemas/application.ts`](./src/schemas/application.ts) defines schema for application records
-  - [`src/schemas/response.ts`](./src/schemas/response.ts) defines schema for response records
+[Issuer](/packages/issuer)
+   - [`/packages/issuer/src/protocol.ts`](/packages/issuer/src/protocol.ts) defines credential issuer protocol
 
-[Credential Manifests](./EXAMPLE-MANIFEST.json)
-  - [`EXAMPLE-MANIFEST.json`](./EXAMPLE-MANIFEST.json) defines an example manifest
+[Common](/packages/common) code shared between the issuer and applicant
+  - [`/packages/common/src/schemas/manifest.ts`](/packages/common/src/schemas/manifest.ts) DWN record schema definition a manifest
+  - [`/packages/common/src/schemas/application.ts`](/packages/common/src/schemas/application.ts) DWN record schema definition for an application
+  - [`/packages/common/src/schemas/response.ts`](/packages/common/src/schemas/response.ts) DWN record schema definition for a response
+  - [`/packages/common/src/schemas/invoice.ts`](/packages/common/src/schemas/invoice.ts) DWN record schema definition for an invoice
+
+[Credential Manifests](/EXAMPLE-MANIFEST.json)
+  - [`EXAMPLE-MANIFEST.json`](/EXAMPLE-MANIFEST.json) defines an example manifest
   - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
   - See [Usage](#Usage) for how to provide manifests
 
@@ -168,10 +171,9 @@ You can leverate the `.use()` method on the server to define custom server optio
 To define your own manifests, you can leverage `server.use('manifest' ... )` to pass in your own.
 An example manifest can be found [here](./src/protocol/manifests/) to use for accepting and issuing VCs
 
-```typescript
-import ExampleManifest from '../EXAMPLE-MANIFEST.json';
-
-import { server } from '@formfree/dcx';
+```ts
+import ExampleManifest from '@dcx-protocol/root';
+import { server } from '@dcx-protocol/issuer';
 
 // Define manifest in local json file, import and pass into server
 server.use('manifest', ExampleManifest);
@@ -253,7 +255,7 @@ when an application is processed. The issuers of the input VCs will be compared 
 DCX defined 1 default issuer if none are provided. See [Config](./src/core/config.ts) or below example for details.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 server.use('issuer',
     {
@@ -271,7 +273,7 @@ You can define your own VC data providers using `server.use('provider' ...`. Ide
 the server can handle multiple for different development contexts (i.e. development, testing, production).
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 // development
 server.use('provider',
@@ -301,7 +303,7 @@ either overwrite and/or work with the existing default ones. See [handlers.ts](.
 expected by the default handlers. Default handler names are: `selectCredentials`, `verifyCredentials`, `requestCredential`, `issueCredential`.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 async function requestCredentialCustom(){ 
     return await fetch('http://api.example.com/v1/vc-data', /* ... */)
@@ -317,7 +319,7 @@ You can define your own DHT Gateway using `server.use('gateway' ...`. At the mom
 DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily toggle between dev envs.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 // development
 server.use('gateway', 'http://localhost:8305');
@@ -328,8 +330,8 @@ await server.start();
 Putting it all together into 1 example
 
 ```ts
-import ExampleManifest from './EXAMPLE-MANIFEST.json';
-import { server } from '@formfree/dcx';
+import ExampleManifest from '@dcx-protocol/root';
+import { server } from '@dcx-protocol/issuer';
 
 server.use('manifest', ExampleManifest);
 server.use('issuer', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
