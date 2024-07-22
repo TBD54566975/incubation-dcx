@@ -13,7 +13,7 @@ As an open, permissionless, "credentials in, credentials out" asynchronous web s
 - [`/packages/common/src/schemas/manifest.ts`](/packages/common/src/schemas/manifest.ts) DWN manifest record schema definition
 - [`/packages/common/src/schemas/application.ts`](/packages/common/src/schemas/application.ts) DWN application record schema definition 
 - [`/packages/common/src/schemas/response.ts`](/packages/common/src/schemas/response.ts) DWN response record schema definition
-- [`/packages/common/src/schemas/invoice.ts`](/packages/common/src/schemas/invoice.ts) DWN invoice record schema definition 
+- [`/packages/common/src/schemas/invoice.ts`](/packages/common/src/schemas/invoice.ts) DWN invoice record schema definition
 
 [Issuer](/packages/issuer)
 - [`/packages/issuer/src/protocol.ts`](/packages/issuer/src/protocol.ts) credential issuer protocol definition
