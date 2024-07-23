@@ -1,11 +1,36 @@
 # Decentralized Credential Exchange (DCX)
 
-DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifiable credentials between applicants and issuers. DCX is a "credentials in, credentials out" asynchronous web server that manages these interactions. The protocol is open and permissionless leveraging the benefits of DWNs, Verifiable Credentials (VCs) and many other powerful Web5 primitives. As mentioned above, the protocol is designed to facilitate the decentralized exchange of credentials between applicants, issuers and data providers; more specifically, DCX interacts with applicant and issuer DWNs performing CRUD operations on DWN Records. Different types of DWN record schemas are defined to represent different messages being sent to/from different actors. These records contain informatino about the VCs required as inputs to the DCX server to received as outputs different VCs.
+DCX is a new Decentralized Web Nodes (DWN) protocol that facilitates the decentralized exchange of borrower data for lender money seurely and privately and a npm package that implements the protocol as a one-click server solution. 
 
-[Credential Manifests](https://identity.foundation/credential-manifest/) are a big part of what makes DCX work. These documents outline key pieces of information:
-1. The input credentials required by the issuer
-2. The output credential(s) the applicant can expect
-3. Data formatting preferences
+As an open, permissionless, "credentials in, credentials out" asynchronous web server, DCX leverages the strongest Web5 primitives: DWNs, Verifiable Credentials (VCs), Credential Manifests, Verifiable Presentations and Presentation Exchange amongst  other important Web5 primitives. DCX facilitates decentralized credential exchange by performing CRUD operations on both applicant and issuer DWNs. Different DWN record schemas represent various messages sent between actors, detailing the VCs required as inputs and outputs for the DCX server.
+
+[Applicant](/packages/applicant)
+- [`/packages/applicant/src/protocol.ts`](/packages/applicant/src/protocol.ts) credential applicant protocol definition
+- [`/packages/applicant/src/handlers.ts`](/packages/applicant/src/handlers.ts) pre-defined credential applicant protocol handlers
+- [`/packages/applicant/src/server.ts`](/packages/applicant/src/server.ts) pre-built server to run credential issuer side (TODO: applicant server code)
+
+[Common](/packages/common) code shared between the issuer and applicant
+- [`/packages/common/src/schemas/manifest.ts`](/packages/common/src/schemas/manifest.ts) DWN manifest record schema definition
+- [`/packages/common/src/schemas/application.ts`](/packages/common/src/schemas/application.ts) DWN application record schema definition 
+- [`/packages/common/src/schemas/response.ts`](/packages/common/src/schemas/response.ts) DWN response record schema definition
+- [`/packages/common/src/schemas/invoice.ts`](/packages/common/src/schemas/invoice.ts) DWN invoice record schema definition
+
+[Issuer](/packages/issuer)
+- [`/packages/issuer/src/protocol.ts`](/packages/issuer/src/protocol.ts) credential issuer protocol definition
+- [`/packages/issuer/src/handlers.ts`](/packages/issuer/src/handlers.ts) pre-defined credential issuer protocol handlers
+- [`/packages/issuer/src/server.ts`](/packages/issuer/src/server.ts) pre-built server to run credential issuer side
+
+[Credential Manifests](/EXAMPLE-MANIFEST.json)
+  - [`EXAMPLE-MANIFEST.json`](/EXAMPLE-MANIFEST.json) defines an example manifest
+  - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
+  - See [Usage](#Usage) for how to provide manifests
+
+A large part of what makes DCX work are the following specs defined by the Decentralized Identity Foundation (DIF).
+1. [Credential Manifest](https://identity.foundation/credential-manifest/#credential-manifest/) 
+2. [Credential Application](https://identity.foundation/credential-manifest/#credential-application/)
+3. [Credential Response](https://identity.foundation/credential-manifest/#credential-response/)
+
+### Credential Manifest
 
 > Credential Manifests are a resource format that defines preconditional requirements, Issuer style preferences, and other facets. User Agents utilize to help articulate and select the inputs necessary for processing and issuance of a specified credential.
 > 
@@ -13,27 +38,47 @@ DCX is a new DWeb Node (DWN) procotol meant to facilitate the exchange of verifi
 
 Applicants pull these manifest records from the issuer's DWN, so they can understand what VCs are required on their side of the exchange. For more details on protocol interactions between issuers and applicants, see the [Architecture Diagram](#architecture-diagram) and [Sequence Diagram](#sequence-diagram) sections below.
 
-[Protocol](./src/protocol/)
-  - [`src/protocol/credential-issuer.ts`](./src/protocol/credential-issuer.ts) defines credential issuer protocol
-  - [`src/protocol/credential-applicant.ts`](./src/protocol/credential-applicant.ts) defines credential applicant protocol
+These objects outline key pieces of information used in the exchange of credentials between applicants and issuers:
+1. The input credential(s) required by the applicant as inputs to the issuer
+2. The output credential(s) issued by the issuer to the applicant
+3. Various style preferences and data structuring requirements imposed by the manifest publisher (i.e. issuers)
 
-[Record Schemas](./src/schemas/)
-  - [`src/schemas/invoice.ts`](./src/schemas/invoice.ts) defines the schema for invoice records
-  - [`src/schemas/manifest.ts`](./src/schemas/manifest.ts) defines schema for manifest records
-  - [`src/schemas/application.ts`](./src/schemas/application.ts) defines schema for application records
-  - [`src/schemas/response.ts`](./src/schemas/response.ts) defines schema for response records
+### Credential Application
 
-[Credential Manifests](./EXAMPLE-MANIFEST.json)
-  - [`EXAMPLE-MANIFEST.json`](./EXAMPLE-MANIFEST.json) defines an example manifest
-  - **NOTE**: Manifests do not ship with the DCX package. Developers are required to provide their own manifests when building their DCX issuer server
-  - See [Usage](#Usage) for how to provide manifests
+> Credential Application are objects embedded within target claim negotiation formats that pass information from the Holder to the Issuer.
+> 
+> Credential Applications are JSON objects composed as follows:
+> 
+> - The object MUST contain an id property. The value of this property MUST be a unique identifier, such as a UUID.
+> - The object MUST contain a spec_version property, and its value MUST be a valid spec URI according to the rules set in the versioning section.
+> - The object MUST contain an applicant property, and its value MUST be a string. The value of this property MUST be a URI which uniquely identifies the applicant.
+> - The object MUST contain a manifest_id property. The value of this property MUST be the id of a valid Credential Manifest.
+> - The object MUST have a format property if the related Credential Manifest specifies a format property. Its value MUST be a subset of the format property in the Credential that this Credential Submission is related to. This object informs the Issuer which formats the Holder wants to receive the Claims in.
+> - The Credential Application object MUST contain a presentation_submission property IF the related Credential Manifest contains a presentation_definition. Its value MUST be a valid Presentation Submission as defined in the Presentation Exchange specification:
+
+### Credential Response
+
+> Credential Responses are objects that encapsulate possible responses from a Credential Application, with two possible outcomes: fulfillment or denial. Fulfillment is the case where a Credential Application is accepted, and results in credential issuance. Fulfillments are embedded within target Claim negotiation formats that express how the outputs presented as proofs to a Holder are provided in accordance with the outputs specified in a Credential Manifest. Rejection is the case where a Credential Application is denied, and results in a response of pertitent information about the rejection. Embedded Credential Response objects MUST be located within target data format as the value of a credential_response property, which is composed and embedded as follows:
+
+> - The object MUST be included at the top-level of an Embed Target, or in the specific location described in the Embed Locations table in the Embed Target section below.
+> - The object MUST contain an id property. The value of this property MUST be a unique identifier, such as a UUID.
+> - The object MUST contain a spec_version property, and its value MUST be a valid spec URI according to the rules set in the versioning section.
+> - The object MUST contain an applicant property, and its valueMUST be a string. The value of this property MUST be a URI which uniquely identifies the applicant.
+> - The object MUST contain a manifest_id property. The value of this property MUST be the id value of a valid Credential.
+The object MAY contain an application_id property. If present, the value of this property MUST be the id value of a valid Credential Application.
+> - The object MUST contain one of the following properties depending on whether the application is to be fulfilled or rejected.
+>   - For fulfillment the object MUST contain a fulfillment property and its value MUST be an object composed as follows:
+>       - The object MUST include a descriptor_map property. The value of this property MUST be an array of Output Descriptor Mapping Objects, just like Presentation Submission’s descriptor_map property as defined in the Presentation Exchange specification.
+>   - For denial the object MUST contain a denial property and its value MUST be an object composed as follows:
+>       - The object MUST contain a reason property . The value of this property MUST be a string which states why the Credential was not successful.
+>       - The object MAY contain an input_descriptors property IF the related Credential Application contains a presentation_submission. It’s value MUST be an array of input_descriptor string identifiers from the descriptor_map property of a Presentation Submission, as defined in the Presentation Exchange specification, corresponding to the claims that failed to fulfill the Credential Application.
 
 ## Docs & Diagrams
 
-Additional docs & diagram files can be found in the [/docs](/docs) folder.
+Additional documentation including UML diagram files can be found in the [/docs](/docs) folder.
 
-- [DEVELOPMENT.md](./docs/DEVELOPMENT.md) Lists current issues and PRs
-- [SUMMARY.md](./docs/SUMMARY.md) Shorter summary about DCX
+- [DEVELOPMENT.md](/docs/DEVELOPMENT.md) Lists current issues and PRs
+- [SUMMARY.md](/docs/SUMMARY.md) Shorter summary about DCX
 
 ### Architecture Diagram
 
@@ -44,7 +89,7 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 - **DCX Applicant**: User client application running @web5/dcx and web5-js
 - **Applicant DWN**: DCX Applicant's DWN server running dwn-sdk-js
 
-![dcx-architecture](./docs/img/dcx-architecture.png)
+![dcx-architecture](/docs/img/dcx-architecture.png)
 
 ### Sequence Diagram
 
@@ -68,7 +113,7 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 </details>
 <br />
 
-![dcx-full-sequence](./docs/img/dcx-full-sequence.png)
+![dcx-full-sequence](/docs/img/dcx-full-sequence.png)
 
 <details>
 <summary>Notes</summary>
@@ -102,7 +147,7 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 </details>
 <br />
 
-![dcx-issuer-sequence](./docs/img/dcx-issuer-sequence.png)
+![dcx-issuer-sequence](/docs/img/dcx-issuer-sequence.png)
 
 #### Applicant Protocol
 
@@ -118,30 +163,31 @@ Additional docs & diagram files can be found in the [/docs](/docs) folder.
 </details>
 <br />
 
-![dcx-applicant-sequence](./docs/img/dcx-applicant-sequence.png)
+![dcx-applicant-sequence](/docs/img/dcx-applicant-sequence.png)
 
 
 ## Package Versions
 
 | Name                                                 |                                                                Latest Version                                                                 |
 | ---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: |
-| [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) |
-<!-- | [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) | -->
-<!-- | [@formfree/dcx](/src) | [![badge](https://img.shields.io/npm/v/@formfree/dcx)](https://www.npmjs.com/package/@formfree/dcx/common) | -->
-
+| [@dcx-protocol/root](/) | [![badge](https://img.shields.io/npm/v/@dcx-protocol/root)](https://www.npmjs.com/package/@dcx-protocol/root) |
+| [@dcx-protocol/applicant](/packages/applicant) | [![badge](https://img.shields.io/npm/v/@dcx-protocol/applicant)](https://www.npmjs.com/package/@dcx-protocol/applicant) |
+| [@dcx-protocol/common](/packages/common) | [![badge](https://img.shields.io/npm/v/@dcx-protocol/common)](https://www.npmjs.com/package/@dcx-protocol/common) |
+| [@dcx-protocol/issuer](/packages/issuer/) | [![badge](https://img.shields.io/npm/v/@dcx-protocol/issuer)](https://www.npmjs.com/package/@dcx-protocol/issuer) |
 
 ## Usage
 
-Import the `server` from `@formfree/dcx` and run `.start()` to simply run the server as-is.
+Import the `server` from `@dcx-protocol/issuer` and run `.start()` to simply run the server as-is.
 
 ```ts
-import { server } from '@formfree/dcx';
+import { server } from '@dcx-protocol/issuer';
 await server.start();
 ```
 
 You can also import the `DcxServer` class and pass options to customize the server
 ```ts
-import DcxServer, ExampleManifest from "@formfree/dcx";
+import ExampleManifest from '@dcx-protocol/root';
+import DcxServer from "@dcx-protocol/issuer";
 const server = new DcxServer();
 
 const server = new DcxServer({
@@ -164,12 +210,11 @@ You can leverate the `.use()` method on the server to define custom server optio
 ### Use Manifest
 
 To define your own manifests, you can leverage `server.use('manifest' ... )` to pass in your own.
-An example manifest can be found [here](./src/protocol/manifests/) to use for accepting and issuing VCs
+An example manifest can be found in the project root [`EXAMPLE-MANIFEST.json`](/EXAMPLE-MANIFEST.json)
 
-```typescript
-import ExampleManifest from '../EXAMPLE-MANIFEST.json';
-
-import { server } from '@formfree/dcx';
+```ts
+import ExampleManifest from '@dcx-protocol/root';
+import { server } from '@dcx-protocol/issuer';
 
 // Define manifest in local json file, import and pass into server
 server.use('manifest', ExampleManifest);
@@ -247,15 +292,14 @@ await server.start();
 ### Use Issuer
 
 You can define your own set of trusted issuers using `server.use('issuer' ...`. The list of issuers defined will be used
-when an application is processed. The issuers of the input VCs will be compared to this list. 
-DCX defined 1 default issuer if none are provided. See [Config](./src/core/config.ts) or below example for details.
+when an application is processed. The issuers of the input VCs will be compared to this list. DCX defines 1 default issuer if none are provided. See [/packages/common/src/config.ts](/packages/common/src/config.ts) and [/packages/issuer/src/config.ts](/packages/issuer/src/config.ts) for details.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 server.use('issuer',
     {
-        name: 'MX Technologies',
+        name: 'mx',
         id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
     }
 );
@@ -269,11 +313,13 @@ You can define your own VC data providers using `server.use('provider' ...`. Ide
 the server can handle multiple for different development contexts (i.e. development, testing, production).
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
+const env = NODE_ENV || 'development';
 // development
 server.use('provider',
     {
+        env,
         method: 'POST',
         endpoint: 'http://localhost:4000/api/v1/vc/data'
     }
@@ -282,10 +328,11 @@ server.use('provider',
 // production
 server.use('provider',
      {
-         name: "Some Third Party Provider",
-         method: 'POST',
-         endpoint: 'http://api.provider.com/v1/vc/data',
-         headers: { 'Authorization': `Bearer ${process.env.PROVIDER_AUTHORIZATION_BEARER_TOKEN}`, }
+        env,
+        name: "Some Third Party Provider",
+        method: 'POST',
+        endpoint: 'http://api.provider.com/v1/vc/data',
+        headers: { 'Authorization': `Bearer some-Bearer-Token`, }
      }
 );
 
@@ -295,11 +342,10 @@ await server.start();
 ### Use Handler
 
 You can define your own set of protocol handlers using `server.use('handler' ...`. The custom handlers you define should
-either overwrite and/or work with the existing default ones. See [handlers.ts](./src/protocol/handlers.ts) for the inputs/outputs
-expected by the default handlers. Default handler names are: `selectCredentials`, `verifyCredentials`, `requestCredential`, `issueCredential`.
+either overwrite and/or work with the existing default ones. See [/packages/issuer/src/handlers.ts](/packages/issuer/src/handlers.ts) for the inputs/outputs expected by the default handlers. Default handler names are: `selectCredentials`, `verifyCredentials`, `requestCredential`, `issueCredential`.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 async function requestCredentialCustom(){ 
     return await fetch('http://api.example.com/v1/vc-data', /* ... */)
@@ -312,10 +358,10 @@ await server.start();
 ### Use Gateway
 
 You can define your own DHT Gateway using `server.use('gateway' ...`. At the moment, this has no impact.
-DCX defaults to using TBD or FormFree DHT gateways. This can be used to easily toggle between dev envs.
+DCX defaults to using TBD or FormFree DHT gateways.
 
 ```ts
-import { server } from './src/index';
+import { server } from '@dcx-protocol/issuer';
 
 // development
 server.use('gateway', 'http://localhost:8305');
@@ -323,25 +369,43 @@ server.use('gateway', 'http://localhost:8305');
 await server.start();
 ```
 
+### Use DWN
+
+You can define your own DWN endpoint using `server.use('dwn' ...`.
+```ts
+import { server } from '@dcx-protocol/issuer';
+
+// development
+server.use('dwn', 'http://localhost:3000');
+
+await server.start();
+```
+
+
 Putting it all together into 1 example
 
 ```ts
-import ExampleManifest from './EXAMPLE-MANIFEST.json';
-import { server } from '@formfree/dcx';
+import ExampleManifest from '@dcx-protocol/root';
+import { server } from '@dcx-protocol/issuer';
 
 server.use('manifest', ExampleManifest);
 server.use('issuer', { name: 'MX Technologies', id: 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo' });
+server.use('provider',
+     {
+        env,
+        name: "Some Third Party Provider",
+        method: 'POST',
+        endpoint: 'http://api.provider.com/v1/vc/data',
+        headers: { 'Authorization': `Bearer some-Bearer-Token`, }
+     }
+);
 async function requestCredentialCustom(){ 
     return await fetch('http://api.example.com/v1/vc-data', /* ... */)
 };
 server.use('handler', 'requestCredential', requestCredentialCustom);
 server.use('gateway', 'http://localhost:8305');
-
+server.use('dwn', 'http://localhost:3000');
 await server.start();
-
-process.on('SIGTERM', () => {
-    server.stop();
-});
 ```
 
 ## Project Resources
