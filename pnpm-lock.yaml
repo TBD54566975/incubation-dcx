@@ -119,9 +119,6 @@ importers:
 
   packages/common:
     dependencies:
-      '@dcx-protocol/common':
-        specifier: workspace:*
-        version: 'link:'
       '@noble/ciphers':
         specifier: 0.4.1
         version: 0.4.1

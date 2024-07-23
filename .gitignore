@@ -3,18 +3,15 @@ dist
 db-data
 /DATA
 .DS_Store
-
 cursor.json
 lastRecordId
 local-test.ts
-
-# Secrets
 CUSTOM-MANIFEST.json
 .env
 did:dht*.json
 .ignore
-
 password.key
 recovery.key
-
 .vscode
+coverage/
+**/*/tests/compiled/

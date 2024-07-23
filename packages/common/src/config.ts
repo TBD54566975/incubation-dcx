@@ -1,10 +1,4 @@
-import * as path from 'path';
-import dotenv from 'dotenv';
 import { Issuer } from './types/dcx';
-
-const rootDir = path.resolve(__dirname, '../../../');
-const filePath = path.join(rootDir, '.env');
-dotenv.config({ path: filePath });
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
   public static TBD_DWN_ENDPOINT = 'https://dwn.formfree.com/';
