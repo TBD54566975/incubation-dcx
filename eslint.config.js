@@ -1,14 +1,33 @@
+import eslint from '@eslint/js';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import mochaPlugin from 'eslint-plugin-mocha';
 import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-
+import tsEslint from 'typescript-eslint';
 
 export default [
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
+  eslint.configs.recommended,
+  mochaPlugin.configs.flat.recommended,
+  ...tsEslint.configs.recommended,
   {
-    files : ['**/*.{js,mjs,cjs,ts}'],
-    rules : {
+    languageOptions: {
+      parser        : tsParser,
+      parserOptions : {
+        ecmaFeatures : { modules: true },
+        ecmaVersion  : '2022'
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021
+      }
+    },
+    plugins: {
+      '@typescript-eslint' : tsPlugin,
+      'mocha'              : mochaPlugin
+    },
+    files   : ['**/*.ts'],
+    rules: {
       'no-unsafe-optional-chaining' : 'off',
       'key-spacing'                 : [
         'error',
@@ -48,10 +67,22 @@ export default [
       'no-trailing-spaces'                       : ['error'],
       '@typescript-eslint/no-explicit-any'       : 'off',
       '@typescript-eslint/no-non-null-assertion' : 'off',
-      '@typescript-eslint/ban-ts-comment'        : 'off'
+      '@typescript-eslint/ban-ts-comment'        : 'off',
+      'mocha/no-exclusive-tests'                 : 'warn',
+      'mocha/no-setup-in-describe'               : 'off',
+      'mocha/no-mocha-arrows'                    : 'off',
+      'mocha/max-top-level-suites'               : 'off',
+      'mocha/no-identical-title'                 : 'off',
+      'mocha/no-pending-tests'                   : 'off',
+      'mocha/no-skipped-tests'                   : 'off',
+      'mocha/no-sibling-hooks'                   : 'off',
     },
-  },
-  {
-    languageOptions: { globals: {...globals.browser, ...globals.node} }
+  }, {
+    ignores: [
+      '**/*.js',
+      '**/*.cjs',
+      '**/*.mjs',
+      '**/*.d.ts',
+    ],
   }
 ];

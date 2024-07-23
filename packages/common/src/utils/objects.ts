@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 export class Objects implements Object {
   /**
    *
@@ -54,9 +55,9 @@ export class Objects implements Object {
   }
 
   /**
-   * 
+   *
    * Check if an object is an empty array
-   * 
+   *
    * @param obj The object to check if it is an empty array
    * @returns A boolean indicating if the object is an empty array
    */

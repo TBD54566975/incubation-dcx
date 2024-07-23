@@ -14,7 +14,9 @@
     "test": "pnpm --recursive test",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "version": "tsx scripts/version.ts",
-    "publish": "tsx scripts/publish.ts"
+    "audit-ci": "audit-ci --config ./audit-ci.json",
+    "lint": "pnpm --recursive lint",
+    "lint:fix": "pnpm --recursive lint:fix"
   },
   "repository": {
     "type": "git",
@@ -61,15 +63,13 @@
     "eslint": "^8.57.0",
     "globals": "^15.8.0",
     "mocha": "^10.6.1",
-    "npkill": "^0.12.2"
+    "npkill": "^0.12.2",
+    "typescript-eslint": "^7.16.1"
   },
   "pnpm": {
     "overrides": {
       "express@<4.19.2": ">=4.19.2",
       "ws@<8.17.1": ">=8.17.1"
     }
-  },
-  "dependencies": {
-    "typescript-eslint": "^7.16.1"
   }
 }

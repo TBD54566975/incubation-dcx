@@ -171,10 +171,10 @@ export class CompactJwe {
     const flattenedJwe = await FlattenedJwe.decrypt({
       jwe: {
         ciphertext,
-        encrypted_key: encryptedKey || undefined,
-        iv: initializationVector || undefined,
-        protected: protectedHeader,
-        tag: authenticationTag || undefined,
+        encrypted_key : encryptedKey || undefined,
+        iv            : initializationVector || undefined,
+        protected     : protectedHeader,
+        tag           : authenticationTag || undefined,
       },
       key,
       keyManager,

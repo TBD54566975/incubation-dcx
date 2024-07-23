@@ -153,7 +153,7 @@ export class IssuerProtocolHandlers {
    * @returns The response from the VC data provider
    */
   public static async requestCredential(
-    body: { vcs: VerifiableCredential[] } | {},
+    body: { vcs: VerifiableCredential[] } | any,
     id: string,
   ): Promise<any> {
     const providers = IssuerServer.useOptions.providers!;
