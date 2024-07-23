@@ -1,0 +1,15 @@
+{
+  "name": "@dcx-protocol/common",
+  "version": "0.0.11",
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": [
+      "../../LICENSE",
+      "README.md",
+      "src"
+    ],
+    "exclude": [
+      "src/tests"
+    ]
+  }
+}
