@@ -1,6 +1,6 @@
 {
-  "name": "@dvcx/common",
-  "version": "0.0.8",
+  "name": "@dcx-protocol/common",
+  "version": "0.0.10",
   "description": "Common library for @dcx/issuer and @dcx/applicant",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "build": "pnpm run build:esm && pnpm run build:cjs",
     "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
-    "build:cjs": "echo TODO",
+    "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
     "lint:fix": "eslint . --fix -c ../../eslint.config.js",
     "workflow": "pnpm install --frozen-lockfile && pnpm run build && pnpm run test",
@@ -66,7 +66,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@dvcx/common": "workspace:*",
     "@noble/ciphers": "0.4.1",
     "@scure/bip39": "^1.3.0",
     "@tbd54566975/dwn-sdk-js": "^0.4.4",

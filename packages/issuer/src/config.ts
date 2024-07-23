@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Config } from '@dvcx/common';
+import { Config } from '@dcx-protocol/common';
 dotenv.config();
 
 export class IssuerConfig extends Config {

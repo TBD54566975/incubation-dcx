@@ -14,7 +14,7 @@ import {
   stringifier,
   Time,
   UseOptions,
-} from '@dvcx/common';
+} from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
@@ -362,7 +362,7 @@ export default class IssuerServer {
         cursor = undefined;
       }
 
-      const recordIds = records.map((record: { id: any }) => record.id);
+      const recordIds = records.map((record: Record) => record.id);
 
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {

@@ -1,7 +1,7 @@
 export type ApplicationSchema = typeof schema;
 
 export const schema = {
-  $id        : 'https://formfree.github.io/.well-known/schemas/dvcx/application.json',
+  $id        : 'https://formfree.github.io/.well-known/schemas/dcx/application.json',
   $schema    : 'http://json-schema.org/draft-07/schema#',
   title      : 'Credential Application',
   type       : 'object',

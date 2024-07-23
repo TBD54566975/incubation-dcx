@@ -1,4 +1,4 @@
-import IssuerServer from '@dvcx/issuer';
+import IssuerServer from '@dcx-protocol/issuer';
 import ExampleManifest from '../../../EXAMPLE-MANIFEST.json';
 
 const server = new IssuerServer();
