@@ -317,8 +317,6 @@ export default class IssuerServer {
     Web5Manager.issuerAgent = agent;
     Web5Manager.issuerAgentVault = agentVault;
 
-    await getTrustedIssuers();
-
     // Set the server initialized flag
     this._isInitialized = true;
   }
