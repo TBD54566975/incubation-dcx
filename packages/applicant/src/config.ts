@@ -1,8 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { Config } from '@dcx-protocol/common';
-
 export class ApplicantConfig extends Config {
   constructor() {
     super();
