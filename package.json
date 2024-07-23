@@ -15,8 +15,7 @@
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
-    "version": "tsx scripts/version.ts",
-    "publish": "tsx scripts/publish.ts"
+    "version": "tsx scripts/version.ts"
   },
   "repository": {
     "type": "git",
