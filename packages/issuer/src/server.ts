@@ -441,7 +441,7 @@ export default class IssuerServer {
 
       this._isPolling = true;
       await this.poll();
-    } catch (error: any) {
+    } catch (error: unknown) {
       Logger.error(error);
       this.stop();
     }
