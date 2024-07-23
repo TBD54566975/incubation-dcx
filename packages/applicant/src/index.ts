@@ -5,7 +5,6 @@ export * from './server.js';
 export * from './web5-manager.js';
 
 import ApplicantServer from './server.js';
-import { server } from './server.js';
-
 export default ApplicantServer;
-export { server };
+
+export const server = new ApplicantServer();

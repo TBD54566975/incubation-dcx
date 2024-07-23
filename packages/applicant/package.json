@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/applicant",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "DCX Applicant protocol and server",
   "type": "module",
   "main": "./dist/cjs/index.js",

@@ -1,5 +1,4 @@
 import { Issuer } from './types/dcx';
-
 export class Config {
   public static NODE_ENV = process.env.NODE_ENV || 'development';
   public static DEFAULT_ENDPOINTS = {
