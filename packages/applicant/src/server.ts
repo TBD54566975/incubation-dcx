@@ -1,4 +1,5 @@
 import {
+  Config,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
@@ -7,35 +8,32 @@ import {
   Handler,
   Issuer,
   Logger,
+  Mnemonic,
   Provider,
-  UseOptions,
-  Config
+  UseOptions
 } from '@dcx-protocol/common';
-import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
 import { Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
+const defaultUseOptions = {
+  handlers  : [],
+  manifests : [],
+  providers : [],
+  issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
+  gateways  : Config.DEFAULT_GATEWAY_URIS,
+  dwns      : Config.DEFAULT_DWN_ENDPOINTS,
+};
 export default class ApplicantServer {
-  static [key: string]: any;
-
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
   _isSetup: boolean = false;
-  _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = [Config.NODE_ENV, process.env.NODE_ENV].includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  useOptions: UseOptions = {
-    handlers  : [],
-    manifests : [],
-    providers : [],
-    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways  : Config.DEFAULT_GATEWAY_URIS,
-    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
-  };
+  useOptions: UseOptions = defaultUseOptions;
 
-  constructor(options: UseOptions = this.useOptions ?? {}) {
+  constructor(options: UseOptions = this.useOptions ?? defaultUseOptions) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -52,12 +50,22 @@ export default class ApplicantServer {
      */
     this.useOptions.manifests = options.manifests ?? [];
     this.useOptions.providers = options.providers ?? [];
-
-    this.useOptions.issuers = options.issuers ?? Config.DEFAULT_TRUSTED_ISSUERS;
-    this.useOptions.gateways = options.gateways ?? Config.DEFAULT_GATEWAY_URIS;
-    this.useOptions.dwns = options.dwns ?? Config.DEFAULT_DWN_ENDPOINTS;
-
     this.useOptions.handlers = options.handlers ?? [];
+
+    this.useOptions.dwns = options.dwns ?? Config.DEFAULT_DWN_ENDPOINTS;
+    this.useOptions.gateways = options.gateways ?? Config.DEFAULT_GATEWAY_URIS;
+    this.useOptions.issuers = options.issuers ?? Config.DEFAULT_TRUSTED_ISSUERS;
+  }
+
+  public static create(): ApplicantServer {
+    const newApplicantServer = new ApplicantServer();
+    return newApplicantServer;
+  }
+
+  public static async createInit(): Promise<ApplicantServer> {
+    const newApplicantServer = ApplicantServer.create();
+    await newApplicantServer.initialize();
+    return newApplicantServer;
   }
 
   /**
@@ -184,23 +192,6 @@ export default class ApplicantServer {
 
   /**
    *
-   * Creates a new password for the DCX server
-   *
-   * @returns string
-   *
-   */
-  public async createPassword(): Promise<string> {
-    const mnemonic = generateMnemonic(wordlist, 128).split(' ');
-    const words: string[] = [];
-    for (let i = 0; i < 6; i++) {
-      const rand = Math.floor(Math.random() * mnemonic.length);
-      words.push(mnemonic[rand]);
-    }
-    return words.join(' ');
-  }
-
-  /**
-   *
    * Checks the state of the password and recovery phrase
    *
    * @param firstLaunch A boolean indicating if this is the first launch of the agent
@@ -215,7 +206,7 @@ export default class ApplicantServer {
     const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
 
     // TODO: consider generating a new recovery phrase if one is not provided
-    // Config.WEB5_RECOVERY_PHRASE = generateMnemonic(128);
+    // Config.WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
 
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       // Logger.security(
@@ -223,7 +214,7 @@ export default class ApplicantServer {
       //   'New WEB5_PASSWORD saved to password.key file. ' +
       //   'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       // );
-      const password = await this.createPassword();
+      const password = Mnemonic.createPassword();
       await FileSystem.overwrite('password.key', password);
       Config.WEB5_PASSWORD = password;
       return { password };
@@ -276,7 +267,7 @@ export default class ApplicantServer {
    *
    */
   public async initialize(): Promise<void> {
-    // Logger.debug('Initializing Web5 ... ');
+    Logger.debug('Initializing Web5 ... ');
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
@@ -295,6 +286,7 @@ export default class ApplicantServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.useOptions.dwns!;
+    Logger.debug('dwnEndpoints', dwnEndpoints);
     const startParams = { password };
     const initializeParams = !recoveryPhrase
       ? { ...startParams, dwnEndpoints }
@@ -315,9 +307,11 @@ export default class ApplicantServer {
     Web5Manager.applicantAgent = agent;
     Web5Manager.applicantAgentVault = agentVault;
 
+    if(!this.useOptions.manifests?.length){
+      this.useManifest(Config.DEFAULT_EXAMPLE_MANIFEST);
+    }
     // Set the server initialized flag
     this._isInitialized = true;
-
   }
 
   /**
@@ -331,10 +325,9 @@ export default class ApplicantServer {
     exit(0);
   }
 
-  public async setupDwn(): Promise<boolean> {
+  public async setupDwn(): Promise<void> {
     await Web5Manager.setup();
     this._isSetup = true;
-    return this._isSetup;
   }
 
   /**
@@ -346,7 +339,7 @@ export default class ApplicantServer {
     try {
       if (!this._isInitialized) {
         await this.initialize();
-        // Logger.debug('Web5 initialized', this._isInitialized);
+        Logger.debug('Web5 initialized', this._isInitialized);
         await Web5Manager.setup();
       }
 
@@ -357,3 +350,5 @@ export default class ApplicantServer {
     }
   }
 }
+
+export const server = new ApplicantServer(defaultUseOptions);

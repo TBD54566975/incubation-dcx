@@ -1,5 +1,5 @@
 import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist as english } from '@scure/bip39/wordlists/english';
 
 export class Mnemonic {
   /**
@@ -8,14 +8,14 @@ export class Mnemonic {
      *
      * @returns string
      */
-  public static async createPassword(): Promise<string> {
-    const mnemonic = generateMnemonic(wordlist, 128).split(' ');
-    const words: string[] = [];
-    for (let i = 0; i < 6; i++) {
-      const rand = Math.floor(Math.random() * mnemonic.length);
-      words.push(mnemonic[rand]);
+  public static createPassword(n: number = 6): string {
+    const mnemonic = Mnemonic.createRecoveryPhrase();
+    const words = mnemonic.split(' ');
+    const password: string[] = [];
+    for (let i = 0; i < n; i++) {
+      password.push(words[Math.floor(Math.random() * words.length)]);
     }
-    return words.join(' ');
+    return password.join(' ');
   }
 
   /**
@@ -24,7 +24,7 @@ export class Mnemonic {
      *
      * @returns string
      */
-  public static async createRecoveryPhrase(): Promise<string> {
-    return generateMnemonic(wordlist, 128);
+  public static createRecoveryPhrase(wordlist: string[] = english, strength: number = 128): string {
+    return generateMnemonic(wordlist, strength);
   }
 }

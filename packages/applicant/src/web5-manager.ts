@@ -15,7 +15,7 @@ import {
   DcxDwnError,
   manifestSchema, DcxAgent, DcxIdentityVault
 } from '@dcx-protocol/common';
-import { credentialApplicantProtocol } from './index.js';
+import { credentialApplicantProtocol, server } from './index.js';
 import ApplicantServer from './server.js';
 
 /**
@@ -39,12 +39,12 @@ export class Web5Manager {
     Logger.debug('Syncing done!');
   }
   /**
-   * Query DWN for credential-issuer protocol
+   * Query DWN for credential-applicant protocol
    * @returns Protocol[]; see {@link Protocol}
    */
   public static async queryApplicantProtocols(): Promise<ProtocolsQueryResponse> {
     try {
-      // Query DWN for credential-issuer protocol
+      // Query DWN for credential-applicant protocol
       const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
         message: {
           filter: {
@@ -68,10 +68,10 @@ export class Web5Manager {
   }
 
   /**
-   * Configure DWN for credential-issuer protocol
+   * Configure DWN for credential-applicant protocol
    * @returns DwnResponseStatus; see {@link DwnResponseStatus}
    */
-  public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
+  public static async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     try {
       const { status: configure, protocol } = await Web5Manager.web5.dwn.protocols.configure({
         message: { definition: credentialApplicantProtocol },
@@ -171,7 +171,7 @@ export class Web5Manager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = ApplicantServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -193,6 +193,7 @@ export class Web5Manager {
   public static async createMissingManifest(
     unwrittenManifest: CredentialManifest,
   ): Promise<RecordsCreateResponse> {
+    Logger.debug('Creating missing manifest record', unwrittenManifest);
     unwrittenManifest.issuer.id = Web5Manager.applicantAgent.agentDid.uri;
     const { record, status: create } = await Web5Manager.web5.dwn.records.create({
       store   : false,
@@ -253,26 +254,26 @@ export class Web5Manager {
   }
 
   /**
-   * Setup DWN with credential-issuer protocol and manifest records
+   * Setup DWN with credential-applicant protocol and manifest records
    * @returns boolean indicating success or failure
    */
   public static async setup(): Promise<void> {
     // Logger.log('Setting up dwn ...');
-    const useManifests = ApplicantServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
     try {
-      // Query DWN for credential-issuer protocols
+      // Query DWN for credential-applicant protocols
       const { protocols } = await Web5Manager.queryApplicantProtocols();
-      Logger.log(`Found ${protocols.length} dcx issuer protocol(s) in dwn`, protocols);
+      Logger.log(`Found ${protocols.length} dcx applicant protocol(s) in dwn`, protocols);
 
-      // Configure DWN with credential-issuer protocol if not found
+      // Configure DWN with credential-applicant protocol if not found
       if (!protocols.length) {
-        Logger.log('Configuring dwn with dcx issuer protocol ...');
-        const { status, protocol } = await Web5Manager.configureIssuerProtocols();
+        Logger.log('Configuring dwn with dcx applicant protocol ...');
+        const { status, protocol } = await Web5Manager.configureProtocols();
         Logger.debug(
-          `Configured credential issuer protocol in dwn: ${status.code} - ${status.detail}`,
+          `Configured credential applicant protocol in dwn: ${status.code} - ${status.detail}`,
           protocol,
         );
       }

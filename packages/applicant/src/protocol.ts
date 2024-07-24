@@ -4,7 +4,7 @@ export const protocol = {
   // applicant protocol is a subset of exchange protocol
   // used on client side to interact with applicant & issuer dwn
   protocol  : 'https://formfree.github.io/.well-known/protocols/dcx/credential-applicant.json',
-  published : false,
+  published : true,
   types     : {
     application: {
       schema      : applicationSchema.$id,

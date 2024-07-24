@@ -11,13 +11,19 @@
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "build": "pnpm --recursive --stream build",
+    "build:tests:node": "pnpm --recursive build:tests:node",
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
-    "build:tests:node": "pnpm --recursive build:tests:node",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "version": "tsx scripts/version.ts",
-    "audit-ci": "audit-ci --config ./audit-ci.json"
+    "audit-ci": "audit-ci --config ./audit-ci.json",
+    "build:applicant": "pnpm --filter applicant build",
+    "build:common": "pnpm --filter common build",
+    "build:issuer": "pnpm --filter issuer build",
+    "test:node:applicant": "pnpm --filter applicant test:node",
+    "test:node:common": "pnpm --filter common test:node",
+    "test:node:issuer": "pnpm --filter issuer test:node"
   },
   "repository": {
     "type": "git",
