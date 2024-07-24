@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import {DcxIdentityVault} from '../src/core/identity-vault.js';
+import { DcxIdentityVault } from '../src/dcx-identity-vault.js';
 
 describe('DcxIdentityVault', () => {
-  it('should be constructed', () => {
+  it('should initialize with default parameters', () => {
     const agentVault = new DcxIdentityVault();
     expect(agentVault).to.not.be.undefined;
     expect(agentVault).to.be.instanceof(DcxIdentityVault);

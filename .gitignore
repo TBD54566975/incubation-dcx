@@ -1,7 +1,7 @@
 node_modules
 dist
 db-data
-/DATA
+**/DATA
 .DS_Store
 cursor.json
 lastRecordId

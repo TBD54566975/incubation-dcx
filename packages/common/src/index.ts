@@ -1,30 +1,3 @@
-// Export prototyping classes
-export * from './prototyping/crypto/crypto-error.js';
-export * from './prototyping/crypto/dsa.js';
-export * from './prototyping/crypto/utils.js';
-export * from './prototyping/crypto/algorithms/aes-gcm.js';
-export * from './prototyping/crypto/algorithms/aes-kw.js';
-export * from './prototyping/crypto/algorithms/ecdsa.js';
-export * from './prototyping/crypto/algorithms/eddsa.js';
-export * from './prototyping/crypto/algorithms/hkdf.js';
-export * from './prototyping/crypto/algorithms/pbkdf2.js';
-export * from './prototyping/crypto/common/object.js';
-export * from './prototyping/crypto/common/type-utils.js';
-export * from './prototyping/crypto/jose/jwe.js';
-export * from './prototyping/crypto/jose/jwe-compact.js';
-export * from './prototyping/crypto/jose/jwe-flattened.js';
-export * from './prototyping/crypto/primitives/aes-gcm.js';
-export * from './prototyping/crypto/primitives/aes-kw.js';
-export * from './prototyping/crypto/primitives/hkdf.js';
-export * from './prototyping/crypto/primitives/pbkdf2.js';
-export type * from './prototyping/crypto/types/cipher.js';
-export type * from './prototyping/crypto/types/crypto-api.js';
-export type * from './prototyping/crypto/types/key-converter.js';
-export type * from './prototyping/crypto/types/key-deriver.js';
-export type * from './prototyping/crypto/types/key-io.js';
-export type * from './prototyping/crypto/types/key-manager.js';
-export type * from './prototyping/crypto/types/params-direct.js';
-export type * from './prototyping/crypto/types/params-kms.js';
 // Export dcx classes
 export type * from './types/dcx.js';
 export type * from './types/did.js';

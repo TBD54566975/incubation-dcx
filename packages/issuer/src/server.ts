@@ -13,13 +13,13 @@ import {
   Provider,
   stringifier,
   Time,
-  UseOptions,
+  UseOptions
 } from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 import { IssuerProtocolHandlers } from './handlers.js';
-import { credentialIssuerProtocol, IssuerConfig, Web5Manager } from './index.js';
+import { credentialIssuerProtocol, Web5Manager } from './index.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
 export default class IssuerServer {
@@ -329,8 +329,8 @@ export default class IssuerServer {
   public async poll(): Promise<void> {
     Logger.debug('DCX server starting ...');
 
-    const CURSOR = IssuerConfig.CURSOR;
-    const LAST_RECORD_ID = IssuerConfig.LAST_RECORD_ID;
+    const CURSOR = Config.CURSOR;
+    const LAST_RECORD_ID = Config.LAST_RECORD_ID;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };

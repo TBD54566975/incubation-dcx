@@ -1,61 +1,71 @@
+import { DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
+import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { server } from '../src/server.js';
-import ApplicantServer from '../src/server.js';
-import { Web5Manager } from '../src/web5-manager.js';
+import ApplicantServer, { Web5Manager } from '../src/index.js';
 
+const applicantServer: ApplicantServer = new ApplicantServer();
 describe('ApplicantServer', () => {
-  let applicantServer: ApplicantServer;
-  const defaultParameters = [
-    '_isPolling',
-    '_isInitialized',
-    '_isNewAgent',
-    '_isTest',
-    'useOptions',
-  ];
-  const nonNullPaths = ['issuers', 'gateways', 'dwns'];
 
-  beforeEach(() => {
-    applicantServer = new ApplicantServer();
-  });
+  it('should initialize with default options', () => {
+    const issuers = applicantServer.useOptions['issuers'];
+    const gateways = applicantServer.useOptions['gateways'];
+    const dwns = applicantServer.useOptions['dwns'];
+    const manifests = applicantServer.useOptions['manifests'];
+    const providers = applicantServer.useOptions['providers'];
+    const handlers = applicantServer.useOptions['handlers'];
 
-  it('should initialize with default parameters', () => {
-    expect(applicantServer).to.not.be.undefined;
+    expect(applicantServer).to.not.be.null.and.not.be.undefined;
     expect(applicantServer).to.be.instanceof(ApplicantServer);
-    defaultParameters.map((prop) => {
-      expect(applicantServer).to.have.property(prop);
-    });
 
-    nonNullPaths.map((path) => {
-      const option = applicantServer.useOptions[path];
-      expect(option).to.not.be.null;
-      expect(option).to.not.be.undefined;
-      expect(option).to.be.an('array');
-      expect(option).to.be.an('array');
-    });
+    expect(applicantServer).to.have.property('_isPolling');
+    expect(applicantServer).to.have.property('_isInitialized');
+    expect(applicantServer).to.have.property('_isSetup');
+    expect(applicantServer).to.have.property('_isTest');
+    expect(applicantServer).to.have.property('useOptions');
 
-    ['manifests', 'providers', 'handlers', ...nonNullPaths].map((path) => {
-      const option = applicantServer.useOptions[path];
-      expect(option).to.not.be.undefined;
-      expect(option).to.be.an('array');
-    });
+    expect(issuers).to.not.be.null.and.not.be.undefined;
+    expect(issuers).to.be.an('array');
+
+    expect(gateways).to.not.be.null.and.not.be.undefined;
+    expect(gateways).to.be.an('array');
+
+    expect(dwns).to.not.be.null.and.not.be.undefined;
+    expect(dwns).to.be.an('array');
+
+    expect(manifests).to.not.be.null.and.not.be.undefined;
+    expect(manifests).to.be.an('array');
+
+    expect(providers).to.not.be.null.and.not.be.undefined;
+    expect(providers).to.be.an('array');
+
+    expect(handlers).to.not.be.null.and.not.be.undefined;
+    expect(handlers).to.be.an('array');
   });
 
-  it('should import with default parameters', () => {
-    expect(server).to.not.be.undefined;
-    expect(server).to.be.instanceof(ApplicantServer);
-    defaultParameters.map((prop) => {
-      expect(applicantServer).to.have.property(prop);
-    });
-  });
 
-  describe('initialize()', () => {
-    it('should initialize the server', async () => {
-      await server.initialize();
-      expect(server._isInitialized).to.be.true;
-      expect(Web5Manager.web5).to.not.be.undefined;
-      expect(Web5Manager.applicantAgent).to.not.be.undefined;
-      expect(Web5Manager.applicantAgentVault).to.not.be.undefined;
+  describe('.initialize()', () => {
+    it('should initialize the applicantServer', async () => {
+      await applicantServer.initialize();
+      expect(applicantServer._isInitialized).equals(true);
     });
-  });
 
+    it('should initialize the Web5Manager', () => {
+      expect(Web5Manager.web5).to.not.be.null.and.not.be.undefined;
+      expect(Web5Manager.web5).to.be.instanceof(Web5);
+
+      expect(Web5Manager.applicantAgent).to.not.be.null.and.not.be.undefined;
+      expect(Web5Manager.applicantAgent).to.be.instanceof(DcxAgent);
+
+      expect(Web5Manager.applicantAgentVault).to.not.be.null.and.not.be.undefined;
+      expect(Web5Manager.applicantAgentVault).to.be.instanceof(DcxIdentityVault);
+    });
+
+    // it('should setup the remote DWN', async () => {
+    //   const _isSetup = await applicantServer.setupDwn();
+    //   console.log('_isSetup', _isSetup);
+    //   expect(_isSetup).equals(true);
+    //   console.log('applicantServer._isSetup', applicantServer._isSetup);
+    //   expect(applicantServer._isSetup).equals(true);
+    // });
+  });
 });

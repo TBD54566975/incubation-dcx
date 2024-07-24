@@ -5,7 +5,7 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { IssuerConfig, Web5Manager, credentialIssuerProtocol } from './index.js';
+import {  Web5Manager, credentialIssuerProtocol } from './index.js';
 import {
   DwnUtils,
   CredentialManifest,
@@ -17,7 +17,8 @@ import {
   Objects,
   stringifier,
   Logger,
-  Provider
+  Provider,
+  Config
 } from '@dcx-protocol/common';
 import IssuerServer from './server.js';
 
@@ -69,7 +70,7 @@ export class IssuerProtocolHandlers {
       }
 
       const issuers = IssuerServer.issuers.map((issuer: Issuer) => issuer.id);
-      const issuerDidSet = new Set<string>([...issuers, ...IssuerConfig.DEFAULT_TRUSTED_ISSUER_DIDS]);
+      const issuerDidSet = new Set<string>([...issuers, ...Config.DEFAULT_TRUSTED_ISSUER_DIDS]);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
         continue;

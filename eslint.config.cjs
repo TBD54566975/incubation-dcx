@@ -1,14 +1,12 @@
-import eslint from '@eslint/js';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import mochaPlugin from 'eslint-plugin-mocha';
-import globals from 'globals';
-import tsEslint from 'typescript-eslint';
+const eslint = require('@eslint/js');
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
+const tsParser = require('@typescript-eslint/parser');
+const mochaPlugin = require('eslint-plugin-mocha');
+const globals = require('globals');
 
-export default [
+module.exports = [
   eslint.configs.recommended,
   mochaPlugin.configs.flat.recommended,
-  ...tsEslint.configs.recommended,
   {
     languageOptions: {
       parser        : tsParser,

@@ -14,7 +14,7 @@ import {
   Time,
   DcxDwnError,
   manifestSchema, DcxAgent, DcxIdentityVault
-} from '../../common/src/index.js';
+} from '@dcx-protocol/common';
 import { credentialApplicantProtocol } from './index.js';
 import ApplicantServer from './server.js';
 
@@ -257,7 +257,7 @@ export class Web5Manager {
    * @returns boolean indicating success or failure
    */
   public static async setup(): Promise<void> {
-    Logger.log('Setting up dwn ...');
+    // Logger.log('Setting up dwn ...');
     const useManifests = ApplicantServer.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');

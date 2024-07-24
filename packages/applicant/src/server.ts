@@ -1,20 +1,20 @@
-import { Web5 } from '@web5/api';
-import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
-import { argv, exit } from 'process';
 import {
-  UseOptions,
-  Config,
-  DcxServerError,
   CredentialManifest,
+  DcxAgent,
+  DcxIdentityVault,
+  DcxServerError,
+  FileSystem,
   Handler,
-  Provider,
   Issuer,
   Logger,
-  DcxIdentityVault,
-  DcxAgent,
-  FileSystem
-} from '../../common/src/index.js';
+  Provider,
+  UseOptions,
+  Config
+} from '@dcx-protocol/common';
+import { generateMnemonic } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
+import { Web5 } from '@web5/api';
+import { argv, exit } from 'process';
 import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
@@ -23,7 +23,7 @@ export default class ApplicantServer {
 
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
+  _isSetup: boolean = false;
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = {
@@ -218,11 +218,11 @@ export default class ApplicantServer {
     // Config.WEB5_RECOVERY_PHRASE = generateMnemonic(128);
 
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
-      Logger.security(
-        'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New WEB5_PASSWORD saved to password.key file. ' +
-        'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
-      );
+      // Logger.security(
+      //   'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
+      //   'New WEB5_PASSWORD saved to password.key file. ' +
+      //   'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
+      // );
       const password = await this.createPassword();
       await FileSystem.overwrite('password.key', password);
       Config.WEB5_PASSWORD = password;
@@ -254,10 +254,10 @@ export default class ApplicantServer {
     }
 
     if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
-      Logger.warn(
-        'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
-        'Attempting to unlock the vault with WEB5_PASSWORD.',
-      );
+      // Logger.warn(
+      //   'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
+      //   'Attempting to unlock the vault with WEB5_PASSWORD.',
+      // );
       return { password: web5Password };
     }
 
@@ -276,7 +276,7 @@ export default class ApplicantServer {
    *
    */
   public async initialize(): Promise<void> {
-    Logger.debug('Initializing Web5 ... ');
+    // Logger.debug('Initializing Web5 ... ');
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
@@ -295,7 +295,6 @@ export default class ApplicantServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.useOptions.dwns!;
-    dwnEndpoints.push(...Config.DEFAULT_DWN_ENDPOINTS);
     const startParams = { password };
     const initializeParams = !recoveryPhrase
       ? { ...startParams, dwnEndpoints }
@@ -318,6 +317,7 @@ export default class ApplicantServer {
 
     // Set the server initialized flag
     this._isInitialized = true;
+
   }
 
   /**
@@ -326,9 +326,15 @@ export default class ApplicantServer {
    * @returns void
    */
   public stop(): void {
-    Logger.debug('DCX server stopping...');
+    // Logger.debug('DCX server stopping...');
     this._isPolling = false;
     exit(0);
+  }
+
+  public async setupDwn(): Promise<boolean> {
+    await Web5Manager.setup();
+    this._isSetup = true;
+    return this._isSetup;
   }
 
   /**
@@ -340,7 +346,7 @@ export default class ApplicantServer {
     try {
       if (!this._isInitialized) {
         await this.initialize();
-        Logger.debug('Web5 initialized', this._isInitialized);
+        // Logger.debug('Web5 initialized', this._isInitialized);
         await Web5Manager.setup();
       }
 
@@ -351,5 +357,3 @@ export default class ApplicantServer {
     }
   }
 }
-
-export const server = new ApplicantServer();

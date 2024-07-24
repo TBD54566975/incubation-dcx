@@ -6,7 +6,6 @@ import {
   Record,
   Web5,
 } from '@web5/api';
-import { DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
 import { credentialIssuerProtocol } from './index.js';
 import IssuerServer from './server.js';
 import {
@@ -16,7 +15,8 @@ import {
   Time,
   Logger,
   CredentialManifest,
-  manifestSchema
+  manifestSchema,
+  DcxAgent, DcxIdentityVault
 } from '@dcx-protocol/common';
 
 /**
