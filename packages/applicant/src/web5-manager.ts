@@ -1,22 +1,23 @@
-import { DwnResponseStatus, DwnPaginationCursor } from '@web5/agent';
-import {
-  ProtocolsQueryResponse,
-  ProtocolsConfigureResponse,
-  RecordsCreateResponse,
-  Record,
-  Web5,
-} from '@web5/api';
 import {
   CredentialManifest,
-  DwnUtils,
-  DwnError,
-  Logger,
-  Time,
+  DcxAgent,
   DcxDwnError,
-  manifestSchema, DcxAgent, DcxIdentityVault
+  DcxIdentityVault,
+  DwnError,
+  DwnUtils,
+  Logger,
+  manifestSchema,
+  Time
 } from '@dcx-protocol/common';
+import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
+import {
+  ProtocolsConfigureResponse,
+  ProtocolsQueryResponse,
+  Record,
+  RecordsCreateResponse,
+  Web5,
+} from '@web5/api';
 import { credentialApplicantProtocol, server } from './index.js';
-import ApplicantServer from './server.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN

@@ -13,7 +13,13 @@ import {
   Provider,
   stringifier,
   Time,
-  UseOptions
+  UseDwns,
+  UseGateways,
+  UseHandlers,
+  UseIssuers,
+  UseManifests,
+  UseOptions,
+  UseProviders
 } from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
@@ -39,7 +45,14 @@ export default class IssuerServer {
     dwns      : Config.DEFAULT_DWN_ENDPOINTS,
   };
 
-  constructor(options: UseOptions = this.useOptions ?? {}) {
+  constructor(options: {
+    manifests?: UseManifests;
+    providers?: UseProviders;
+    issuers?: UseIssuers;
+    gateways?: UseGateways;
+    dwns?: UseDwns;
+    handlers?: UseHandlers;
+  } = this.useOptions ?? {}) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -81,12 +94,12 @@ export default class IssuerServer {
         `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
       );
     }
-
     if (validPaths.includes(path)) {
-      if (!this.useOptions[path]) {
-        this.useOptions[path] = [];
+      const plural = `${path}s`;
+      if (!this.useOptions[plural]) {
+        this.useOptions[plural] = [];
       }
-      this.useOptions[path].push(obj);
+      this.useOptions[plural].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }

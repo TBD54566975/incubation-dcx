@@ -16,8 +16,8 @@ import { Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 import { Web5Manager } from './web5-manager.js';
 
-type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
-const defaultUseOptions = {
+type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
+const defaultUseOptions: UseOptions = {
   handlers  : [],
   manifests : [],
   providers : [],
@@ -26,9 +26,9 @@ const defaultUseOptions = {
   dwns      : Config.DEFAULT_DWN_ENDPOINTS,
 };
 export default class ApplicantServer {
+  _isSetup: boolean = false;
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isSetup: boolean = false;
   _isTest: boolean = [Config.NODE_ENV, process.env.NODE_ENV].includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   useOptions: UseOptions = defaultUseOptions;
@@ -79,7 +79,7 @@ export default class ApplicantServer {
    *
    */
   public use(path: UsePath, obj: any): void {
-    const validPaths = ['gateway', 'dwn', 'issuer', 'manifest', 'provider', 'handler'];
+    const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
         `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
@@ -273,7 +273,7 @@ export default class ApplicantServer {
     const agentVault = new DcxIdentityVault();
 
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ agentVault });
+    const agent = await DcxAgent.create({ dataPath: `${process.cwd()}/DATA`, agentVault });
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();

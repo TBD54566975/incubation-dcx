@@ -2,8 +2,7 @@ import { Issuer } from './types/dcx';
 export class Config {
   public static PORT = process.env.PORT ?? 3000;
   public static NODE_ENV = process.env.NODE_ENV ?? 'development';
-  public static EXTERNAL_PORT = process.env.EXTERNAL_PORT ?? 3000;
-  public static SERVICE_NAME = process.env.SERVICE_NAME ?? 'decentralized credential exchange';
+  public static SERVICE_NAME = process.env.SERVICE_NAME ?? 'dcx';
   public static SERVICE_ID = process.env.SERVICE_ID ?? 'dcx';
   public static LAST_RECORD_ID = process.env.LAST_RECORD_ID ?? '';
   public static CURSOR = process.env.CURSOR ?? '';

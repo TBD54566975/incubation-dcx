@@ -1,17 +1,17 @@
 import dotenv from 'dotenv';
-import CustomManifest from '../../issuer/CUSTOM-MANIFEST.json';
+import CustomManifest from '../../../CUSTOM-MANIFEST.json';
 import { server } from '../src/index.js';
-dotenv.config({path: '../.env'});
+dotenv.config({path: './.env'});
 
-server.use('manifest', CustomManifest);
-server.use('provider',
+server.use('manifests', CustomManifest);
+server.use('providers',
   {
     id       : CustomManifest.output_descriptors[0].id,
     method   : 'POST',
     endpoint : 'http://localhost:4000/api/v1/vc/data'
   }
 );
-server.use('dwn', 'http://localhost:3000/');
+server.use('dwns', 'http://localhost:3000/');
 
 await server.start();
 
