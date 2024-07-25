@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import dotenv from 'dotenv';
 import { ApplicantConfig } from '../src/config';
-dotenv.config({ path: './.env' });
+dotenv.config({ path: '.env.applicant' });
 
 describe('ApplicantConfig class', () => {
   describe('properties defined by process.env vars', () => {
