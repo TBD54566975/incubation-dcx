@@ -20,7 +20,7 @@ import {
   VerifiablePresentation,
 } from '@web5/credentials';
 import { issuer, IssuerConfig, Web5Manager } from './index.js';
-import { server } from './server.js';
+import { server } from './issuer-server.js';
 
 export class IssuerProtocolHandlers {
 

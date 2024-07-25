@@ -47,10 +47,10 @@ export class ServerManifest implements CredentialManifest {
 }
 
 export type UseOptions = {
-  manifests: ServerManifest[];
-  providers: Provider[];
-  issuers: Issuer[];
-  gateways: string[];
-  dwns: string[];
-  handlers: ServerHandler[];
+  manifests?: ServerManifest[];
+  providers?: Provider[];
+  issuers?: Issuer[];
+  gateways?: string[];
+  dwns?: string[];
+  handlers?: ServerHandler[];
 };

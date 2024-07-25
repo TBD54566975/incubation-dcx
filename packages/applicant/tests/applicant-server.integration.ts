@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import CustomManifest from '../../../CUSTOM-MANIFEST.json';
 import { server } from '../src/index.js';
-dotenv.config({path: './.env'});
+dotenv.config({path: '.env.applicant'});
 
 server.use('manifests', CustomManifest);
 server.use('providers',

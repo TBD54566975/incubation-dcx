@@ -12,6 +12,8 @@ export class IssuerConfig extends Config {
   public static ISSUER_DWN_ENDPOINTS = process.env.ISSUER_DWN_ENDPOINTS?.split(',') ?? IssuerConfig.DCX_ENDPOINTS.DWN_ENDPOINTS;
   public static ISSUER_GATEWAY_URIS = process.env.ISSUER_GATEWAY_URIS?.split(',') ?? IssuerConfig.DCX_ENDPOINTS.GATEWAY_URIS;
 
+  public static ISSUER_DCX_AGENT_DATA_PATH = process.env.ISSUER_DCX_AGENT_DATA_PATH ?? `DATA/DCX/ISSUER/AGENT`;
+
   private static _ISSUER_WEB5_PASSWORD = process.env.ISSUER_WEB5_PASSWORD ?? '';
   static get ISSUER_WEB5_PASSWORD(): string {
     return this._ISSUER_WEB5_PASSWORD;

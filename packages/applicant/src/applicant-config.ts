@@ -12,6 +12,8 @@ export class ApplicantConfig extends Config {
   public static APPLICANT_DWN_ENDPOINTS = process.env.APPLICANT_DWN_ENDPOINTS?.split(',') ?? ApplicantConfig.DCX_ENDPOINTS.DWN_ENDPOINTS;
   public static APPLICANT_GATEWAY_URIS = process.env.APPLICANT_GATEWAY_URIS?.split(',') ?? ApplicantConfig.DCX_ENDPOINTS.GATEWAY_URIS;
 
+  public static APPLICANT_DCX_AGENT_DATA_PATH = process.env.APPLICANT_WEB5_AGENT_DATA_PATH ?? `DATA/DCX/APPLICANT/AGENT`;
+
   private static _APPLICANT_WEB5_PASSWORD = process.env.APPLICANT_WEB5_PASSWORD ?? '';
   static get APPLICANT_WEB5_PASSWORD(): string {
     return this._APPLICANT_WEB5_PASSWORD;

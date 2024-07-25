@@ -12,43 +12,43 @@ export class Config {
     }
   ];
   public static DCX_HANDSHAKE_MANIFEST = {
-    'id'           : 'DCX-HANDSHAKE-MANIFEST',
-    'name'         : 'DCX Applicant-Issuer Handshake Manifest',
-    'description'  : 'Basic handshake manifest used to establish a connection between a DCX applicant and a DCX issuer.',
-    'spec_version' : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
-    'issuer'       : {
-      'id'   : '',
-      'name' : 'formfree'
+    id           : 'DCX-HANDSHAKE-MANIFEST',
+    name         : 'DCX Applicant-Issuer Handshake Manifest',
+    description  : 'Basic handshake manifest used to establish a connection between a DCX applicant and a DCX issuer.',
+    spec_version : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
+    issuer       : {
+      id   : '',
+      name : 'formfree'
     },
-    'output_descriptors': [
+    output_descriptors: [
       {
-        'id'     : 'dcx_handshake_output',
-        'name'   : 'DCX Handshake Credential',
-        'schema' : 'https://decentralized.cx/schemas/DCXHandshakeCredential'
+        id     : 'dcx_handshake_output',
+        name   : 'DCX Handshake Credential',
+        schema : 'https://decentralized.cx/schemas/DCXHandshakeCredential'
       }
     ],
-    'format': {
-      'jwt_vc': {
-        'alg': ['EdDSA']
+    format: {
+      jwt_vc: {
+        alg: ['EdDSA']
       }
     },
-    'presentation_definition': {
-      'id'                : 'example-presentation-definition-id',
-      'input_descriptors' : [
+    presentation_definition: {
+      id                : 'dcx-handshake-presentation-ca7f3e0e-10dd-4d0a-9539-29390a9c16e3',
+      input_descriptors : [
         {
-          'id'          : 'example-presentation-definition-input-descriptor-id',
-          'purpose'     : 'Meant as an example to developers',
-          'constraints' : {
-            'fields': [
+          id          : 'example-presentation-definition-input-descriptor-id',
+          purpose     : 'Meant as an example to developers',
+          constraints : {
+            fields: [
               {
-                'path'   : ['$.type[*]'],
-                'filter' : {
-                  'type'    : 'string',
-                  'pattern' : '^*$'
+                path   : ['$.type[*]'],
+                filter : {
+                  type    : 'string',
+                  pattern : '^*$'
                 }
               },
               {
-                'path': [
+                path: [
                   '$.credentialSubject.some.unique.field1',
                   '$.credentialSubject.some.unique.field2',
                   '$.credentialSubject.some.unique.fieldn'

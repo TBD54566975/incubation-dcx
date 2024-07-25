@@ -1,10 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.applicant' });
+
 import {  DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import ApplicantServer, { Web5Manager } from '../src/index.js';
 import CustomManifest from '../../../CUSTOM-MANIFEST.json';
-import dotenv from 'dotenv';
-dotenv.config({ path: './.env' });
 
 const applicantServer: ApplicantServer = new ApplicantServer({ manifests: [CustomManifest] });
 

@@ -1,39 +1,40 @@
 import {
-  Config,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
   DcxServerError,
   FileSystem,
-  Handler,
   Issuer,
   Logger,
   Mnemonic,
   Provider,
+  ServerHandler,
   UseOptions
 } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { argv, exit } from 'process';
+import { ApplicantConfig } from './applicant-config.js';
 import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
-const defaultUseOptions: UseOptions = {
+
+const APPLICANT_SERVER_USE_OPTIONS: UseOptions = {
   handlers  : [],
-  manifests : [],
   providers : [],
-  issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
-  gateways  : Config.DEFAULT_GATEWAY_URIS,
-  dwns      : Config.DEFAULT_DWN_ENDPOINTS,
+  manifests : [ApplicantConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : ApplicantConfig.DCX_INPUT_ISSUERS,
+  gateways  : ApplicantConfig.APPLICANT_GATEWAY_URIS,
+  dwns      : ApplicantConfig.APPLICANT_DWN_ENDPOINTS,
 };
 export default class ApplicantServer {
   _isSetup: boolean = false;
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isTest: boolean = [Config.NODE_ENV, process.env.NODE_ENV].includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = ApplicantConfig.APPLICANT_NODE_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  useOptions: UseOptions = defaultUseOptions;
+  useOptions: UseOptions = APPLICANT_SERVER_USE_OPTIONS;
 
-  constructor(options: UseOptions = this.useOptions ?? defaultUseOptions) {
+  constructor(options: UseOptions = APPLICANT_SERVER_USE_OPTIONS) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -48,13 +49,13 @@ export default class ApplicantServer {
      * @example see README.md for usage information
      *
      */
-    this.useOptions.manifests = options.manifests ?? [];
-    this.useOptions.providers = options.providers ?? [];
-    this.useOptions.handlers = options.handlers ?? [];
+    this.useOptions.manifests = options.manifests ?? this.useOptions.manifests;
+    this.useOptions.providers = options.providers ?? this.useOptions.providers;
+    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
 
-    this.useOptions.dwns = options.dwns ?? Config.DEFAULT_DWN_ENDPOINTS;
-    this.useOptions.gateways = options.gateways ?? Config.DEFAULT_GATEWAY_URIS;
-    this.useOptions.issuers = options.issuers ?? Config.DEFAULT_TRUSTED_ISSUERS;
+    this.useOptions.issuers = options.issuers ?? this.useOptions.issuers;
+    this.useOptions.gateways = options.gateways ?? this.useOptions.gateways;
+    this.useOptions.dwns = options.dwns ?? this.useOptions.dwns;
   }
 
   public static create(): ApplicantServer {
@@ -87,9 +88,6 @@ export default class ApplicantServer {
     }
 
     if (validPaths.includes(path)) {
-      if (!this.useOptions[path]) {
-        this.useOptions[path] = [];
-      }
       this.useOptions[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
@@ -106,9 +104,6 @@ export default class ApplicantServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    if (!this.useOptions.manifests || !this.useOptions.manifests.length) {
-      this.useOptions.manifests = [];
-    }
     this.useOptions.manifests.push(manifest);
   }
 
@@ -121,10 +116,7 @@ export default class ApplicantServer {
    * @example see README.md for usage information
    *
    */
-  public useHandler(handler: Handler): void {
-    if (!this.useOptions.handlers || !this.useOptions.handlers.length) {
-      this.useOptions.handlers = [];
-    }
+  public useHandler(handler: ServerHandler): void {
     this.useOptions.handlers.push(handler);
   }
 
@@ -202,52 +194,52 @@ export default class ApplicantServer {
   public async checkWeb5Config(
     firstLaunch: boolean,
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = Config.WEB5_PASSWORD;
-    const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
+    const web5Password = ApplicantConfig.APPLICANT_WEB5_PASSWORD;
+    const web5RecoveryPhrase = ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE;
 
     // TODO: consider generating a new recovery phrase if one is not provided
-    // Config.WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
+    // ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
 
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
-      // Logger.security(
-      //   'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-      //   'New WEB5_PASSWORD saved to password.key file. ' +
-      //   'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
-      // );
+      Logger.security(
+        'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
+        'New APPLICANT_WEB5_PASSWORD saved to password.key file. ' +
+        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to recovery.key file.',
+      );
       const password = Mnemonic.createPassword();
       await FileSystem.overwrite('password.key', password);
-      Config.WEB5_PASSWORD = password;
+      ApplicantConfig.APPLICANT_WEB5_PASSWORD = password;
       return { password };
     }
 
     if (firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
-        'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on first launch! ' +
-        'WEB5_PASSWORD is required to unlock the vault recovered by WEB5_RECOVERY_PHRASE. ' +
-        'Please set WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file.',
+        'APPLICANT_WEB5_RECOVERY_PHRASE found without APPLICANT_WEB5_PASSWORD on first launch! ' +
+        'APPLICANT_WEB5_PASSWORD is required to unlock the vault recovered by APPLICANT_WEB5_RECOVERY_PHRASE. ' +
+        'Please set APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file.',
       );
     }
 
     if (!firstLaunch && !web5Password && !web5RecoveryPhrase) {
       throw new DcxServerError(
-        'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
-        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+        'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
+        'Either set both APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
         'to create a new password and recovery phrase.',
       );
     }
 
     if (!firstLaunch && !web5Password && web5RecoveryPhrase) {
       throw new DcxServerError(
-        'WEB5_RECOVERY_PHRASE found without WEB5_PASSWORD on non-first launch! ' +
-        'Either set both WEB5_PASSWORD and WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
+        'APPLICANT_WEB5_RECOVERY_PHRASE found without APPLICANT_WEB5_PASSWORD on non-first launch! ' +
+        'Either set both APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
         'to create a new recovery phrase with the given password.',
       );
     }
 
     if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
       // Logger.warn(
-      //   'WEB5_PASSWORD found without WEB5_RECOVERY_PHRASE on non-first launch! ' +
-      //   'Attempting to unlock the vault with WEB5_PASSWORD.',
+      //   'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE on non-first launch! ' +
+      //   'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
       // );
       return { password: web5Password };
     }
@@ -294,8 +286,8 @@ export default class ApplicantServer {
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      Config.WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.key', Config.WEB5_RECOVERY_PHRASE);
+      ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
+      await FileSystem.overwrite('recovery.key', ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance
@@ -307,9 +299,6 @@ export default class ApplicantServer {
     Web5Manager.applicantAgent = agent;
     Web5Manager.applicantAgentVault = agentVault;
 
-    if(!this.useOptions.manifests?.length){
-      this.useManifest(Config.DEFAULT_EXAMPLE_MANIFEST);
-    }
     // Set the server initialized flag
     this._isInitialized = true;
   }
@@ -326,6 +315,9 @@ export default class ApplicantServer {
   }
 
   public async setupDwn(): Promise<void> {
+    if(!this.useOptions.manifests?.length){
+      this.useManifest(ApplicantConfig.DCX_HANDSHAKE_MANIFEST);
+    }
     await Web5Manager.setup();
     this._isSetup = true;
   }
@@ -351,4 +343,4 @@ export default class ApplicantServer {
   }
 }
 
-export const server = new ApplicantServer(defaultUseOptions);
+export const server = new ApplicantServer(APPLICANT_SERVER_USE_OPTIONS);

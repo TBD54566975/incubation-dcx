@@ -7,7 +7,7 @@ import {
   Web5,
 } from '@web5/api';
 import { credentialIssuerProtocol } from './index.js';
-import IssuerServer from './server.js';
+import IssuerServer from './issuer-server.js';
 import {
   DwnUtils,
   DwnError,

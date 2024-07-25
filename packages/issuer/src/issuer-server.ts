@@ -4,12 +4,12 @@ import {
   DcxIdentityVault,
   DcxServerError,
   FileSystem,
-  Handler,
   Issuer,
   Logger,
   Mnemonic,
   Objects,
   Provider,
+  ServerHandler,
   stringifier,
   Time,
   UseOptions
@@ -17,27 +17,29 @@ import {
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import { IssuerConfig } from './config.js';
 import { IssuerProtocolHandlers } from './handlers.js';
 import { issuer, Web5Manager } from './index.js';
+import { IssuerConfig } from './issuer-config.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
+const ISSUER_SERVER_USE_OPTIONS: UseOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [IssuerConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : IssuerConfig.DCX_INPUT_ISSUERS,
+  gateways  : IssuerConfig.ISSUER_GATEWAY_URIS,
+  dwns      : IssuerConfig.ISSUER_DWN_ENDPOINTS,
+};
+
 export default class IssuerServer {
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
   _isSetup: boolean = false;
-  _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = IssuerConfig.ISSUER_NODE_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  public useOptions: UseOptions = {
-    handlers  : [],
-    providers : [],
-    manifests : [IssuerConfig.DCX_HANDSHAKE_MANIFEST],
-    issuers   : IssuerConfig.DCX_INPUT_ISSUERS,
-    gateways  : IssuerConfig.ISSUER_GATEWAY_URIS,
-    dwns      : IssuerConfig.ISSUER_DWN_ENDPOINTS,
-  };
+  useOptions: UseOptions = ISSUER_SERVER_USE_OPTIONS;
 
-  constructor(options: UseOptions = this.useOptions) {
+  constructor(options: UseOptions = ISSUER_SERVER_USE_OPTIONS) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -79,7 +81,7 @@ export default class IssuerServer {
       );
     }
     if (validPaths.includes(path)) {
-      this.useOptions[path]!.push(obj);
+      this.useOptions[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -110,7 +112,7 @@ export default class IssuerServer {
    * @example see README.md for usage information
    *
    */
-  public useHandler(handler: Handler): void {
+  public useHandler(handler: ServerHandler): void {
     if (!this.useOptions.handlers || !this.useOptions.handlers.length) {
       this.useOptions.handlers = [];
     }
@@ -436,4 +438,4 @@ export default class IssuerServer {
   }
 }
 
-export const server = new IssuerServer();
+export const server = new IssuerServer(ISSUER_SERVER_USE_OPTIONS);
