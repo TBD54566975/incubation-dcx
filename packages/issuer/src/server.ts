@@ -1,5 +1,4 @@
 import {
-  Config,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
@@ -13,46 +12,32 @@ import {
   Provider,
   stringifier,
   Time,
-  UseDwns,
-  UseGateways,
-  UseHandlers,
-  UseIssuers,
-  UseManifests,
-  UseOptions,
-  UseProviders
+  UseOptions
 } from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
+import { IssuerConfig } from './config.js';
 import { IssuerProtocolHandlers } from './handlers.js';
-import { credentialIssuerProtocol, Web5Manager } from './index.js';
+import { issuer, Web5Manager } from './index.js';
 
-type UsePath = 'manifest' | 'handler' | 'provider' | 'issuer' | 'gateway' | 'dwn';
+type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
 export default class IssuerServer {
-  static [key: string]: any;
-
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isNewAgent: boolean = argv.slice(2).some((arg) => ['--new-agent', '-n'].includes(arg));
+  _isSetup: boolean = false;
   _isTest: boolean = argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  useOptions: UseOptions = {
+  public useOptions: UseOptions = {
     handlers  : [],
-    manifests : [],
     providers : [],
-    issuers   : Config.DEFAULT_TRUSTED_ISSUERS,
-    gateways  : Config.DEFAULT_GATEWAY_URIS,
-    dwns      : Config.DEFAULT_DWN_ENDPOINTS,
+    manifests : [IssuerConfig.DCX_HANDSHAKE_MANIFEST],
+    issuers   : IssuerConfig.DCX_INPUT_ISSUERS,
+    gateways  : IssuerConfig.ISSUER_GATEWAY_URIS,
+    dwns      : IssuerConfig.ISSUER_DWN_ENDPOINTS,
   };
 
-  constructor(options: {
-    manifests?: UseManifests;
-    providers?: UseProviders;
-    issuers?: UseIssuers;
-    gateways?: UseGateways;
-    dwns?: UseDwns;
-    handlers?: UseHandlers;
-  } = this.useOptions ?? {}) {
+  constructor(options: UseOptions = this.useOptions) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -67,14 +52,13 @@ export default class IssuerServer {
      * @example see README.md for usage information
      *
      */
-    this.useOptions.manifests = options.manifests ?? [];
-    this.useOptions.providers = options.providers ?? [];
+    this.useOptions.manifests = options.manifests ?? this.useOptions.manifests;
+    this.useOptions.providers = options.providers ?? this.useOptions.providers;
+    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
 
-    this.useOptions.issuers = options.issuers ?? Config.DEFAULT_TRUSTED_ISSUERS;
-    this.useOptions.gateways = options.gateways ?? Config.DEFAULT_GATEWAY_URIS;
-    this.useOptions.dwns = options.dwns ?? Config.DEFAULT_DWN_ENDPOINTS;
-
-    this.useOptions.handlers = options.handlers ?? [];
+    this.useOptions.issuers = options.issuers ?? this.useOptions.issuers;
+    this.useOptions.gateways = options.gateways ?? this.useOptions.gateways;
+    this.useOptions.dwns = options.dwns ?? this.useOptions.dwns;
   }
 
   /**
@@ -83,23 +67,19 @@ export default class IssuerServer {
    *
    * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link UseOption}
+   * @param obj The object to use; see {@link UseOptions}
    * @example see README.md for usage information
    *
    */
   public use(path: UsePath, obj: any): void {
-    const validPaths = ['gateway', 'dwn', 'issuer', 'manifest', 'provider', 'handler'];
+    const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
         `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
       );
     }
     if (validPaths.includes(path)) {
-      const plural = `${path}s`;
-      if (!this.useOptions[plural]) {
-        this.useOptions[plural] = [];
-      }
-      this.useOptions[plural].push(obj);
+      this.useOptions[path]!.push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -218,8 +198,8 @@ export default class IssuerServer {
   public async checkWeb5Config(
     firstLaunch: boolean
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = Config.WEB5_PASSWORD;
-    const web5RecoveryPhrase = Config.WEB5_RECOVERY_PHRASE;
+    const web5Password = IssuerConfig.ISSUER_WEB5_PASSWORD;
+    const web5RecoveryPhrase = IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE;
 
     // TODO: consider generating a new recovery phrase if one is not provided
     // Config.WEB5_RECOVERY_PHRASE = generateMnemonic(128);
@@ -230,12 +210,12 @@ export default class IssuerServer {
         'New WEB5_PASSWORD saved to password.key file. ' +
         'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       );
-      const password = await Mnemonic.createPassword();
-      const recoveryPhrase = await Mnemonic.createRecoveryPhrase();
-      await FileSystem.overwrite('password.key', password);
-      await FileSystem.overwrite('recovery.key', recoveryPhrase);
-      Config.WEB5_PASSWORD = password;
-      Config.WEB5_RECOVERY_PHRASE = recoveryPhrase;
+      const password = Mnemonic.createPassword();
+      await FileSystem.overwrite('issuer.password.key', password);
+      const recoveryPhrase = Mnemonic.createRecoveryPhrase();
+      await FileSystem.overwrite('issuer.recovery.key', recoveryPhrase);
+      IssuerConfig.ISSUER_WEB5_PASSWORD = password;
+      IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = recoveryPhrase;
       return { password, recoveryPhrase };
     }
 
@@ -277,11 +257,6 @@ export default class IssuerServer {
     };
   }
 
-  public static async getTrustedIssuers(): Promise<Issuer[]> {
-    const response = await fetch(Config.DEFAULT_ENDPOINTS.ISSUERS);
-    return await response.json();
-  }
-
   /**
    *
    * Configures the DCX server by creating a new password, initializing Web5,
@@ -305,8 +280,8 @@ export default class IssuerServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = !this.useOptions.dwns || !this.useOptions.dwns.length
-      ? Config.DEFAULT_DWN_ENDPOINTS
-      : [...this.useOptions.dwns, ...Config.DEFAULT_DWN_ENDPOINTS];
+      ? IssuerConfig.ISSUER_DWN_ENDPOINTS
+      : [...this.useOptions.dwns, ...IssuerConfig.ISSUER_DWN_ENDPOINTS];
 
     const startParams = { password };
     const initializeParams = !recoveryPhrase
@@ -315,8 +290,8 @@ export default class IssuerServer {
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      Config.WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.key', Config.WEB5_RECOVERY_PHRASE);
+      IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
+      await FileSystem.overwrite('recovery.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance
@@ -342,18 +317,18 @@ export default class IssuerServer {
   public async poll(): Promise<void> {
     Logger.debug('DCX server starting ...');
 
-    const CURSOR = Config.CURSOR;
-    const LAST_RECORD_ID = Config.LAST_RECORD_ID;
+    const CURSOR = IssuerConfig.ISSUER_CURSOR;
+    const LAST_RECORD_ID = IssuerConfig.ISSUER_LAST_RECORD_ID;
 
     let cursor = await FileSystem.readToJson(CURSOR);
-    const pagination = Objects.isEmptyObject(cursor) ? {} : { cursor };
+    const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
     let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
 
     while (this._isPolling) {
       const { records = [], cursor: nextCursor } = await Web5Manager.web5.dwn.records.query({
         message: {
           filter: {
-            protocol: credentialIssuerProtocol.protocol,
+            protocol: issuer.protocol,
           },
           pagination,
         },
@@ -460,3 +435,5 @@ export default class IssuerServer {
     }
   }
 }
+
+export const server = new IssuerServer();

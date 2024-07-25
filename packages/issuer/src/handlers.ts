@@ -1,3 +1,17 @@
+import {
+  CredentialManifest,
+  DcxProtocolHandlerError,
+  DwnError,
+  DwnUtils,
+  Handler,
+  Issuer,
+  Logger,
+  Objects,
+  Provider,
+  responseSchema,
+  ServerHandler,
+  stringifier
+} from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import { Record } from '@web5/api';
 import {
@@ -5,38 +19,20 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import {  Web5Manager, credentialIssuerProtocol } from './index.js';
-import {
-  DwnUtils,
-  CredentialManifest,
-  Handler,
-  Issuer,
-  DcxProtocolHandlerError,
-  DwnError,
-  responseSchema,
-  Objects,
-  stringifier,
-  Logger,
-  Provider,
-  Config
-} from '@dcx-protocol/common';
-import IssuerServer from './server.js';
+import { issuer, IssuerConfig, Web5Manager } from './index.js';
+import { server } from './server.js';
 
 export class IssuerProtocolHandlers {
+
   constructor() {
-    IssuerProtocolHandlers.selectCredentials =
-      IssuerProtocolHandlers.findHandler('selectCredentials') ?? IssuerProtocolHandlers.selectCredentials;
-    IssuerProtocolHandlers.verifyCredentials =
-      IssuerProtocolHandlers.findHandler('verifyCredentials') ?? IssuerProtocolHandlers.verifyCredentials;
-    IssuerProtocolHandlers.requestCredential =
-      IssuerProtocolHandlers.findHandler('requestCredential') ?? IssuerProtocolHandlers.requestCredential;
-    IssuerProtocolHandlers.issueCredential =
-      IssuerProtocolHandlers.findHandler('issueCredential') ?? IssuerProtocolHandlers.issueCredential;
+    IssuerProtocolHandlers.selectCredentials = IssuerProtocolHandlers.findHandler('selectCredentials', IssuerProtocolHandlers.selectCredentials);
+    IssuerProtocolHandlers.verifyCredentials = IssuerProtocolHandlers.findHandler('verifyCredentials', IssuerProtocolHandlers.verifyCredentials);
+    IssuerProtocolHandlers.requestCredential = IssuerProtocolHandlers.findHandler('requestCredential', IssuerProtocolHandlers.requestCredential);
+    IssuerProtocolHandlers.issueCredential = IssuerProtocolHandlers.findHandler('issueCredential', IssuerProtocolHandlers.issueCredential);
   }
 
-  public static findHandler(id: string): (...args: any[]) => any | Promise<any> | undefined {
-    const handler = IssuerServer.useOptions.handlers.find((handler: Handler) => handler.id === id);
-    return handler?.callback;
+  public static findHandler(id: string, staticHandler: Handler): Handler {
+    return server.useOptions.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -69,15 +65,15 @@ export class IssuerProtocolHandlers {
         continue;
       }
 
-      const issuers = IssuerServer.issuers.map((issuer: Issuer) => issuer.id);
-      const issuerDidSet = new Set<string>([...issuers, ...Config.DEFAULT_TRUSTED_ISSUER_DIDS]);
+      const issuers = [...server.useOptions.issuers, ...IssuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
         continue;
       }
 
       const verified = await VerifiableCredential.verify({ vcJwt });
-      if (!verified || Objects.isEmptyObject(verified)) {
+      if (!verified || Objects.isEmpty(verified)) {
         Logger.debug('Credential verification failed');
         continue;
       }
@@ -157,7 +153,7 @@ export class IssuerProtocolHandlers {
     body: { vcs: VerifiableCredential[] } | any,
     id: string,
   ): Promise<any> {
-    const providers = IssuerServer.useOptions.providers!;
+    const providers = server.useOptions.providers;
     const provider = providers.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
@@ -219,7 +215,7 @@ export class IssuerProtocolHandlers {
       store   : false,
       message : {
         schema       : responseSchema.$id,
-        protocol     : credentialIssuerProtocol.protocol,
+        protocol     : issuer.protocol,
         dataFormat   : 'application/json',
         protocolPath : 'application/response',
       },

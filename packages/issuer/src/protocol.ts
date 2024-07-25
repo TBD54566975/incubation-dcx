@@ -1,6 +1,6 @@
 import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dcx-protocol/common';
 
-export const protocol = {
+export const issuer = {
   // issuer protocol is a subset of exchange protocol
   // used on server side to interact with applicant & issuer dwn
   protocol  : 'https://decentralized.cx/protocol/credential-exchange',

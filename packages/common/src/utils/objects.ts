@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/ban-types */
-export class Objects implements Object {
+export class Objects {
   /**
    *
    * Check if an object and its possible child objects (i.e. {}, []) is/are null
    * @param obj The object to check if it is null
    * @returns A boolean indicating if the object is null
    */
-  public static isEmptyObject(obj: any): boolean {
+  public static isEmpty(obj: any): boolean {
     if (obj === null || typeof obj !== 'object') {
       return false;
     }
@@ -24,7 +23,7 @@ export class Objects implements Object {
    * @param obj The object to check if it is null
    * @returns A boolean indicating if the object is null
    */
-  public static isEmptyObjectDeep(obj: any): boolean {
+  public static isEmptyDeep(obj: any): boolean {
     if (obj === null || typeof obj !== 'object') {
       return false;
     }
@@ -35,7 +34,7 @@ export class Objects implements Object {
 
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        if (!this.isEmptyObjectDeep(obj[key])) {
+        if (!this.isEmptyDeep(obj[key])) {
           return false;
         }
       }

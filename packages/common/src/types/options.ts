@@ -7,21 +7,23 @@ import {
   PresentationDefinition
 } from './dcx';
 
+export type Handler = (...args: any[]) => any | Promise<any>;
+
 // Handler
-export type Handler = {
+export type ServerHandler = {
     id: string;
-    callback: (...args: any[]) => any | Promise<any>
+    handler: Handler
 };
 
 // Provider
-export interface DataProvider extends AdditionalProperties {
+export interface Provider extends AdditionalProperties {
     id: string;
     endpoint: string;
     method?: string;
     headers?: Record<string, string>;
   }
 
-export class Provider implements DataProvider {
+export class ServerProvider implements Provider {
   constructor(
       public id: string,
       public endpoint: string,
@@ -31,7 +33,7 @@ export class Provider implements DataProvider {
 }
 
 // Manifest
-export class Manifest implements CredentialManifest {
+export class ServerManifest implements CredentialManifest {
   constructor(
       public id: string,
       public name: string,
@@ -44,26 +46,11 @@ export class Manifest implements CredentialManifest {
   ) {}
 }
 
-export type UseIssuers = Issuer[];
-export type UseManifests = Manifest[];
-export type UseProviders = Provider[];
-export type UseHandlers = Handler[];
-export type UseGateways = string[];
-export type UseDwns = string[];
-
-export type UseOption =
-  | UseIssuers
-  | UseHandlers
-  | UseProviders
-  | UseManifests
-  | UseGateways
-  | UseDwns;
-
 export type UseOptions = {
-  manifests?: Manifest[];
-  providers?: Provider[];
-  issuers?: Issuer[];
-  gateways?: string[];
-  dwns?: string[];
-  handlers?: Handler[];
+  manifests: ServerManifest[];
+  providers: Provider[];
+  issuers: Issuer[];
+  gateways: string[];
+  dwns: string[];
+  handlers: ServerHandler[];
 };
