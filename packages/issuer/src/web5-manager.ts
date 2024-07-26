@@ -1,23 +1,24 @@
-import { DwnResponseStatus, DwnPaginationCursor } from '@web5/agent';
 import {
-  ProtocolsQueryResponse,
+  CredentialManifest,
+  DcxAgent,
+  DcxDwnError,
+  DcxIdentityVault,
+  DwnError,
+  DwnUtils,
+  Logger,
+  manifestSchema,
+  Time
+} from '@dcx-protocol/common';
+import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
+import {
   ProtocolsConfigureResponse,
-  RecordsCreateResponse,
+  ProtocolsQueryResponse,
   Record,
+  RecordsCreateResponse,
   Web5,
 } from '@web5/api';
-import { credentialIssuerProtocol } from './index.js';
-import IssuerServer from './issuer-server.js';
-import {
-  DwnUtils,
-  DwnError,
-  DcxDwnError,
-  Time,
-  Logger,
-  CredentialManifest,
-  manifestSchema,
-  DcxAgent, DcxIdentityVault
-} from '@dcx-protocol/common';
+import { issuer } from './index.js';
+import { server } from './issuer-server.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
@@ -49,7 +50,7 @@ export class Web5Manager {
       const { status: query, protocols = [] } = await Web5Manager.web5.dwn.protocols.query({
         message: {
           filter: {
-            protocol: credentialIssuerProtocol.protocol,
+            protocol: issuer.protocol,
           },
         },
       });
@@ -75,7 +76,7 @@ export class Web5Manager {
   public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
     try {
       const { status: configure, protocol } = await Web5Manager.web5.dwn.protocols.configure({
-        message: { definition: credentialIssuerProtocol },
+        message: { definition: issuer },
       });
 
       if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -117,7 +118,7 @@ export class Web5Manager {
           filter: {
             schema       : manifestSchema.$id,
             dataFormat   : 'application/json',
-            protocol     : credentialIssuerProtocol.protocol,
+            protocol     : issuer.protocol,
             protocolPath : 'manifest',
           },
         },
@@ -172,7 +173,7 @@ export class Web5Manager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    const useManifests = IssuerServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }
@@ -201,7 +202,7 @@ export class Web5Manager {
       message : {
         schema       : manifestSchema.$id,
         dataFormat   : 'application/json',
-        protocol     : credentialIssuerProtocol.protocol,
+        protocol     : issuer.protocol,
         protocolPath : 'manifest',
         published    : true,
       },
@@ -259,7 +260,7 @@ export class Web5Manager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    const useManifests = IssuerServer.useOptions.manifests;
+    const useManifests = server.useOptions.manifests;
     if (!useManifests) {
       throw new DcxDwnError('Manifests not provided');
     }

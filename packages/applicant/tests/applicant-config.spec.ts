@@ -28,19 +28,19 @@ describe('ApplicantConfig class', () => {
       console.log(`      ✔ APPLICANT_NODE_ENV=${APPLICANT_NODE_ENV}`);
     });
 
-    it('should contain property APPLICANT_SERVICE_NAME as a string equal to "dcx"', () => {
+    it('should contain property APPLICANT_SERVICE_NAME as a string equal to "DCX Applicant"', () => {
       const APPLICANT_SERVICE_NAME = ApplicantConfig.APPLICANT_SERVICE_NAME;
       expect(APPLICANT_SERVICE_NAME).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_SERVICE_NAME).to.be.an('string');
-      expect(APPLICANT_SERVICE_NAME).equals('dcx');
+      expect(APPLICANT_SERVICE_NAME).equals('DCX Applicant');
       console.log(`      ✔ APPLICANT_SERVICE_NAME=${APPLICANT_SERVICE_NAME}`);
     });
 
-    it('should contain property APPLICANT_SERVICE_ID as a string equal to "dcx"', () => {
+    it('should contain property APPLICANT_SERVICE_ID as a string equal to "dcx-applicant"', () => {
       const APPLICANT_SERVICE_ID = ApplicantConfig.APPLICANT_SERVICE_ID;
       expect(APPLICANT_SERVICE_ID).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_SERVICE_ID).to.be.an('string');
-      expect(APPLICANT_SERVICE_ID).equals('dcx');
+      expect(APPLICANT_SERVICE_ID).equals('dcx-applicant');
       console.log(`      ✔ APPLICANT_SERVICE_ID=${APPLICANT_SERVICE_ID}`);
     });
 
@@ -60,7 +60,7 @@ describe('ApplicantConfig class', () => {
       console.log(`      ✔ APPLICANT_GATEWAY_URIS=`, APPLICANT_GATEWAY_URIS);
     });
 
-    it('should contain property APPLICANT_DCX_AGENT_DATA_PATH as a string equal to "DATA/DCX/ISSUER/AGENT"', () => {
+    it('should contain property APPLICANT_DCX_AGENT_DATA_PATH as a string equal to "DATA/DCX/APPLICANT/AGENT"', () => {
       const APPLICANT_DCX_AGENT_DATA_PATH = ApplicantConfig.APPLICANT_DCX_AGENT_DATA_PATH;
       expect(APPLICANT_DCX_AGENT_DATA_PATH).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_DCX_AGENT_DATA_PATH).to.be.an('array');

@@ -88,7 +88,7 @@ export default class ApplicantServer {
     }
 
     if (validPaths.includes(path)) {
-      this.useOptions[path].push(obj);
+      this.useOptions[path]!.push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -104,7 +104,7 @@ export default class ApplicantServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    this.useOptions.manifests.push(manifest);
+    this.useOptions.manifests!.push(manifest);
   }
 
   /**
@@ -117,7 +117,7 @@ export default class ApplicantServer {
    *
    */
   public useHandler(handler: ServerHandler): void {
-    this.useOptions.handlers.push(handler);
+    this.useOptions.handlers!.push(handler);
   }
 
   /**
@@ -130,10 +130,7 @@ export default class ApplicantServer {
    *
    */
   public useProvider(provider: Provider): void {
-    if (!this.useOptions.providers || !this.useOptions.providers.length) {
-      this.useOptions.providers = [];
-    }
-    this.useOptions.providers.push(provider);
+    this.useOptions.providers!.push(provider);
   }
 
   /**
@@ -146,10 +143,7 @@ export default class ApplicantServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    if (!this.useOptions.issuers || !this.useOptions.issuers.length) {
-      this.useOptions.issuers = [];
-    }
-    this.useOptions.issuers.push(issuer);
+    this.useOptions.issuers!.push(issuer);
   }
 
   /**
@@ -161,10 +155,7 @@ export default class ApplicantServer {
    *
    */
   public useDwn(dwn: string): void {
-    if (!this.useOptions.dwns || !this.useOptions.dwns.length) {
-      this.useOptions.dwns = [];
-    }
-    this.useOptions.dwns.push(dwn);
+    this.useOptions.dwns!.push(dwn);
   }
 
   /**
@@ -176,10 +167,7 @@ export default class ApplicantServer {
    *
    */
   public useGateway(gateway: string): void {
-    if (!this.useOptions.gateways || !this.useOptions.gateways.length) {
-      this.useOptions.gateways = [];
-    }
-    this.useOptions.gateways.push(gateway);
+    this.useOptions.gateways!.push(gateway);
   }
 
   /**
@@ -207,7 +195,7 @@ export default class ApplicantServer {
         'New APPLICANT_WEB5_RECOVERY_PHRASE saved to recovery.key file.',
       );
       const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('password.key', password);
+      await FileSystem.overwrite('applicant.password.key', password);
       ApplicantConfig.APPLICANT_WEB5_PASSWORD = password;
       return { password };
     }

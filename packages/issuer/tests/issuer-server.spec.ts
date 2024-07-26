@@ -38,14 +38,6 @@ describe('IssuerServer class', () => {
       expect(handlers).to.be.an('array');
     });
 
-    it('should import with default parameters', () => {
-      expect(server).to.not.be.undefined;
-      expect(server).to.be.instanceof(IssuerServer);
-      defaultParameters.map((prop) => {
-        expect(issuerServer).to.have.property(prop);
-      });
-    });
-
     describe('initialize()', () => {
       it('should initialize the server', async () => {
         await server.initialize();

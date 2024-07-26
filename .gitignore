@@ -10,9 +10,9 @@ node_modules
 .ignore
 lastRecordId
 did:dht*.json
-*-cursor.json
-*.password.key
-*.recovery.key
+*cursor.json
+*password.key
+*recovery.key
 CUSTOM-MANIFEST.json
 
 coverage/

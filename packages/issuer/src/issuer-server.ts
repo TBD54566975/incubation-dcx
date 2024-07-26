@@ -17,8 +17,9 @@ import {
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
+import { issuer } from './protocol.js';
 import { IssuerProtocolHandlers } from './handlers.js';
-import { issuer, Web5Manager } from './index.js';
+import { Web5Manager } from './web5-manager.js';
 import { IssuerConfig } from './issuer-config.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
@@ -37,7 +38,7 @@ export default class IssuerServer {
   _isSetup: boolean = false;
   _isTest: boolean = IssuerConfig.ISSUER_NODE_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  useOptions: UseOptions = ISSUER_SERVER_USE_OPTIONS;
+  public useOptions: UseOptions = ISSUER_SERVER_USE_OPTIONS;
 
   constructor(options: UseOptions = ISSUER_SERVER_USE_OPTIONS) {
     /**
@@ -55,12 +56,11 @@ export default class IssuerServer {
      *
      */
     this.useOptions.manifests = options.manifests ?? this.useOptions.manifests;
-    this.useOptions.providers = options.providers ?? this.useOptions.providers;
-    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
-
     this.useOptions.issuers = options.issuers ?? this.useOptions.issuers;
     this.useOptions.gateways = options.gateways ?? this.useOptions.gateways;
     this.useOptions.dwns = options.dwns ?? this.useOptions.dwns;
+    this.useOptions.providers = options.providers ?? this.useOptions.providers;
+    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
   }
 
   /**
@@ -97,10 +97,7 @@ export default class IssuerServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    if (!this.useOptions.manifests || !this.useOptions.manifests.length) {
-      this.useOptions.manifests = [];
-    }
-    this.useOptions.manifests.push(manifest);
+    this.useOptions.manifests!.push(manifest);
   }
 
   /**
@@ -113,10 +110,7 @@ export default class IssuerServer {
    *
    */
   public useHandler(handler: ServerHandler): void {
-    if (!this.useOptions.handlers || !this.useOptions.handlers.length) {
-      this.useOptions.handlers = [];
-    }
-    this.useOptions.handlers.push(handler);
+    this.useOptions.handlers!.push(handler);
   }
 
   /**
@@ -129,10 +123,7 @@ export default class IssuerServer {
    *
    */
   public useProvider(provider: Provider): void {
-    if (!this.useOptions.providers || !this.useOptions.providers.length) {
-      this.useOptions.providers = [];
-    }
-    this.useOptions.providers.push(provider);
+    this.useOptions.providers!.push(provider);
   }
 
   /**
@@ -145,10 +136,7 @@ export default class IssuerServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    if (!this.useOptions.issuers || !this.useOptions.issuers.length) {
-      this.useOptions.issuers = [];
-    }
-    this.useOptions.issuers.push(issuer);
+    this.useOptions.issuers!.push(issuer);
   }
 
   /**
@@ -160,10 +148,7 @@ export default class IssuerServer {
    *
    */
   public useDwn(dwn: string): void {
-    if (!this.useOptions.dwns || !this.useOptions.dwns.length) {
-      this.useOptions.dwns = [];
-    }
-    this.useOptions.dwns.push(dwn);
+    this.useOptions.dwns!.push(dwn);
   }
 
   /**
@@ -293,7 +278,7 @@ export default class IssuerServer {
     // Initialize the agent with the options
     if (firstLaunch) {
       IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
+      await FileSystem.overwrite('issuer.recovery.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance

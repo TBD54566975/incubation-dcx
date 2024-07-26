@@ -1,7 +1,7 @@
 
 import { expect } from 'chai';
 import dotenv from 'dotenv';
-import { IssuerConfig } from '../src/config';
+import { IssuerConfig } from '../src/index.js';
 dotenv.config({ path: './.env' });
 
 describe('IssuerConfig class', () => {

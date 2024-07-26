@@ -5,12 +5,12 @@ import {  DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import ApplicantServer, { Web5Manager } from '../src/index.js';
-import CustomManifest from '../../../CUSTOM-MANIFEST.json';
+import CustomManifest from '../../../CUSTOM-MANIFEST.json' assert { type: 'json' };
 
-const applicantServer: ApplicantServer = new ApplicantServer({ manifests: [CustomManifest] });
+const applicantServer: ApplicantServer = new ApplicantServer();
+applicantServer.use('manifests', CustomManifest);
 
 describe('ApplicantServer class', () => {
-  // applicantServer.use('manifests', CustomManifest);
   describe('constructor with a custom manifest', () => {
     it('should contain static instance variables and a useOptions options object', () => {
       const _isPolling = applicantServer._isPolling;
@@ -50,36 +50,42 @@ describe('ApplicantServer class', () => {
         const issuers = applicantServer.useOptions.issuers;
         expect(issuers).to.not.be.null.and.not.be.undefined;
         expect(issuers).to.be.an('array');
+        expect(issuers).to.have.lengthOf(1);
       });
 
       it('should contain property', () => {
         const gateways = applicantServer.useOptions.gateways;
         expect(gateways).to.not.be.null.and.not.be.undefined;
         expect(gateways).to.be.an('array');
+        expect(gateways).to.have.lengthOf(1);
       });
 
       it('should contain property', () => {
         const dwns = applicantServer.useOptions.dwns;
         expect(dwns).to.not.be.null.and.not.be.undefined;
         expect(dwns).to.be.an('array');
+        expect(dwns).to.have.lengthOf(1);
       });
 
       it('should contain property', () => {
         const manifests = applicantServer.useOptions.manifests;
         expect(manifests).to.not.be.null.and.not.be.undefined;
         expect(manifests).to.be.an('array');
+        expect(manifests).to.have.lengthOf(1);
       });
 
       it('should contain property', () => {
         const providers = applicantServer.useOptions.providers;
         expect(providers).to.not.be.null.and.not.be.undefined;
         expect(providers).to.be.an('array');
+        expect(providers).to.have.lengthOf(1);
       });
 
       it('should contain property', () => {
         const handlers = applicantServer.useOptions.handlers;
         expect(handlers).to.not.be.null.and.not.be.undefined;
         expect(handlers).to.be.an('array');
+        expect(handlers).to.have.lengthOf(1);
       });
     });
 
