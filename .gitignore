@@ -11,8 +11,8 @@ node_modules
 lastRecordId
 did:dht*.json
 *cursor.json
-*password.key
-*recovery.key
+*.key
+*.key
 CUSTOM-MANIFEST.json
 
 coverage/

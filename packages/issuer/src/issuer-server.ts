@@ -36,7 +36,7 @@ export default class IssuerServer {
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
   _isSetup: boolean = false;
-  _isTest: boolean = IssuerConfig.ISSUER_NODE_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = IssuerConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   public useOptions: UseOptions = ISSUER_SERVER_USE_OPTIONS;
 
@@ -194,13 +194,13 @@ export default class IssuerServer {
     if (firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       Logger.security(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New WEB5_PASSWORD saved to password.key file. ' +
-        'New WEB5_RECOVERY_PHRASE saved to recovery.key file.',
+        'New WEB5_PASSWORD saved to password.issuer.key file. ' +
+        'New WEB5_RECOVERY_PHRASE saved to recovery.issuer.key file.',
       );
       const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('issuer.password.key', password);
+      await FileSystem.overwrite('password.issuer.key', password);
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
-      await FileSystem.overwrite('issuer.recovery.key', recoveryPhrase);
+      await FileSystem.overwrite('recovery.issuer.key', recoveryPhrase);
       IssuerConfig.ISSUER_WEB5_PASSWORD = password;
       IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = recoveryPhrase;
       return { password, recoveryPhrase };
@@ -278,7 +278,7 @@ export default class IssuerServer {
     // Initialize the agent with the options
     if (firstLaunch) {
       IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('issuer.recovery.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
+      await FileSystem.overwrite('recovery.issuer.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance

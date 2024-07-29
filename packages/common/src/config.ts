@@ -1,5 +1,7 @@
+import { CredentialManifest } from './types/dcx';
+
 export class Config {
-  public static DCX_NODE_ENV = process.env.NODE_ENV ?? 'development';
+  public static DCX_ENV = process.env.NODE_ENV ?? 'development';
   public static DCX_ENDPOINTS = {
     DWN_ENDPOINTS         : ['https://dwn.formfree.com/', 'https://dwn.tbddev.org/beta'],
     GATEWAY_URIS          : ['http://dev.dht.formfree.com:8305/', 'https://diddht.tbddev.org/'],
@@ -48,16 +50,12 @@ export class Config {
                 }
               },
               {
-                path: [
-                  '$.credentialSubject.some.unique.field1',
-                  '$.credentialSubject.some.unique.field2',
-                  '$.credentialSubject.some.unique.fieldn'
-                ]
+                path: []
               }
             ]
           }
         }
       ]
     }
-  };
+  } as CredentialManifest;
 }

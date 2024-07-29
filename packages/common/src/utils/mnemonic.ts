@@ -9,11 +9,12 @@ export class Mnemonic {
      * @returns string
      */
   public static createPassword(n: number = 6): string {
-    const mnemonic = Mnemonic.createRecoveryPhrase();
-    const words = mnemonic.split(' ');
+    const mnemonic = Mnemonic.createRecoveryPhrase().split(' ');
     const password: string[] = [];
-    for (let i = 0; i < n; i++) {
-      password.push(words[Math.floor(Math.random() * words.length)]);
+    while (password.length < n && mnemonic.length > 0) {
+      const randomIndex = Math.floor(Math.random() * mnemonic.length);
+      password.push(mnemonic[randomIndex]);
+      mnemonic.splice(randomIndex, 1);
     }
     return password.join(' ');
   }

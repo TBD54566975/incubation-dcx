@@ -315,7 +315,7 @@ the server can handle multiple for different development contexts (i.e. developm
 ```ts
 import { server } from '@dcx-protocol/issuer';
 
-const env = NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development';
 // development
 server.use('provider',
     {

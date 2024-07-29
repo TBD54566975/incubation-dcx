@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import chalk from 'chalk';
+import { Config } from '../config.js';
 
 enum Env {
   Development = 'development',
@@ -22,10 +23,9 @@ enum LogLevel {
  */
 type Level = 'debug' | 'error' | 'info' | 'log' | 'warn' | 'off';
 export class Logger implements Partial<Console> {
-  public static NODE_ENV: string | undefined = process.env.NODE_ENV;
-  public static isTest: boolean = Logger.NODE_ENV === Env.Test;
-  public static isDevelopment: boolean = Logger.NODE_ENV === Env.Development;
-  public static isProduction: boolean = Logger.NODE_ENV === Env.Production;
+  public static isTest: boolean = Config.DCX_ENV === Env.Test;
+  public static isDevelopment: boolean = Config.DCX_ENV === Env.Development;
+  public static isProduction: boolean = Config.DCX_ENV === Env.Production;
   public static level: Level = Logger.isTest ? 'off' : Logger.isDevelopment ? 'debug' : 'info';
   public static isOff: boolean = Logger.level === LogLevel.Off;
 

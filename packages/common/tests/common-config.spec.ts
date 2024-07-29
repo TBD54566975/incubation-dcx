@@ -1,16 +1,16 @@
 import { expect } from 'chai';
 import dotenv from 'dotenv';
 import { Config } from '../src/config';
-dotenv.config({ path: '.env.common' });
+dotenv.config({ path: '.env.test' });
 
 describe('Config class', () => {
   describe('properties defined by process.env vars', () => {
-    it('should contain property DCX_NODE_ENV as string equal to "test" or "development"', () => {
-      const DCX_NODE_ENV = Config.DCX_NODE_ENV;
-      expect(DCX_NODE_ENV).to.not.be.null.and.not.be.undefined;
-      expect(DCX_NODE_ENV).to.be.an('object');
-      expect(Object.entries(DCX_NODE_ENV)).to.have.lengthOf(3);
-      console.log(`      ✔ DCX_NODE_ENV=`, DCX_NODE_ENV);
+    it('should contain property DCX_ENV as string equal to "test" or "development"', () => {
+      const DCX_ENV = Config.DCX_ENV;
+      expect(DCX_ENV).to.not.be.null.and.not.be.undefined;
+      expect(DCX_ENV).to.be.an('object');
+      expect(Object.entries(DCX_ENV)).to.have.lengthOf(3);
+      console.log(`      ✔ DCX_ENV=`, DCX_ENV);
     });
 
     it('should contain property DCX_ENDPOINTS as an object containing 3 entries', () => {

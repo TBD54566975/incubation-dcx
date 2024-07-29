@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import dotenv from 'dotenv';
 import { IssuerConfig } from '../src/index.js';
-dotenv.config({ path: './.env' });
+dotenv.config({ path: '.env.test' });
 
 describe('IssuerConfig class', () => {
   describe('properties defined by process.env vars', () => {
@@ -20,12 +20,12 @@ describe('IssuerConfig class', () => {
       console.log(`      ✔ ISSUER_CURSOR=${ISSUER_CURSOR}`);
     });
 
-    it('should contain property ISSUER_NODE_ENV as a string equal to "test" or "development"', () => {
-      const ISSUER_NODE_ENV = IssuerConfig.ISSUER_NODE_ENV;
-      expect(ISSUER_NODE_ENV).to.not.be.null.and.not.be.undefined;
-      expect(ISSUER_NODE_ENV).to.be.an('string');
-      expect(ISSUER_NODE_ENV).to.be.match(/(development|test)/);
-      console.log(`      ✔ ISSUER_NODE_ENV=${ISSUER_NODE_ENV}`);
+    it('should contain property ISSUER_PORT as a string equal to 4000', () => {
+      const ISSUER_PORT = IssuerConfig.ISSUER_PORT;
+      expect(ISSUER_PORT).to.not.be.null.and.not.be.undefined;
+      expect(ISSUER_PORT).to.be.an('string');
+      expect(ISSUER_PORT).equals('4000');
+      console.log(`      ✔ ISSUER_PORT=${ISSUER_PORT}`);
     });
 
     it('should contain property ISSUER_SERVICE_NAME as a string equal to "dcx"', () => {
@@ -60,12 +60,12 @@ describe('IssuerConfig class', () => {
       console.log(`      ✔ ISSUER_GATEWAY_URIS=`, ISSUER_GATEWAY_URIS);
     });
 
-    it('should contain property ISSUER_DCX_AGENT_DATA_PATH as a string equal to "DATA/DCX/ISSUER/AGENT"', () => {
-      const ISSUER_DCX_AGENT_DATA_PATH = IssuerConfig.ISSUER_DCX_AGENT_DATA_PATH;
-      expect(ISSUER_DCX_AGENT_DATA_PATH).to.not.be.null.and.not.be.undefined;
-      expect(ISSUER_DCX_AGENT_DATA_PATH).to.be.an('array');
-      expect(ISSUER_DCX_AGENT_DATA_PATH).to.have.lengthOf(1);
-      console.log(`      ✔ ISSUER_DCX_AGENT_DATA_PATH=`, ISSUER_DCX_AGENT_DATA_PATH);
+    it('should contain property ISSUER_WEB5_AGENT_DATA_PATH as a string equal to "DATA/DCX/ISSUER/AGENT"', () => {
+      const ISSUER_WEB5_AGENT_DATA_PATH = IssuerConfig.ISSUER_WEB5_AGENT_DATA_PATH;
+      expect(ISSUER_WEB5_AGENT_DATA_PATH).to.not.be.null.and.not.be.undefined;
+      expect(ISSUER_WEB5_AGENT_DATA_PATH).to.be.an('array');
+      expect(ISSUER_WEB5_AGENT_DATA_PATH).to.have.lengthOf(1);
+      console.log(`      ✔ ISSUER_WEB5_AGENT_DATA_PATH=`, ISSUER_WEB5_AGENT_DATA_PATH);
     });
 
     it('should contain property ISSUER_WEB5_PASSWORD as a string', () => {

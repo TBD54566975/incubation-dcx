@@ -13,7 +13,7 @@ import {
 } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import { ApplicantConfig } from './applicant-config.js';
+import { applicantConfig, ApplicantConfig, ApplicantSecrets } from './applicant-config.js';
 import { Web5Manager } from './web5-manager.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
@@ -26,40 +26,45 @@ const APPLICANT_SERVER_USE_OPTIONS: UseOptions = {
   gateways  : ApplicantConfig.APPLICANT_GATEWAY_URIS,
   dwns      : ApplicantConfig.APPLICANT_DWN_ENDPOINTS,
 };
+
+type ApplicantServerParams = { options: UseOptions, config: typeof applicantConfig };
 export default class ApplicantServer {
+  useOptions: UseOptions = APPLICANT_SERVER_USE_OPTIONS;
+  config: typeof applicantConfig = applicantConfig;
+
   _isSetup: boolean = false;
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
-  _isTest: boolean = ApplicantConfig.APPLICANT_NODE_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = ApplicantConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  useOptions: UseOptions = APPLICANT_SERVER_USE_OPTIONS;
-
-  constructor(options: UseOptions = APPLICANT_SERVER_USE_OPTIONS) {
+  constructor(params: ApplicantServerParams = { options: APPLICANT_SERVER_USE_OPTIONS, config: applicantConfig }) {
+    this.config = params.config ?? applicantConfig;
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
      *
-     * @param options The options to use for the DcxServer
-     * @param options.issuers The issuers to use; array
-     * @param options.manifests The manifests to use; array
-     * @param options.providers The providers to use; array
-     * @param options.handlers The handlers to use; array
-     * @param options.dwns The dwns to use; array
-     * @param options.gateways The gateways to use; array
+     * @param params.options The options to use for the DcxServer
+     * @param params.options.issuers The issuers to use; array
+     * @param params.options.manifests The manifests to use; array
+     * @param params.options.providers The providers to use; array
+     * @param params.options.handlers The handlers to use; array
+     * @param params.options.dwns The dwns to use; array
+     * @param params.options.gateways The gateways to use; array
      * @example see README.md for usage information
      *
      */
-    this.useOptions.manifests = options.manifests ?? this.useOptions.manifests;
-    this.useOptions.providers = options.providers ?? this.useOptions.providers;
-    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
+    this.useOptions.manifests = params.options.manifests ?? this.useOptions.manifests;
+    this.useOptions.providers = params.options.providers ?? this.useOptions.providers;
+    this.useOptions.handlers = params.options.handlers ?? this.useOptions.handlers;
 
-    this.useOptions.issuers = options.issuers ?? this.useOptions.issuers;
-    this.useOptions.gateways = options.gateways ?? this.useOptions.gateways;
-    this.useOptions.dwns = options.dwns ?? this.useOptions.dwns;
+    this.useOptions.issuers = params.options.issuers ?? this.useOptions.issuers;
+    this.useOptions.gateways = params.options.gateways ?? this.useOptions.gateways;
+    this.useOptions.dwns = params.options.dwns ?? this.useOptions.dwns;
   }
 
   public static create(): ApplicantServer {
     const newApplicantServer = new ApplicantServer();
+    newApplicantServer.config = ApplicantConfig;
     return newApplicantServer;
   }
 
@@ -182,21 +187,21 @@ export default class ApplicantServer {
   public async checkWeb5Config(
     firstLaunch: boolean,
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = ApplicantConfig.APPLICANT_WEB5_PASSWORD;
-    const web5RecoveryPhrase = ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE;
+    const web5Password = ApplicantSecrets.APPLICANT_WEB5_PASSWORD;
+    const web5RecoveryPhrase = ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE;
 
     // TODO: consider generating a new recovery phrase if one is not provided
-    // ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
+    // ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
 
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       Logger.security(
         'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New APPLICANT_WEB5_PASSWORD saved to password.key file. ' +
-        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to recovery.key file.',
+        'New APPLICANT_WEB5_PASSWORD saved to password.applicant.key file. ' +
+        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to recovery.applicant.key file.',
       );
       const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('applicant.password.key', password);
-      ApplicantConfig.APPLICANT_WEB5_PASSWORD = password;
+      await FileSystem.overwrite('password.applicant.key', password);
+      ApplicantSecrets.APPLICANT_WEB5_PASSWORD = password;
       return { password };
     }
 
@@ -253,7 +258,10 @@ export default class ApplicantServer {
     const agentVault = new DcxIdentityVault();
 
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ dataPath: `${process.cwd()}/DATA`, agentVault });
+    const agent = await DcxAgent.create({
+      dataPath: ApplicantConfig.APPLICANT_WEB5_AGENT_DATA_PATH,
+      agentVault
+    });
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();
@@ -274,8 +282,8 @@ export default class ApplicantServer {
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.key', ApplicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE);
+      ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
+      await FileSystem.overwrite('recovery.applicant.key', ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance
@@ -331,4 +339,4 @@ export default class ApplicantServer {
   }
 }
 
-export const server = new ApplicantServer(APPLICANT_SERVER_USE_OPTIONS);
+export const server = new ApplicantServer({ options: APPLICANT_SERVER_USE_OPTIONS, config: ApplicantConfig });

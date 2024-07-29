@@ -16,8 +16,8 @@
     "test:unit": "echo TODO: Add unit tests && exit 0",
     "test:e2e": "tsx tests/server.integration.ts -t",
     "test:node": "pnpm build:tests:node && pnpm c8 mocha --require dotenv/config",
-    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
-    "lint:fix": "eslint . --fix -c ../../eslint.config.js",
+    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
+    "lint:fix": "eslint . --fix -c ../../eslint.config.cjs",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
@@ -65,7 +65,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0 || <22.0.0"
   },
   "dependencies": {
     "@dcx-protocol/common": "workspace:*",
