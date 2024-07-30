@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import chalk from 'chalk';
-import { Config } from '../config.js';
+import { config as dcxConfig } from '../config.js';
 
 enum Env {
   Development = 'development',
@@ -23,39 +23,39 @@ enum LogLevel {
  */
 type Level = 'debug' | 'error' | 'info' | 'log' | 'warn' | 'off';
 export class Logger implements Partial<Console> {
-  public static isTest: boolean = Config.DCX_ENV === Env.Test;
-  public static isDevelopment: boolean = Config.DCX_ENV === Env.Development;
-  public static isProduction: boolean = Config.DCX_ENV === Env.Production;
+  public static isTest: boolean = dcxConfig.DCX_ENV === Env.Test;
+  public static isDevelopment: boolean = dcxConfig.DCX_ENV === Env.Development;
+  public static isProduction: boolean = dcxConfig.DCX_ENV === Env.Production;
+
   public static level: Level = Logger.isTest ? 'off' : Logger.isDevelopment ? 'debug' : 'info';
-  public static isOff: boolean = Logger.level === LogLevel.Off;
 
   public static debug(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     console.debug(chalk.green('debug') + ':', message, ...args);
   }
 
   public static error(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     console.error(chalk.red('error') + ':', message, ...args);
   }
 
   public static info(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     console.info(chalk.blue('info') + ':', message, ...args);
   }
 
   public static warn(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     console.warn(chalk.yellow('warn') + ':', message, ...args);
   }
 
   public static security(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     console.warn(chalk.red('security') + ':', message, ...args);
   }
 
   public static log(message?: unknown, ...args: unknown[]): void {
-    if(Logger.isOff) return;
+    if(dcxConfig.DCX_ENV === Env.Test) return;
     switch (Logger.level) {
       case LogLevel.Debug:
         Logger.debug(message, ...args);

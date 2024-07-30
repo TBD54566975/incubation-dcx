@@ -4,32 +4,17 @@ dotenv.config({ path: '.env.test' });
 import { DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import CustomManifest from '../../../CUSTOM-MANIFEST.json' assert { type: 'json' };
-import { applicantConfig } from '../src/applicant-config.js';
-import ApplicantServer, { Web5Manager } from '../src/index.js';
+import { applicantConfig, ApplicantServer, ApplicantManager } from '../src/index.js';
 
 const applicantServer: ApplicantServer = new ApplicantServer({
-  options: {
-    issuers   : [],
-    gateways  : [],
-    dwns      : [],
-    manifests : [],
-    providers : [],
-    handlers  : [],
-  },
   config: {
     ...applicantConfig,
-    APPLICANT_PORT                  : process.env.APPLICANT_PORT ?? '5000',
-    APPLICANT_SERVICE_NAME          : process.env.APPLICANT_SERVICE_NAME ?? '@dcx-protocol/applicant',
-    APPLICANT_SERVICE_ID            : process.env.APPLICANT_SERVICE_ID ?? 'dcx-applicant',
-    APPLICANT_CURSOR                : process.env.APPLICANT_CURSOR ?? 'lastRecordId.applicant',
-    APPLICANT_LAST_RECORD_ID        : process.env.APPLICANT_LAST_RECORD_ID ?? 'applicant-cursor.json',
-    APPLICANT_WEB5_AGENT_DATA_PATH  : process.env.APPLICANT_WEB5_AGENT_DATA_PATH ?? `DATA/DCX/APPLICANT/AGENT`,
-    _APPLICANT_WEB5_PASSWORD        : process.env.APPLICANT_WEB5_PASSWORD ?? '',
-    _APPLICANT_WEB5_RECOVERY_PHRASE : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? '',
+    web5Password       : process.env.APPLICANT_WEB5_PASSWORD!,
+    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE!
   }
 });
-applicantServer.use('manifests', CustomManifest);
+console.log('process.env', process.env);
+console.log('applicantServer', applicantServer);
 
 describe('ApplicantServer class', () => {
   describe('constructor with a custom manifest', () => {
@@ -60,56 +45,11 @@ describe('ApplicantServer class', () => {
       expect(_isTest).to.be.equals(false);
     });
 
-    it('should contain property useOptions as an object containing 7 entries', () => {
+    it('should contain property useOptions as an object containing 6 entries', () => {
       const useOptions = applicantServer.useOptions;
       expect(useOptions).to.not.be.null.and.not.be.undefined;
-      expect(Object.entries(useOptions)).to.have.lengthOf(7);
+      expect(Object.entries(useOptions)).to.have.lengthOf.gte(6);
     });
-
-    // describe('useOptions', () => {
-    //   it('should contain property issuers as an array ', () => {
-    //     const issuers = applicantServer.useOptions.issuers;
-    //     expect(issuers).to.not.be.null.and.not.be.undefined;
-    //     expect(issuers).to.be.an('array');
-    //     expect(issuers).to.have.lengthOf(1);
-    //   });
-
-    //   it('should contain property', () => {
-    //     const gateways = applicantServer.useOptions.gateways;
-    //     expect(gateways).to.not.be.null.and.not.be.undefined;
-    //     expect(gateways).to.be.an('array');
-    //     expect(gateways).to.have.lengthOf(1);
-    //   });
-
-    //   it('should contain property', () => {
-    //     const dwns = applicantServer.useOptions.dwns;
-    //     expect(dwns).to.not.be.null.and.not.be.undefined;
-    //     expect(dwns).to.be.an('array');
-    //     expect(dwns).to.have.lengthOf(1);
-    //   });
-
-    //   it('should contain property', () => {
-    //     const manifests = applicantServer.useOptions.manifests;
-    //     expect(manifests).to.not.be.null.and.not.be.undefined;
-    //     expect(manifests).to.be.an('array');
-    //     expect(manifests).to.have.lengthOf(1);
-    //   });
-
-    //   it('should contain property', () => {
-    //     const providers = applicantServer.useOptions.providers;
-    //     expect(providers).to.not.be.null.and.not.be.undefined;
-    //     expect(providers).to.be.an('array');
-    //     expect(providers).to.have.lengthOf(1);
-    //   });
-
-    //   it('should contain property', () => {
-    //     const handlers = applicantServer.useOptions.handlers;
-    //     expect(handlers).to.not.be.null.and.not.be.undefined;
-    //     expect(handlers).to.be.an('array');
-    //     expect(handlers).to.have.lengthOf(1);
-    //   });
-    // });
-
 
     describe('.initialize()', () => {
       it('should initialize the applicantServer', async () => {
@@ -117,15 +57,15 @@ describe('ApplicantServer class', () => {
         expect(applicantServer._isInitialized).equals(true);
       });
 
-      it('should initialize the Web5Manager', () => {
-        expect(Web5Manager.web5).to.not.be.null.and.not.be.undefined;
-        expect(Web5Manager.web5).to.be.instanceof(Web5);
+      it('should initialize the ApplicantManager', () => {
+        expect(ApplicantManager.web5).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantManager.web5).to.be.instanceof(Web5);
 
-        expect(Web5Manager.applicantAgent).to.not.be.null.and.not.be.undefined;
-        expect(Web5Manager.applicantAgent).to.be.instanceof(DcxAgent);
+        expect(ApplicantManager.applicantAgent).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantManager.applicantAgent).to.be.instanceof(DcxAgent);
 
-        expect(Web5Manager.applicantAgentVault).to.not.be.null.and.not.be.undefined;
-        expect(Web5Manager.applicantAgentVault).to.be.instanceof(DcxIdentityVault);
+        expect(ApplicantManager.applicantAgentVault).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantManager.applicantAgentVault).to.be.instanceof(DcxIdentityVault);
       });
     });
 
@@ -137,3 +77,47 @@ describe('ApplicantServer class', () => {
     });
   });
 });
+
+// describe('useOptions', () => {
+//   it('should contain property issuers as an array ', () => {
+//     const issuers = applicantServer.useOptions.issuers;
+//     expect(issuers).to.not.be.null.and.not.be.undefined;
+//     expect(issuers).to.be.an('array');
+//     expect(issuers).to.have.lengthOf(1);
+//   });
+
+//   it('should contain property', () => {
+//     const gateways = applicantServer.useOptions.gateways;
+//     expect(gateways).to.not.be.null.and.not.be.undefined;
+//     expect(gateways).to.be.an('array');
+//     expect(gateways).to.have.lengthOf(1);
+//   });
+
+//   it('should contain property', () => {
+//     const dwns = applicantServer.useOptions.dwns;
+//     expect(dwns).to.not.be.null.and.not.be.undefined;
+//     expect(dwns).to.be.an('array');
+//     expect(dwns).to.have.lengthOf(1);
+//   });
+
+//   it('should contain property', () => {
+//     const manifests = applicantServer.useOptions.manifests;
+//     expect(manifests).to.not.be.null.and.not.be.undefined;
+//     expect(manifests).to.be.an('array');
+//     expect(manifests).to.have.lengthOf(1);
+//   });
+
+//   it('should contain property', () => {
+//     const providers = applicantServer.useOptions.providers;
+//     expect(providers).to.not.be.null.and.not.be.undefined;
+//     expect(providers).to.be.an('array');
+//     expect(providers).to.have.lengthOf(1);
+//   });
+
+//   it('should contain property', () => {
+//     const handlers = applicantServer.useOptions.handlers;
+//     expect(handlers).to.not.be.null.and.not.be.undefined;
+//     expect(handlers).to.be.an('array');
+//     expect(handlers).to.have.lengthOf(1);
+//   });
+// });

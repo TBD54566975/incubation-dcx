@@ -46,7 +46,7 @@ export class ServerManifest implements CredentialManifest {
   ) {}
 }
 
-export type UseOptions = {
+export type ServerOptions = {
   manifests: ServerManifest[];
   providers: Provider[];
   issuers: Issuer[];

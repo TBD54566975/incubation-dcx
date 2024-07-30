@@ -19,7 +19,7 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { issuer, IssuerConfig, Web5Manager } from './index.js';
+import { issuer, issuerConfig, Web5Manager } from './index.js';
 import { server } from './issuer-server.js';
 
 export class IssuerProtocolHandlers {
@@ -65,7 +65,7 @@ export class IssuerProtocolHandlers {
         continue;
       }
 
-      const issuers = [...server.useOptions.issuers, ...IssuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuers = [...server.useOptions.issuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {

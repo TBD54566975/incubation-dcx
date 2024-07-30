@@ -1,61 +1,85 @@
 import { CredentialManifest } from './types/dcx';
 
-export class Config {
-  public static DCX_ENV = process.env.NODE_ENV ?? 'development';
-  public static DCX_ENDPOINTS = {
-    DWN_ENDPOINTS         : ['https://dwn.formfree.com/', 'https://dwn.tbddev.org/beta'],
+export type Config = typeof config;
+
+export const config =  {
+  DCX_ENV       : process.env.NODE_ENV ?? 'development',
+  DCX_ENDPOINTS : {
+    DWN_ENDPOINTS         : ['https://dwn.formfree.com/', 'https://dwn.gcda.xyz/', 'https://dwn.tbddev.org/beta'],
     GATEWAY_URIS          : ['http://dev.dht.formfree.com:8305/', 'https://diddht.tbddev.org/'],
     ISSUERS               : 'https://formfree.github.io/.well-known/issuers.json',
-  };
-  public static DCX_INPUT_ISSUERS = [
+  },
+  DCX_INPUT_ISSUERS: [
     {
-      'name' : 'mx',
-      'id'   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
+      name : 'mx',
+      id   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
     }
-  ];
-  public static DCX_HANDSHAKE_MANIFEST = {
-    id           : 'DCX-HANDSHAKE-MANIFEST',
-    name         : 'DCX Applicant-Issuer Handshake Manifest',
-    description  : 'Basic handshake manifest used to establish a connection between a DCX applicant and a DCX issuer.',
+  ],
+  DCX_HANDSHAKE_MANIFEST: {
+    id            : 'DCX-HANDSHAKE-MANIFEST',
+    name          : 'DCX Applicant-Issuer Handshake Manifest',
+    description   : 'Basic handshake manifest used to establish a connection between a DCX applicant and a DCX issuer.',
     spec_version : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
     issuer       : {
-      id   : '',
-      name : 'formfree'
+      id       : 'https://formfree.github.io/.well-known/issuers/formfree.json',
+      name     : 'FormFree',
+      styles : {
+        thumbnail: {
+          uri : 'https://formfree.github.io/images/thumbnail.jpg',
+          alt : 'FormFree Logo'
+        },
+        hero: {
+          uri : 'https://formfree.github.io/images/hero.jpg',
+          alt : 'FormFree Hero Image'
+        },
+        background: {
+          color: '#FFFFFF'
+        },
+        text: {
+          color: '#000000'
+        }
+      }
     },
     output_descriptors: [
       {
         id     : 'dcx_handshake_output',
         name   : 'DCX Handshake Credential',
-        schema : 'https://decentralized.cx/schemas/DCXHandshakeCredential'
+        schema : 'https://formfree.github.io/.well-known/credential/DcxHandshakeCredential.json'
       }
     ],
     format: {
       jwt_vc: {
-        alg: ['EdDSA']
+        alg: [
+          'EdDSA'
+        ]
       }
     },
     presentation_definition: {
-      id                : 'dcx-handshake-presentation-ca7f3e0e-10dd-4d0a-9539-29390a9c16e3',
+      id                  : 'dcx_handshake_presentation',
       input_descriptors : [
         {
-          id          : 'example-presentation-definition-input-descriptor-id',
-          purpose     : 'Meant as an example to developers',
+          id            : 'dcx_handshake_input',
+          purpose       : 'DCX Applicant initiates handshake proving did ownership',
           constraints : {
             fields: [
               {
-                path   : ['$.type[*]'],
-                filter : {
+                path: [
+                  '$.type[*]'
+                ],
+                filter: {
                   type    : 'string',
                   pattern : '^*$'
                 }
               },
               {
-                path: []
+                path: [
+                  '$.credentialSubject.did'
+                ]
               }
             ]
           }
         }
       ]
     }
-  } as CredentialManifest;
-}
+  } as CredentialManifest,
+};

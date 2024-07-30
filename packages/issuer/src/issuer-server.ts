@@ -10,37 +10,34 @@ import {
   Objects,
   Provider,
   ServerHandler,
+  ServerOptions,
   stringifier,
-  Time,
-  UseOptions
+  Time
 } from '@dcx-protocol/common';
 import { DwnRegistrar, IdentityVaultParams } from '@web5/agent';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import { issuer } from './protocol.js';
-import { IssuerProtocolHandlers } from './handlers.js';
-import { Web5Manager } from './web5-manager.js';
-import { IssuerConfig } from './issuer-config.js';
+import { IssuerProtocolHandlers, IssuerConfig, issuerConfig, issuer, Web5Manager } from './index.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
-const ISSUER_SERVER_USE_OPTIONS: UseOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [IssuerConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : IssuerConfig.DCX_INPUT_ISSUERS,
-  gateways  : IssuerConfig.ISSUER_GATEWAY_URIS,
-  dwns      : IssuerConfig.ISSUER_DWN_ENDPOINTS,
-};
+type IssuerServerParams = { options?: ServerOptions; config?: IssuerConfig };
 
 export default class IssuerServer {
+  useOptions: ServerOptions = {
+    handlers  : [],
+    providers : [],
+    manifests : [issuerConfig.DCX_HANDSHAKE_MANIFEST],
+    issuers   : issuerConfig.DCX_INPUT_ISSUERS,
+    gateways  : issuerConfig.ISSUER_GATEWAY_URIS,
+    dwns      : issuerConfig.ISSUER_DWN_ENDPOINTS,
+  };
+
   _isPolling: boolean = false;
   _isInitialized: boolean = false;
   _isSetup: boolean = false;
-  _isTest: boolean = IssuerConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest: boolean = issuerConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  public useOptions: UseOptions = ISSUER_SERVER_USE_OPTIONS;
-
-  constructor(options: UseOptions = ISSUER_SERVER_USE_OPTIONS) {
+  constructor(params: IssuerServerParams = { options: this.useOptions, config: issuerConfig }) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -55,12 +52,12 @@ export default class IssuerServer {
      * @example see README.md for usage information
      *
      */
-    this.useOptions.manifests = options.manifests ?? this.useOptions.manifests;
-    this.useOptions.issuers = options.issuers ?? this.useOptions.issuers;
-    this.useOptions.gateways = options.gateways ?? this.useOptions.gateways;
-    this.useOptions.dwns = options.dwns ?? this.useOptions.dwns;
-    this.useOptions.providers = options.providers ?? this.useOptions.providers;
-    this.useOptions.handlers = options.handlers ?? this.useOptions.handlers;
+    this.useOptions.manifests = params?.options?.manifests  ?? this.useOptions.manifests;
+    this.useOptions.issuers   = params?.options?.issuers    ?? this.useOptions.issuers;
+    this.useOptions.gateways  = params?.options?.gateways   ?? this.useOptions.gateways;
+    this.useOptions.dwns      = params?.options?.dwns       ?? this.useOptions.dwns;
+    this.useOptions.providers = params?.options?.providers  ?? this.useOptions.providers;
+    this.useOptions.handlers  = params?.options?.handlers   ?? this.useOptions.handlers;
   }
 
   /**
@@ -69,7 +66,7 @@ export default class IssuerServer {
    *
    * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link UseOptions}
+   * @param obj The object to use; see {@link ServerOptions}
    * @example see README.md for usage information
    *
    */
@@ -185,8 +182,8 @@ export default class IssuerServer {
   public async checkWeb5Config(
     firstLaunch: boolean
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = IssuerConfig.ISSUER_WEB5_PASSWORD;
-    const web5RecoveryPhrase = IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE;
+    const web5Password = issuerConfig.ISSUER_WEB5_PASSWORD;
+    const web5RecoveryPhrase = issuerConfig.ISSUER_WEB5_RECOVERY_PHRASE;
 
     // TODO: consider generating a new recovery phrase if one is not provided
     // Config.WEB5_RECOVERY_PHRASE = generateMnemonic(128);
@@ -201,8 +198,8 @@ export default class IssuerServer {
       await FileSystem.overwrite('password.issuer.key', password);
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
       await FileSystem.overwrite('recovery.issuer.key', recoveryPhrase);
-      IssuerConfig.ISSUER_WEB5_PASSWORD = password;
-      IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = recoveryPhrase;
+      issuerConfig.ISSUER_WEB5_PASSWORD = password;
+      issuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = recoveryPhrase;
       return { password, recoveryPhrase };
     }
 
@@ -267,8 +264,8 @@ export default class IssuerServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = !this.useOptions.dwns || !this.useOptions.dwns.length
-      ? IssuerConfig.ISSUER_DWN_ENDPOINTS
-      : [...this.useOptions.dwns, ...IssuerConfig.ISSUER_DWN_ENDPOINTS];
+      ? issuerConfig.ISSUER_DWN_ENDPOINTS
+      : [...this.useOptions.dwns, ...issuerConfig.ISSUER_DWN_ENDPOINTS];
 
     const startParams = { password };
     const initializeParams = !recoveryPhrase
@@ -277,8 +274,8 @@ export default class IssuerServer {
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.issuer.key', IssuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
+      issuerConfig.ISSUER_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
+      await FileSystem.overwrite('recovery.issuer.key', issuerConfig.ISSUER_WEB5_RECOVERY_PHRASE);
     }
 
     // Start the agent and create a new Web5 instance
@@ -304,8 +301,8 @@ export default class IssuerServer {
   public async poll(): Promise<void> {
     Logger.debug('DCX server starting ...');
 
-    const CURSOR = IssuerConfig.ISSUER_CURSOR;
-    const LAST_RECORD_ID = IssuerConfig.ISSUER_LAST_RECORD_ID;
+    const CURSOR = issuerConfig.ISSUER_CURSOR;
+    const LAST_RECORD_ID = issuerConfig.ISSUER_LAST_RECORD_ID;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
@@ -423,4 +420,4 @@ export default class IssuerServer {
   }
 }
 
-export const server = new IssuerServer(ISSUER_SERVER_USE_OPTIONS);
+export const server = new IssuerServer();

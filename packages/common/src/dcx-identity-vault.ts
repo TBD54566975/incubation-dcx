@@ -11,7 +11,7 @@ import {
 } from '@web5/agent';
 import { Convert, KeyValueStore, MemoryStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
-import { BearerDid, DidDht } from '@web5/dids';
+import { BearerDid, DidDht, DidDhtCreateOptions } from '@web5/dids';
 import { HDKey } from 'ed25519-keygen/hdkey';
 import { CompactJwe } from './prototyping/crypto/jose/jwe-compact.js';
 import { DeterministicKeyGenerator } from './prototyping/crypto/utils.js';
@@ -292,13 +292,13 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
     await this._store.set('contentEncryptionKey', cekJwe);
 
-    const identityHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/0'`);
+    const identityHdKey = rootHdKey.derive(`m/44'/0'/${Date.now()}'/0'/0'`);
     const identityPrivateKey = await this.crypto.bytesToPrivateKey({
       algorithm       : 'Ed25519',
       privateKeyBytes : identityHdKey.privateKey,
     });
 
-    const signingHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/1'`);
+    const signingHdKey = rootHdKey.derive(`m/44'/0'/${Date.now()}'/0'/1'`);
     const signingPrivateKey = await this.crypto.bytesToPrivateKey({
       algorithm       : 'Ed25519',
       privateKeyBytes : signingHdKey.privateKey,
@@ -309,27 +309,29 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       privateKeys: [identityPrivateKey, signingPrivateKey],
     });
 
-    const did = await DidDht.create({
-      keyManager : deterministicKeyGenerator,
-      options    : {
-        verificationMethods: [
-          {
-            algorithm : 'Ed25519',
-            id        : 'sig',
-            purposes  : ['assertionMethod', 'authentication'],
-          },
-        ],
-        services: [
-          {
-            id              : 'dwn',
-            type            : 'DecentralizedWebNode',
-            serviceEndpoint : dwnEndpoints,
-            enc             : '#enc',
-            sig             : '#sig',
-          },
-        ],
-      },
-    });
+    const options = {
+      verificationMethods: [
+        {
+          algorithm : 'Ed25519',
+          id        : 'sig',
+          purposes  : ['assertionMethod', 'authentication']
+        },
+      ]
+    } as DidDhtCreateOptions<DeterministicKeyGenerator>;
+
+    if(dwnEndpoints && !!dwnEndpoints.length) {
+      options.services = [
+        {
+          id              : 'dwn',
+          type            : 'DecentralizedWebNode',
+          serviceEndpoint : dwnEndpoints,
+          enc             : '#enc',
+          sig             : '#sig',
+        }
+      ];
+    }
+
+    const did = await DidDht.create({ keyManager: deterministicKeyGenerator, options });
 
     const portableDid = await did.export();
 

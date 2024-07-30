@@ -7,38 +7,33 @@ import {
   Issuer,
   Logger,
   Mnemonic,
+  Objects,
   Provider,
   ServerHandler,
-  UseOptions
+  ServerOptions,
+  stringifier,
+  Time
 } from '@dcx-protocol/common';
-import { Web5 } from '@web5/api';
+import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import { applicantConfig, ApplicantConfig, ApplicantSecrets } from './applicant-config.js';
-import { Web5Manager } from './web5-manager.js';
+import { applicantConfig, ApplicantConfig } from './config.js';
+import { ApplicantHandlers } from './handlers.js';
+import { applicant } from './index.js';
+import { ApplicantManager } from './manager.js';
 
 type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
+type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
 
-const APPLICANT_SERVER_USE_OPTIONS: UseOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [ApplicantConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : ApplicantConfig.DCX_INPUT_ISSUERS,
-  gateways  : ApplicantConfig.APPLICANT_GATEWAY_URIS,
-  dwns      : ApplicantConfig.APPLICANT_DWN_ENDPOINTS,
-};
+export class ApplicantServer {
+  config: ApplicantConfig;
+  useOptions: ServerOptions;
 
-type ApplicantServerParams = { options: UseOptions, config: typeof applicantConfig };
-export default class ApplicantServer {
-  useOptions: UseOptions = APPLICANT_SERVER_USE_OPTIONS;
-  config: typeof applicantConfig = applicantConfig;
+  _isSetup       : boolean = false;
+  _isPolling     : boolean = false;
+  _isInitialized : boolean = false;
+  _isTest        : boolean = applicantConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  _isSetup: boolean = false;
-  _isPolling: boolean = false;
-  _isInitialized: boolean = false;
-  _isTest: boolean = ApplicantConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
-
-  constructor(params: ApplicantServerParams = { options: APPLICANT_SERVER_USE_OPTIONS, config: applicantConfig }) {
-    this.config = params.config ?? applicantConfig;
+  constructor(params: ApplicantServerParams = {}) {
     /**
      *
      * Setup the DcxManager and the DcxServer with the provided options
@@ -53,18 +48,19 @@ export default class ApplicantServer {
      * @example see README.md for usage information
      *
      */
-    this.useOptions.manifests = params.options.manifests ?? this.useOptions.manifests;
-    this.useOptions.providers = params.options.providers ?? this.useOptions.providers;
-    this.useOptions.handlers = params.options.handlers ?? this.useOptions.handlers;
-
-    this.useOptions.issuers = params.options.issuers ?? this.useOptions.issuers;
-    this.useOptions.gateways = params.options.gateways ?? this.useOptions.gateways;
-    this.useOptions.dwns = params.options.dwns ?? this.useOptions.dwns;
+    this.config = params.config ?? applicantConfig;
+    this.useOptions = params.options ?? {
+      handlers  : [],
+      providers : [],
+      manifests : [this.config.DCX_HANDSHAKE_MANIFEST],
+      issuers   : this.config.DCX_INPUT_ISSUERS,
+      gateways  : this.config.gatewayUris,
+      dwns      : this.config.dwnEndpoints,
+    };
   }
 
   public static create(): ApplicantServer {
     const newApplicantServer = new ApplicantServer();
-    newApplicantServer.config = ApplicantConfig;
     return newApplicantServer;
   }
 
@@ -187,11 +183,11 @@ export default class ApplicantServer {
   public async checkWeb5Config(
     firstLaunch: boolean,
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = ApplicantSecrets.APPLICANT_WEB5_PASSWORD;
-    const web5RecoveryPhrase = ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE;
+    const web5Password = this.config.web5Password;
+    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
 
     // TODO: consider generating a new recovery phrase if one is not provided
-    // ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
+    // this.config.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
 
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       Logger.security(
@@ -201,7 +197,7 @@ export default class ApplicantServer {
       );
       const password = Mnemonic.createPassword();
       await FileSystem.overwrite('password.applicant.key', password);
-      ApplicantSecrets.APPLICANT_WEB5_PASSWORD = password;
+      this.config.web5Password = password;
       return { password };
     }
 
@@ -230,10 +226,10 @@ export default class ApplicantServer {
     }
 
     if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
-      // Logger.warn(
-      //   'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE on non-first launch! ' +
-      //   'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
-      // );
+      Logger.warn(
+        'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE on non-first launch! ' +
+        'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
+      );
       return { password: web5Password };
     }
 
@@ -252,16 +248,16 @@ export default class ApplicantServer {
    *
    */
   public async initialize(): Promise<void> {
-    Logger.debug('Initializing Web5 ... ');
+    Logger.debug('this.config.agentDataPath', this.config.agentDataPath);
+    Logger.debug('this.config.web5Password', this.config.web5Password);
+    Logger.debug('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
+    const dataPath = this.config.agentDataPath;
 
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({
-      dataPath: ApplicantConfig.APPLICANT_WEB5_AGENT_DATA_PATH,
-      agentVault
-    });
+    const agent = await DcxAgent.create({ agentVault, dataPath });
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();
@@ -274,26 +270,29 @@ export default class ApplicantServer {
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.useOptions.dwns!;
-    Logger.debug('dwnEndpoints', dwnEndpoints);
-    const startParams = { password };
     const initializeParams = !recoveryPhrase
-      ? { ...startParams, dwnEndpoints }
-      : { ...startParams, recoveryPhrase, dwnEndpoints };
+      ? { password, dwnEndpoints }
+      : { password, recoveryPhrase, dwnEndpoints };
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.applicant.key', ApplicantSecrets.APPLICANT_WEB5_RECOVERY_PHRASE);
+      this.config.web5RecoveryPhrase = await agent.initialize(initializeParams);
+      await FileSystem.overwrite('recovery.applicant.key', this.config.web5RecoveryPhrase);
     }
 
     // Start the agent and create a new Web5 instance
-    await agent.start(startParams);
+    await agent.start({ password });
+
+    // Register the agent identity with the DWN
+    await agent.sync.registerIdentity({ did: agent.agentDid.uri });
+
+    // Initialize the Web5 instance
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
-    Web5Manager.web5 = web5;
-    Web5Manager.applicantAgent = agent;
-    Web5Manager.applicantAgentVault = agentVault;
+    ApplicantManager.web5 = web5;
+    ApplicantManager.applicantAgent = agent;
+    ApplicantManager.applicantAgentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -311,11 +310,99 @@ export default class ApplicantServer {
   }
 
   public async setupDwn(): Promise<void> {
-    if(!this.useOptions.manifests?.length){
-      this.useManifest(ApplicantConfig.DCX_HANDSHAKE_MANIFEST);
-    }
-    await Web5Manager.setup();
+    await ApplicantManager.setup();
     this._isSetup = true;
+  }
+
+
+  /**
+   *
+   * Polls the DWN for incoming records
+   *
+   */
+  public async poll(): Promise<void> {
+    Logger.debug('DCX server starting ...');
+
+    const CURSOR = this.config.cursorFile;
+    const LAST_RECORD_ID = this.config.lastRecordIdFile;
+
+    let cursor = await FileSystem.readToJson(CURSOR);
+    const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
+    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
+
+    while (this._isPolling) {
+      const { records = [], cursor: nextCursor } = await ApplicantManager.web5.dwn.records.query({
+        message: {
+          filter: {
+            protocol: applicant.protocol,
+          },
+          pagination,
+        },
+      });
+
+      Logger.debug(`Found ${records.length} records`);
+      if (nextCursor) {
+        Logger.debug(`Next cursor update for next query`, stringifier(nextCursor));
+        cursor = nextCursor;
+        const overwritten = await FileSystem.overwrite(CURSOR, cursor);
+        Logger.debug(`${CURSOR} overwritten ${overwritten}`, cursor);
+      } else {
+        Logger.debug(`Next cursor not found!`);
+      }
+
+      if (cursor && !records.length) {
+        cursor = undefined;
+      }
+
+      const recordIds = records.map((record: Record) => record.id);
+
+      const recordReads: Record[] = await Promise.all(
+        recordIds.map(async (recordId: string) => {
+          const { record }: { record: Record } = await ApplicantManager.web5.dwn.records.read({
+            message: {
+              filter: {
+                recordId,
+              },
+            },
+          });
+          return record;
+        }),
+      );
+
+      Logger.debug(`Read ${recordReads.length} records`);
+
+      if (!recordReads.length) {
+        Logger.debug('No records found!', recordReads.length);
+        if (this._isTest) {
+          Logger.debug('Test Complete! Stopping DCX server ...');
+          this.stop();
+        }
+        await Time.sleep();
+      }
+
+      for (const record of recordReads) {
+        if (record.id != lastRecordId) {
+          if (record.protocolPath === 'application') {
+            const manifest = this.useOptions.manifests!.find(
+              (manifest: CredentialManifest) =>
+                manifest.presentation_definition.id === record.schema,
+            );
+
+            if (manifest) {
+              await ApplicantHandlers.processResponseRecord(record, manifest);
+            } else {
+              Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
+            }
+
+            lastRecordId = record.id;
+            const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
+            Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
+          }
+        } else {
+          await Time.sleep();
+        }
+      }
+    }
   }
 
   /**
@@ -328,7 +415,7 @@ export default class ApplicantServer {
       if (!this._isInitialized) {
         await this.initialize();
         Logger.debug('Web5 initialized', this._isInitialized);
-        await Web5Manager.setup();
+        await ApplicantManager.setup();
       }
 
       this._isPolling = true;
@@ -338,5 +425,3 @@ export default class ApplicantServer {
     }
   }
 }
-
-export const server = new ApplicantServer({ options: APPLICANT_SERVER_USE_OPTIONS, config: ApplicantConfig });
