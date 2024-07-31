@@ -292,13 +292,13 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
     await this._store.set('contentEncryptionKey', cekJwe);
 
-    const identityHdKey = rootHdKey.derive(`m/44'/0'/${Date.now()}'/0'/0'`);
+    const identityHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/0'`);
     const identityPrivateKey = await this.crypto.bytesToPrivateKey({
       algorithm       : 'Ed25519',
       privateKeyBytes : identityHdKey.privateKey,
     });
 
-    const signingHdKey = rootHdKey.derive(`m/44'/0'/${Date.now()}'/0'/1'`);
+    const signingHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/1'`);
     const signingPrivateKey = await this.crypto.bytesToPrivateKey({
       algorithm       : 'Ed25519',
       privateKeyBytes : signingHdKey.privateKey,
