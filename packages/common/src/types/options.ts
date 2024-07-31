@@ -46,6 +46,8 @@ export class ServerManifest implements CredentialManifest {
   ) {}
 }
 
+export type ServerPath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
+
 export type ServerOptions = {
   manifests: ServerManifest[];
   providers: Provider[];

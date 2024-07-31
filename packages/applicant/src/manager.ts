@@ -4,6 +4,7 @@ import {
   DwnError,
   DwnUtils,
   Logger,
+  ServerManifest,
   Time
 } from '@dcx-protocol/common';
 import {
@@ -11,7 +12,7 @@ import {
   ProtocolsQueryResponse,
   Web5
 } from '@web5/api';
-import { applicant, ApplicantServer } from './index.js';
+import { applicant } from './index.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
@@ -20,11 +21,11 @@ export class ApplicantManager {
   public static web5: Web5;
   public static applicantAgent: DcxAgent;
   public static applicantAgentVault: DcxIdentityVault;
-  public static applicantManife: ApplicantServer;
+  public static applicantManifests: ServerManifest[];
   /**
    * Sync DWN
    */
-  public sync(): void {
+  public static sync(): void {
     Logger.debug('Syncing dwn ...');
     ApplicantManager.applicantAgent.sync.startSync({ interval: '1ms' });
 

@@ -11,43 +11,45 @@ import {
   Provider,
   ServerHandler,
   ServerOptions,
+  ServerPath,
   stringifier,
   Time
 } from '@dcx-protocol/common';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import { applicantConfig, ApplicantConfig } from './config.js';
-import { ApplicantHandlers } from './handlers.js';
-import { applicant } from './index.js';
-import { ApplicantManager } from './manager.js';
+import {
+  applicant,
+  applicantConfig,
+  ApplicantConfig,
+  ApplicantHandlers,
+  ApplicantManager
+} from './index.js';
 
-type UsePath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
 type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
 
 export class ApplicantServer {
-  config: ApplicantConfig;
-  useOptions: ServerOptions;
-
+  config         : ApplicantConfig;
+  useOptions     : ServerOptions;
   _isSetup       : boolean = false;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isTest        : boolean = applicantConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
+  /**
+   *
+   * Setup the server with the provided options and config
+   *
+   * @param params.options The options to use for the DcxServer
+   * @param params.options.issuers The issuers to use; array
+   * @param params.options.manifests The manifests to use; array
+   * @param params.options.providers The providers to use; array
+   * @param params.options.handlers The handlers to use; array
+   * @param params.options.dwns The dwns to use; array
+   * @param params.options.gateways The gateways to use; array
+   * @example see README.md for usage information
+   *
+   */
   constructor(params: ApplicantServerParams = {}) {
-    /**
-     *
-     * Setup the DcxManager and the DcxServer with the provided options
-     *
-     * @param params.options The options to use for the DcxServer
-     * @param params.options.issuers The issuers to use; array
-     * @param params.options.manifests The manifests to use; array
-     * @param params.options.providers The providers to use; array
-     * @param params.options.handlers The handlers to use; array
-     * @param params.options.dwns The dwns to use; array
-     * @param params.options.gateways The gateways to use; array
-     * @example see README.md for usage information
-     *
-     */
     this.config = params.config ?? applicantConfig;
     this.useOptions = params.options ?? {
       handlers  : [],
@@ -64,23 +66,17 @@ export class ApplicantServer {
     return newApplicantServer;
   }
 
-  public static async createInit(): Promise<ApplicantServer> {
-    const newApplicantServer = ApplicantServer.create();
-    await newApplicantServer.initialize();
-    return newApplicantServer;
-  }
-
   /**
    *
    * Sets the server options
    *
-   * @param path The type of server option; must be one of 'handler', 'providers', 'manifest', or 'issuer'
+   * @param path The type of server option; see {@link ServerPath}
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link UseOption}
+   * @param obj The object to use; see {@link ServerOptions}
    * @example see README.md for usage information
    *
    */
-  public use(path: UsePath, obj: any): void {
+  public use(path: ServerPath, obj: any): void {
     const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
@@ -242,12 +238,11 @@ export class ApplicantServer {
   /**
    *
    * Configures the DCX server by creating a new password, initializing Web5,
-   * connecting to the remote DWN and configuring the DWN with the DCX credential-issuer protocol
-   *
-   * @returns void
+   * connecting to the remote DWN and configuring the DWN with the DCX applicant protocol
    *
    */
   public async initialize(): Promise<void> {
+    Logger.debug('Initializing Web5 ... ');
     Logger.debug('this.config.agentDataPath', this.config.agentDataPath);
     Logger.debug('this.config.web5Password', this.config.web5Password);
     Logger.debug('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
@@ -293,6 +288,8 @@ export class ApplicantServer {
     ApplicantManager.web5 = web5;
     ApplicantManager.applicantAgent = agent;
     ApplicantManager.applicantAgentVault = agentVault;
+    ApplicantManager.applicantManifests = this.useOptions.manifests;
+    ApplicantHandlers.applicantHandlers = this.useOptions.handlers;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -355,7 +352,6 @@ export class ApplicantServer {
       }
 
       const recordIds = records.map((record: Record) => record.id);
-
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
           const { record }: { record: Record } = await ApplicantManager.web5.dwn.records.read({

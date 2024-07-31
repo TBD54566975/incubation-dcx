@@ -8,7 +8,7 @@ import { applicantConfig } from '../src/config.js';
 describe('ApplicantConfig class', () => {
   describe('properties defined by process.env vars and ', () => {
     it('should contain property APPLICANT_PORT as a string equal to 5000', () => {
-      const APPLICANT_PORT = applicantConfig.APPLICANT_PORT;
+      const APPLICANT_PORT = applicantConfig.port;
       expect(APPLICANT_PORT).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_PORT).to.be.a('number');
       expect(APPLICANT_PORT).equals(5000);
@@ -16,7 +16,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_SERVICE_NAME as a string equal to "@dcx-protocol/applicant"', () => {
-      const APPLICANT_SERVICE_NAME = applicantConfig.APPLICANT_SERVICE_NAME;
+      const APPLICANT_SERVICE_NAME = applicantConfig.serviceName;
       expect(APPLICANT_SERVICE_NAME).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_SERVICE_NAME).to.be.a('string');
       expect(APPLICANT_SERVICE_NAME).equals('@dcx-protocol/applicant');
@@ -24,7 +24,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_SERVICE_ID as a string equal to "dcx-applicant"', () => {
-      const APPLICANT_SERVICE_ID = applicantConfig.APPLICANT_SERVICE_ID;
+      const APPLICANT_SERVICE_ID = applicantConfig.serviceId;
       expect(APPLICANT_SERVICE_ID).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_SERVICE_ID).to.be.a('string');
       expect(APPLICANT_SERVICE_ID).equals('dcx-applicant');
@@ -32,7 +32,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_CURSOR as a string equal to applicant-cursor.json', () => {
-      const APPLICANT_CURSOR = applicantConfig.APPLICANT_CURSOR;
+      const APPLICANT_CURSOR = applicantConfig.cursorFile;
       expect(APPLICANT_CURSOR).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_CURSOR).to.be.a('string');
       expect(APPLICANT_CURSOR).equals('applicant-cursor.json');
@@ -40,7 +40,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_LAST_RECORD_ID as a string equal to lastRecordId.applicant', () => {
-      const APPLICANT_LAST_RECORD_ID = applicantConfig.APPLICANT_LAST_RECORD_ID;
+      const APPLICANT_LAST_RECORD_ID = applicantConfig.lastRecordIdFile;
       expect(APPLICANT_LAST_RECORD_ID).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_LAST_RECORD_ID).to.be.a('string');
       expect(APPLICANT_LAST_RECORD_ID).equals('lastRecordId.applicant');
@@ -48,7 +48,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_DWN_ENDPOINTS as an array of length 2', () => {
-      const APPLICANT_DWN_ENDPOINTS = applicantConfig.APPLICANT_DWN_ENDPOINTS;
+      const APPLICANT_DWN_ENDPOINTS = applicantConfig.dwnEndpoints;
       expect(APPLICANT_DWN_ENDPOINTS).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_DWN_ENDPOINTS).to.be.an('array');
       expect(APPLICANT_DWN_ENDPOINTS).to.have.lengthOf.gte(2);
@@ -56,7 +56,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_GATEWAY_URIS as an array of length 2', () => {
-      const APPLICANT_GATEWAY_URIS = applicantConfig.APPLICANT_GATEWAY_URIS;
+      const APPLICANT_GATEWAY_URIS = applicantConfig.gatewayUris;
       expect(APPLICANT_GATEWAY_URIS).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_GATEWAY_URIS).to.be.an('array');
       expect(APPLICANT_GATEWAY_URIS).to.have.lengthOf.gte(2);
@@ -64,7 +64,7 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_WEB5_AGENT_DATA_PATH as a string equal to "DATA/DCX/APPLICANT/AGENT"', () => {
-      const APPLICANT_WEB5_AGENT_DATA_PATH = applicantConfig.APPLICANT_WEB5_AGENT_DATA_PATH;
+      const APPLICANT_WEB5_AGENT_DATA_PATH = applicantConfig.agentDataPath;
       expect(APPLICANT_WEB5_AGENT_DATA_PATH).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_WEB5_AGENT_DATA_PATH).to.be.a('string');
       expect(APPLICANT_WEB5_AGENT_DATA_PATH).equals('DATA/DCX/APPLICANT/AGENT');
@@ -72,14 +72,14 @@ describe('ApplicantConfig class', () => {
     });
 
     it('should contain property APPLICANT_WEB5_PASSWORD as a string', () => {
-      const APPLICANT_WEB5_PASSWORD = applicantConfig.APPLICANT_WEB5_PASSWORD;
+      const APPLICANT_WEB5_PASSWORD = applicantConfig.web5Password;
       expect(APPLICANT_WEB5_PASSWORD).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_WEB5_PASSWORD).to.be.a('string');
       console.log(`      ✔ APPLICANT_WEB5_PASSWORD=${APPLICANT_WEB5_PASSWORD}`);
     });
 
     it('should contain APPLICANT_WEB5_RECOVERY_PHRASE as a string', () => {
-      const APPLICANT_WEB5_RECOVERY_PHRASE = applicantConfig.APPLICANT_WEB5_RECOVERY_PHRASE;
+      const APPLICANT_WEB5_RECOVERY_PHRASE = applicantConfig.web5RecoveryPhrase;
       expect(APPLICANT_WEB5_RECOVERY_PHRASE).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_WEB5_RECOVERY_PHRASE).to.be.a('string');
       console.log(`      ✔ APPLICANT_WEB5_RECOVERY_PHRASE=${APPLICANT_WEB5_RECOVERY_PHRASE}`);

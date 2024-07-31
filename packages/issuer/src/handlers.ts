@@ -10,6 +10,7 @@ import {
   Provider,
   responseSchema,
   ServerHandler,
+  ServerProvider,
   stringifier
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
@@ -19,10 +20,12 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { issuer, issuerConfig, Web5Manager } from './index.js';
-import { server } from './issuer-server.js';
+import { issuer, issuerConfig, IssuerManager } from './index.js';
 
 export class IssuerProtocolHandlers {
+  public static serverIssuers: Issuer[];
+  public static serverHandlers: ServerHandler[];
+  public static serverProviders: ServerProvider[];
 
   constructor() {
     IssuerProtocolHandlers.selectCredentials = IssuerProtocolHandlers.findHandler('selectCredentials', IssuerProtocolHandlers.selectCredentials);
@@ -32,7 +35,7 @@ export class IssuerProtocolHandlers {
   }
 
   public static findHandler(id: string, staticHandler: Handler): Handler {
-    return server.useOptions.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
+    return this.serverHandlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -65,7 +68,7 @@ export class IssuerProtocolHandlers {
         continue;
       }
 
-      const issuers = [...server.useOptions.issuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuers = [...this.serverIssuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -119,12 +122,12 @@ export class IssuerProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject : subjectDid,
-      issuer  : Web5Manager.issuerAgent.agentDid.uri,
+      issuer  : IssuerManager.issuerAgent.agentDid.uri,
       type    : manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: Web5Manager.issuerAgent.agentDid });
+    const signed = await vc.sign({ did: IssuerManager.issuerAgent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
@@ -153,8 +156,7 @@ export class IssuerProtocolHandlers {
     body: { vcs: VerifiableCredential[] } | any,
     id: string,
   ): Promise<any> {
-    const providers = server.useOptions.providers;
-    const provider = providers.find((provider: Provider) => provider.id === id);
+    const provider = this.serverProviders.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -210,7 +212,7 @@ export class IssuerProtocolHandlers {
 
     const vc = await IssuerProtocolHandlers.issueCredential(data, recordAuthor, manifest);
 
-    const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+    const { record, status: create } = await IssuerManager.web5.dwn.records.create({
       data    : vc,
       store   : false,
       message : {
