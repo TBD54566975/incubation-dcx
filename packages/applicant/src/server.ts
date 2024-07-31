@@ -1,4 +1,5 @@
 import {
+  config as dcxConfig,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
@@ -33,7 +34,7 @@ export class ApplicantServer {
   _isSetup       : boolean = false;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
-  _isTest        : boolean = applicantConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest        : boolean = dcxConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   /**
    *
@@ -242,10 +243,10 @@ export class ApplicantServer {
    *
    */
   public async initialize(): Promise<void> {
-    Logger.debug('Initializing Web5 ... ');
-    Logger.debug('this.config.agentDataPath', this.config.agentDataPath);
-    Logger.debug('this.config.web5Password', this.config.web5Password);
-    Logger.debug('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
+    Logger.log('Initializing Web5 ... ');
+    Logger.log('this.config.agentDataPath', this.config.agentDataPath);
+    Logger.log('this.config.web5Password', this.config.web5Password);
+    Logger.log('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
@@ -301,7 +302,7 @@ export class ApplicantServer {
    * @returns void
    */
   public stop(): void {
-    // Logger.debug('DCX server stopping...');
+    Logger.log('DCX server stopping...');
     this._isPolling = false;
     exit(0);
   }
@@ -318,7 +319,7 @@ export class ApplicantServer {
    *
    */
   public async poll(): Promise<void> {
-    Logger.debug('DCX server starting ...');
+    Logger.log('DCX server starting ...');
 
     const CURSOR = this.config.cursorFile;
     const LAST_RECORD_ID = this.config.lastRecordIdFile;
@@ -337,14 +338,14 @@ export class ApplicantServer {
         },
       });
 
-      Logger.debug(`Found ${records.length} records`);
+      Logger.log(`Found ${records.length} records`);
       if (nextCursor) {
-        Logger.debug(`Next cursor update for next query`, stringifier(nextCursor));
+        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
         cursor = nextCursor;
         const overwritten = await FileSystem.overwrite(CURSOR, cursor);
-        Logger.debug(`${CURSOR} overwritten ${overwritten}`, cursor);
+        Logger.log(`${CURSOR} overwritten ${overwritten}`, cursor);
       } else {
-        Logger.debug(`Next cursor not found!`);
+        Logger.log(`Next cursor not found!`);
       }
 
       if (cursor && !records.length) {
@@ -365,12 +366,12 @@ export class ApplicantServer {
         }),
       );
 
-      Logger.debug(`Read ${recordReads.length} records`);
+      Logger.log(`Read ${recordReads.length} records`);
 
       if (!recordReads.length) {
-        Logger.debug('No records found!', recordReads.length);
+        Logger.log('No records found!', recordReads.length);
         if (this._isTest) {
-          Logger.debug('Test Complete! Stopping DCX server ...');
+          Logger.log('Test Complete! Stopping DCX server ...');
           this.stop();
         }
         await Time.sleep();
@@ -387,12 +388,12 @@ export class ApplicantServer {
             if (manifest) {
               await ApplicantHandlers.processResponseRecord(record, manifest);
             } else {
-              Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
+              Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
             }
 
             lastRecordId = record.id;
             const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
+            Logger.log(`Overwritten last record id ${overwritten}`, lastRecordId);
           }
         } else {
           await Time.sleep();
@@ -410,8 +411,8 @@ export class ApplicantServer {
     try {
       if (!this._isInitialized) {
         await this.initialize();
-        Logger.debug('Web5 initialized', this._isInitialized);
-        await ApplicantManager.setup();
+        Logger.log('Web5 initialized', this._isInitialized);
+        await this.setupDwn();
       }
 
       this._isPolling = true;

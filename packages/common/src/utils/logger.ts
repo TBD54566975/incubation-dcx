@@ -14,49 +14,60 @@ enum LogLevel {
   Info = 'info',
   Log = 'log',
   Warn = 'warn',
-  Off = 'off',
+  Test = 'test',
 }
 
 /**
  *
  * A simple console logger with colorized output.
  */
-type Level = 'debug' | 'error' | 'info' | 'log' | 'warn' | 'off';
+type Level = 'debug' | 'error' | 'info' | 'log' | 'warn' | 'test';
 export class Logger implements Partial<Console> {
   public static isTest: boolean = dcxConfig.DCX_ENV === Env.Test;
   public static isDevelopment: boolean = dcxConfig.DCX_ENV === Env.Development;
   public static isProduction: boolean = dcxConfig.DCX_ENV === Env.Production;
 
-  public static level: Level = Logger.isTest ? 'off' : Logger.isDevelopment ? 'debug' : 'info';
+  public static level: Level = 'info';
+  constructor() {
+    if(Logger.isTest){
+      Logger.level = 'test';
+    } else if (Logger.isDevelopment) {
+      Logger.level = 'debug';
+    } else {
+      Logger.level = 'info';
+    }
+  }
 
   public static debug(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
+    if(Logger.level === Env.Test) return;
     console.debug(chalk.green('debug') + ':', message, ...args);
   }
 
   public static error(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
+    if(Logger.level === Env.Test) return;
     console.error(chalk.red('error') + ':', message, ...args);
   }
 
   public static info(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
+    if(Logger.level === Env.Test) return;
     console.info(chalk.blue('info') + ':', message, ...args);
   }
 
   public static warn(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
+    if(Logger.level === Env.Test) return;
     console.warn(chalk.yellow('warn') + ':', message, ...args);
   }
 
   public static security(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
+    if(Logger.level === Env.Test) return;
     console.warn(chalk.red('security') + ':', message, ...args);
   }
 
   public static log(message?: unknown, ...args: unknown[]): void {
-    if(dcxConfig.DCX_ENV === Env.Test) return;
     switch (Logger.level) {
+      case LogLevel.Log:
+        console.log(chalk.gray('log') + ':', message, ...args);
+        break;
       case LogLevel.Debug:
         Logger.debug(message, ...args);
         break;
@@ -70,7 +81,7 @@ export class Logger implements Partial<Console> {
         Logger.warn(message, ...args);
         break;
       default:
-        console.log(chalk.gray('log') + ':', message, ...args);
+        break;
     }
   }
 }

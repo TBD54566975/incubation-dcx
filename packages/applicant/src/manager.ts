@@ -26,13 +26,13 @@ export class ApplicantManager {
    * Sync DWN
    */
   public static sync(): void {
-    Logger.debug('Syncing dwn ...');
+    Logger.log('Syncing dwn ...');
     ApplicantManager.applicantAgent.sync.startSync({ interval: '1ms' });
 
     Time.sleep(1000);
 
     ApplicantManager.applicantAgent.sync.stopSync();
-    Logger.debug('Syncing done!');
+    Logger.log('Syncing done!');
   }
   /**
    * Query DWN for credential-applicant protocol
@@ -54,7 +54,7 @@ export class ApplicantManager {
       throw new DwnError(code, detail);
     }
 
-    Logger.debug(`DWN has ${protocols.length} protocols available`);
+    Logger.log(`DWN has ${protocols.length} protocols available`);
     return { status: query, protocols };
   }
 
@@ -81,7 +81,7 @@ export class ApplicantManager {
       throw new DwnError(code, detail);
     }
 
-    Logger.debug('Sent protocol to remote DWN', send);
+    Logger.log('Sent protocol to remote DWN', send);
     return { status: send, protocol };
   }
 
@@ -100,7 +100,7 @@ export class ApplicantManager {
       if (!protocols.length) {
         Logger.log('Configuring dwn with dcx applicant protocol ...');
         const { status, protocol } = await ApplicantManager.configureProtocols();
-        Logger.debug(
+        Logger.log(
           `Configured credential applicant protocol in dwn: ${status.code} - ${status.detail}`,
           protocol,
         );
