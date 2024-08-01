@@ -27,7 +27,7 @@ export class Logger implements Partial<Console> {
   public static isDevelopment: boolean = dcxConfig.DCX_ENV === Env.Development;
   public static isProduction: boolean = dcxConfig.DCX_ENV === Env.Production;
 
-  public static level: Level = 'info';
+  public static level: Level = dcxConfig.DCX_ENV as Level;
   constructor() {
     if(Logger.isTest){
       Logger.level = 'test';
