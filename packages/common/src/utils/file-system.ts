@@ -1,8 +1,47 @@
 import { access, constants, open, readFile } from 'fs/promises';
 import { parse } from './json.js';
 import { Logger } from './logger.js';
-
+import { fileURLToPath } from 'url';
+import { dirname, resolve, join } from 'path';
 export class FileSystem {
+  public static async findFileInProject(fileName: string): Promise<string> {
+    let currentDir: string;
+    let found = false;
+    let filePath = '';
+
+    if (typeof require !== 'undefined' && typeof require.main !== 'undefined') {
+      currentDir = require.main.path; // CommonJS
+    } else {
+      const __filename = fileURLToPath(import.meta.url); // ESM
+      currentDir = dirname(__filename);
+    }
+
+    while (!found) {
+      filePath = join(currentDir, fileName);
+      try {
+        await FileSystem.access(filePath);
+        found = true;
+      } catch {
+        const parentDir = resolve(currentDir, '..');
+        if (parentDir === currentDir) {
+          throw new Error(`Could not find ${fileName} in the project root`);
+        }
+        currentDir = parentDir;
+      }
+    }
+
+    return filePath;
+  }
+
+  public static async access(path: string): Promise<void> {
+    try {
+      await access(path, constants.R_OK | constants.W_OK);
+      console.log('can access');
+    } catch {
+      console.error('cannot access');
+    }
+  }
+
   public static toJson(data: string): any {
     try {
       return parse(data);

@@ -332,10 +332,10 @@ export class FlattenedJwe {
 
     return {
       plaintext,
-      protectedHeader: parsedProtectedHeader,
-      additionalAuthenticatedData: decodeHeaderParam('aad', jwe.aad),
-      sharedUnprotectedHeader: jwe.unprotected,
-      unprotectedHeader: jwe.header
+      protectedHeader             : parsedProtectedHeader,
+      additionalAuthenticatedData : decodeHeaderParam('aad', jwe.aad),
+      sharedUnprotectedHeader     : jwe.unprotected,
+      unprotectedHeader           : jwe.header
     };
   }
 

@@ -1,19 +1,18 @@
-import { Config } from '@dcx-protocol/common';
-export class ApplicantConfig extends Config {
-  constructor() {
-    super();
-  }
+import { config as dcxConfig } from '@dcx-protocol/common';
 
-  public static NODE_ENV = process.env.NODE_ENV || 'development';
-  public static SERVICE_NAME = process.env.SERVICE_NAME || 'decentralized credential exchange';
-  public static SERVICE_ID = process.env.SERVICE_ID || 'dcx';
+export type ApplicantConfig = typeof applicantConfig;
 
-  public static LAST_RECORD_ID = process.env.LAST_RECORD_ID ?? `${process.cwd()}/lastRecordId`;
-  public static CURSOR = process.env.CURSOR ?? `${process.cwd()}/cursor.json`;
-
-  static get ApplicantConfig(): ApplicantConfig {
-    return this;
-  }
-}
-
-export type DcxApplicantConfig = InstanceType<typeof ApplicantConfig>;
+export const applicantConfig = {
+  // TODO: check validity of these values
+  ...dcxConfig,
+  port                           : process.env.APPLICANT_PORT                      || 5000,
+  serviceName                    : process.env.APPLICANT_SERVICE_NAME              || '@dcx-protocol/applicant',
+  serviceId                      : process.env.APPLICANT_SERVICE_ID                || 'dcx-applicant',
+  cursorFile                     : process.env.APPLICANT_CURSOR                    || 'applicant-cursor.json',
+  lastRecordIdFile               : process.env.APPLICANT_LAST_RECORD_ID            || 'lastRecordId.applicant',
+  dwnEndpoints                   : process.env.APPLICANT_DWN_ENDPOINTS?.split(',') || dcxConfig.DCX_ENDPOINTS.DWN_ENDPOINTS,
+  gatewayUris                    : process.env.APPLICANT_GATEWAY_URIS?.split(',')  || dcxConfig.DCX_ENDPOINTS.GATEWAY_URIS,
+  agentDataPath                  : process.env.APPLICANT_WEB5_AGENT_DATA_PATH      || `DATA/DCX/APPLICANT/AGENT`,
+  web5Password                   : process.env.APPLICANT_WEB5_PASSWORD             || '',
+  web5RecoveryPhrase             : process.env.APPLICANT_WEB5_RECOVERY_PHRASE      || '',
+};
