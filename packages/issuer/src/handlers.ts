@@ -22,16 +22,16 @@ import {
 } from '@web5/credentials';
 import { issuer, issuerConfig, IssuerManager } from './index.js';
 
-export class IssuerProtocolHandlers {
+export class IssuerHandlers {
   public static serverIssuers: Issuer[];
   public static serverHandlers: ServerHandler[];
   public static serverProviders: ServerProvider[];
 
   constructor() {
-    IssuerProtocolHandlers.selectCredentials = IssuerProtocolHandlers.findHandler('selectCredentials', IssuerProtocolHandlers.selectCredentials);
-    IssuerProtocolHandlers.verifyCredentials = IssuerProtocolHandlers.findHandler('verifyCredentials', IssuerProtocolHandlers.verifyCredentials);
-    IssuerProtocolHandlers.requestCredential = IssuerProtocolHandlers.findHandler('requestCredential', IssuerProtocolHandlers.requestCredential);
-    IssuerProtocolHandlers.issueCredential = IssuerProtocolHandlers.findHandler('issueCredential', IssuerProtocolHandlers.issueCredential);
+    IssuerHandlers.selectCredentials = IssuerHandlers.findHandler('selectCredentials', IssuerHandlers.selectCredentials);
+    IssuerHandlers.verifyCredentials = IssuerHandlers.findHandler('verifyCredentials', IssuerHandlers.verifyCredentials);
+    IssuerHandlers.requestCredential = IssuerHandlers.findHandler('requestCredential', IssuerHandlers.requestCredential);
+    IssuerHandlers.issueCredential = IssuerHandlers.findHandler('issueCredential', IssuerHandlers.issueCredential);
   }
 
   public static findHandler(id: string, staticHandler: Handler): Handler {
@@ -199,18 +199,18 @@ export class IssuerProtocolHandlers {
     Logger.debug('Application record verifiable presentation', stringifier(vp));
 
     // Select valid credentials against the manifest
-    const vcJwts = IssuerProtocolHandlers.selectCredentials(vp, manifest);
+    const vcJwts = IssuerHandlers.selectCredentials(vp, manifest);
     Logger.debug(`Selected ${vcJwts.length} credentials`);
 
     const recordAuthor = applicationRecord.author;
-    const verified = await IssuerProtocolHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
+    const verified = await IssuerHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
     Logger.debug(`Verified ${verified.length} credentials`);
 
     // request vc data
-    const data = await IssuerProtocolHandlers.requestCredential({ vcs: verified }, providerId);
+    const data = await IssuerHandlers.requestCredential({ vcs: verified }, providerId);
     Logger.debug('VC data from provider', stringifier(data));
 
-    const vc = await IssuerProtocolHandlers.issueCredential(data, recordAuthor, manifest);
+    const vc = await IssuerHandlers.issueCredential(data, recordAuthor, manifest);
 
     const { record, status: create } = await IssuerManager.web5.dwn.records.create({
       data    : vc,

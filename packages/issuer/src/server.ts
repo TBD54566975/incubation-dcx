@@ -21,7 +21,7 @@ import {
   issuer,
   IssuerConfig,
   issuerConfig,
-  IssuerProtocolHandlers,
+  IssuerHandlers,
   IssuerManager
 } from './index.js';
 
@@ -62,8 +62,7 @@ export class IssuerServer {
   }
 
   public static create(): IssuerServer {
-    const newIssuerServer = new IssuerServer();
-    return newIssuerServer;
+    return new IssuerServer();
   }
 
   /**
@@ -244,10 +243,7 @@ export class IssuerServer {
    *
    */
   public async initialize(): Promise<void> {
-    Logger.debug('Initializing Web5 ... ');
-    Logger.debug('this.config.agentDataPath', this.config.agentDataPath);
-    Logger.debug('this.config.web5Password', this.config.web5Password);
-    Logger.debug('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
+    Logger.log('Initializing Web5 ... ');
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
@@ -281,7 +277,6 @@ export class IssuerServer {
     await agent.start({ password });
     // Register the agent identity with the DWN
     await agent.sync.registerIdentity({ did: agent.agentDid.uri });
-
     // Initialize the Web5 instance
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
@@ -290,9 +285,10 @@ export class IssuerServer {
     IssuerManager.issuerAgent = agent;
     IssuerManager.issuerAgentVault = agentVault;
     IssuerManager.issuerManifests = this.useOptions.manifests;
-    IssuerProtocolHandlers.serverHandlers = this.useOptions.handlers;
-    IssuerProtocolHandlers.serverIssuers = this.useOptions.issuers;
-    IssuerProtocolHandlers.serverProviders = this.useOptions.providers;
+
+    IssuerHandlers.serverHandlers = this.useOptions.handlers;
+    IssuerHandlers.serverIssuers = this.useOptions.issuers;
+    IssuerHandlers.serverProviders = this.useOptions.providers;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -304,7 +300,7 @@ export class IssuerServer {
    *
    */
   public async poll(): Promise<void> {
-    Logger.debug('DCX server starting ...');
+    Logger.log('DCX server starting ...');
 
     const CURSOR = this.config.cursorFile;
     const LAST_RECORD_ID = this.config.lastRecordIdFile;
@@ -323,14 +319,14 @@ export class IssuerServer {
         },
       });
 
-      Logger.debug(`Found ${records.length} records`);
+      Logger.log(`Found ${records.length} records`);
       if (nextCursor) {
-        Logger.debug(`Next cursor update for next query`, stringifier(nextCursor));
+        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
         cursor = nextCursor;
         const overwritten = await FileSystem.overwrite(CURSOR, cursor);
-        Logger.debug(`${CURSOR} overwritten ${overwritten}`, cursor);
+        Logger.log(`${CURSOR} overwritten ${overwritten}`, cursor);
       } else {
-        Logger.debug(`Next cursor not found!`);
+        Logger.log(`Next cursor not found!`);
       }
 
       if (cursor && !records.length) {
@@ -352,12 +348,12 @@ export class IssuerServer {
         }),
       );
 
-      Logger.debug(`Read ${recordReads.length} records`);
+      Logger.log(`Read ${recordReads.length} records`);
 
       if (!recordReads.length) {
-        Logger.debug('No records found!', recordReads.length);
+        Logger.log('No records found!', recordReads.length);
         if (this._isTest) {
-          Logger.debug('Test Complete! Stopping DCX server ...');
+          Logger.log('Test Complete! Stopping DCX server ...');
           this.stop();
         }
         await Time.sleep();
@@ -372,18 +368,18 @@ export class IssuerServer {
             );
 
             if (manifest) {
-              await IssuerProtocolHandlers.processApplicationRecord(
+              await IssuerHandlers.processApplicationRecord(
                 record,
                 manifest,
                 manifest.output_descriptors[0].id,
               );
             } else {
-              Logger.debug(`Skipped message with protocol path ${record.protocolPath}`);
+              Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
             }
 
             lastRecordId = record.id;
             const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.debug(`Overwritten last record id ${overwritten}`, lastRecordId);
+            Logger.log(`Overwritten last record id ${overwritten}`, lastRecordId);
           }
         } else {
           await Time.sleep();
@@ -403,7 +399,7 @@ export class IssuerServer {
    * @returns void
    */
   public stop(): void {
-    Logger.debug('DCX server stopping...');
+    Logger.log('DCX server stopping...');
     this._isPolling = false;
     exit(0);
   }
@@ -417,13 +413,13 @@ export class IssuerServer {
     try {
       if (!this._isInitialized) {
         await this.initialize();
-        Logger.debug('Web5 initialized', this._isInitialized);
-        await IssuerManager.setup();
+        Logger.log('Web5 initialized', this._isInitialized);
+        await this.setupDwn();
       }
 
       this._isPolling = true;
       await this.poll();
-    } catch (error: unknown) {
+    } catch (error: any) {
       Logger.error(error);
       this.stop();
     }

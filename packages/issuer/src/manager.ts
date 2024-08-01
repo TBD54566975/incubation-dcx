@@ -34,11 +34,11 @@ export class IssuerManager {
    */
   public static sync(): void {
     Logger.debug('Syncing dwn ...');
-    IssuerManager.issuerAgent.sync.startSync({ interval: '1ms' });
+    this.issuerAgent.sync.startSync({ interval: '1ms' });
 
     Time.sleep(1000);
 
-    IssuerManager.issuerAgent.sync.stopSync();
+    this.issuerAgent.sync.stopSync();
     Logger.debug('Syncing done!');
   }
   /**
@@ -48,7 +48,7 @@ export class IssuerManager {
   public static async queryIssuerProtocols(): Promise<ProtocolsQueryResponse> {
     try {
       // Query DWN for credential-issuer protocol
-      const { status: query, protocols = [] } = await IssuerManager.web5.dwn.protocols.query({
+      const { status: query, protocols = [] } = await this.web5.dwn.protocols.query({
         message: {
           filter: {
             protocol: issuer.protocol,
@@ -76,7 +76,7 @@ export class IssuerManager {
    */
   public static async configureIssuerProtocols(): Promise<ProtocolsConfigureResponse> {
     try {
-      const { status: configure, protocol } = await IssuerManager.web5.dwn.protocols.configure({
+      const { status: configure, protocol } = await this.web5.dwn.protocols.configure({
         message: { definition: issuer },
       });
 
@@ -86,7 +86,7 @@ export class IssuerManager {
         throw new DwnError(code, detail);
       }
 
-      const { status: send } = await protocol.send(IssuerManager.issuerAgent.agentDid.uri);
+      const { status: send } = await protocol.send(this.issuerAgent.agentDid.uri);
 
       if (DwnUtils.isFailure(send.code)) {
         const { code, detail } = send;
@@ -114,7 +114,7 @@ export class IssuerManager {
         status,
         records: manifestRecords = [],
         cursor,
-      } = await IssuerManager.web5.dwn.records.query({
+      } = await this.web5.dwn.records.query({
         message: {
           filter: {
             schema       : manifestSchema.$id,
@@ -149,7 +149,7 @@ export class IssuerManager {
     try {
       const manifests = await Promise.all(
         manifestRecords.map(async (manifestRecord) => {
-          const { record } = await IssuerManager.web5.dwn.records.read({
+          const { record } = await this.web5.dwn.records.read({
             message: {
               filter: {
                 recordId: manifestRecord.id,
@@ -195,8 +195,8 @@ export class IssuerManager {
   public static async createMissingManifest(
     unwrittenManifest: CredentialManifest,
   ): Promise<RecordsCreateResponse> {
-    unwrittenManifest.issuer.id = IssuerManager.issuerAgent.agentDid.uri;
-    const { record, status: create } = await IssuerManager.web5.dwn.records.create({
+    unwrittenManifest.issuer.id = this.issuerAgent.agentDid.uri;
+    const { record, status: create } = await this.web5.dwn.records.create({
       store   : false,
       data    : unwrittenManifest,
       message : {
@@ -220,7 +220,7 @@ export class IssuerManager {
       );
     }
 
-    const { status: send } = await record.send(IssuerManager.issuerAgent.agentDid.uri);
+    const { status: send } = await record.send(this.issuerAgent.agentDid.uri);
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
@@ -244,7 +244,7 @@ export class IssuerManager {
       const createdManifestRecords = await Promise.all(
         missingManifests.map(
           async (unwrittenManifest: CredentialManifest) =>
-            (await IssuerManager.createMissingManifest(unwrittenManifest))?.record,
+            (await this.createMissingManifest(unwrittenManifest))?.record,
         ),
       );
       return createdManifestRecords.filter((record?: Record) => record !== undefined) as Record[];
@@ -265,36 +265,37 @@ export class IssuerManager {
     }
     try {
       // Query DWN for credential-issuer protocols
-      const { protocols } = await IssuerManager.queryIssuerProtocols();
-      Logger.log(`Found ${protocols.length} dcx issuer protocol(s) in dwn`, protocols);
+      const { protocols } = await this.queryIssuerProtocols();
+      Logger.log(`Found ${protocols.length} dcx issuer protocol(s) in dwn`, JSON.stringify(protocols, null, 2));
 
       // Configure DWN with credential-issuer protocol if not found
-      if (!protocols.length) {
-        Logger.log('Configuring dwn with dcx issuer protocol ...');
-        const { status, protocol } = await IssuerManager.configureIssuerProtocols();
-        Logger.debug(
-          `Configured credential issuer protocol in dwn: ${status.code} - ${status.detail}`,
-          protocol,
-        );
-      }
+      // if (!protocols.length) {
+      Logger.log('Configuring dwn with dcx issuer protocol ...');
+      const { status, protocol } = await this.configureIssuerProtocols();
+      Logger.debug(
+        `Configured credential issuer protocol in dwn: ${status.code} - ${status.detail}`,
+        protocol,
+      );
+      // }
 
       // Query DWN for manifest records
-      const { records } = await IssuerManager.queryManifestRecords();
+      const { records } = await this.queryManifestRecords();
       Logger.log(`Found ${records.length} dwn manifest records`);
 
       // Read manifest records data
-      const { manifests } = await IssuerManager.readManifestRecordsData(records);
+      const { manifests } = await this.readManifestRecordsData(records);
       Logger.debug(`Read ${manifests.length} manifest records`, manifests);
 
       if (!manifests.length) {
       // Create missing manifest records
-        const manifestRecords = await IssuerManager.createManifestRecords(this.issuerManifests);
+        Logger.debug('this.issuerManifests', this.issuerManifests);
+        const manifestRecords = await this.createManifestRecords(this.issuerManifests);
         Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
       } else {
         // Filter and create missing manifest records
-        const unwrittenManifests = await IssuerManager.filterManifestRecords(manifests);
+        const unwrittenManifests = await this.filterManifestRecords(manifests);
         Logger.debug(`Found ${unwrittenManifests.length} unwritten manifests`);
-        const manifestRecords = await IssuerManager.createManifestRecords(unwrittenManifests);
+        const manifestRecords = await this.createManifestRecords(unwrittenManifests);
         Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
       }
 

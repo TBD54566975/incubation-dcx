@@ -9,7 +9,7 @@ describe('ApplicantConfig class', () => {
   applicantConfig.DCX_ENV = 'test';
 
   describe('has properties defined by process.env vars and ', () => {
-    it('should contain property APPLICANT_PORT as a string equal to 5000', () => {
+    it('should contain property APPLICANT_PORT as a number equal to 5000', () => {
       const APPLICANT_PORT = applicantConfig.port;
       expect(APPLICANT_PORT).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_PORT).to.be.a('number');

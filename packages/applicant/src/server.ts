@@ -63,8 +63,7 @@ export class ApplicantServer {
   }
 
   public static create(): ApplicantServer {
-    const newApplicantServer = new ApplicantServer();
-    return newApplicantServer;
+    return new ApplicantServer();
   }
 
   /**
@@ -244,9 +243,6 @@ export class ApplicantServer {
    */
   public async initialize(): Promise<void> {
     Logger.log('Initializing Web5 ... ');
-    Logger.log('this.config.agentDataPath', this.config.agentDataPath);
-    Logger.log('this.config.web5Password', this.config.web5Password);
-    Logger.log('this.config.web5RecoveryPhrase', this.config.web5RecoveryPhrase);
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
