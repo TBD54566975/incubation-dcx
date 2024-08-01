@@ -12,10 +12,9 @@
     "build:esm": "rimraf dist/esm dist/types && pnpm tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "build:tests:node": "rimraf tests/compiled && pnpm tsc -p tests/tsconfig.json",
-    "test": "pnpm test:unit && pnpm test:e2e",
-    "test:unit": "echo TODO: Add unit tests && exit 0",
-    "test:e2e": "tsx tests/server.integration.ts",
-    "test:node": "pnpm build:tests:node && pnpm c8 mocha",
+    "test": "pnpm test:node",
+    "test:e2e": "tsx tests/e2e/*.spec.ts",
+    "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
     "lint:fix": "eslint . --fix -c ../../eslint.config.js",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test"

@@ -41,7 +41,7 @@ describe('ApplicantServer class', () => {
       const _isTest = applicantServer._isTest;
       expect(_isTest).to.not.be.null.and.not.be.undefined;
       expect(typeof _isTest).equals('boolean');
-      expect(_isTest).to.be.equals(false);
+      expect(_isTest).to.be.equals(true);
     });
 
     it('should include property useOptions as an object containing 6 entries', () => {
