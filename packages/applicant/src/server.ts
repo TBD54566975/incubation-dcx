@@ -285,8 +285,7 @@ export class ApplicantServer {
     ApplicantManager.web5 = web5;
     ApplicantManager.applicantAgent = agent;
     ApplicantManager.applicantAgentVault = agentVault;
-    ApplicantManager.applicantManifests = this.useOptions.manifests;
-    ApplicantHandlers.applicantHandlers = this.useOptions.handlers;
+    ApplicantManager.applicantOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;
