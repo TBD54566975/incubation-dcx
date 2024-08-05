@@ -3,7 +3,6 @@
 
 dist
 db-data
-**/DATA/*
 node_modules
 
 .env*
@@ -15,5 +14,9 @@ did:dht*.json
 *.key
 CUSTOM-MANIFEST.json
 
+**/DATA/*
+
 coverage/
 **/*/tests/compiled/
+__TEST_DATA__/
+DATASTORE/

@@ -4,7 +4,7 @@ import {
   DwnError,
   DwnUtils,
   Logger,
-  ServerManifest,
+  ServerOptions,
   Time
 } from '@dcx-protocol/common';
 import {
@@ -21,19 +21,8 @@ export class ApplicantManager {
   public static web5: Web5;
   public static applicantAgent: DcxAgent;
   public static applicantAgentVault: DcxIdentityVault;
-  public static applicantManifests: ServerManifest[];
-  /**
-   * Sync DWN
-   */
-  public static sync(): void {
-    Logger.log('Syncing dwn ...');
-    ApplicantManager.applicantAgent.sync.startSync({ interval: '1ms' });
+  public static applicantOptions: ServerOptions;
 
-    Time.sleep(1000);
-
-    ApplicantManager.applicantAgent.sync.stopSync();
-    Logger.log('Syncing done!');
-  }
   /**
    * Query DWN for credential-applicant protocol
    * @returns Protocol[]; see {@link Protocol}

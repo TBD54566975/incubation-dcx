@@ -1,44 +1,23 @@
-import { access, constants, open, readFile } from 'fs/promises';
+import { access, constants, open, readFile, rm } from 'fs/promises';
 import { parse } from './json.js';
 import { Logger } from './logger.js';
-import { fileURLToPath } from 'url';
-import { dirname, resolve, join } from 'path';
 export class FileSystem {
-  public static async findFileInProject(fileName: string): Promise<string> {
-    let currentDir: string;
-    let found = false;
-    let filePath = '';
-
-    if (typeof require !== 'undefined' && typeof require.main !== 'undefined') {
-      currentDir = require.main.path; // CommonJS
-    } else {
-      const __filename = fileURLToPath(import.meta.url); // ESM
-      currentDir = dirname(__filename);
+  public static async rm(path: string): Promise<boolean> {
+    try {
+      await rm(path);
+      return true;
+    } catch (error: any) {
+      Logger.error(`Failed to remove ${path}`);
+      return false;
     }
-
-    while (!found) {
-      filePath = join(currentDir, fileName);
-      try {
-        await FileSystem.access(filePath);
-        found = true;
-      } catch {
-        const parentDir = resolve(currentDir, '..');
-        if (parentDir === currentDir) {
-          throw new Error(`Could not find ${fileName} in the project root`);
-        }
-        currentDir = parentDir;
-      }
-    }
-
-    return filePath;
   }
-
-  public static async access(path: string): Promise<void> {
+  public static async access(path: string): Promise<boolean> {
     try {
       await access(path, constants.R_OK | constants.W_OK);
-      console.log('can access');
+      return true;
     } catch {
-      console.error('cannot access');
+      Logger.error(`Cannot access ${path}`);
+      return false;
     }
   }
 
@@ -77,8 +56,9 @@ export class FileSystem {
       if (!data) {
         const touched = await FileSystem.touch(path);
         Logger.info(`File ${path} touched ${touched}`);
+        return '';
       }
-      return !data ? '' : data.toString();
+      return data.toString();
     } catch (error: any) {
       Logger.warn(`Failed to read ${path} toString`);
       return '';
@@ -91,8 +71,9 @@ export class FileSystem {
       if (!data) {
         const touched = await FileSystem.touch(path, {});
         Logger.info(`File ${path} touched ${touched}`);
+        return {};
       }
-      return !data ? {} : FileSystem.toJson(data);
+      return FileSystem.toJson(data);
     } catch (error: any) {
       Logger.warn(`Failed to read ${path} toJson`);
       return {};
@@ -129,14 +110,10 @@ export class FileSystem {
 
   public static async append(path: string, data: string): Promise<boolean> {
     try {
-      const exists = await FileSystem.exists(path);
-      if (!exists) {
-        const file = await open(path, 'a', 0o700);
-        await file.appendFile(data, 'utf-8');
-        await file.close();
-        return true;
-      }
-      return false;
+      const file = await open(path, 'a', 0o700);
+      await file.appendFile(data, 'utf-8');
+      await file.close();
+      return true;
     } catch (error: any) {
       Logger.error(`Failed to append ${path}`);
       return false;
