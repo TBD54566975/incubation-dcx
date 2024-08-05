@@ -17,8 +17,8 @@ jobs:
         run: pnpm install -r --frozen-lockfile
       - name: Build packages
         run: pnpm build
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v4.0.1
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     slug: TBD54566975/incubation-dcx
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: TBD54566975/incubation-dcx
