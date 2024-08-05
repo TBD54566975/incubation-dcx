@@ -284,11 +284,7 @@ export class IssuerServer {
     IssuerManager.web5 = web5;
     IssuerManager.issuerAgent = agent;
     IssuerManager.issuerAgentVault = agentVault;
-    IssuerManager.issuerManifests = this.useOptions.manifests;
-
-    IssuerHandlers.serverHandlers = this.useOptions.handlers;
-    IssuerHandlers.serverIssuers = this.useOptions.issuers;
-    IssuerHandlers.serverProviders = this.useOptions.providers;
+    IssuerManager.serverOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -312,10 +308,8 @@ export class IssuerServer {
     while (this._isPolling) {
       const { records = [], cursor: nextCursor } = await IssuerManager.web5.dwn.records.query({
         message: {
-          filter: {
-            protocol: issuer.protocol,
-          },
           pagination,
+          filter: { protocol: issuer.protocol },
         },
       });
 

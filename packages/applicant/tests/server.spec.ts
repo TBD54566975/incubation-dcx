@@ -11,7 +11,8 @@ const applicantServer: ApplicantServer = new ApplicantServer({
     ...applicantConfig,
     DCX_ENV            : process.env.NODE_ENV ?? 'test',
     web5Password       : process.env.APPLICANT_WEB5_PASSWORD!,
-    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE!
+    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE!,
+    agentDataPath      : '__TEST_DATA__/DCX/APPLICANT/AGENT',
   }
 });
 

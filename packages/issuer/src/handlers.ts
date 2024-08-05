@@ -10,7 +10,7 @@ import {
   Provider,
   responseSchema,
   ServerHandler,
-  ServerProvider,
+  ServerOptions,
   stringifier
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
@@ -23,9 +23,7 @@ import {
 import { issuer, issuerConfig, IssuerManager } from './index.js';
 
 export class IssuerHandlers {
-  public static serverIssuers: Issuer[];
-  public static serverHandlers: ServerHandler[];
-  public static serverProviders: ServerProvider[];
+  public static serverOptions: ServerOptions;
 
   constructor() {
     IssuerHandlers.selectCredentials = IssuerHandlers.findHandler('selectCredentials', IssuerHandlers.selectCredentials);
@@ -35,7 +33,7 @@ export class IssuerHandlers {
   }
 
   public static findHandler(id: string, staticHandler: Handler): Handler {
-    return this.serverHandlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
+    return this.serverOptions.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -68,7 +66,7 @@ export class IssuerHandlers {
         continue;
       }
 
-      const issuers = [...this.serverIssuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuers = [...this.serverOptions.issuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -156,7 +154,7 @@ export class IssuerHandlers {
     body: { vcs: VerifiableCredential[] } | any,
     id: string,
   ): Promise<any> {
-    const provider = this.serverProviders.find((provider: Provider) => provider.id === id);
+    const provider = this.serverOptions.providers.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');

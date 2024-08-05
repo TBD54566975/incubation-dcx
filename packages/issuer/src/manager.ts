@@ -7,7 +7,7 @@ import {
   DwnUtils,
   Logger,
   manifestSchema,
-  ServerManifest,
+  ServerOptions,
   Time
 } from '@dcx-protocol/common';
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
@@ -27,7 +27,7 @@ export class IssuerManager {
   public static web5: Web5;
   public static issuerAgent: DcxAgent;
   public static issuerAgentVault: DcxIdentityVault;
-  public static issuerManifests: ServerManifest[];
+  public static serverOptions: ServerOptions;
 
   /**
    * Sync DWN
@@ -174,11 +174,11 @@ export class IssuerManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    if (!this.issuerManifests) {
+    if (!this.serverOptions.manifests) {
       throw new DcxDwnError('Manifests not provided');
     }
     try {
-      return this.issuerManifests.filter((manifest: CredentialManifest) =>
+      return this.serverOptions.manifests.filter((manifest: CredentialManifest) =>
         manifestReads.find((manifestRead: CredentialManifest) => manifest.id !== manifestRead.id),
       );
     } catch (error: any) {
@@ -260,7 +260,7 @@ export class IssuerManager {
    */
   public static async setup(): Promise<void> {
     Logger.log('Setting up dwn ...');
-    if (!this.issuerManifests) {
+    if (!this.serverOptions.manifests) {
       throw new DcxDwnError('Manifests not provided');
     }
     try {
@@ -288,8 +288,7 @@ export class IssuerManager {
 
       if (!manifests.length) {
       // Create missing manifest records
-        Logger.debug('this.issuerManifests', this.issuerManifests);
-        const manifestRecords = await this.createManifestRecords(this.issuerManifests);
+        const manifestRecords = await this.createManifestRecords(this.serverOptions.manifests);
         Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
       } else {
         // Filter and create missing manifest records
