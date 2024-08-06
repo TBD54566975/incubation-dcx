@@ -1,22 +1,27 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
-import { DcxAgent, DcxIdentityVault, Mnemonic } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { applicantConfig, ApplicantServer, ApplicantManager } from '../src/index.js';
 
-const applicantServer: ApplicantServer = new ApplicantServer({
-  config: {
-    ...applicantConfig,
-    DCX_ENV            : 'test',
-    web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-    agentDataPath      : '__TEST_DATA__/DCX/APPLICANT/AGENT',
-  }
-});
-
 describe('ApplicantServer class', () => {
+  applicantConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
+
+  const applicantServer: ApplicantServer = new ApplicantServer({
+    config: {
+      ...applicantConfig,
+      web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+      web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+      agentDataPath      : '__TEST_DATA__/DCX/APPLICANT/AGENT',
+    }
+  });
+
+  after(async () => {
+    await FileSystem.rmdir(applicantServer.config.agentDataPath);
+  });
+
   describe('has default properties that', () => {
     it('should include static property _isPolling as a boolean equal to false', () => {
       const _isPolling = applicantServer._isPolling;

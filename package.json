@@ -16,7 +16,6 @@
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "version": "tsx scripts/version.ts",
     "audit-ci": "audit-ci --config ./audit-ci.json",
     "build:applicant": "pnpm --filter applicant build",
@@ -24,7 +23,9 @@
     "build:issuer": "pnpm --filter issuer build",
     "test:node:applicant": "pnpm --filter applicant test:node",
     "test:node:common": "pnpm --filter common test:node",
-    "test:node:issuer": "pnpm --filter issuer test:node"
+    "test:node:issuer": "pnpm --filter issuer test:node",
+    "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node && pnpm test:node"
   },
   "repository": {
     "type": "git",

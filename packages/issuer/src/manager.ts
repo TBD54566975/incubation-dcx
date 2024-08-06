@@ -7,7 +7,8 @@ import {
   DwnUtils,
   Logger,
   manifestSchema,
-  ServerOptions
+  ServerOptions,
+  stringifier
 } from '@dcx-protocol/common';
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import {
@@ -49,6 +50,7 @@ export class IssuerManager {
     }
 
     Logger.debug(`DWN has ${protocols.length} protocols available`);
+    Logger.debug('protocols', stringifier(protocols));
     return { status: query, protocols };
   }
 
@@ -60,6 +62,10 @@ export class IssuerManager {
     const { status: configure, protocol } = await IssuerManager.web5.dwn.protocols.configure({
       message: { definition: issuer },
     });
+
+    Logger.debug('configureProtocols configure', stringifier(configure));
+    Logger.debug('configureProtocols protocol', stringifier(protocol));
+
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
       const { code, detail } = configure;
@@ -164,7 +170,7 @@ export class IssuerManager {
   ): Promise<RecordsCreateResponse> {
     unwrittenManifest.issuer.id = IssuerManager.agent.agentDid.uri;
     const { record, status: create } = await IssuerManager.web5.dwn.records.create({
-      store   : false,
+      store   : true,
       data    : unwrittenManifest,
       message : {
         schema       : manifestSchema.$id,
@@ -187,7 +193,7 @@ export class IssuerManager {
       );
     }
 
-    const { status: send } = await record.send(IssuerManager.agent.agentDid.uri);
+    const { status: send } = await record.send();
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
@@ -195,7 +201,7 @@ export class IssuerManager {
       throw new DwnError(code, detail);
     }
 
-    Logger.debug(`Sent protocol to remote dwn`, send);
+    Logger.debug(`Sent manifest record to remote dwn`, send);
     return { status: send, record };
   }
 
@@ -221,6 +227,9 @@ export class IssuerManager {
    * @returns boolean indicating success or failure
    */
   public static async setup(): Promise<void> {
+    Logger.log('IssuerManager.agent.agentDid.uri', IssuerManager.agent.agentDid.uri);
+    const port = await IssuerManager.agent.agentDid.export();
+    Logger.log('IssuerManager.agent => portableDid', stringifier(port));
     Logger.log('Setting up dwn ...');
     if (!IssuerManager.serverOptions.manifests) {
       throw new DcxDwnError('Manifests not provided');

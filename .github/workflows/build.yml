@@ -19,12 +19,8 @@ jobs:
         run: pnpm build
       - name: Build tests
         run: pnpm build:tests:node
-      # - name: Run applicant tests
-      #   run: pnpm test:node:applicant
-      # - name: Build common tests
-      #   run: test:node:common
-      # - name: Build issuer tests
-      #   run: test:node:issuer
+      - name: Run tests
+        run: pnpm test:node
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:
