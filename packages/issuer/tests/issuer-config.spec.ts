@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
-import { Logger, stringifier } from '@dcx-protocol/common';
 import { expect } from 'chai';
 import { issuerConfig } from '../src/config.js';
 
@@ -14,7 +13,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_PORT).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_PORT).to.be.a('number');
       expect(ISSUER_PORT).equals(4000);
-      Logger.log(`      ✔ ISSUER_PORT=${ISSUER_PORT}`);
     });
 
     it('should contain property ISSUER_SERVICE_NAME as a string equal to "@dcx-protocol/issuer"', () => {
@@ -22,7 +20,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_SERVICE_NAME).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_SERVICE_NAME).to.be.a('string');
       expect(ISSUER_SERVICE_NAME).equals('@dcx-protocol/issuer');
-      Logger.log(`      ✔ ISSUER_SERVICE_NAME=${ISSUER_SERVICE_NAME}`);
     });
 
     it('should contain property ISSUER_SERVICE_ID as a string equal to "dcx-issuer"', () => {
@@ -30,7 +27,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_SERVICE_ID).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_SERVICE_ID).to.be.a('string');
       expect(ISSUER_SERVICE_ID).equals('dcx-issuer');
-      Logger.log(`      ✔ ISSUER_SERVICE_ID=${ISSUER_SERVICE_ID}`);
     });
 
     it('should contain property ISSUER_CURSOR as a string equal to issuer-cursor.json', () => {
@@ -38,7 +34,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_CURSOR).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_CURSOR).to.be.a('string');
       expect(ISSUER_CURSOR).equals('issuer-cursor.json');
-      Logger.log(`      ✔ ISSUER_CURSOR=${ISSUER_CURSOR}`);
     });
 
     it('should contain property ISSUER_LAST_RECORD_ID as a string equal to lastRecordId.issuer', () => {
@@ -46,7 +41,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_LAST_RECORD_ID).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_LAST_RECORD_ID).to.be.a('string');
       expect(ISSUER_LAST_RECORD_ID).equals('lastRecordId.issuer');
-      Logger.log(`      ✔ ISSUER_LAST_RECORD_ID=${ISSUER_LAST_RECORD_ID}`);
     });
 
     it('should contain property ISSUER_DWN_ENDPOINTS as an array of length 2', () => {
@@ -54,7 +48,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_DWN_ENDPOINTS).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_DWN_ENDPOINTS).to.be.an('array');
       expect(ISSUER_DWN_ENDPOINTS).to.have.lengthOf.gte(2);
-      Logger.log(`      ✔ ISSUER_DWN_ENDPOINTS=`, ISSUER_DWN_ENDPOINTS);
     });
 
     it('should contain property ISSUER_GATEWAY_URIS as an array of length 2', () => {
@@ -62,7 +55,6 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_GATEWAY_URIS).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_GATEWAY_URIS).to.be.an('array');
       expect(ISSUER_GATEWAY_URIS).to.have.lengthOf.gte(2);
-      Logger.log(`      ✔ ISSUER_GATEWAY_URIS=`, ISSUER_GATEWAY_URIS);
     });
 
     it('should contain property ISSUER_WEB5_AGENT_DATA_PATH as a string equal to "DATA/DCX/ISSUER/AGENT"', () => {
@@ -70,21 +62,18 @@ describe('IssuerConfig class', () => {
       expect(ISSUER_WEB5_AGENT_DATA_PATH).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_WEB5_AGENT_DATA_PATH).to.be.a('string');
       expect(ISSUER_WEB5_AGENT_DATA_PATH).equals('DATA/DCX/ISSUER/AGENT');
-      Logger.log(`      ✔ ISSUER_WEB5_AGENT_DATA_PATH=`, ISSUER_WEB5_AGENT_DATA_PATH);
     });
 
     it('should contain property ISSUER_WEB5_PASSWORD as a string', () => {
       const ISSUER_WEB5_PASSWORD = issuerConfig.web5Password;
       expect(ISSUER_WEB5_PASSWORD).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_WEB5_PASSWORD).to.be.a('string');
-      Logger.log(`      ✔ ISSUER_WEB5_PASSWORD=${ISSUER_WEB5_PASSWORD}`);
     });
 
     it('should contain ISSUER_WEB5_RECOVERY_PHRASE as a string', () => {
       const ISSUER_WEB5_RECOVERY_PHRASE = issuerConfig.web5RecoveryPhrase;
       expect(ISSUER_WEB5_RECOVERY_PHRASE).to.not.be.null.and.not.be.undefined;
       expect(ISSUER_WEB5_RECOVERY_PHRASE).to.be.a('string');
-      Logger.log(`      ✔ ISSUER_WEB5_RECOVERY_PHRASE=${ISSUER_WEB5_RECOVERY_PHRASE}`);
     });
   });
 
@@ -94,7 +83,6 @@ describe('IssuerConfig class', () => {
       expect(DCX_ENV).to.not.be.null.and.not.be.undefined;
       expect(DCX_ENV).to.be.a('string');
       expect(DCX_ENV).to.be.match(/(development|test)/);
-      Logger.log(`      ✔ DCX_ENV=${DCX_ENV}`);
     });
 
     it('should contain property DCX_ENDPOINTS inherited from Config class as an object containing 3 key value pairs', () => {
@@ -102,7 +90,6 @@ describe('IssuerConfig class', () => {
       expect(DCX_ENDPOINTS).to.not.be.null.and.not.be.undefined;
       expect(DCX_ENDPOINTS).to.be.an('object');
       expect(Object.entries(DCX_ENDPOINTS)).have.lengthOf.gte(3);
-      Logger.log(`      ✔ DCX_ENDPOINTS=`, stringifier(DCX_ENDPOINTS));
     });
 
     it('should contain property DCX_INPUT_ISSUERS inherited from Config class as an array of length 1', () => {
@@ -110,7 +97,6 @@ describe('IssuerConfig class', () => {
       expect(DCX_INPUT_ISSUERS).to.not.be.null.and.not.be.undefined;
       expect(DCX_INPUT_ISSUERS).to.be.an('array');
       expect(DCX_INPUT_ISSUERS).to.have.lengthOf.gte(1);
-      Logger.log(`      ✔ DCX_INPUT_ISSUERS=`, stringifier(DCX_INPUT_ISSUERS));
     });
 
     it('should contain property DCX_HANDSHAKE_MANIFEST inherited from Config class as an object of type ServerManifest', () => {
@@ -118,7 +104,6 @@ describe('IssuerConfig class', () => {
       expect(DCX_HANDSHAKE_MANIFEST).to.not.be.null.and.not.be.undefined;
       expect(DCX_HANDSHAKE_MANIFEST).to.be.an('object');
       expect(DCX_HANDSHAKE_MANIFEST.id).to.equal('DCX-HANDSHAKE-MANIFEST');
-      Logger.log(`      ✔ DCX_HANDSHAKE_MANIFEST=`, stringifier(DCX_HANDSHAKE_MANIFEST));
     });
   });
 });

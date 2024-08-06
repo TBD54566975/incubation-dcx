@@ -3,7 +3,7 @@ import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from
 export const issuer = {
   // issuer protocol is a subset of exchange protocol
   // used on server side to interact with applicant & issuer dwn
-  protocol  : 'https://decentralized.cx/protocol/exchange/credential-issuer',
+  protocol  : 'https://decentralized.cx/protocol/credential-exchange',
   published : false,
   types     : {
     application: {
