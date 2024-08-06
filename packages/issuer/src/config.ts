@@ -1,19 +1,18 @@
-import { Config } from '@dcx-protocol/common';
-export class IssuerConfig extends Config {
-  constructor() {
-    super();
-  }
-  public static PORT = process.env.PORT || 3000;
-  public static EXTERNAL_PORT = process.env.EXTERNAL_PORT || 3000;
-  public static SERVICE_NAME = process.env.SERVICE_NAME || 'decentralized credential exchange';
-  public static SERVICE_ID = process.env.SERVICE_ID || 'dcx';
+import { config as dcxConfig } from '@dcx-protocol/common';
 
-  public static LAST_RECORD_ID = process.env.LAST_RECORD_ID ?? `${process.cwd()}/lastRecordId`;
-  public static CURSOR = process.env.CURSOR ?? `${process.cwd()}/cursor.json`;
+export type IssuerConfig = typeof issuerConfig;
 
-  static get IssuerConfig(): IssuerConfig {
-    return this;
-  }
-}
-
-export type DcxIssuerConfig = InstanceType<typeof IssuerConfig>;
+export const issuerConfig = {
+  // TODO: check validity of these values
+  ...dcxConfig,
+  port               : process.env.ISSUER_PORT                      ?? 4000,
+  serviceName        : process.env.ISSUER_SERVICE_NAME              ?? '@dcx-protocol/issuer',
+  serviceId          : process.env.ISSUER_SERVICE_ID                ?? 'dcx-issuer',
+  cursorFile         : process.env.ISSUER_CURSOR                    ?? 'issuer-cursor.json',
+  lastRecordIdFile   : process.env.ISSUER_LAST_RECORD_ID            ?? 'lastRecordId.issuer',
+  dwnEndpoints       : process.env.ISSUER_DWN_ENDPOINTS?.split(',') ?? dcxConfig.DCX_ENDPOINTS.DWN_ENDPOINTS,
+  gatewayUris        : process.env.ISSUER_GATEWAY_URIS?.split(',')  ?? dcxConfig.DCX_ENDPOINTS.GATEWAY_URIS,
+  agentDataPath      : process.env.ISSUER_WEB5_AGENT_DATA_PATH      ?? `DATA/DCX/ISSUER/AGENT`,
+  web5Password       : process.env.ISSUER_WEB5_PASSWORD             ?? '',
+  web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE      ?? '',
+};

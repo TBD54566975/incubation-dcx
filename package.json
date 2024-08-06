@@ -11,12 +11,21 @@
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "build": "pnpm --recursive --stream build",
+    "build:tests:node": "pnpm --recursive build:tests:node",
+    "test:node": "pnpm --recursive test:node",
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test",
     "version": "tsx scripts/version.ts",
-    "publish": "tsx scripts/publish.ts"
+    "audit-ci": "audit-ci --config ./audit-ci.json",
+    "build:applicant": "pnpm --filter applicant build",
+    "build:common": "pnpm --filter common build",
+    "build:issuer": "pnpm --filter issuer build",
+    "test:node:applicant": "pnpm --filter applicant test:node",
+    "test:node:common": "pnpm --filter common test:node",
+    "test:node:issuer": "pnpm --filter issuer test:node",
+    "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node && pnpm test:node"
   },
   "repository": {
     "type": "git",
@@ -39,7 +48,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0 || <22.0.0"
   },
   "license": "Apache-2.0",
   "contributors": [
@@ -55,14 +64,11 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.7",
-    "@eslint/js": "^8.57.0",
     "@npmcli/package-json": "^5.2.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
     "audit-ci": "^7.1.0",
-    "eslint": "^8.57.0",
+    "eslint-plugin-mocha": "^10.4.3",
     "globals": "^15.8.0",
-    "mocha": "^10.6.1",
     "npkill": "^0.12.2"
   },
   "pnpm": {
@@ -70,8 +76,5 @@
       "express@<4.19.2": ">=4.19.2",
       "ws@<8.17.1": ">=8.17.1"
     }
-  },
-  "dependencies": {
-    "typescript-eslint": "^7.16.1"
   }
 }

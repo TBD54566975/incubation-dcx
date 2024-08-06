@@ -1,6 +1,9 @@
 # Applicant
 
-See root [README.md](../../README.md)
+[![codecov](https://codecov.io/github/TBD54566975/incubation-dcx/graph/badge.svg?token=6PYX9498RD)](https://codecov.io/github/TBD54566975/incubation-dcx)
+
+
+See root [README.md](../../README.md) for more information.
 
 ## Package Versions
 

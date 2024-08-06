@@ -1,3 +1,18 @@
+import {
+  CredentialManifest,
+  DcxProtocolHandlerError,
+  DwnError,
+  DwnUtils,
+  Handler,
+  Issuer,
+  Logger,
+  Objects,
+  Provider,
+  responseSchema,
+  ServerHandler,
+  ServerOptions,
+  stringifier
+} from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import { Record } from '@web5/api';
 import {
@@ -5,37 +20,20 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { IssuerConfig, Web5Manager, credentialIssuerProtocol } from './index.js';
-import {
-  DwnUtils,
-  CredentialManifest,
-  Handler,
-  Issuer,
-  DcxProtocolHandlerError,
-  DwnError,
-  responseSchema,
-  Objects,
-  stringifier,
-  Logger,
-  Provider
-} from '@dcx-protocol/common';
-import IssuerServer from './server.js';
+import { issuer, issuerConfig, IssuerManager } from './index.js';
 
-export class IssuerProtocolHandlers {
+export class IssuerHandlers {
+  public static serverOptions: ServerOptions;
+
   constructor() {
-    IssuerProtocolHandlers.selectCredentials =
-      IssuerProtocolHandlers.findHandler('selectCredentials') ?? IssuerProtocolHandlers.selectCredentials;
-    IssuerProtocolHandlers.verifyCredentials =
-      IssuerProtocolHandlers.findHandler('verifyCredentials') ?? IssuerProtocolHandlers.verifyCredentials;
-    IssuerProtocolHandlers.requestCredential =
-      IssuerProtocolHandlers.findHandler('requestCredential') ?? IssuerProtocolHandlers.requestCredential;
-    IssuerProtocolHandlers.issueCredential =
-      IssuerProtocolHandlers.findHandler('issueCredential') ?? IssuerProtocolHandlers.issueCredential;
+    IssuerHandlers.selectCredentials = IssuerHandlers.findHandler('selectCredentials', IssuerHandlers.selectCredentials);
+    IssuerHandlers.verifyCredentials = IssuerHandlers.findHandler('verifyCredentials', IssuerHandlers.verifyCredentials);
+    IssuerHandlers.requestCredential = IssuerHandlers.findHandler('requestCredential', IssuerHandlers.requestCredential);
+    IssuerHandlers.issueCredential = IssuerHandlers.findHandler('issueCredential', IssuerHandlers.issueCredential);
   }
 
-  public static findHandler(id: string): (...args: any[]) => any | Promise<any> | undefined {
-    const handler = IssuerServer.useOptions.handlers.find((handler: Handler) => handler.id === id);
-    return handler?.callback;
+  public static findHandler(id: string, staticHandler: Handler): Handler {
+    return this.serverOptions.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -68,15 +66,15 @@ export class IssuerProtocolHandlers {
         continue;
       }
 
-      const issuers = IssuerServer.issuers.map((issuer: Issuer) => issuer.id);
-      const issuerDidSet = new Set<string>([...issuers, ...IssuerConfig.DEFAULT_TRUSTED_ISSUER_DIDS]);
+      const issuers = [...this.serverOptions.issuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
         continue;
       }
 
       const verified = await VerifiableCredential.verify({ vcJwt });
-      if (!verified || Objects.isEmptyObject(verified)) {
+      if (!verified || Objects.isEmpty(verified)) {
         Logger.debug('Credential verification failed');
         continue;
       }
@@ -122,12 +120,12 @@ export class IssuerProtocolHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject : subjectDid,
-      issuer  : Web5Manager.issuerAgent.agentDid.uri,
+      issuer  : IssuerManager.agent.agentDid.uri,
       type    : manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: Web5Manager.issuerAgent.agentDid });
+    const signed = await vc.sign({ did: IssuerManager.agent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
@@ -153,11 +151,10 @@ export class IssuerProtocolHandlers {
    * @returns The response from the VC data provider
    */
   public static async requestCredential(
-    body: { vcs: VerifiableCredential[] } | {},
+    body: { vcs: VerifiableCredential[] } | any,
     id: string,
   ): Promise<any> {
-    const providers = IssuerServer.useOptions.providers!;
-    const provider = providers.find((provider: Provider) => provider.id === id);
+    const provider = this.serverOptions.providers.find((provider: Provider) => provider.id === id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -200,25 +197,25 @@ export class IssuerProtocolHandlers {
     Logger.debug('Application record verifiable presentation', stringifier(vp));
 
     // Select valid credentials against the manifest
-    const vcJwts = IssuerProtocolHandlers.selectCredentials(vp, manifest);
+    const vcJwts = IssuerHandlers.selectCredentials(vp, manifest);
     Logger.debug(`Selected ${vcJwts.length} credentials`);
 
     const recordAuthor = applicationRecord.author;
-    const verified = await IssuerProtocolHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
+    const verified = await IssuerHandlers.verifyCredentials(vcJwts, manifest, recordAuthor);
     Logger.debug(`Verified ${verified.length} credentials`);
 
     // request vc data
-    const data = await IssuerProtocolHandlers.requestCredential({ vcs: verified }, providerId);
+    const data = await IssuerHandlers.requestCredential({ vcs: verified }, providerId);
     Logger.debug('VC data from provider', stringifier(data));
 
-    const vc = await IssuerProtocolHandlers.issueCredential(data, recordAuthor, manifest);
+    const vc = await IssuerHandlers.issueCredential(data, recordAuthor, manifest);
 
-    const { record, status: create } = await Web5Manager.web5.dwn.records.create({
+    const { record, status: create } = await IssuerManager.web5.dwn.records.create({
       data    : vc,
       store   : false,
       message : {
         schema       : responseSchema.$id,
-        protocol     : credentialIssuerProtocol.protocol,
+        protocol     : issuer.protocol,
         dataFormat   : 'application/json',
         protocolPath : 'application/response',
       },

@@ -7,16 +7,17 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "scripts": {
-    "clean": "rimraf dist",
-    "build": "pnpm run build:esm && pnpm run build:cjs",
-    "build:esm": "rimraf dist/esm dist/types && tsc -p tsconfig.json",
+    "clean": "rimraf dist coverage tests/compiled",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:cjs",
+    "build:esm": "rimraf dist/esm dist/types && pnpm tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
-    "test": "pnpm run test:unit && pnpm run test:e2e",
-    "test:e2e": "echo TODO: Add e2e test && exit 0",
-    "test:unit": "echo TODO: Add unit tests && exit 0",
-    "workflow": "pnpm install --frozen-lockfile && pnpm run build && pnpm run test",
-    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
-    "lint:fix": "eslint . --fix -c ../../eslint.config.js"
+    "build:tests:node": "rimraf tests/compiled && pnpm tsc -p tests/tsconfig.json",
+    "test": "pnpm test:node",
+    "test:e2e": "tsx tests/e2e/*.spec.ts -t",
+    "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
+    "workflow": "pnpm build && pnpm build:tests:node && pnpm test",
+    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
+    "lint:fix": "eslint . --fix -c ../../eslint.config.cjs"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
@@ -62,7 +63,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0 || <22.0.0"
   },
   "dependencies": {
     "@dcx-protocol/common": "workspace:*",
@@ -75,13 +76,35 @@
     "@web5/crypto": "^1.0.2",
     "@web5/dids": "^1.1.2",
     "@web5/user-agent": "^0.4.1",
+    "chalk": "^5.3.0",
     "ed25519-keygen": "^0.6.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.3",
+    "@types/chai": "^4.3.16",
+    "@types/chai-as-promised": "^7.1.8",
+    "@types/eslint": "^9.6.0",
+    "@types/mocha": "^10.0.7",
     "@types/node": "^20.14.11",
+    "@types/readable-stream": "^4.0.15",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
+    "@web/test-runner": "^0.18.2",
+    "@web/test-runner-playwright": "^0.11.0",
+    "abstract-level": "^2.0.0",
+    "c8": "^10.1.2",
+    "chai": "^5.1.1",
+    "chai-as-promised": "^8.0.0",
     "dotenv": "^16.4.5",
     "esbuild": "^0.23.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-mocha": "^10.4.3",
+    "globals": "^15.8.0",
+    "mocha": "^10.6.1",
+    "mocha-junit-reporter": "^2.2.1",
+    "playwright": "^1.45.3",
     "rimraf": "^6.0.1",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.17.0"
   }
 }

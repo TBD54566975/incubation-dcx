@@ -123,7 +123,7 @@ implements Web5PlatformAgent<TKeyManager>
    * If any of the required agent components are not provided, instantiate default implementations.
    */
   public static async create({
-    dataPath = 'DATA/AGENT',
+    dataPath = 'DATA/DCX/AGENT',
     agentDid,
     agentVault,
     cryptoApi,

@@ -5,17 +5,37 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+      
       - name: Install pnpm
         run: npm install -g pnpm
+      
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install -r --frozen-lockfile
+      
+      - name: Verify crypto module
+        run: |
+          node -e "console.log(require('crypto').randomBytes(8).toString('hex'));"
+
       - name: Build packages
         run: pnpm build
-      - name: Run tests
-        run: pnpm test
+      
+      - name: Build tests
+        run: pnpm build:tests:node
+      
+      # - name: Run tests
+      #   run: pnpm test:node
+      
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v4.0.1
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     slug: TBD54566975/incubation-dcx

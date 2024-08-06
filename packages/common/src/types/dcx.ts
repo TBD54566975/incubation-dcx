@@ -18,17 +18,14 @@ export type VerifiablePresentation = {
   };
 } & AdditionalProperties;
 
-export type VcDataRequest = { vcs: VerifiableCredential[] } | null;
+export type VcDataRequest = undefined | {
+  vcs: VerifiableCredential[]
+};
 
 export type ManifestOutputDescriptor = {
   id: string;
   name: string;
   schema: string;
-};
-
-export type Issuer = {
-  id: string;
-  name: string;
 };
 
 export type Filter = {
@@ -59,6 +56,23 @@ export type PresentationDefinition = {
   input_descriptors: InputDescriptor[];
 };
 
+/**
+ * Issuer interface defines objects passed into server.useOptions.issuers
+ * DCX issuers are entities that issue credentials to applicants prior to an application submission.
+ * These issuers are 3rd party data validators that sign VCs and provide them to applicants.
+ * The list of trusted issuers within DCX should be list of entities that are trusted to issue the VCs
+ * that are defined in the CredentialManifest.presentation_definition.input_descriptors section as inputs to the DCX.
+ * See more details at {@link https://identity.foundation/credential-manifest/#input-evaluation}
+ */
+export interface Issuer extends AdditionalProperties {
+  name: string;
+  id: string;
+}
+
+/**
+ * CredentialManifest implements DIF spec
+ * See more details at {@link https://identity.foundation/credential-manifest/#credential-manifest}
+ */
 export interface CredentialManifest extends AdditionalProperties {
   id: string;
   name: string;
@@ -74,83 +88,4 @@ export type VerifiedCredential = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
-};
-
-// Issuer
-export interface TrustedIssuer extends AdditionalProperties {
-  [key: string | number | symbol]: any;
-  name: string;
-  id: string;
-}
-
-// Handler
-export type Handler = { id: string; callback: (...args: any[]) => any | Promise<any> };
-
-// Provider
-export interface DataProvider extends AdditionalProperties {
-  [key: string | number | symbol]: any;
-  id: string;
-  endpoint: string;
-  method?: string;
-  headers?: Record<string, string>;
-}
-export class Provider implements DataProvider {
-  constructor(
-    public id: string,
-    public endpoint: string,
-    public method?: string,
-    public headers?: Record<string, string>,
-  ) {}
-}
-
-// Manifest
-export class Manifest implements CredentialManifest {
-  constructor(
-    public id: string,
-    public name: string,
-    public description: string,
-    public spec_version: string,
-    public issuer: Issuer,
-    public output_descriptors: ManifestOutputDescriptor[],
-    public format: ManifestFormat,
-    public presentation_definition: PresentationDefinition,
-  ) {}
-}
-export interface GatewayType extends AdditionalProperties {
-  id: string;
-  uri: string;
-}
-// export type Gateways = ;
-// export type Dwns = ;
-
-export type UseIssuers = Issuer[];
-// Map<string | number | symbol, Issuer>;
-export type UseManifests = Manifest[];
-// Map<string | number | symbol, Manifest>;
-export type UseProviders = Provider[];
-// Map<string | number | symbol, Provider>;
-export type UseHandlers = Handler[];
-export type UseGateways = string[];
-// Map<string | number | symbol, Gateways>;
-export type UseDwns = string[];
-// Map<string | number | symbol, Dwns>;
-
-export type UseOption =
-  | UseIssuers
-  | UseHandlers
-  | UseProviders
-  | UseManifests
-  | UseGateways
-  | UseDwns;
-
-export type UseOptions = {
-  [key: string]: any;
-  manifests?: UseManifests;
-  providers?: UseProviders;
-
-  issuers?: UseIssuers;
-  gateways?: UseGateways;
-  dwns?: UseDwns;
-
-  handlers?: UseHandlers;
 };
