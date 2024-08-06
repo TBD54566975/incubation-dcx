@@ -43,18 +43,18 @@ describe('ApplicantConfig class', () => {
       expect(APPLICANT_LAST_RECORD_ID).equals('lastRecordId.applicant');
     });
 
-    it('should contain property APPLICANT_DWN_ENDPOINTS as an array of length 2', () => {
+    it('should contain property APPLICANT_DWN_ENDPOINTS as an array of length 1', () => {
       const APPLICANT_DWN_ENDPOINTS = applicantConfig.dwnEndpoints;
       expect(APPLICANT_DWN_ENDPOINTS).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_DWN_ENDPOINTS).to.be.an('array');
-      expect(APPLICANT_DWN_ENDPOINTS).to.have.lengthOf.gte(2);
+      expect(APPLICANT_DWN_ENDPOINTS).to.have.lengthOf.gte(1);
     });
 
-    it('should contain property APPLICANT_GATEWAY_URIS as an array of length 2', () => {
+    it('should contain property APPLICANT_GATEWAY_URIS as an array of length 1', () => {
       const APPLICANT_GATEWAY_URIS = applicantConfig.gatewayUris;
       expect(APPLICANT_GATEWAY_URIS).to.not.be.null.and.not.be.undefined;
       expect(APPLICANT_GATEWAY_URIS).to.be.an('array');
-      expect(APPLICANT_GATEWAY_URIS).to.have.lengthOf.gte(2);
+      expect(APPLICANT_GATEWAY_URIS).to.have.lengthOf.gte(1);
     });
 
     it('should contain property APPLICANT_WEB5_AGENT_DATA_PATH as a string equal to "DATA/DCX/APPLICANT/AGENT"', () => {

@@ -268,14 +268,13 @@ export class IssuerServer {
       : { password, dwnEndpoints, recoveryPhrase };
 
     // Initialize the agent with the options
+    // TODO: rethink how im doing this
     if (firstLaunch) {
       await agent.initialize(initializeParams);
     }
 
     // Start the agent and create a new Web5 instance
     await agent.start({ password });
-    // Register the agent identity with the DWN
-    await agent.sync.registerIdentity({ did: agent.agentDid.uri });
     // Initialize the Web5 instance
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
@@ -344,12 +343,13 @@ export class IssuerServer {
 
       Logger.log(`Read ${recordReads.length} records`);
 
+      if (this._isTest) {
+        Logger.log('Test Complete! Stopping DCX server ...');
+        this.stop();
+      }
+
       if (!recordReads.length) {
         Logger.log('No records found!', recordReads.length);
-        if (this._isTest) {
-          Logger.log('Test Complete! Stopping DCX server ...');
-          this.stop();
-        }
         await Time.sleep();
       }
 

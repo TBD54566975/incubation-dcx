@@ -1,19 +1,23 @@
-import { DcxAgent, DcxIdentityVault, Mnemonic } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { issuerConfig, IssuerManager, IssuerServer } from '../src/index.js';
 
-const issuerServer: IssuerServer = new IssuerServer({
-  config: {
-    ...issuerConfig,
-    DCX_ENV            : 'test',
-    web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-    web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-    agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
-  }
-});
-console.log('issuerServer.config:', issuerServer.config);
 describe('IssuerServer class', () => {
+  issuerConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
+  const issuerServer: IssuerServer = new IssuerServer({
+    config: {
+      ...issuerConfig,
+      web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+      web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+      agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
+    }
+  });
+
+  after(async () => {
+    await FileSystem.rmdir('__TEST_DATA__');
+  });
+
   describe('default properties', () => {
     it('should include static property _isPolling as a boolean equal to false', () => {
       const _isPolling = issuerServer._isPolling;
@@ -49,37 +53,35 @@ describe('IssuerServer class', () => {
     });
   });
 
-  describe('default methods', () => {
-    describe('.initialize()', () => {
-      it('should initialize the issuerServer', async () => {
-        await issuerServer.initialize();
-        expect(issuerServer._isInitialized).equals(true);
-      });
-
-      it('should initialize the IssuerManager', () => {
-        expect(IssuerManager.web5).to.not.be.null.and.not.be.undefined;
-        expect(IssuerManager.web5).to.be.instanceof(Web5);
-
-        expect(IssuerManager.agent).to.not.be.null.and.not.be.undefined;
-        expect(IssuerManager.agent).to.be.instanceof(DcxAgent);
-
-        expect(IssuerManager.agentVault).to.not.be.null.and.not.be.undefined;
-        expect(IssuerManager.agentVault).to.be.instanceof(DcxIdentityVault);
-      });
+  describe('.initialize()', () => {
+    it('should initialize the issuerServer', async () => {
+      await issuerServer.initialize();
+      expect(issuerServer._isInitialized).equals(true);
     });
 
-    describe('.setupDwn()', () => {
-      it('should setup the remote DWN', async () => {
-        await issuerServer.setupDwn();
-        expect(issuerServer._isSetup).equals(true);
-      });
-    });
+    it('should initialize the IssuerManager', () => {
+      expect(IssuerManager.web5).to.not.be.null.and.not.be.undefined;
+      expect(IssuerManager.web5).to.be.instanceof(Web5);
 
-    // describe('.poll()', () => {
-    //   it('should listen for new DWN record updates', async () => {
-    //     await issuerServer.poll();
-    //     expect(issuerServer._isPolling).equals(true);
-    //   });
-    // });
+      expect(IssuerManager.agent).to.not.be.null.and.not.be.undefined;
+      expect(IssuerManager.agent).to.be.instanceof(DcxAgent);
+
+      expect(IssuerManager.agentVault).to.not.be.null.and.not.be.undefined;
+      expect(IssuerManager.agentVault).to.be.instanceof(DcxIdentityVault);
+    });
+  });
+
+  describe('.setupDwn()', () => {
+    it('should setup the remote DWN', async () => {
+      await issuerServer.setupDwn();
+      expect(issuerServer._isSetup).equals(true);
+    });
+  });
+
+  describe('.poll()', () => {
+    it('should listen for new DWN record updates', async () => {
+      await issuerServer.poll();
+      expect(issuerServer._isPolling).equals(true);
+    });
   });
 });

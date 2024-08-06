@@ -1,6 +1,6 @@
 import { BearerDid } from '@web5/dids';
 import { expect } from 'chai';
-import { config, DcxAgent, DcxIdentityVault, Mnemonic } from '../src/index.js';
+import { config, DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '../src/index.js';
 
 describe('DcxAgent class', () => {
   let agentVault: DcxIdentityVault;
@@ -8,6 +8,7 @@ describe('DcxAgent class', () => {
   let password = Mnemonic.createPassword();
   let recoveryPhrase = Mnemonic.createRecoveryPhrase();
   let dwnEndpoints = config.DCX_ENDPOINTS.DWN_ENDPOINTS;
+  const dataPath = '__TEST_DATA__/DCX_COMMON/AGENT';
 
   before(() => {
     agentVault = new DcxIdentityVault();
@@ -17,7 +18,7 @@ describe('DcxAgent class', () => {
 
   describe('.create({ agentVault })', () => {
     it('should return a non-null DcxAgent object', async () => {
-      agent = await DcxAgent.create({ dataPath: '__TEST_DATA__/DCX_COMMON/AGENT', agentVault });
+      agent = await DcxAgent.create({ dataPath, agentVault });
       expect(agent).to.not.be.null.and.not.be.undefined;
       expect(agent).to.be.instanceof(DcxAgent);
     });
@@ -61,5 +62,9 @@ describe('DcxAgent class', () => {
       expect(agent.agentDid).to.not.be.null.and.not.be.undefined;
       expect(agent.agentDid).to.be.instanceof(BearerDid);
     });
+  });
+
+  after(async () => {
+    await FileSystem.rmdir('__TEST_DATA__');
   });
 });

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { FileSystem } from '../src/index.js';
+import crypto from 'crypto';
 
 describe('FileSystem class', () => {
   const EXISTS_FILE_PATH = 'exists.txt';
