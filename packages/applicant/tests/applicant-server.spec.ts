@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
-import { DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { applicantConfig, ApplicantServer, ApplicantManager } from '../src/index.js';
@@ -9,9 +9,9 @@ import { applicantConfig, ApplicantServer, ApplicantManager } from '../src/index
 const applicantServer: ApplicantServer = new ApplicantServer({
   config: {
     ...applicantConfig,
-    DCX_ENV            : process.env.NODE_ENV ?? 'test',
-    web5Password       : process.env.APPLICANT_WEB5_PASSWORD!,
-    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE!,
+    DCX_ENV            : 'test',
+    web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+    web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
     agentDataPath      : '__TEST_DATA__/DCX/APPLICANT/AGENT',
   }
 });
@@ -61,11 +61,11 @@ describe('ApplicantServer class', () => {
         expect(ApplicantManager.web5).to.not.be.null.and.not.be.undefined;
         expect(ApplicantManager.web5).to.be.instanceof(Web5);
 
-        expect(ApplicantManager.applicantAgent).to.not.be.null.and.not.be.undefined;
-        expect(ApplicantManager.applicantAgent).to.be.instanceof(DcxAgent);
+        expect(ApplicantManager.agent).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantManager.agent).to.be.instanceof(DcxAgent);
 
-        expect(ApplicantManager.applicantAgentVault).to.not.be.null.and.not.be.undefined;
-        expect(ApplicantManager.applicantAgentVault).to.be.instanceof(DcxIdentityVault);
+        expect(ApplicantManager.agentVault).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantManager.agentVault).to.be.instanceof(DcxIdentityVault);
       });
     });
 

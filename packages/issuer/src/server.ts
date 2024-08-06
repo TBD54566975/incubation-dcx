@@ -1,4 +1,5 @@
 import {
+  config as dcxConfig,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
@@ -33,7 +34,7 @@ export class IssuerServer {
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isSetup       : boolean = false;
-  _isTest        : boolean = issuerConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest        : boolean = dcxConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   /**
    *
@@ -180,19 +181,18 @@ export class IssuerServer {
     const web5Password = this.config.web5Password;
     const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
 
-    // TODO: consider generating a new recovery phrase if one is not provided
-    // this.config.ISSUER_WEB5_RECOVERY_PHRASE = generateMnemonic(128);
-
     if (firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       Logger.security(
         'WEB5_PASSWORD and WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New WEB5_PASSWORD saved to password.issuer.key file. ' +
-        'New WEB5_RECOVERY_PHRASE saved to recovery.issuer.key file.',
+        'New WEB5_PASSWORD saved to issuer.password.key file. ' +
+        'New WEB5_RECOVERY_PHRASE saved to issuer.recovery.key file.',
       );
       const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('password.issuer.key', password);
+      await FileSystem.overwrite('issuer.password.key', password);
+
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
-      await FileSystem.overwrite('recovery.issuer.key', recoveryPhrase);
+      await FileSystem.overwrite('issuer.recovery.key', recoveryPhrase);
+
       this.config.web5Password = password;
       this.config.web5RecoveryPhrase = recoveryPhrase;
       return { password, recoveryPhrase };
@@ -265,12 +265,11 @@ export class IssuerServer {
     const dwnEndpoints = this.useOptions.dwns!;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
-      : { password, recoveryPhrase, dwnEndpoints };
+      : { password, dwnEndpoints, recoveryPhrase };
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      this.config.web5RecoveryPhrase = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.issuer.key', this.config.web5RecoveryPhrase);
+      await agent.initialize(initializeParams);
     }
 
     // Start the agent and create a new Web5 instance
@@ -282,8 +281,8 @@ export class IssuerServer {
 
     // Set the DcxManager properties
     IssuerManager.web5 = web5;
-    IssuerManager.issuerAgent = agent;
-    IssuerManager.issuerAgentVault = agentVault;
+    IssuerManager.agent = agent;
+    IssuerManager.agentVault = agentVault;
     IssuerManager.serverOptions = this.useOptions;
 
     // Set the server initialized flag
@@ -296,6 +295,7 @@ export class IssuerServer {
    *
    */
   public async poll(): Promise<void> {
+    this._isPolling = true;
     Logger.log('DCX server starting ...');
 
     const CURSOR = this.config.cursorFile;
@@ -410,8 +410,6 @@ export class IssuerServer {
         Logger.log('Web5 initialized', this._isInitialized);
         await this.setupDwn();
       }
-
-      this._isPolling = true;
       await this.poll();
     } catch (error: any) {
       Logger.error(error);

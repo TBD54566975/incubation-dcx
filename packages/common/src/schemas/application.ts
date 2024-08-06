@@ -1,7 +1,7 @@
 export type ApplicationSchema = typeof schema;
 
 export const schema = {
-  $id        : 'https://decentralized.cx/.well-known/schemas/application.json',
+  $id        : 'https://decentralized.cx/protocol/credential-exchange/schemas/application',
   $schema    : 'http://json-schema.org/draft-07/schema#',
   title      : 'Credential Application',
   type       : 'object',

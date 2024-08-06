@@ -5,18 +5,20 @@ dist
 db-data
 node_modules
 
-.env*
+.env.test
+.env.development
+.env
+
 .ignore
-lastRecordId
+lastRecordId*
 did:dht*.json
 *cursor.json
 *.key
 *.key
 CUSTOM-MANIFEST.json
 
-**/DATA/*
-
 coverage/
 **/*/tests/compiled/
-__TEST_DATA__/
+DATA/
 DATASTORE/
+__TEST_DATA__/

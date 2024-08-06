@@ -1,7 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test' });
-
-import { DcxAgent, DcxIdentityVault } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { issuerConfig, IssuerManager, IssuerServer } from '../src/index.js';
@@ -9,15 +6,15 @@ import { issuerConfig, IssuerManager, IssuerServer } from '../src/index.js';
 const issuerServer: IssuerServer = new IssuerServer({
   config: {
     ...issuerConfig,
-    DCX_ENV            : process.env.NODE_ENV ?? 'test',
-    web5Password       : process.env.ISSUER_WEB5_PASSWORD!,
-    web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE!,
+    DCX_ENV            : 'test',
+    web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+    web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
     agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
   }
 });
-
+console.log('issuerServer.config:', issuerServer.config);
 describe('IssuerServer class', () => {
-  describe('has default properties that', () => {
+  describe('default properties', () => {
     it('should include static property _isPolling as a boolean equal to false', () => {
       const _isPolling = issuerServer._isPolling;
       expect(_isPolling).to.not.be.null.and.not.be.undefined;
@@ -38,7 +35,7 @@ describe('IssuerServer class', () => {
       expect(_isSetup).to.be.equals(false);
     });
 
-    it('should include property _isTest as a boolean equal to false', () => {
+    it('should include property _isTest as a boolean equal to true', () => {
       const _isTest = issuerServer._isTest;
       expect(_isTest).to.not.be.null.and.not.be.undefined;
       expect(typeof _isTest).equals('boolean');
@@ -50,7 +47,9 @@ describe('IssuerServer class', () => {
       expect(useOptions).to.not.be.null.and.not.be.undefined;
       expect(Object.entries(useOptions)).to.have.lengthOf.gte(6);
     });
+  });
 
+  describe('default methods', () => {
     describe('.initialize()', () => {
       it('should initialize the issuerServer', async () => {
         await issuerServer.initialize();
@@ -61,11 +60,11 @@ describe('IssuerServer class', () => {
         expect(IssuerManager.web5).to.not.be.null.and.not.be.undefined;
         expect(IssuerManager.web5).to.be.instanceof(Web5);
 
-        expect(IssuerManager.issuerAgent).to.not.be.null.and.not.be.undefined;
-        expect(IssuerManager.issuerAgent).to.be.instanceof(DcxAgent);
+        expect(IssuerManager.agent).to.not.be.null.and.not.be.undefined;
+        expect(IssuerManager.agent).to.be.instanceof(DcxAgent);
 
-        expect(IssuerManager.issuerAgentVault).to.not.be.null.and.not.be.undefined;
-        expect(IssuerManager.issuerAgentVault).to.be.instanceof(DcxIdentityVault);
+        expect(IssuerManager.agentVault).to.not.be.null.and.not.be.undefined;
+        expect(IssuerManager.agentVault).to.be.instanceof(DcxIdentityVault);
       });
     });
 
@@ -75,5 +74,12 @@ describe('IssuerServer class', () => {
         expect(issuerServer._isSetup).equals(true);
       });
     });
+
+    // describe('.poll()', () => {
+    //   it('should listen for new DWN record updates', async () => {
+    //     await issuerServer.poll();
+    //     expect(issuerServer._isPolling).equals(true);
+    //   });
+    // });
   });
 });

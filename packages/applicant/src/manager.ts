@@ -4,8 +4,7 @@ import {
   DwnError,
   DwnUtils,
   Logger,
-  ServerOptions,
-  Time
+  ServerOptions
 } from '@dcx-protocol/common';
 import {
   ProtocolsConfigureResponse,
@@ -19,9 +18,9 @@ import { applicant } from './index.js';
  */
 export class ApplicantManager {
   public static web5: Web5;
-  public static applicantAgent: DcxAgent;
-  public static applicantAgentVault: DcxIdentityVault;
-  public static applicantOptions: ServerOptions;
+  public static agent: DcxAgent;
+  public static agentVault: DcxIdentityVault;
+  public static serverOptions: ServerOptions;
 
   /**
    * Query DWN for credential-applicant protocol
@@ -39,7 +38,7 @@ export class ApplicantManager {
 
     if (DwnUtils.isFailure(query.code)) {
       const { code, detail } = query;
-      Logger.error(`ApplicantManager.protocolsQuery: DWN protocols query failed`, query);
+      Logger.error('DWN protocols query failed', query);
       throw new DwnError(code, detail);
     }
 
@@ -62,7 +61,7 @@ export class ApplicantManager {
       throw new DwnError(code, detail);
     }
 
-    const { status: send } = await protocol.send(ApplicantManager.applicantAgent.agentDid.uri);
+    const { status: send } = await protocol.send(ApplicantManager.agent.agentDid.uri);
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;

@@ -85,7 +85,7 @@ export class ApplicantServer {
     }
 
     if (validPaths.includes(path)) {
-      this.useOptions[path]!.push(obj);
+      this.useOptions[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -101,7 +101,7 @@ export class ApplicantServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    this.useOptions.manifests!.push(manifest);
+    this.useOptions.manifests.push(manifest);
   }
 
   /**
@@ -127,7 +127,7 @@ export class ApplicantServer {
    *
    */
   public useProvider(provider: Provider): void {
-    this.useOptions.providers!.push(provider);
+    this.useOptions.providers.push(provider);
   }
 
   /**
@@ -140,7 +140,7 @@ export class ApplicantServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    this.useOptions.issuers!.push(issuer);
+    this.useOptions.issuers.push(issuer);
   }
 
   /**
@@ -152,7 +152,7 @@ export class ApplicantServer {
    *
    */
   public useDwn(dwn: string): void {
-    this.useOptions.dwns!.push(dwn);
+    this.useOptions.dwns.push(dwn);
   }
 
   /**
@@ -164,7 +164,7 @@ export class ApplicantServer {
    *
    */
   public useGateway(gateway: string): void {
-    this.useOptions.gateways!.push(gateway);
+    this.useOptions.gateways.push(gateway);
   }
 
   /**
@@ -188,13 +188,18 @@ export class ApplicantServer {
     if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
       Logger.security(
         'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New APPLICANT_WEB5_PASSWORD saved to password.applicant.key file. ' +
-        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to recovery.applicant.key file.',
+        'New APPLICANT_WEB5_PASSWORD saved to applicant.password.key file. ' +
+        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to applicant.recovery.key file.',
       );
       const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('password.applicant.key', password);
+      await FileSystem.overwrite('applicant.password.key', password);
+
+      const recoveryPhrase = Mnemonic.createRecoveryPhrase();
+      await FileSystem.overwrite('applicant.recovery.key', recoveryPhrase);
+
       this.config.web5Password = password;
-      return { password };
+      this.config.web5RecoveryPhrase = recoveryPhrase;
+      return { password, recoveryPhrase };
     }
 
     if (firstLaunch && !web5Password && web5RecoveryPhrase) {
@@ -268,8 +273,7 @@ export class ApplicantServer {
 
     // Initialize the agent with the options
     if (firstLaunch) {
-      this.config.web5RecoveryPhrase = await agent.initialize(initializeParams);
-      await FileSystem.overwrite('recovery.applicant.key', this.config.web5RecoveryPhrase);
+      await agent.initialize(initializeParams);
     }
 
     // Start the agent and create a new Web5 instance
@@ -283,9 +287,9 @@ export class ApplicantServer {
 
     // Set the DcxManager properties
     ApplicantManager.web5 = web5;
-    ApplicantManager.applicantAgent = agent;
-    ApplicantManager.applicantAgentVault = agentVault;
-    ApplicantManager.applicantOptions = this.useOptions;
+    ApplicantManager.agent = agent;
+    ApplicantManager.agentVault = agentVault;
+    ApplicantManager.serverOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;

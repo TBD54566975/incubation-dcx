@@ -120,12 +120,12 @@ export class IssuerHandlers {
     const vc = await VerifiableCredential.create({
       data,
       subject : subjectDid,
-      issuer  : IssuerManager.issuerAgent.agentDid.uri,
+      issuer  : IssuerManager.agent.agentDid.uri,
       type    : manifestOutputDescriptor.name,
     });
     Logger.debug(`Created ${manifestOutputDescriptor.id} credential`, stringifier(vc));
 
-    const signed = await vc.sign({ did: IssuerManager.issuerAgent.agentDid });
+    const signed = await vc.sign({ did: IssuerManager.agent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
