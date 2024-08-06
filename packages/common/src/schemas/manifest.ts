@@ -26,10 +26,10 @@ export const schema = {
         type       : 'object',
         required   : ['id', 'schema'],
         properties : {
-          id          : { type: 'string'},
-          name        : { type: 'string'},
-          description : { type: 'string'},
-          schema      : { type: 'string'},
+          id          : { type: 'string' },
+          name        : { type: 'string' },
+          description : { type: 'string' },
+          schema      : { type: 'string' },
           display     : {
             type       : 'object',
             properties : {

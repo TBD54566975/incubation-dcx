@@ -44,7 +44,7 @@ export class IssuerManager {
 
     if (DwnUtils.isFailure(query.code)) {
       const { code, detail } = query;
-      Logger.error(`${IssuerManager.name}: DWN protocols query failed`, query);
+      Logger.error(`DWN protocols query failed`, query);
       throw new DwnError(code, detail);
     }
 
@@ -86,33 +86,28 @@ export class IssuerManager {
   public static async queryManifests(): Promise<
     DwnResponseStatus & { records: Record[]; cursor?: DwnPaginationCursor }
     > {
-    try {
-      const {
-        status,
-        records: manifestRecords = [],
-        cursor,
-      } = await IssuerManager.web5.dwn.records.query({
-        message: {
-          filter: {
-            schema       : manifestSchema.$id,
-            dataFormat   : 'application/json',
-            protocol     : issuer.protocol,
-            protocolPath : 'manifest',
-          },
+    const {
+      status,
+      records: manifestRecords = [],
+      cursor,
+    } = await IssuerManager.web5.dwn.records.query({
+      message: {
+        filter: {
+          schema       : manifestSchema.$id,
+          dataFormat   : 'application/json',
+          protocol     : issuer.protocol,
+          protocolPath : 'manifest',
         },
-      });
+      },
+    });
 
-      if (DwnUtils.isFailure(status.code)) {
-        const { code, detail } = status;
-        Logger.error('DWN manifest records query failed', status);
-        throw new DwnError(code, detail);
-      }
-
-      return { status, records: manifestRecords, cursor };
-    } catch (error: any) {
-      Logger.warn(error);
-      throw error;
+    if (DwnUtils.isFailure(status.code)) {
+      const { code, detail } = status;
+      Logger.error('DWN manifest records query failed', status);
+      throw new DwnError(code, detail);
     }
+
+    return { status, records: manifestRecords, cursor };
   }
 
   /**
@@ -138,7 +133,7 @@ export class IssuerManager {
       );
       return { manifests };
     } catch (error: any) {
-      Logger.error(`${IssuerManager.name}: Failed to filter dwn manifest records`, error);
+      Logger.error('Failed to filter dwn manifest records', error);
       throw error;
     }
   }
@@ -196,7 +191,7 @@ export class IssuerManager {
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
-      Logger.error(`${IssuerManager.name}: Failed to send dwn manifest record`, send);
+      Logger.error('Failed to send dwn manifest record', send);
       throw new DwnError(code, detail);
     }
 
