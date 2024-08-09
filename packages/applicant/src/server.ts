@@ -18,7 +18,7 @@ import { argv, exit } from 'process';
 import {
   applicantConfig,
   ApplicantConfig,
-  ApplicantCore
+  DcxApplicant
 } from './index.js';
 
 type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
@@ -281,9 +281,9 @@ export class ApplicantServer {
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
-    ApplicantCore.web5 = web5;
-    ApplicantCore.agent = agent;
-    ApplicantCore.agentVault = agentVault;
+    DcxApplicant.web5 = web5;
+    DcxApplicant.agent = agent;
+    DcxApplicant.agentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -301,7 +301,7 @@ export class ApplicantServer {
   }
 
   public async setupDwn(): Promise<void> {
-    await ApplicantCore.setupDwn();
+    await DcxApplicant.setupDwn();
     this._isSetup = true;
   }
 
