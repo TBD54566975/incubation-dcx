@@ -3,7 +3,7 @@ export const dwn500Error = {
   detail : 'DWN server error',
 };
 export class DcxError extends Error {
-  constructor(error: any, name: string) {
+  constructor(name: string, error: any) {
     super(error);
     this.name = name;
   }
@@ -11,25 +11,25 @@ export class DcxError extends Error {
 
 export class DidDhtManagerError extends DcxError {
   constructor(error: any) {
-    super(error, 'DidDhtManagerError');
+    super( 'DidDhtManagerError', error);
   }
 }
 
 export class DcxServerError extends DcxError {
   constructor(error: any) {
-    super(error, 'DcxServerError');
+    super( 'DcxServerError', error);
   }
 }
 
 export class DcxDwnError extends DcxError {
   constructor(error: any) {
-    super(error, 'DcxDwnError');
+    super( 'DcxDwnError', error);
   }
 }
 
 export class DcxProtocolHandlerError extends DcxError {
   constructor(error: any) {
-    super(error, 'DcxProtocolHandlerError');
+    super( 'DcxProtocolHandlerError', error);
   }
 }
 
@@ -58,7 +58,7 @@ export function handleDcxErrors(target: any, propertyKey: any, descriptor?: any)
         case error instanceof DcxDwnError:
           throw new DcxDwnError(error);
         default:
-          throw new DcxError(error, 'DcxError');
+          throw new DcxError('DcxError', error);
       }
     }
   };

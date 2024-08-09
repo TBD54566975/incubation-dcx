@@ -4,7 +4,7 @@ dotenv.config({ path: '.env.test' });
 import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { applicantConfig, ApplicantServer, ApplicantManager } from '../src/index.js';
+import { applicantConfig, ApplicantServer, ApplicantCore } from '../src/index.js';
 
 describe('ApplicantServer class', () => {
   applicantConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
@@ -62,15 +62,15 @@ describe('ApplicantServer class', () => {
         expect(applicantServer._isInitialized).equals(true);
       });
 
-      it('should initialize the ApplicantManager', () => {
-        expect(ApplicantManager.web5).to.not.be.null.and.not.be.undefined;
-        expect(ApplicantManager.web5).to.be.instanceof(Web5);
+      it('should initialize the ApplicantCore', () => {
+        expect(ApplicantCore.web5).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantCore.web5).to.be.instanceof(Web5);
 
-        expect(ApplicantManager.agent).to.not.be.null.and.not.be.undefined;
-        expect(ApplicantManager.agent).to.be.instanceof(DcxAgent);
+        expect(ApplicantCore.agent).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantCore.agent).to.be.instanceof(DcxAgent);
 
-        expect(ApplicantManager.agentVault).to.not.be.null.and.not.be.undefined;
-        expect(ApplicantManager.agentVault).to.be.instanceof(DcxIdentityVault);
+        expect(ApplicantCore.agentVault).to.not.be.null.and.not.be.undefined;
+        expect(ApplicantCore.agentVault).to.be.instanceof(DcxIdentityVault);
       });
     });
 

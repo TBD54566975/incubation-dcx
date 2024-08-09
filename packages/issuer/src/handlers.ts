@@ -212,7 +212,7 @@ export class IssuerHandlers {
 
     const { record, status: create } = await IssuerManager.web5.dwn.records.create({
       data    : vc,
-      store   : false,
+      store   : true,
       message : {
         schema       : responseSchema.$id,
         protocol     : issuer.protocol,

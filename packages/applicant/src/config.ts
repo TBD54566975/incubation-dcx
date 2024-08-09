@@ -10,7 +10,7 @@ export const applicantConfig = {
   serviceId                      : process.env.APPLICANT_SERVICE_ID                || 'dcx-applicant',
   cursorFile                     : process.env.APPLICANT_CURSOR                    || 'applicant-cursor.json',
   lastRecordIdFile               : process.env.APPLICANT_LAST_RECORD_ID            || 'lastRecordId.applicant',
-  dwnEndpoints                   : process.env.APPLICANT_DWN_ENDPOINTS?.split(',') || dcxConfig.DCX_ENDPOINTS.DWN_ENDPOINTS,
+  dwnEndpoints                   : process.env.APPLICANT_DWN_ENDPOINTS?.split(',') || ['https://dwn.gcda.xyz/'],
   gatewayUris                    : process.env.APPLICANT_GATEWAY_URIS?.split(',')  || dcxConfig.DCX_ENDPOINTS.GATEWAY_URIS,
   agentDataPath                  : process.env.APPLICANT_WEB5_AGENT_DATA_PATH      || 'DATA/DCX/APPLICANT/AGENT',
   web5Password                   : process.env.APPLICANT_WEB5_PASSWORD             || '',

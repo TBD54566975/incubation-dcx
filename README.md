@@ -1,26 +1,10 @@
 # Decentralized Credential Exchange (DCX)
 
-[![codecov](https://codecov.io/github/TBD54566975/incubation-dcx/graph/badge.svg?token=6PYX9498RD)](https://codecov.io/github/TBD54566975/incubation-dcx)
+[![codecov](https://codecov.io/github/TBD54566975/incubation-dcx/branch/main/graph/badge.svg?token=6PYX9498RD)](https://codecov.io/github/TBD54566975/incubation-dcx)
 
 DCX is a new Decentralized Web Nodes (DWN) protocol that facilitates the decentralized exchange of borrower data for lender money seurely and privately and a npm package that implements the protocol as a one-click server solution. 
 
 As an open, permissionless, "credentials in, credentials out" asynchronous web server, DCX leverages the strongest Web5 primitives: DWNs, Verifiable Credentials (VCs), Credential Manifests, Verifiable Presentations and Presentation Exchange amongst  other important Web5 primitives. DCX facilitates decentralized credential exchange by performing CRUD operations on both applicant and issuer DWNs. Different DWN record schemas represent various messages sent between actors, detailing the VCs required as inputs and outputs for the DCX server.
-
-[Applicant](/packages/applicant)
-- [`/packages/applicant/src/protocol.ts`](/packages/applicant/src/protocol.ts) credential applicant protocol definition
-- [`/packages/applicant/src/handlers.ts`](/packages/applicant/src/handlers.ts) pre-defined credential applicant protocol handlers
-- [`/packages/applicant/src/server.ts`](/packages/applicant/src/server.ts) pre-built server to run credential issuer side (TODO: applicant server code)
-
-[Common](/packages/common) code shared between the issuer and applicant
-- [`/packages/common/src/schemas/manifest.ts`](/packages/common/src/schemas/manifest.ts) DWN manifest record schema definition
-- [`/packages/common/src/schemas/application.ts`](/packages/common/src/schemas/application.ts) DWN application record schema definition 
-- [`/packages/common/src/schemas/response.ts`](/packages/common/src/schemas/response.ts) DWN response record schema definition
-- [`/packages/common/src/schemas/invoice.ts`](/packages/common/src/schemas/invoice.ts) DWN invoice record schema definition
-
-[Issuer](/packages/issuer)
-- [`/packages/issuer/src/protocol.ts`](/packages/issuer/src/protocol.ts) credential issuer protocol definition
-- [`/packages/issuer/src/handlers.ts`](/packages/issuer/src/handlers.ts) pre-defined credential issuer protocol handlers
-- [`/packages/issuer/src/server.ts`](/packages/issuer/src/server.ts) pre-built server to run credential issuer side
 
 To learn more about the components of DCX, check out [/docs/learn/README.md](/docs/learn/README.md).
 

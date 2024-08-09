@@ -1,29 +1,24 @@
 import {
-  config as dcxConfig,
   CredentialManifest,
   DcxAgent,
+  config as dcxConfig,
   DcxIdentityVault,
   DcxServerError,
   FileSystem,
   Issuer,
   Logger,
   Mnemonic,
-  Objects,
   Provider,
   ServerHandler,
   ServerOptions,
-  ServerPath,
-  stringifier,
-  Time
+  ServerPath
 } from '@dcx-protocol/common';
-import { Record, Web5 } from '@web5/api';
+import { Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 import {
-  applicant,
   applicantConfig,
   ApplicantConfig,
-  ApplicantHandlers,
-  ApplicantManager
+  ApplicantCore
 } from './index.js';
 
 type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
@@ -286,10 +281,9 @@ export class ApplicantServer {
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
-    ApplicantManager.web5 = web5;
-    ApplicantManager.agent = agent;
-    ApplicantManager.agentVault = agentVault;
-    ApplicantManager.serverOptions = this.useOptions;
+    ApplicantCore.web5 = web5;
+    ApplicantCore.agent = agent;
+    ApplicantCore.agentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -307,98 +301,8 @@ export class ApplicantServer {
   }
 
   public async setupDwn(): Promise<void> {
-    await ApplicantManager.setup();
+    await ApplicantCore.setupDwn();
     this._isSetup = true;
-  }
-
-
-  /**
-   *
-   * Polls the DWN for incoming records
-   *
-   */
-  public async poll(): Promise<void> {
-    Logger.log('DCX server starting ...');
-
-    const CURSOR = this.config.cursorFile;
-    const LAST_RECORD_ID = this.config.lastRecordIdFile;
-
-    let cursor = await FileSystem.readToJson(CURSOR);
-    const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
-    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
-
-    while (this._isPolling) {
-      const { records = [], cursor: nextCursor } = await ApplicantManager.web5.dwn.records.query({
-        message: {
-          filter: {
-            protocol: applicant.protocol,
-          },
-          pagination,
-        },
-      });
-
-      Logger.log(`Found ${records.length} records`);
-      if (nextCursor) {
-        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
-        cursor = nextCursor;
-        const overwritten = await FileSystem.overwrite(CURSOR, cursor);
-        Logger.log(`${CURSOR} overwritten ${overwritten}`, cursor);
-      } else {
-        Logger.log(`Next cursor not found!`);
-      }
-
-      if (cursor && !records.length) {
-        cursor = undefined;
-      }
-
-      const recordIds = records.map((record: Record) => record.id);
-      const recordReads: Record[] = await Promise.all(
-        recordIds.map(async (recordId: string) => {
-          const { record }: { record: Record } = await ApplicantManager.web5.dwn.records.read({
-            message: {
-              filter: {
-                recordId,
-              },
-            },
-          });
-          return record;
-        }),
-      );
-
-      Logger.log(`Read ${recordReads.length} records`);
-
-      if (!recordReads.length) {
-        Logger.log('No records found!', recordReads.length);
-        if (this._isTest) {
-          Logger.log('Test Complete! Stopping DCX server ...');
-          this.stop();
-        }
-        await Time.sleep();
-      }
-
-      for (const record of recordReads) {
-        if (record.id != lastRecordId) {
-          if (record.protocolPath === 'application') {
-            const manifest = this.useOptions.manifests!.find(
-              (manifest: CredentialManifest) =>
-                manifest.presentation_definition.id === record.schema,
-            );
-
-            if (manifest) {
-              await ApplicantHandlers.processResponseRecord(record, manifest);
-            } else {
-              Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
-            }
-
-            lastRecordId = record.id;
-            const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.log(`Overwritten last record id ${overwritten}`, lastRecordId);
-          }
-        } else {
-          await Time.sleep();
-        }
-      }
-    }
   }
 
   /**

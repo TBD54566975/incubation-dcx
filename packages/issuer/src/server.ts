@@ -362,18 +362,19 @@ export class IssuerServer {
             );
 
             if (manifest) {
-              await IssuerHandlers.processApplicationRecord(
+              const { status } = await IssuerHandlers.processApplicationRecord(
                 record,
                 manifest,
                 manifest.output_descriptors[0].id,
               );
+              Logger.debug(`Processed application id ${record.id}`, status);
             } else {
               Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
             }
 
             lastRecordId = record.id;
             const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.log(`Overwritten last record id ${overwritten}`, lastRecordId);
+            Logger.log(`Overwritten last record id: ${overwritten}`, lastRecordId);
           }
         } else {
           await Time.sleep();
