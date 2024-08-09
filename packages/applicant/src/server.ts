@@ -1,7 +1,7 @@
 import {
-  config as dcxConfig,
   CredentialManifest,
   DcxAgent,
+  config as dcxConfig,
   DcxIdentityVault,
   DcxServerError,
   FileSystem,
@@ -22,8 +22,8 @@ import {
   applicant,
   applicantConfig,
   ApplicantConfig,
-  ApplicantHandlers,
-  ApplicantManager
+  ApplicantCore,
+  ApplicantHandlers
 } from './index.js';
 
 type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
@@ -286,10 +286,9 @@ export class ApplicantServer {
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
-    ApplicantManager.web5 = web5;
-    ApplicantManager.agent = agent;
-    ApplicantManager.agentVault = agentVault;
-    ApplicantManager.serverOptions = this.useOptions;
+    ApplicantCore.web5 = web5;
+    ApplicantCore.agent = agent;
+    ApplicantCore.agentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -307,7 +306,7 @@ export class ApplicantServer {
   }
 
   public async setupDwn(): Promise<void> {
-    await ApplicantManager.setup();
+    await ApplicantCore.setup();
     this._isSetup = true;
   }
 
@@ -328,7 +327,7 @@ export class ApplicantServer {
     let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
 
     while (this._isPolling) {
-      const { records = [], cursor: nextCursor } = await ApplicantManager.web5.dwn.records.query({
+      const { records = [], cursor: nextCursor } = await ApplicantCore.web5.dwn.records.query({
         message: {
           filter: {
             protocol: applicant.protocol,
@@ -354,7 +353,7 @@ export class ApplicantServer {
       const recordIds = records.map((record: Record) => record.id);
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
-          const { record }: { record: Record } = await ApplicantManager.web5.dwn.records.read({
+          const { record }: { record: Record } = await ApplicantCore.web5.dwn.records.read({
             message: {
               filter: {
                 recordId,
