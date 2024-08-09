@@ -17,7 +17,9 @@
     "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
     "lint:fix": "eslint . --fix -c ../../eslint.config.js",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm test"
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
