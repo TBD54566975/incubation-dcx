@@ -25,7 +25,8 @@
     "test:node:common": "pnpm --filter common test:node",
     "test:node:issuer": "pnpm --filter issuer test:node",
     "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node"
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node",
+    "publish": "pnpm --recursive publish"
   },
   "repository": {
     "type": "git",
