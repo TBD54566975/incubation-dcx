@@ -10,7 +10,7 @@ import {
   Provider,
   responseSchema,
   ServerHandler,
-  ServerOptions,
+  DcxOptions,
   stringifier
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
@@ -23,7 +23,7 @@ import {
 import { issuer, issuerConfig, IssuerManager } from './index.js';
 
 export class IssuerHandlers {
-  public static serverOptions: ServerOptions;
+  public static serverOptions: DcxOptions;
 
   constructor() {
     IssuerHandlers.selectCredentials = IssuerHandlers.findHandler('selectCredentials', IssuerHandlers.selectCredentials);

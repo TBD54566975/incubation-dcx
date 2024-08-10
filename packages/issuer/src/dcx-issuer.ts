@@ -3,11 +3,11 @@ import {
   DcxAgent,
   DcxDwnError,
   DcxIdentityVault,
+  DcxOptions,
   DwnError,
   DwnUtils,
   Logger,
   manifestSchema,
-  ServerOptions,
   stringifier
 } from '@dcx-protocol/common';
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
@@ -27,7 +27,7 @@ export class IssuerManager {
   public static web5: Web5;
   public static agent: DcxAgent;
   public static agentVault: DcxIdentityVault;
-  public static serverOptions: ServerOptions;
+  public static serverOptions: DcxOptions;
 
   /**
    * Query DWN for credential-issuer protocol
@@ -123,9 +123,9 @@ export class IssuerManager {
    */
   public static async readManifests(
     manifestRecords: Record[],
-  ): Promise<{ manifests: CredentialManifest[] }> {
+  ): Promise<{ records: CredentialManifest[] }> {
     try {
-      const manifests = await Promise.all(
+      const records = await Promise.all(
         manifestRecords.map(async (manifestRecord) => {
           const { record } = await IssuerManager.web5.dwn.records.read({
             message: {
@@ -137,7 +137,7 @@ export class IssuerManager {
           return record.data.json();
         }),
       );
-      return { manifests };
+      return { records };
     } catch (error: any) {
       Logger.error('Failed to filter dwn manifest records', error);
       throw error;
@@ -254,7 +254,7 @@ export class IssuerManager {
       Logger.log(`Found ${records.length} dwn manifest records`);
 
       // Read manifest records data
-      const { manifests } = await IssuerManager.readManifests(records);
+      const { records: manifests } = await IssuerManager.readManifests(records);
       Logger.debug(`Read ${manifests.length} manifest records`, manifests);
 
       if (!manifests.length) {

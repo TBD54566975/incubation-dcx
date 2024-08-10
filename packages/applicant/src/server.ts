@@ -10,7 +10,7 @@ import {
   Mnemonic,
   Provider,
   ServerHandler,
-  ServerOptions,
+  DcxOptions,
   ServerPath
 } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
@@ -21,11 +21,11 @@ import {
   DcxApplicant
 } from './index.js';
 
-type ApplicantServerParams = { options?: ServerOptions; config?: ApplicantConfig };
+type ApplicantServerParams = { options?: DcxOptions; config?: ApplicantConfig };
 
 export class ApplicantServer {
   config         : ApplicantConfig;
-  useOptions     : ServerOptions;
+  useOptions     : DcxOptions;
   _isSetup       : boolean = false;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
@@ -67,7 +67,7 @@ export class ApplicantServer {
    *
    * @param path The type of server option; see {@link ServerPath}
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link ServerOptions}
+   * @param obj The object to use; see {@link DcxOptions}
    * @example see README.md for usage information
    *
    */

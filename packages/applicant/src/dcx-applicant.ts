@@ -12,7 +12,7 @@ import {
   manifestSchema,
   Mnemonic,
   responseSchema,
-  ServerOptions
+  DcxOptions
 } from '@dcx-protocol/common';
 import {
   ProtocolsConfigureResponse,
@@ -32,14 +32,14 @@ type PresentationExchangeArgs = {
 
 type ApplicantParams = {
   config?  : ApplicantConfig;
-  options? : ServerOptions;
+  options? : DcxOptions;
 };
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class DcxApplicant {
-  options                  : ServerOptions;
+  options                  : DcxOptions;
   config                   : ApplicantConfig;
   _isSetup                 : boolean = false;
   _isInitialized           : boolean = false;
@@ -137,8 +137,8 @@ export class DcxApplicant {
    * @param applicationResponseRecords Record[]; see {@link Record}
    * @returns applicationResponses[]; see {@link responseSchema}
    */
-  public static async readApplicationResponses(applicationResponseRecords: Record[]): Promise<{ applicationResponses: any[] }> {
-    const applicationResponses = await Promise.all(
+  public static async readApplicationResponses(applicationResponseRecords: Record[]): Promise<{ records: any[] }> {
+    const records = await Promise.all(
       applicationResponseRecords.map(async (applicationResponseRecord) => {
         const { record } = await DcxApplicant.web5.dwn.records.read({
           message: {
@@ -150,7 +150,7 @@ export class DcxApplicant {
         return record.data.json();
       }),
     );
-    return { applicationResponses };
+    return { records };
   }
 
 
@@ -209,7 +209,6 @@ export class DcxApplicant {
     pex: PresentationExchangeArgs,
     issuerDid: string
   ): Promise<RecordsCreateResponse> {
-    //   presentationDefinition: manifest.presentation_definition
     const presentationResult = PresentationExchange.createPresentationFromCredentials(pex);
 
     const { record, status: create } = await DcxApplicant.web5.dwn.records.create({
