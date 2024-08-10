@@ -151,10 +151,11 @@ export class IssuerHandlers {
    * @returns The response from the VC data provider
    */
   public static async requestCredential(
-    body: { vcs: VerifiableCredential[] } | any,
-    id: string,
-  ): Promise<any> {
-    const provider = this.serverOptions.providers.find((provider: Provider) => provider.id === id);
+    params: {
+      body : { vcs: VerifiableCredential[] | any },
+      id?  : string
+    }): Promise<any> {
+    const provider = this.serverOptions.providers.find((provider: Provider) => provider.id === params?.id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -163,11 +164,8 @@ export class IssuerHandlers {
 
     const response = await fetch(provider.endpoint, {
       method  : provider.method ?? 'POST',
-      headers : {
-        ...provider.headers,
-        'Content-Type': 'application/json',
-      },
-      body: stringifier(body),
+      headers : provider.headers,
+      body    : stringifier(params.body),
     });
     Logger.debug('VC request response', stringifier(response));
 
@@ -205,7 +203,7 @@ export class IssuerHandlers {
     Logger.debug(`Verified ${verified.length} credentials`);
 
     // request vc data
-    const data = await IssuerHandlers.requestCredential({ vcs: verified }, providerId);
+    const data = await IssuerHandlers.requestCredential({ body: { vcs: verified }, id: providerId });
     Logger.debug('VC data from provider', stringifier(data));
 
     const vc = await IssuerHandlers.issueCredential(data, recordAuthor, manifest);
