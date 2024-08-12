@@ -9,6 +9,13 @@ describe('FileSystem class', () => {
   const CURSOR = 'cursor.json';
   const randomUUID = crypto.randomUUID();
 
+  after(async () => {
+    await FileSystem.rm(EXISTS_FILE_PATH);
+    await FileSystem.rm(DNE_FILE_PATH);
+    await FileSystem.rm(LAST_RECORD_ID);
+    await FileSystem.rm(CURSOR);
+  });
+
   describe('.touch()', () => {
     it(`should create a new file called ${EXISTS_FILE_PATH} and return true`, async ()  => {
       const touched = await FileSystem.touch(EXISTS_FILE_PATH, 'Hello, World!');
@@ -117,12 +124,5 @@ describe('FileSystem class', () => {
       const read = await FileSystem.read(LAST_RECORD_ID);
       expect(read!.toString()).to.contain('Hello, World!');
     });
-  });
-
-  after(async () => {
-    await FileSystem.rm(EXISTS_FILE_PATH);
-    await FileSystem.rm(DNE_FILE_PATH);
-    await FileSystem.rm(LAST_RECORD_ID);
-    await FileSystem.rm(CURSOR);
   });
 });

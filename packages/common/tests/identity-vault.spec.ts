@@ -5,6 +5,10 @@ import { DcxIdentityVault, FileSystem } from '../src/index.js';
 describe('DcxIdentityVault class', () => {
   const location = '__TEST_DATA__/DCX_COMMON/AGENT/DATASTORE';
 
+  after(async () => {
+    await FileSystem.rmdir('__TEST_DATA__', { recursive: true, force: true });
+  });
+
   describe('takes two constructor arguments', () => {
     it('should initialize successfully with default IdentityVaultParams', () => {
       const defaultVault = new DcxIdentityVault();
@@ -26,9 +30,5 @@ describe('DcxIdentityVault class', () => {
       expect(customAgentVault).to.not.be.null.and.not.be.undefined;
       expect(customAgentVault).to.be.instanceof(DcxIdentityVault);
     });
-  });
-
-  after(async () => {
-    await FileSystem.rmdir('__TEST_DATA__');
   });
 });
