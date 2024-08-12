@@ -27,47 +27,36 @@ export class Logger implements Partial<Console> {
   public static isDevelopment: boolean = dcxConfig.DCX_ENV === Env.Development;
   public static isProduction: boolean = dcxConfig.DCX_ENV === Env.Production;
 
-  public static level: Level = dcxConfig.DCX_ENV as Level;
-  constructor() {
-    if(Logger.isTest){
-      Logger.level = 'test';
-    } else if (Logger.isDevelopment) {
-      Logger.level = 'debug';
-    } else {
-      Logger.level = 'info';
-    }
-  }
+  public static level: Level = Logger.isTest ? 'test' : Logger.isDevelopment ? 'debug' : 'info';
+
 
   public static debug(message?: unknown, ...args: unknown[]): void {
-    if(Logger.level === Env.Test) return;
+    if (Logger.isTest) return;
     console.debug(chalk.green('debug') + ':', message, ...args);
   }
 
   public static error(message?: unknown, ...args: unknown[]): void {
-    if(Logger.level === Env.Test) return;
+    if (Logger.isTest) return;
     console.error(chalk.red('error') + ':', message, ...args);
   }
 
   public static info(message?: unknown, ...args: unknown[]): void {
-    if(Logger.level === Env.Test) return;
+    if (Logger.isTest) return;
     console.info(chalk.blue('info') + ':', message, ...args);
   }
 
   public static warn(message?: unknown, ...args: unknown[]): void {
-    if(Logger.level === Env.Test) return;
+    if (Logger.isTest) return;
     console.warn(chalk.yellow('warn') + ':', message, ...args);
   }
 
   public static security(message?: unknown, ...args: unknown[]): void {
-    if(Logger.level === Env.Test) return;
+    if (Logger.isTest) return;
     console.warn(chalk.red('security') + ':', message, ...args);
   }
 
   public static log(message?: unknown, ...args: unknown[]): void {
     switch (Logger.level) {
-      case LogLevel.Log:
-        console.log(chalk.gray('log') + ':', message, ...args);
-        break;
       case LogLevel.Debug:
         Logger.debug(message, ...args);
         break;
@@ -81,7 +70,7 @@ export class Logger implements Partial<Console> {
         Logger.warn(message, ...args);
         break;
       default:
-        break;
+        console.log(chalk.gray('log') + ':', message, ...args);
     }
   }
 }
