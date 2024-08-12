@@ -1,7 +1,7 @@
 {
   "name": "@dcx-protocol/issuer",
   "version": "0.0.15",
-  "description": "DCX Issuer protocol and server",
+  "description": "DCX Issuer Protocol Implementation",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

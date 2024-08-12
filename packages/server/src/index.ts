@@ -14,23 +14,19 @@ import {
   ServerOptions,
   ServerPath,
   stringifier,
-  Time
+  Time,
+  Config,
+  config
 } from '@dcx-protocol/common';
+import { IssuerManager, IssuerHandlers, issuer } from '@dcx-protocol/issuer';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
-import {
-  issuer,
-  IssuerConfig,
-  issuerConfig,
-  IssuerHandlers,
-  IssuerManager
-} from './index.js';
 
-type DcxServerParams = { options?: ServerOptions; config?: IssuerConfig };
+type DcxServerParams = { options?: ServerOptions; config?: Config };
 
 export class DcxServer {
-  config         : IssuerConfig;
-  useOptions     : ServerOptions;
+  config         : Config;
+  options        : ServerOptions;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isSetup       : boolean = false;
@@ -51,8 +47,8 @@ export class DcxServer {
    *
    */
   constructor(params: DcxServerParams = {}) {
-    this.config = params.config ?? issuerConfig;
-    this.useOptions = params.options ?? {
+    this.config = params.config ?? config;
+    this.options = params.options ?? {
       handlers  : [],
       providers : [],
       manifests : [this.config.DCX_HANDSHAKE_MANIFEST],
@@ -62,8 +58,8 @@ export class DcxServer {
     };
   }
 
-  public static create(): IssuerServer {
-    return new IssuerServer();
+  public static create(): DcxServer {
+    return new DcxServer();
   }
 
   /**
@@ -84,7 +80,7 @@ export class DcxServer {
       );
     }
     if (validPaths.includes(path)) {
-      this.useOptions[path].push(obj);
+      this.options[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -100,7 +96,7 @@ export class DcxServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    this.useOptions.manifests.push(manifest);
+    this.options.manifests.push(manifest);
   }
 
   /**
@@ -113,7 +109,7 @@ export class DcxServer {
    *
    */
   public useHandler(handler: ServerHandler): void {
-    this.useOptions.handlers.push(handler);
+    this.options.handlers.push(handler);
   }
 
   /**
@@ -126,7 +122,7 @@ export class DcxServer {
    *
    */
   public useProvider(provider: Provider): void {
-    this.useOptions.providers.push(provider);
+    this.options.providers.push(provider);
   }
 
   /**
@@ -139,7 +135,7 @@ export class DcxServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    this.useOptions.issuers.push(issuer);
+    this.options.issuers.push(issuer);
   }
 
   /**
@@ -151,7 +147,7 @@ export class DcxServer {
    *
    */
   public useDwn(dwn: string): void {
-    this.useOptions.dwns.push(dwn);
+    this.options.dwns.push(dwn);
   }
 
   /**
@@ -163,7 +159,7 @@ export class DcxServer {
    *
    */
   public useGateway(gateway: string): void {
-    this.useOptions.gateways.push(gateway);
+    this.options.gateways.push(gateway);
   }
 
   /**
@@ -262,7 +258,7 @@ export class DcxServer {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.useOptions.dwns!;
+    const dwnEndpoints = this.options.dwns!;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
       : { password, dwnEndpoints, recoveryPhrase };
@@ -282,7 +278,7 @@ export class DcxServer {
     IssuerManager.web5 = web5;
     IssuerManager.agent = agent;
     IssuerManager.agentVault = agentVault;
-    IssuerManager.serverOptions = this.useOptions;
+    IssuerManager.serverOptions = this.options;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -356,7 +352,7 @@ export class DcxServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = this.useOptions.manifests!.find(
+            const manifest = this.options.manifests!.find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );

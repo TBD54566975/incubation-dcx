@@ -1,7 +1,7 @@
 {
-  "name": "@dcx-protocol/issuer",
-  "version": "0.0.15",
-  "description": "DCX Issuer protocol and server",
+  "name": "@dcx-protocol/server",
+  "version": "0.0.1",
+  "description": "DCX Server Implementation",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "@dcx-protocol/common": "workspace:*",
+    "@dcx-protocol/issuer": "workspace:*",
     "@noble/ciphers": "0.5.3",
     "@scure/bip39": "^1.3.0",
     "@web5/agent": "0.4.1",

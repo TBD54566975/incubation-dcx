@@ -1,13 +1,12 @@
 import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { issuerConfig, IssuerManager, IssuerServer } from '../src/index.js';
+import { DcxServer } from '../src/index.js';
 
 describe('IssuerServer class', () => {
-  issuerConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
-  const issuerServer: IssuerServer = new IssuerServer({
+
+  const issuerServer: DcxServer = new DcxServer({
     config: {
-      ...issuerConfig,
       web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
       agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
@@ -59,15 +58,15 @@ describe('IssuerServer class', () => {
       expect(issuerServer._isInitialized).equals(true);
     });
 
-    it('should initialize the IssuerManager', () => {
-      expect(IssuerManager.web5).to.not.be.null.and.not.be.undefined;
-      expect(IssuerManager.web5).to.be.instanceof(Web5);
+    it('should initialize the DcxManager', () => {
+      expect(DcxManager.web5).to.not.be.null.and.not.be.undefined;
+      expect(DcxManager.web5).to.be.instanceof(Web5);
 
-      expect(IssuerManager.agent).to.not.be.null.and.not.be.undefined;
-      expect(IssuerManager.agent).to.be.instanceof(DcxAgent);
+      expect(DcxManager.agent).to.not.be.null.and.not.be.undefined;
+      expect(DcxManager.agent).to.be.instanceof(DcxAgent);
 
-      expect(IssuerManager.agentVault).to.not.be.null.and.not.be.undefined;
-      expect(IssuerManager.agentVault).to.be.instanceof(DcxIdentityVault);
+      expect(DcxManager.agentVault).to.not.be.null.and.not.be.undefined;
+      expect(DcxManager.agentVault).to.be.instanceof(DcxIdentityVault);
     });
   });
 

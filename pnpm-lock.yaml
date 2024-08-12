@@ -4,10 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  express@<4.19.2: '>=4.19.2'
-  ws@<8.17.1: '>=8.17.1'
-
 importers:
 
   .:
@@ -369,6 +365,127 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^7.16.1
         version: 7.16.1(eslint@8.57.0)(typescript@5.5.3)
+      '@web/test-runner':
+        specifier: ^0.18.2
+        version: 0.18.2
+      '@web/test-runner-playwright':
+        specifier: ^0.11.0
+        version: 0.11.0
+      abstract-level:
+        specifier: ^2.0.0
+        version: 2.0.0
+      c8:
+        specifier: ^10.1.2
+        version: 10.1.2
+      chai:
+        specifier: ^5.1.1
+        version: 5.1.1
+      chai-as-promised:
+        specifier: ^8.0.0
+        version: 8.0.0(chai@5.1.1)
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
+      esbuild:
+        specifier: ^0.23.0
+        version: 0.23.0
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
+      eslint-plugin-mocha:
+        specifier: ^10.4.3
+        version: 10.4.3(eslint@8.57.0)
+      globals:
+        specifier: ^15.8.0
+        version: 15.8.0
+      mocha:
+        specifier: ^10.6.1
+        version: 10.6.1
+      mocha-junit-reporter:
+        specifier: ^2.2.1
+        version: 2.2.1(mocha@10.6.1)
+      playwright:
+        specifier: ^1.45.3
+        version: 1.45.3
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.3
+      typescript-eslint:
+        specifier: ^7.17.0
+        version: 7.17.0(eslint@8.57.0)(typescript@5.5.3)
+
+  packages/server:
+    dependencies:
+      '@dcx-protocol/common':
+        specifier: workspace:*
+        version: link:../common
+      '@dcx-protocol/issuer':
+        specifier: workspace:*
+        version: link:../issuer
+      '@noble/ciphers':
+        specifier: 0.5.3
+        version: 0.5.3
+      '@scure/bip39':
+        specifier: ^1.3.0
+        version: 1.3.0
+      '@web5/agent':
+        specifier: 0.4.1
+        version: 0.4.1(ws@8.18.0)
+      '@web5/api':
+        specifier: ^0.10.0
+        version: 0.10.0(ws@8.18.0)
+      '@web5/common':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@web5/credentials':
+        specifier: ^1.0.4
+        version: 1.0.4
+      '@web5/crypto':
+        specifier: ^1.0.2
+        version: 1.0.2
+      '@web5/dids':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@web5/user-agent':
+        specifier: ^0.4.1
+        version: 0.4.1(ws@8.18.0)
+      chalk:
+        specifier: ^5.3.0
+        version: 5.3.0
+      ed25519-keygen:
+        specifier: ^0.6.2
+        version: 0.6.2
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.45.3
+        version: 1.45.3
+      '@types/chai':
+        specifier: ^4.3.16
+        version: 4.3.16
+      '@types/chai-as-promised':
+        specifier: ^7.1.8
+        version: 7.1.8
+      '@types/eslint':
+        specifier: ^9.6.0
+        version: 9.6.0
+      '@types/mocha':
+        specifier: ^10.0.7
+        version: 10.0.7
+      '@types/node':
+        specifier: ^20.14.11
+        version: 20.14.11
+      '@types/readable-stream':
+        specifier: ^4.0.15
+        version: 4.0.15
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^7.16.1
+        version: 7.17.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0)(typescript@5.5.3)
+      '@typescript-eslint/parser':
+        specifier: ^7.16.1
+        version: 7.17.0(eslint@8.57.0)(typescript@5.5.3)
       '@web/test-runner':
         specifier: ^0.18.2
         version: 0.18.2
@@ -2658,7 +2775,7 @@ packages:
   isomorphic-ws@5.0.0:
     resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
     peerDependencies:
-      ws: '>=8.17.1'
+      ws: '*'
 
   istanbul-lib-coverage@3.2.2:
     resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
@@ -4058,6 +4175,18 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+  ws@7.5.10:
+    resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}
+    engines: {node: '>=8.3.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
@@ -5118,7 +5247,7 @@ snapshots:
       mime-types: 2.1.35
       parse5: 6.0.1
       picomatch: 2.3.1
-      ws: 8.18.0
+      ws: 7.5.10
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -8528,6 +8657,8 @@ snapshots:
       strip-ansi: 7.1.0
 
   wrappy@1.0.2: {}
+
+  ws@7.5.10: {}
 
   ws@8.18.0: {}
 
