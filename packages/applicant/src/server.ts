@@ -274,9 +274,6 @@ export class ApplicantServer {
     // Start the agent and create a new Web5 instance
     await agent.start({ password });
 
-    // Register the agent identity with the DWN
-    await agent.sync.registerIdentity({ did: agent.agentDid.uri });
-
     // Initialize the Web5 instance
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
