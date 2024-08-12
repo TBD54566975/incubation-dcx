@@ -56,7 +56,7 @@ async function updateVersion(packagePath: string, releaseType: string) {
 async function version() {
   const args = process.argv.slice(2);
   const releaseTypes = ['patch', 'minor', 'major'];
-  const packageNames = ['root', 'applicant', 'common', 'issuer'];
+  const packageNames = ['applicant', 'common', 'issuer'];
   const packageName = args.find(arg => packageNames.find(packageName=> packageName === arg));
   const releaseType = args.find(arg => releaseTypes.find(releaseType => releaseType === arg));
   const doGit = args.some(arg => ['--git', '-g'].includes(arg));
@@ -72,13 +72,16 @@ async function version() {
     path.resolve(process.cwd(), 'packages/issuer/package.json'),
   ];
 
-  if(packageName && packageNames.includes(packageName)) {
-    const packagePath = path.resolve(process.cwd(), `packages/${packageName.toLowerCase()}/package.json`);
-    await updateVersion(packagePath, releaseType);
-  } else {
+  if(!packageName){
     for (const packagePath of packagePaths) {
       await updateVersion(packagePath, releaseType);
     }
+  } else if(packageName === 'root') {
+    const packagePath = path.resolve(process.cwd(), 'package.json');
+    await updateVersion(packagePath, releaseType);
+  } else if(packageNames.includes(packageName)) {
+    const packagePath = path.resolve(process.cwd(), `packages/${packageName.toLowerCase()}/package.json`);
+    await updateVersion(packagePath, releaseType);
   }
 
   console.log('Package versions updated:', semvers);
