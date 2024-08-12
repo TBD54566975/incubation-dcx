@@ -65,14 +65,17 @@ async function version() {
     throw new Error('Invalid argument. Use "patch", "minor", or "major".');
   }
 
-  const packagePaths = [
-    path.resolve(process.cwd(), 'package.json'),
-    path.resolve(process.cwd(), 'packages/applicant/package.json'),
-    path.resolve(process.cwd(), 'packages/common/package.json'),
-    path.resolve(process.cwd(), 'packages/issuer/package.json'),
-  ];
+  const rootPackagePath = path.resolve(process.cwd(), 'package.json');
+  const applicantPackagePath = path.resolve(process.cwd(), 'packages/applicant/package.json');
+  const commonPackagePath = path.resolve(process.cwd(), 'packages/common/package.json');
+  const issuerPackagePath = path.resolve(process.cwd(), 'packages/issuer/package.json');
 
-  if(packageName && packageNames.includes(packageName)) {
+  const packagePaths = [rootPackagePath, applicantPackagePath, commonPackagePath, issuerPackagePath];
+
+  if(packageName && packageName === 'root') {
+    const packagePath = path.resolve(process.cwd(), 'package.json');
+    await updateVersion(packagePath, releaseType);
+  } else if(packageName && packageNames.includes(packageName)) {
     const packagePath = path.resolve(process.cwd(), `packages/${packageName.toLowerCase()}/package.json`);
     await updateVersion(packagePath, releaseType);
   } else {

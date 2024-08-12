@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/root",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "DCX: Decentralized Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
@@ -16,7 +16,6 @@
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
-    "version": "tsx scripts/version.ts",
     "audit-ci": "audit-ci --config ./audit-ci.json",
     "build:applicant": "pnpm --filter applicant build",
     "build:common": "pnpm --filter common build",
@@ -25,7 +24,20 @@
     "test:node:common": "pnpm --filter common test:node",
     "test:node:issuer": "pnpm --filter issuer test:node",
     "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node"
+    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node",
+    "publish:applicant": "pnpm --filter applicant publish",
+    "publish:common": "pnpm --filter common publish",
+    "publish:issuer": "pnpm --filter issuer publish",
+    "version": "tsx scripts/version.ts",
+    "version:patch:applicant": "tsx scripts/version.ts patch applicant",
+    "version:patch:common": "tsx scripts/version.ts patch common",
+    "version:patch:issuer": "tsx scripts/version.ts patch issuer",
+    "version:minor:applicant": "tsx scripts/version.ts minor applicant",
+    "version:minor:common": "tsx scripts/version.ts minor common",
+    "version:minor:issuer": "tsx scripts/version.ts minor issuer",
+    "version:major:applicant": "tsx scripts/version.ts major applicant",
+    "version:major:common": "tsx scripts/version.ts major common",
+    "version:major:issuer": "tsx scripts/version.ts major issuer"
   },
   "repository": {
     "type": "git",
