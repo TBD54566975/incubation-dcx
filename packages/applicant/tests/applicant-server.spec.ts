@@ -19,7 +19,7 @@ describe('ApplicantServer class', () => {
   });
 
   after(async () => {
-    await FileSystem.rmdir(applicantServer.config.agentDataPath);
+    await FileSystem.rmdir('__TEST_DATA__', { recursive: true, force: true });
   });
 
   describe('has default properties that', () => {
