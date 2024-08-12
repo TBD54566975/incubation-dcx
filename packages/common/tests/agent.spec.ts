@@ -16,6 +16,10 @@ describe('DcxAgent class', () => {
     expect(agentVault).to.be.instanceof(DcxIdentityVault);
   });
 
+  after(async () => {
+    await FileSystem.rmdir('__TEST_DATA__', { recursive: true, force: true });
+  });
+
   describe('.create({ agentVault })', () => {
     it('should return a non-null DcxAgent object', async () => {
       agent = await DcxAgent.create({ dataPath, agentVault });
@@ -62,9 +66,5 @@ describe('DcxAgent class', () => {
       expect(agent.agentDid).to.not.be.null.and.not.be.undefined;
       expect(agent.agentDid).to.be.instanceof(BearerDid);
     });
-  });
-
-  after(async () => {
-    await FileSystem.rmdir('__TEST_DATA__');
   });
 });
