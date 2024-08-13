@@ -1,13 +1,13 @@
 import { BearerDid } from '@web5/dids';
 import { expect } from 'chai';
-import { config, DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '../src/index.js';
+import { dcxConfig, DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '../src/index.js';
 
 describe('DcxAgent class', () => {
   let agentVault: DcxIdentityVault;
   let agent: DcxAgent;
   let password = Mnemonic.createPassword();
   let recoveryPhrase = Mnemonic.createRecoveryPhrase();
-  let dwnEndpoints = config.DCX_ENDPOINTS.DWN_ENDPOINTS;
+  let dwnEndpoints = dcxConfig.endpoints.dwns;
   const dataPath = '__TEST_DATA__/DCX_COMMON/AGENT';
 
   before(() => {
@@ -17,7 +17,7 @@ describe('DcxAgent class', () => {
   });
 
   after(async () => {
-    await FileSystem.rmdir('__TEST_DATA__', { recursive: true, force: true });
+    await FileSystem.rm('__TEST_DATA__', { recursive: true, force: true });
   });
 
   describe('.create({ agentVault })', () => {

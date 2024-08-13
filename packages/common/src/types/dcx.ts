@@ -1,6 +1,6 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
-import { DcxConfig } from '../../../server/src/config';
+import { DcxConfig } from '../dcx-config';
 
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
 import { DcxOptions } from './options';

@@ -310,11 +310,11 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
 
     const deterministicKeyGenerator = new DeterministicKeyGenerator();
     await deterministicKeyGenerator.addPredefinedKeys({
-      privateKeys: [identityPrivateKey, signingPrivateKey],
+      privateKeys : [identityPrivateKey, signingPrivateKey],
     });
 
     const options = {
-      verificationMethods: [
+      verificationMethods : [
         {
           algorithm : 'Ed25519',
           id        : 'sig',

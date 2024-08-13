@@ -1,11 +1,14 @@
 import {
   CredentialManifest,
   DcxAgent,
+  DcxConfig,
+  dcxConfig,
   DcxDwnError,
   DcxIdentityVault,
   DcxIssuerError,
   DcxIssuerProcessRecordParams,
   DcxManager,
+  dcxOptions,
   DcxOptions,
   DcxParams,
   DcxProtocolHandlerError,
@@ -27,7 +30,7 @@ import {
   RecordsParams,
   responseSchema,
   ServerHandler,
-  stringifier,
+  stringifier
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import {
@@ -44,30 +47,28 @@ import {
 } from '@web5/credentials';
 import { issuer } from './index.js';
 
-
 export class DcxIssuer implements DcxManager {
-
-  options : DcxOptions;
-
   isSetup       : boolean = false;
   isInitialized : boolean = false;
+  options       : DcxOptions;
+  config        : DcxConfig = dcxConfig;
 
   public static web5       : Web5;
   public static agent      : DcxAgent;
   public static agentVault : DcxIdentityVault = new DcxIdentityVault();
 
-  constructor(params: DcxParams = {}) {
+  constructor(params: DcxParams) {
+    this.options = params.options ?? dcxOptions;
+    this.config = params.config ?? this.config;
+
     this.selectCredentials = this.findHandler('selectCredentials', this.selectCredentials);
     this.verifyCredentials = this.findHandler('verifyCredentials', this.verifyCredentials);
     this.requestCredential = this.findHandler('requestCredential', this.requestCredential);
     this.issueCredential = this.findHandler('issueCredential', this.issueCredential);
-
-    this.options = params.options ?? issuerOptions;
   }
-  config: DcxConfig;
 
   public findHandler(id: string, staticHandler: Handler): Handler {
-    return this.options.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
+    return this?.options?.handlers?.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -84,7 +85,7 @@ export class DcxIssuer implements DcxManager {
   ): Promise<VerifiableCredential[]> {
     PresentationExchange.satisfiesPresentationDefinition({
       vcJwts,
-      presentationDefinition: manifest.presentation_definition,
+      presentationDefinition : manifest.presentation_definition,
     });
 
     const verifiedCredentials: VerifiableCredential[] = [];
@@ -100,7 +101,7 @@ export class DcxIssuer implements DcxManager {
         continue;
       }
 
-      const issuers = [...this.options.issuers, ...issuerConfig.DCX_INPUT_ISSUERS].map((issuer: Issuer) => issuer.id);
+      const issuers = [...this.options.issuers, ...this.config.issuers].map((issuer: Issuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -163,8 +164,8 @@ export class DcxIssuer implements DcxManager {
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
-      fulfillment: {
-        descriptor_map: [
+      fulfillment : {
+        descriptor_map : [
           {
             id     : manifestOutputDescriptor.id,
             format : 'jwt_vc',
@@ -172,7 +173,7 @@ export class DcxIssuer implements DcxManager {
           },
         ],
       },
-      verifiableCredential: [signed],
+      verifiableCredential : [signed],
     };
   }
 
@@ -216,9 +217,9 @@ export class DcxIssuer implements DcxManager {
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-issuer protocol
     const { status: query, protocols = [] } = await DcxIssuer.web5.dwn.protocols.query({
-      message: {
-        filter: {
-          protocol: issuer.protocol,
+      message : {
+        filter : {
+          protocol : issuer.protocol,
         },
       },
     });
@@ -240,7 +241,7 @@ export class DcxIssuer implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxIssuer.web5.dwn.protocols.configure({
-      message: { definition: issuer },
+      message : { definition: issuer },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -268,8 +269,8 @@ export class DcxIssuer implements DcxManager {
    */
   public async queryRecords(): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxIssuer.web5.dwn.records.query({
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : issuer.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
@@ -297,9 +298,9 @@ export class DcxIssuer implements DcxManager {
     const records = await Promise.all(
       manifestRecords.map(async (manifestRecord: Record) => {
         const { record } = await DcxIssuer.web5.dwn.records.read({
-          message: {
-            filter: {
-              recordId: manifestRecord.id,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
             },
           },
         });
@@ -454,8 +455,8 @@ export class DcxIssuer implements DcxManager {
   public async checkWeb5Config(
     firstLaunch: boolean
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = this.config.web5Password;
-    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
+    const web5Password = this.config.issuerProtocol.web5Password;
+    const web5RecoveryPhrase = this.config.issuerProtocol.web5RecoveryPhrase;
 
     if (firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       Logger.security(
@@ -469,8 +470,8 @@ export class DcxIssuer implements DcxManager {
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
       await FileSystem.overwrite('issuer.recovery.key', recoveryPhrase);
 
-      this.config.web5Password = password;
-      this.config.web5RecoveryPhrase = recoveryPhrase;
+      this.config.issuerProtocol.web5Password = password;
+      this.config.issuerProtocol.web5RecoveryPhrase = recoveryPhrase;
       return { password, recoveryPhrase };
     }
 
@@ -521,12 +522,8 @@ export class DcxIssuer implements DcxManager {
   public async initializeWeb5(): Promise<void> {
     Logger.log('Initializing Web5 for DcxIssuer ... ');
 
-    // Create a new DcxIdentityVault instance
-    const agentVault = new DcxIdentityVault();
-    const dataPath = this.config.agentDataPath;
-
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ agentVault, dataPath });
+    const agent = await DcxAgent.create({ agentVault: DcxIssuer.agentVault, dataPath: this.config.issuerProtocol.agentDataPath });
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();
@@ -538,26 +535,25 @@ export class DcxIssuer implements DcxManager {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.options.dwns!;
+    const dwnEndpoints = this.options.dwns;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
       : { password, dwnEndpoints, recoveryPhrase };
 
     // Initialize the agent with the options
-    // TODO: rethink how im doing this
     if (firstLaunch) {
       await agent.initialize(initializeParams);
     }
 
     // Start the agent and create a new Web5 instance
     await agent.start({ password });
+
     // Initialize the Web5 instance
     const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
     DcxIssuer.web5 = web5;
     DcxIssuer.agent = agent;
-    DcxIssuer.agentVault = agentVault;
 
     // Set the server initialized flag
     this.isInitialized = true;
@@ -604,6 +600,7 @@ export class DcxIssuer implements DcxManager {
       }
 
       Logger.log('Dcx Issuer DWN Setup Complete!');
+      this.isSetup = true;
     } catch (error: any) {
       Logger.error('DWN Setup Failed!', error);
       throw error;

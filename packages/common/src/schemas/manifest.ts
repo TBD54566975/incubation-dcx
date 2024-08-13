@@ -18,9 +18,9 @@ export const schema = {
         name   : { type: 'string' },
         styles : { $ref: 'https://identity.foundation/wallet-rendering/schemas/entity-styles.json' },
       },
-      additionalProperties: false,
+      additionalProperties : false,
     },
-    output_descriptors: {
+    output_descriptors : {
       type  : 'array',
       items : {
         type       : 'object',
@@ -41,11 +41,11 @@ export const schema = {
                 items : { $ref: 'https://identity.foundation/wallet-rendering/schemas/labeled-display-mapping-object.json' },
               },
             },
-            additionalProperties: false,
+            additionalProperties : false,
           },
-          styles: { $ref: 'https://identity.foundation/wallet-rendering/schemas/entity-styles.json' },
+          styles : { $ref: 'https://identity.foundation/wallet-rendering/schemas/entity-styles.json' },
         },
-        additionalProperties: false,
+        additionalProperties : false,
       },
     },
     presentation_definition : { $ref: 'https://identity.foundation/presentation-exchange/schemas/presentation-definition.json' },

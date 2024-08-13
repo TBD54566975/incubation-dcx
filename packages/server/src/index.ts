@@ -302,9 +302,9 @@ export class DcxServer {
 
     while (this._isPolling) {
       const { records = [], cursor: nextCursor } = await IssuerManager.web5.dwn.records.query({
-        message: {
+        message : {
           pagination,
-          filter: { protocol: issuer.protocol },
+          filter : { protocol: issuer.protocol },
         },
       });
 
@@ -327,8 +327,8 @@ export class DcxServer {
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
           const { record }: { record: Record } = await IssuerManager.web5.dwn.records.read({
-            message: {
-              filter: {
+            message : {
+              filter : {
                 recordId,
               },
             },

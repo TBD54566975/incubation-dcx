@@ -1,8 +1,11 @@
 import {
   applicationSchema,
   DcxApplicantProcessRecordParams,
+  dcxConfig,
+  DcxConfig,
   DcxDwnError,
   DcxManager,
+  dcxOptions,
   DcxOptions,
   DcxParams,
   DcxRecordsQueryResponse,
@@ -25,36 +28,24 @@ import {
   Web5
 } from '@web5/api';
 import { PresentationExchange } from '@web5/credentials';
-import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
-
-
-const applicantOptions: DcxOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [applicantConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : applicantConfig.DCX_INPUT_ISSUERS,
-  gateways  : applicantConfig.gatewayUris,
-  dwns      : applicantConfig.dwnEndpoints,
-};
+import { applicant } from './index.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class DcxApplicant implements DcxManager {
-
-  options : DcxOptions;
-  config  : DcxApplicantConfig;
-
   isSetup       : boolean = false;
   isInitialized : boolean = false;
+  config        : DcxConfig = dcxConfig;
+  options       : DcxOptions;
 
   public static did   : string;
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
-  constructor(params: DcxParams = {}) {
-    this.config = { ...applicantConfig, ...params.config };
-    this.options = params.options ?? applicantOptions;
+  constructor(params: DcxParams) {
+    this.options = params.options ?? dcxOptions;
+    this.config = params.config ?? this.config;
   }
 
   /**
@@ -64,9 +55,9 @@ export class DcxApplicant implements DcxManager {
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-applicant protocol
     const { status: query, protocols = [] } = await DcxApplicant.web5.dwn.protocols.query({
-      message: {
-        filter: {
-          protocol: applicant.protocol,
+      message : {
+        filter : {
+          protocol : applicant.protocol,
         },
       },
     });
@@ -87,7 +78,7 @@ export class DcxApplicant implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxApplicant.web5.dwn.protocols.configure({
-      message: { definition: applicant },
+      message : { definition: applicant },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -110,8 +101,8 @@ export class DcxApplicant implements DcxManager {
 
   public static async queryRecords(): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : applicant.protocol,
           protocolPath : 'application/response',
           schema       : responseSchema.$id,
@@ -138,9 +129,9 @@ export class DcxApplicant implements DcxManager {
     const recordReads = await Promise.all(
       records.map(async (record: Record) => {
         const baseReadRequest = {
-          message: {
-            filter: {
-              recordId: record.id,
+          message : {
+            filter : {
+              recordId : record.id,
             },
           },
         };
@@ -160,8 +151,8 @@ export class DcxApplicant implements DcxManager {
   public async queryRecords({ from }: { from: string }): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       from,
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : applicant.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
@@ -271,8 +262,8 @@ export class DcxApplicant implements DcxManager {
    *
    */
   public async checkWeb5Config(): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = this.config.web5Password;
-    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
+    const web5Password = dcxConfig.applicantProtocol.web5Password;
+    const web5RecoveryPhrase = dcxConfig.applicantProtocol.web5RecoveryPhrase;
 
     // TODO: consider generating a new recovery phrase if one is not provided
     // this.config.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
@@ -289,8 +280,8 @@ export class DcxApplicant implements DcxManager {
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
       await FileSystem.overwrite('applicant.recovery.key', recoveryPhrase);
 
-      this.config.web5Password = password;
-      this.config.web5RecoveryPhrase = recoveryPhrase;
+      dcxConfig.applicantProtocol.web5Password = password;
+      dcxConfig.applicantProtocol.web5RecoveryPhrase = recoveryPhrase;
       return { password, recoveryPhrase };
     }
 
