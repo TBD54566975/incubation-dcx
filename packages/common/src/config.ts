@@ -1,6 +1,6 @@
 import { CredentialManifest } from './types/dcx';
 
-export type Config = typeof config;
+export type DcxConfig = typeof config;
 
 export const config =  {
   DCX_ENDPOINTS: {

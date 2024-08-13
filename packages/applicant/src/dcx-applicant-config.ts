@@ -1,6 +1,6 @@
 import { config as dcxConfig } from '@dcx-protocol/common';
 
-export type ApplicantConfig = typeof applicantConfig;
+export type DcxApplicantConfig = typeof applicantConfig;
 
 export const applicantConfig = {
   // TODO: check validity of these values

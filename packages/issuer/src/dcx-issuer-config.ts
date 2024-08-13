@@ -1,6 +1,6 @@
 import { config as dcxConfig } from '@dcx-protocol/common';
 
-export type IssuerConfig = typeof issuerConfig;
+export type DcxIssuerConfig = typeof issuerConfig;
 
 export const issuerConfig = {
   // TODO: check validity of these values

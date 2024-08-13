@@ -1,14 +1,20 @@
 import {
   applicationSchema,
-  CredentialManifest,
+  DcxApplicantParams,
+  DcxApplicantProcessRecordParams,
   DcxDwnError,
+  DcxError,
+  DcxManager,
   DcxOptions,
+  DcxRecordsQueryResponse,
+  DcxRecordsReadResponse,
   DwnError,
   DwnUtils,
   FileSystem,
   Logger,
   manifestSchema,
   Mnemonic,
+  RecordsParams,
   responseSchema
 } from '@dcx-protocol/common';
 import { Web5PlatformAgent } from '@web5/agent';
@@ -17,54 +23,49 @@ import {
   ProtocolsQueryResponse,
   Record,
   RecordsCreateResponse,
-  RecordsQueryResponse,
-  Web5,
+  Web5
 } from '@web5/api';
-import { PresentationDefinitionV2, PresentationExchange } from '@web5/credentials';
-import { applicant, applicantConfig, ApplicantConfig } from './index.js';
+import { PresentationExchange } from '@web5/credentials';
+import { Web5UserAgent } from '@web5/user-agent';
+import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
 
-type PresentationExchangeArgs = {
-  vcJwts: string[];
-  presentationDefinition: PresentationDefinitionV2
-};
 
-type ApplicantParams = {
-  config?  : ApplicantConfig;
-  options? : DcxOptions;
+const applicantOptions: DcxOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [applicantConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : applicantConfig.DCX_INPUT_ISSUERS,
+  gateways  : applicantConfig.gatewayUris,
+  dwns      : applicantConfig.dwnEndpoints,
 };
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
-export class ApplicantCore {
-  options        : DcxOptions;
-  config         : ApplicantConfig;
-  _isSetup       : boolean = false;
-  _isInitialized : boolean = false;
+export class DcxApplicant implements DcxManager {
+
+  options : DcxOptions;
+  config  : DcxApplicantConfig;
+
+  isSetup       : boolean = false;
+  isInitialized : boolean = false;
 
   public static did   : string;
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
-  constructor(params: ApplicantParams = {}) {
-    this.config = params.config ?? applicantConfig;
-    this.options = params.options ?? {
-      handlers  : [],
-      providers : [],
-      manifests : [this.config.DCX_HANDSHAKE_MANIFEST],
-      issuers   : this.config.DCX_INPUT_ISSUERS,
-      gateways  : this.config.gatewayUris,
-      dwns      : this.config.dwnEndpoints,
-    };
+  constructor(params: DcxApplicantParams = {}) {
+    this.config = { ...applicantConfig, ...params.config };
+    this.options = params.options ?? applicantOptions;
   }
 
   /**
    * Query DWN for credential-applicant protocol
    * @returns Protocol[]; see {@link Protocol}
    */
-  public static async queryProtocols(): Promise<ProtocolsQueryResponse> {
+  public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-applicant protocol
-    const { status: query, protocols = [] } = await ApplicantCore.web5.dwn.protocols.query({
+    const { status: query, protocols = [] } = await DcxApplicant.web5.dwn.protocols.query({
       message: {
         filter: {
           protocol: applicant.protocol,
@@ -86,8 +87,8 @@ export class ApplicantCore {
    * Configure DWN for credential-applicant protocol
    * @returns DwnResponseStatus; see {@link DwnResponseStatus}
    */
-  public static async configureProtocols(): Promise<ProtocolsConfigureResponse> {
-    const { status: configure, protocol } = await ApplicantCore.web5.dwn.protocols.configure({
+  public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
+    const { status: configure, protocol } = await DcxApplicant.web5.dwn.protocols.configure({
       message: { definition: applicant },
     });
 
@@ -97,7 +98,7 @@ export class ApplicantCore {
       throw new DwnError(code, detail);
     }
 
-    const { status: send } = await protocol.send(ApplicantCore.did);
+    const { status: send } = await protocol.send(DcxApplicant.did);
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
@@ -109,8 +110,8 @@ export class ApplicantCore {
     return { status: send, protocol };
   }
 
-  public static async queryApplicationResponses(): Promise<RecordsQueryResponse> {
-    const { status, records = [], cursor } = await ApplicantCore.web5.dwn.records.query({
+  public static async queryRecords(): Promise<DcxRecordsQueryResponse> {
+    const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       message: {
         filter: {
           protocol     : applicant.protocol,
@@ -135,27 +136,33 @@ export class ApplicantCore {
    * @param applicationResponseRecords Record[]; see {@link Record}
    * @returns applicationResponses[]; see {@link responseSchema}
    */
-  public static async readApplicationResponses(applicationResponseRecords: Record[]): Promise<{ applicationResponses: any[] }> {
-    const applicationResponses = await Promise.all(
-      applicationResponseRecords.map(async (applicationResponseRecord) => {
-        const { record } = await ApplicantCore.web5.dwn.records.read({
+  public async readRecords({ records, type }: RecordsParams & { type: string }): Promise<DcxRecordsReadResponse> {
+    const recordReads = await Promise.all(
+      records.map(async (record: Record) => {
+        const baseReadRequest = {
           message: {
             filter: {
-              recordId: applicationResponseRecord.id,
+              recordId: record.id,
             },
           },
-        });
-        return record.data.json();
+        };
+        const readRequest = type === 'manifest'
+          ? { ...baseReadRequest, from: record.author }
+          : baseReadRequest;
+        const { record: read } = await DcxApplicant.web5.dwn.records.read(readRequest);
+        return read.data.json();
       }),
     );
-    return { applicationResponses };
+    return { records: recordReads };
   }
 
-
-  public static async queryIssuerManifests(issuerDid: string): Promise<RecordsQueryResponse> {
-    const { status, records = [], cursor } = await ApplicantCore.web5.dwn.records.query({
-      from    : issuerDid,
-      message : {
+  /**
+   * Query records
+   */
+  public async queryRecords({ from }: { from: string }): Promise<DcxRecordsQueryResponse> {
+    const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
+      from,
+      message: {
         filter: {
           protocol     : applicant.protocol,
           protocolPath : 'manifest',
@@ -175,27 +182,6 @@ export class ApplicantCore {
   }
 
   /**
-   * Filter manifest records
-   * @param manifestRecords Record[]; see {@link Record}
-   * @returns issuerManifests[]; see {@link responseSchema}
-   */
-  public static async readIssuerManifests(manifestRecords: Record[]): Promise<{ manifests: CredentialManifest[] }> {
-    const manifests = await Promise.all(
-      manifestRecords.map(async (manifestRecord) => {
-        const { record } = await ApplicantCore.web5.dwn.records.read({
-          from    : manifestRecord.author,
-          message : {
-            filter: {
-              recordId: manifestRecord.id,
-            },
-          },
-        });
-        return record.data.json();
-      }),
-    );
-    return { manifests };
-  }
-  /**
    *
    * { vcJwts: string[], presentationDefinition: PresentationDefinitionV2 }
    * @param pex Presentation Exchange object; see {@link PresentationExchangeArgs}
@@ -203,18 +189,16 @@ export class ApplicantCore {
    * @param pex.presentationDefinition The Presentation Definition V2 to match the VCs against.
    * @param issuerDid The DID of the issuer to send the application record to.
    */
-  public static async createApplicationRecord(
-    pex: PresentationExchangeArgs,
-    issuerDid: string
+  public static async processRecord(
+    { pex, recipient }: DcxApplicantProcessRecordParams
   ): Promise<RecordsCreateResponse> {
-    //   presentationDefinition: manifest.presentation_definition
     const presentationResult = PresentationExchange.createPresentationFromCredentials(pex);
 
-    const { record, status: create } = await ApplicantCore.web5.dwn.records.create({
+    const { record, status: create } = await DcxApplicant.web5.dwn.records.create({
       store   : true,
       data    : presentationResult.presentation,
       message : {
-        recipient    : issuerDid,
+        recipient,
         schema       : applicationSchema.$id,
         dataFormat   : 'application/json',
         protocol     : applicant.protocol,
@@ -239,7 +223,7 @@ export class ApplicantCore {
       throw new DwnError(code, detail);
     }
 
-    const { status: remote } = await record.send(issuerDid);
+    const { status: remote } = await record.send(recipient);
     if (DwnUtils.isFailure(remote.code)) {
       const { code, detail } = remote;
       Logger.error('Failed to send dwn application record to remote', remote);
@@ -259,19 +243,19 @@ export class ApplicantCore {
     // Logger.log('Setting up dwn ...');
     try {
       // Query DWN for credential-applicant protocols
-      const { protocols } = await ApplicantCore.queryProtocols();
+      const { protocols } = await this.queryProtocols();
       Logger.log(`Found ${protocols.length} dcx applicant protocol in dwn`, protocols);
 
       // Configure DWN with credential-applicant protocol if not found
       if (!protocols.length) {
         Logger.log('Configuring dwn with dcx applicant protocol ...');
-        const { status, protocol } = await ApplicantCore.configureProtocols();
+        const { status, protocol } = await this.configureProtocols();
         Logger.log(
           `Configured credential applicant protocol in dwn: ${status.code} - ${status.detail}`,
           protocol,
         );
       }
-      this._isSetup = true;
+      this.isSetup = true;
       Logger.log('DWN Setup Complete!');
     } catch (error: any) {
       Logger.error(`DWN Setup Failed!`, error);
@@ -332,7 +316,7 @@ export class ApplicantCore {
    *
    */
   public async initializeWeb5(): Promise<void> {
-    Logger.log('Initializing Web5 ... ');
+    Logger.log('Initializing Web5 for DcxApplicant ... ');
 
     // Check the state of the password and recovery phrase
     const { password: userPassword, recoveryPhrase: userRecoveryPhrase } = await this.checkWeb5Config();
@@ -353,11 +337,11 @@ export class ApplicantCore {
     const { web5, did } = await Web5.connect(connectParams);
     const agent = web5.agent as Web5PlatformAgent;
     // Set the DcxManager properties
-    ApplicantCore.web5 = web5;
-    ApplicantCore.agent = agent;
-    ApplicantCore.did = did;
+    DcxApplicant.web5 = web5;
+    DcxApplicant.agent = agent;
+    DcxApplicant.did = did;
 
     // Set the server initialized flag
-    this._isInitialized = true;
+    this.isInitialized = true;
   }
 }
