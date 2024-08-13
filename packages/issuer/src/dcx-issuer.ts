@@ -42,17 +42,7 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { DcxIssuerConfig, issuer, issuerConfig } from './index.js';
-
-export const issuerOptions: DcxOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [issuerConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : issuerConfig.DCX_INPUT_ISSUERS,
-  gateways  : issuerConfig.gatewayUris,
-  dwns      : issuerConfig.dwnEndpoints,
-};
-
+import { DcxIssuerConfig, issuer, issuerConfig, issuerOptions } from './index.js';
 
 export class DcxIssuer implements DcxManager {
 

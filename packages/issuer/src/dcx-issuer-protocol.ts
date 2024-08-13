@@ -6,27 +6,27 @@ export const issuer = {
   protocol  : 'https://decentralized.cx/protocol/credential-exchange',
   published : false,
   types     : {
-    application: {
+    application : {
       schema      : applicationSchema.$id,
       dataFormats : ['application/json'],
     },
-    invoice: {
+    invoice : {
       schema      : invoiceSchema.$id,
       dataFormats : ['application/json'],
     },
-    manifest: {
+    manifest : {
       schema      : manifestSchema.$id,
       dataFormats : ['application/json'],
     },
-    response: {
+    response : {
       schema      : responseSchema.$id,
       dataFormats : ['application/json'],
     },
   },
-  structure: {
+  structure : {
     // issuers publish manifests to describe the data they can provide
-    manifest: {
-      $actions: [
+    manifest : {
+      $actions : [
         {
           who : 'anyone',
           can : ['read'],
@@ -34,8 +34,8 @@ export const issuer = {
       ],
     },
     // applicants can apply for a credential
-    application: {
-      $actions: [
+    application : {
+      $actions : [
         {
           who : 'anyone',
           can : ['create'],
@@ -47,8 +47,8 @@ export const issuer = {
         },
       ],
       // a credential response might be sent in response to an application
-      response: {
-        $actions: [
+      response : {
+        $actions : [
           {
             who : 'recipient',
             of  : 'application',
@@ -62,8 +62,8 @@ export const issuer = {
         ],
       },
       // an invoice might be sent in response to an application
-      invoice: {
-        $actions: [
+      invoice : {
+        $actions : [
           {
             who : 'recipient',
             of  : 'application',
