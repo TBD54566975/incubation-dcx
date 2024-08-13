@@ -1,5 +1,5 @@
 {
-  "name": "@dcx-protocol/common",
+  "name": "@dcxp/common",
   "version": "0.1.3",
   "description": "Common library for @dcx/issuer and @dcx/applicant",
   "type": "module",

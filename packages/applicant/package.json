@@ -1,5 +1,5 @@
 {
-  "name": "@dcx-protocol/applicant",
+  "name": "@dcxp/applicant",
   "version": "0.1.2",
   "description": "DCX Applicant protocol and server",
   "type": "module",

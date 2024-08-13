@@ -1,5 +1,5 @@
 {
-  "name": "@dcx-protocol/issuer",
+  "name": "@dcxp/issuer",
   "version": "0.2.1",
   "description": "DCX Issuer protocol and server",
   "type": "module",
