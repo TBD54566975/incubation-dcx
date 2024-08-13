@@ -3,8 +3,9 @@ import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { issuerConfig, IssuerManager, IssuerServer } from '../src/index.js';
 
+process.env.NODE_ENV = 'test';
+
 describe('IssuerServer class', () => {
-  issuerConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
   const issuerServer: IssuerServer = new IssuerServer({
     config: {
       ...issuerConfig,
