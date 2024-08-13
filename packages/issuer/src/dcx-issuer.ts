@@ -44,7 +44,7 @@ import {
 } from '@web5/credentials';
 import { DcxIssuerConfig, issuer, issuerConfig } from './index.js';
 
-const issuerOptions: DcxOptions = {
+export const issuerOptions: DcxOptions = {
   handlers  : [],
   providers : [],
   manifests : [issuerConfig.DCX_HANDSHAKE_MANIFEST],
@@ -77,7 +77,7 @@ export class DcxIssuer implements DcxManager {
   }
 
   public findHandler(id: string, staticHandler: Handler): Handler {
-    return this.options.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
+    return this?.options?.handlers?.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;
   }
 
   /**
@@ -614,6 +614,7 @@ export class DcxIssuer implements DcxManager {
       }
 
       Logger.log('Dcx Issuer DWN Setup Complete!');
+      this.isSetup = true;
     } catch (error: any) {
       Logger.error('DWN Setup Failed!', error);
       throw error;

@@ -2,9 +2,10 @@ import { access, constants, open, readFile, rm, rmdir } from 'fs/promises';
 import { parse } from './json.js';
 import { Logger } from './logger.js';
 export class FileSystem {
-  public static async rm(path: string): Promise<boolean> {
+  public static async rm(path: string, options?: { recursive: boolean, force: boolean }): Promise<boolean> {
     try {
-      await rm(path);
+      options ??= { recursive: true, force: true };
+      await rm(path, options);
       return true;
     } catch (error: any) {
       Logger.error(`Failed to remove ${path}`);

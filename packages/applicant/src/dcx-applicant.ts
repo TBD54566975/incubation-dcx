@@ -3,7 +3,6 @@ import {
   DcxApplicantParams,
   DcxApplicantProcessRecordParams,
   DcxDwnError,
-  DcxError,
   DcxManager,
   DcxOptions,
   DcxRecordsQueryResponse,
@@ -26,7 +25,6 @@ import {
   Web5
 } from '@web5/api';
 import { PresentationExchange } from '@web5/credentials';
-import { Web5UserAgent } from '@web5/user-agent';
 import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
 
 
@@ -66,9 +64,9 @@ export class DcxApplicant implements DcxManager {
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-applicant protocol
     const { status: query, protocols = [] } = await DcxApplicant.web5.dwn.protocols.query({
-      message: {
-        filter: {
-          protocol: applicant.protocol,
+      message : {
+        filter : {
+          protocol : applicant.protocol,
         },
       },
     });
@@ -89,7 +87,7 @@ export class DcxApplicant implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxApplicant.web5.dwn.protocols.configure({
-      message: { definition: applicant },
+      message : { definition: applicant },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -112,8 +110,8 @@ export class DcxApplicant implements DcxManager {
 
   public static async queryRecords(): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : applicant.protocol,
           protocolPath : 'application/response',
           schema       : responseSchema.$id,
@@ -140,9 +138,9 @@ export class DcxApplicant implements DcxManager {
     const recordReads = await Promise.all(
       records.map(async (record: Record) => {
         const baseReadRequest = {
-          message: {
-            filter: {
-              recordId: record.id,
+          message : {
+            filter : {
+              recordId : record.id,
             },
           },
         };
@@ -162,8 +160,8 @@ export class DcxApplicant implements DcxManager {
   public async queryRecords({ from }: { from: string }): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       from,
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : applicant.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,

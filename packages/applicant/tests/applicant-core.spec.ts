@@ -12,7 +12,7 @@ process.env.NODE_ENV = 'test';
 describe('DcxApplicant class', () => {
 
   const dcxApplicant = new DcxApplicant({
-    config: {
+    config : {
       ...applicantConfig,
       web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
@@ -21,7 +21,7 @@ describe('DcxApplicant class', () => {
   });
 
   after(async () => {
-    await FileSystem.rmdir('DATA', { recursive: true, force: true });
+    await FileSystem.rm('DATA');
   });
 
   describe('has default properties that', () => {

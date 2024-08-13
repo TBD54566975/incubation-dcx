@@ -1,13 +1,13 @@
 import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { issuerConfig, DcxIssuer } from '../src/index.js';
+import { DcxIssuer, issuerConfig } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
 describe('DcxIssuer class', () => {
   const dcxIssuer: DcxIssuer = new DcxIssuer({
-    config: {
+    config  : {
       ...issuerConfig,
       web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
@@ -16,7 +16,7 @@ describe('DcxIssuer class', () => {
   });
 
   after(async () => {
-    await FileSystem.rmdir('__TEST_DATA__');
+    await FileSystem.rm('__TEST_DATA__');
   });
 
   describe('default properties', () => {
