@@ -12,7 +12,7 @@
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "build": "pnpm --recursive --stream build",
     "build:tests:node": "pnpm --recursive build:tests:node",
-    "test:node": "pnpm --recursive test:node",
+    "test:node": "pnpm --recursive --stream test:node",
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "lint:fix": "pnpm --recursive lint:fix",
