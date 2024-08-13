@@ -28,6 +28,7 @@ import {
   Objects,
   Provider,
   RecordsParams,
+  RequestCredentialParams,
   responseSchema,
   ServerHandler,
   stringifier
@@ -48,10 +49,11 @@ import {
 import { issuer } from './index.js';
 
 export class DcxIssuer implements DcxManager {
+  options : DcxOptions;
+  config  : DcxConfig = dcxConfig;
+
   isSetup       : boolean = false;
   isInitialized : boolean = false;
-  options       : DcxOptions;
-  config        : DcxConfig = dcxConfig;
 
   public static web5       : Web5;
   public static agent      : DcxAgent;
@@ -185,11 +187,7 @@ export class DcxIssuer implements DcxManager {
    * @param headers The headers to include in the request
    * @returns The response from the VC data provider
    */
-  public async requestCredential(
-    params: {
-      body : { vcs: VerifiableCredential[] | any },
-      id?  : string
-    }): Promise<any> {
+  public async requestCredential(params: RequestCredentialParams): Promise<any> {
     const provider = this.options.providers.find((provider: Provider) => provider.id === params?.id);
 
     if (!provider) {
