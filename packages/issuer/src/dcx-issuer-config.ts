@@ -1,4 +1,4 @@
-import { config as dcxConfig } from '@dcx-protocol/common';
+import { config as dcxConfig, DcxOptions } from '@dcx-protocol/common';
 
 export type DcxIssuerConfig = typeof issuerConfig;
 
@@ -15,4 +15,13 @@ export const issuerConfig = {
   agentDataPath      : process.env.ISSUER_WEB5_AGENT_DATA_PATH      ?? `DATA/DCX/ISSUER/AGENT`,
   web5Password       : process.env.ISSUER_WEB5_PASSWORD             ?? '',
   web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE      ?? '',
+};
+
+export const issuerOptions: DcxOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [issuerConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : issuerConfig.DCX_INPUT_ISSUERS,
+  gateways  : issuerConfig.gatewayUris,
+  dwns      : issuerConfig.dwnEndpoints,
 };

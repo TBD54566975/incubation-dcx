@@ -25,7 +25,7 @@ import {
   Web5
 } from '@web5/api';
 import { PresentationExchange } from '@web5/credentials';
-import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
+import { applicant, applicantConfig, applicantOptions, DcxApplicantConfig } from './index.js';
 
 
 /**
