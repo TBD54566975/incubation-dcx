@@ -34,6 +34,10 @@ module.exports = [
             'beforeColon' : false,
             'afterColon'  : true,
           },
+          'multiLine': {
+            'beforeColon' : true,
+            'afterColon'  : true,
+          },
           'align': {
             'beforeColon' : true,
             'afterColon'  : true,
