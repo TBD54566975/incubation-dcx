@@ -28,15 +28,6 @@ import { PresentationExchange } from '@web5/credentials';
 import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
 
 
-const applicantOptions: DcxOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [applicantConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : applicantConfig.DCX_INPUT_ISSUERS,
-  gateways  : applicantConfig.gatewayUris,
-  dwns      : applicantConfig.dwnEndpoints,
-};
-
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */

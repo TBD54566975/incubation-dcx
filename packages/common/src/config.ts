@@ -3,12 +3,12 @@ import { CredentialManifest } from './types/dcx';
 export type DcxConfig = typeof config;
 
 export const config =  {
-  DCX_ENDPOINTS: {
+  DCX_ENDPOINTS : {
     DWN_ENDPOINTS         : ['https://dwn.tbddev.org/beta'],
     GATEWAY_URIS          : ['https://diddht.tbddev.org/'],
     ISSUERS               : 'https://formfree.github.io/.well-known/issuers.json',
   },
-  DCX_INPUT_ISSUERS: [
+  DCX_INPUT_ISSUERS : [
     {
       'name' : 'mx',
       'id'   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
@@ -18,7 +18,7 @@ export const config =  {
       'id'   : 'did:dht:hcf5e55bbm44s4oixp5z89wtxenxyk35su7f5pd4r5np93ikyowy'
     }
   ],
-  DCX_HANDSHAKE_MANIFEST: {
+  DCX_HANDSHAKE_MANIFEST : {
     id            : 'DCX-HANDSHAKE-MANIFEST',
     name          : 'DCX Applicant-Issuer Handshake Manifest',
     description   : 'Basic handshake manifest used to establish a connection between a DCX applicant and a DCX issuer.',
@@ -27,11 +27,11 @@ export const config =  {
       id       : 'https://formfree.github.io/.well-known/issuers/formfree.json',
       name     : 'FormFree',
       styles : {
-        thumbnail: {
+        thumbnail : {
           uri : 'https://formfree.github.io/images/thumbnail.jpg',
           alt : 'FormFree Logo'
         },
-        hero: {
+        hero : {
           uri : 'https://formfree.github.io/images/hero.jpg',
           alt : 'FormFree Hero Image'
         },
@@ -39,7 +39,7 @@ export const config =  {
         text       : { color: '#000000' }
       }
     },
-    output_descriptors: [{
+    output_descriptors : [{
       id     : 'dcx_handshake_output',
       name   : 'DCX Handshake Credential',
       schema : 'https://formfree.github.io/.well-known/credential/DcxHandshakeCredential.json'
@@ -52,12 +52,12 @@ export const config =  {
           id            : 'dcx_handshake_input',
           purpose       : 'DCX Applicant initiates handshake proving did ownership',
           constraints : {
-            fields: [{
+            fields : [{
               path   : ['$.type[*]'],
               filter : { type: 'string', pattern: '^*$' }
             },
             {
-              path: [
+              path : [
                 '$.credentialSubject.did',
                 '$.credentialSubject.signature',
                 '$.credentialSubject.message',
