@@ -3,8 +3,7 @@ import { CredentialManifest } from './types/dcx';
 export type DcxConfig = typeof config;
 
 export const config =  {
-  DCX_ENV       : process.env.NODE_ENV ?? 'development',
-  DCX_ENDPOINTS : {
+  DCX_ENDPOINTS: {
     DWN_ENDPOINTS         : ['https://dwn.tbddev.org/beta'],
     GATEWAY_URIS          : ['https://diddht.tbddev.org/'],
     ISSUERS               : 'https://formfree.github.io/.well-known/issuers.json',

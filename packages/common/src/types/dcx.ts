@@ -1,4 +1,11 @@
+import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
+import { Record as DwnRecord, Web5 } from '@web5/api';
+import { DcxConfig } from '../config';
+
+import { DcxOptions } from './options';
 import { VcDataModel, VerifiableCredential } from '@web5/credentials';
+import { DcxAgent } from '..';
+import { DcxIdentityVault } from '../dcx-identity-vault';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -88,4 +95,31 @@ export type VerifiedCredential = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
+};
+
+export type DcxIssuerParams = DcxManagerParams & {
+  web5: Web5;
+  agent: DcxAgent;
+  agentVault: DcxIdentityVault;
+};
+
+export type DcxProcessRecordResponse = { record: DwnRecord, manifest: CredentialManifest, providerId?: string }
+
+export type DcxRecordsQueryResponse = DwnResponseStatus & {
+    records: DwnRecord[];
+    cursor?: DwnPaginationCursor
+};
+
+export type DcxRecordsReadResponse = { records: CredentialManifest[] | any[] };
+
+export type DcxRecordsCreateResponse = DcxRecordsReadResponse;
+
+export type DcxRecordsFilterResponse = DcxRecordsReadResponse;
+
+export type RecordsParams = { records: DwnRecord[] };
+export type ManifestParams = { records: CredentialManifest[] };
+
+export type DcxManagerParams = {
+    options?: DcxOptions;
+    config?: DcxConfig & { [key: string]: any };
 };

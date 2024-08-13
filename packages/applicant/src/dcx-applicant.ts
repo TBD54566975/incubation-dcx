@@ -35,6 +35,15 @@ type ApplicantParams = {
   options? : DcxOptions;
 };
 
+const applicantOptions: DcxOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [applicantConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : applicantConfig.DCX_INPUT_ISSUERS,
+  gateways  : applicantConfig.gatewayUris,
+  dwns      : applicantConfig.dwnEndpoints,
+};
+
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
@@ -50,14 +59,7 @@ export class DcxApplicant {
 
   constructor(params: ApplicantParams = {}) {
     this.config = params.config ?? applicantConfig;
-    this.options = params.options ?? {
-      handlers  : [],
-      providers : [],
-      manifests : [this.config.DCX_HANDSHAKE_MANIFEST],
-      issuers   : this.config.DCX_INPUT_ISSUERS,
-      gateways  : this.config.gatewayUris,
-      dwns      : this.config.dwnEndpoints,
-    };
+    this.options = params.options ?? applicantOptions;
   }
 
   /**

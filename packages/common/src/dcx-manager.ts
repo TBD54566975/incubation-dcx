@@ -1,11 +1,7 @@
-import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
-import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Record, Web5 } from '@web5/api';
+import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Web5 } from '@web5/api';
 import { DcxIdentityVault } from './dcx-identity-vault';
-import { CredentialManifest, DcxAgent, DcxConfig, DcxOptions } from './index.js';
-
-type DcxRecordsQueryResponse = DwnResponseStatus & { records: Record[]; cursor?: DwnPaginationCursor }
-type DcxRecordsReadResponse = { records: CredentialManifest[] | any[] };
-type RecordsParams = { records: Record[] };
+import { DcxAgent, DcxConfig, DcxOptions } from './index.js';
+import { DcxRecordsQueryResponse, DcxRecordsReadResponse, RecordsParams } from './types/manager';
 
 export interface DcxManager {
     isSetup: boolean;
@@ -19,12 +15,8 @@ export interface DcxManager {
     agentVault: DcxIdentityVault;
 
     queryProtocols(): Promise<ProtocolsQueryResponse>;
-
     configureProtocols(): Promise<ProtocolsConfigureResponse>;
-
-    queryRecords(): Promise<DcxRecordsQueryResponse>;
-
+    queryRecords(params: {}): Promise<DcxRecordsQueryResponse>;
     readRecords(params: RecordsParams): Promise<DcxRecordsReadResponse>;
-
-    createRecords(params: RecordsParams): Promise<ProtocolsConfigureResponse>;
+    createRecords(params: RecordsParams): Promise<DcxRecordsReadResponse>;
 }
