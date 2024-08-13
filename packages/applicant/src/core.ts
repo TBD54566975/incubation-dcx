@@ -1,29 +1,29 @@
 import {
   applicationSchema,
   CredentialManifest,
-  DcxAgent,
   DcxDwnError,
   DcxError,
-  DcxIdentityVault,
+  DcxOptions,
   DwnError,
   DwnUtils,
   FileSystem,
   Logger,
   manifestSchema,
   Mnemonic,
-  responseSchema,
-  ServerOptions
+  responseSchema
 } from '@dcx-protocol/common';
+import { HdIdentityVault, Web5PlatformAgent } from '@web5/agent';
 import {
   ProtocolsConfigureResponse,
   ProtocolsQueryResponse,
   Record,
   RecordsCreateResponse,
   RecordsQueryResponse,
-  Web5
+  Web5,
 } from '@web5/api';
-import { applicant, applicantConfig, ApplicantConfig } from './index.js';
 import { PresentationDefinitionV2, PresentationExchange } from '@web5/credentials';
+import { Web5UserAgent } from '@web5/user-agent';
+import { applicant, applicantConfig, ApplicantConfig } from './index.js';
 
 type PresentationExchangeArgs = {
   vcJwts: string[];
@@ -32,21 +32,21 @@ type PresentationExchangeArgs = {
 
 type ApplicantParams = {
   config?  : ApplicantConfig;
-  options? : ServerOptions;
+  options? : DcxOptions;
 };
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class ApplicantCore {
-  options                  : ServerOptions;
+  options                  : DcxOptions;
   config                   : ApplicantConfig;
   _isSetup                 : boolean = false;
   _isInitialized           : boolean = false;
 
   public static web5       : Web5;
-  public static agent      : DcxAgent;
-  public static agentVault : DcxIdentityVault;
+  public static agent      : Web5PlatformAgent;
+  public static agentVault : HdIdentityVault;
 
   constructor(params: ApplicantParams = {}) {
     this.config = params.config ?? applicantConfig;
@@ -257,7 +257,7 @@ export class ApplicantCore {
    * Setup DWN with credential-applicant protocol and manifest records
    * @returns boolean indicating success or failure
    */
-  public static async setupDwn(): Promise<void> {
+  public async setupDwn(): Promise<void> {
     // Logger.log('Setting up dwn ...');
     try {
       // Query DWN for credential-applicant protocols
@@ -363,11 +363,11 @@ export class ApplicantCore {
     Logger.log('Initializing Web5 ... ');
 
     // Create a new DcxIdentityVault instance
-    const agentVault = new DcxIdentityVault();
+    const agentVault = new HdIdentityVault();
     const dataPath = this.config.agentDataPath;
 
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ agentVault, dataPath });
+    const agent = await Web5UserAgent.create({ agentVault, dataPath });
 
     // Check if this is the first launch of the agent
     const firstLaunch = await agent.firstLaunch();
@@ -376,28 +376,26 @@ export class ApplicantCore {
     // const isLocked = agent.vault.isLocked();
 
     // Check the state of the password and recovery phrase
-    const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
+    const { password: userPassword, recoveryPhrase: userRecoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.options.dwns!;
-    const initializeParams = !recoveryPhrase
-      ? { password, dwnEndpoints }
-      : { password, recoveryPhrase, dwnEndpoints };
+    const initializeParams = !userRecoveryPhrase
+      ? {
+        password         : userPassword,
+        didCreateOptions : { dwnEndpoints }
+      }
+      : {
+        password         : userPassword,
+        recoveryPhrase   : userRecoveryPhrase,
+        didCreateOptions : { dwnEndpoints }
+      };
 
-    // Initialize the agent with the options
-    if (firstLaunch) {
-      await agent.initialize(initializeParams);
-    }
-
-    // Start the agent and create a new Web5 instance
-    await agent.start({ password });
-
-    // Initialize the Web5 instance
-    const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
+    const { web5 } = await Web5.connect({ agent, agentVault, ...initializeParams});
 
     // Set the DcxManager properties
     ApplicantCore.web5 = web5;
-    ApplicantCore.agent = agent;
+    ApplicantCore.agent = agent as Web5PlatformAgent;
     ApplicantCore.agentVault = agentVault;
 
     // Set the server initialized flag
