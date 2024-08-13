@@ -34,7 +34,7 @@ export class IssuerServer {
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isSetup       : boolean = false;
-  _isTest        : boolean = dcxConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest        : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   /**
    *
@@ -312,7 +312,7 @@ export class IssuerServer {
         },
       });
 
-      Logger.log(`Found ${records.length} records`);
+      Logger.log(`Found ${records.length} records`, records);
       if (nextCursor) {
         Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
         cursor = nextCursor;
@@ -341,7 +341,7 @@ export class IssuerServer {
         }),
       );
 
-      Logger.log(`Read ${recordReads.length} records`);
+      Logger.log(`Read ${recordReads.length} records`, recordReads);
 
       if (this._isTest) {
         Logger.log('Test Complete! Stopping DCX server ...');

@@ -63,10 +63,6 @@ export class IssuerManager {
       message: { definition: issuer },
     });
 
-    Logger.debug('configureProtocols configure', stringifier(configure));
-    Logger.debug('configureProtocols protocol', stringifier(protocol));
-
-
     if (DwnUtils.isFailure(configure.code) || !protocol) {
       const { code, detail } = configure;
       Logger.error('DWN protocol configure fail', configure, protocol);
@@ -256,18 +252,19 @@ export class IssuerManager {
 
       // Read manifest records data
       const { manifests } = await IssuerManager.readManifests(records);
-      Logger.debug(`Read ${manifests.length} manifest records`, manifests);
+      Logger.debug(`Read ${manifests.length} dwn manifest records`);
 
       if (!manifests.length) {
       // Create missing manifest records
+        Logger.log('No dwn manifest records!');
         const manifestRecords = await IssuerManager.createManifests(IssuerManager.dcxOptions.manifests);
-        Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+        Logger.log(`Created ${manifestRecords.length} dwn manifests records`, await manifestRecords?.[0].data.json());
       } else {
         // Filter and create missing manifest records
         const unwrittenManifests = await IssuerManager.filterManifestRecords(manifests);
         Logger.debug(`Found ${unwrittenManifests.length} unwritten manifests`);
         const manifestRecords = await IssuerManager.createManifests(unwrittenManifests);
-        Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+        Logger.log(`Created ${manifestRecords.length} dwn manifest records`, await manifestRecords?.[0].data.json());
       }
 
       Logger.log('DWN Setup Complete!');
