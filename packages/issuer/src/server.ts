@@ -11,7 +11,7 @@ import {
   Objects,
   Provider,
   ServerHandler,
-  ServerOptions,
+  DcxOptions,
   ServerPath,
   stringifier,
   Time
@@ -26,15 +26,15 @@ import {
   IssuerManager
 } from './index.js';
 
-type IssuerServerParams = { options?: ServerOptions; config?: IssuerConfig };
+type IssuerServerParams = { options?: DcxOptions; config?: IssuerConfig };
 
 export class IssuerServer {
   config         : IssuerConfig;
-  useOptions     : ServerOptions;
+  useOptions     : DcxOptions;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isSetup       : boolean = false;
-  _isTest        : boolean = dcxConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  _isTest        : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   /**
    *
@@ -72,7 +72,7 @@ export class IssuerServer {
    *
    * @param path The type of server option; see {@link ServerPath}
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link ServerOptions}
+   * @param obj The object to use; see {@link DcxOptions}
    * @example see README.md for usage information
    *
    */
@@ -282,7 +282,7 @@ export class IssuerServer {
     IssuerManager.web5 = web5;
     IssuerManager.agent = agent;
     IssuerManager.agentVault = agentVault;
-    IssuerManager.serverOptions = this.useOptions;
+    IssuerManager.dcxOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -312,7 +312,7 @@ export class IssuerServer {
         },
       });
 
-      Logger.log(`Found ${records.length} records`);
+      Logger.log(`Found ${records.length} records`, records);
       if (nextCursor) {
         Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
         cursor = nextCursor;
@@ -341,7 +341,7 @@ export class IssuerServer {
         }),
       );
 
-      Logger.log(`Read ${recordReads.length} records`);
+      Logger.log(`Read ${recordReads.length} records`, recordReads);
 
       if (this._isTest) {
         Logger.log('Test Complete! Stopping DCX server ...');

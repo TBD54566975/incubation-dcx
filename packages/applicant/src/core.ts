@@ -1,29 +1,27 @@
 import {
   applicationSchema,
   CredentialManifest,
-  DcxAgent,
   DcxDwnError,
-  DcxError,
-  DcxIdentityVault,
+  DcxOptions,
   DwnError,
   DwnUtils,
   FileSystem,
   Logger,
   manifestSchema,
   Mnemonic,
-  responseSchema,
-  ServerOptions
+  responseSchema
 } from '@dcx-protocol/common';
+import { Web5PlatformAgent } from '@web5/agent';
 import {
   ProtocolsConfigureResponse,
   ProtocolsQueryResponse,
   Record,
   RecordsCreateResponse,
   RecordsQueryResponse,
-  Web5
+  Web5,
 } from '@web5/api';
-import { applicant, applicantConfig, ApplicantConfig } from './index.js';
 import { PresentationDefinitionV2, PresentationExchange } from '@web5/credentials';
+import { applicant, applicantConfig, ApplicantConfig } from './index.js';
 
 type PresentationExchangeArgs = {
   vcJwts: string[];
@@ -32,21 +30,21 @@ type PresentationExchangeArgs = {
 
 type ApplicantParams = {
   config?  : ApplicantConfig;
-  options? : ServerOptions;
+  options? : DcxOptions;
 };
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class ApplicantCore {
-  options                  : ServerOptions;
-  config                   : ApplicantConfig;
-  _isSetup                 : boolean = false;
-  _isInitialized           : boolean = false;
+  options        : DcxOptions;
+  config         : ApplicantConfig;
+  _isSetup       : boolean = false;
+  _isInitialized : boolean = false;
 
-  public static web5       : Web5;
-  public static agent      : DcxAgent;
-  public static agentVault : DcxIdentityVault;
+  public static did   : string;
+  public static web5  : Web5;
+  public static agent : Web5PlatformAgent;
 
   constructor(params: ApplicantParams = {}) {
     this.config = params.config ?? applicantConfig;
@@ -99,7 +97,7 @@ export class ApplicantCore {
       throw new DwnError(code, detail);
     }
 
-    const { status: send } = await protocol.send(ApplicantCore.agent.agentDid.uri);
+    const { status: send } = await protocol.send(ApplicantCore.did);
 
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
@@ -257,7 +255,7 @@ export class ApplicantCore {
    * Setup DWN with credential-applicant protocol and manifest records
    * @returns boolean indicating success or failure
    */
-  public static async setupDwn(): Promise<void> {
+  public async setupDwn(): Promise<void> {
     // Logger.log('Setting up dwn ...');
     try {
       // Query DWN for credential-applicant protocols
@@ -273,7 +271,7 @@ export class ApplicantCore {
           protocol,
         );
       }
-
+      this._isSetup = true;
       Logger.log('DWN Setup Complete!');
     } catch (error: any) {
       Logger.error(`DWN Setup Failed!`, error);
@@ -290,16 +288,14 @@ export class ApplicantCore {
    * @throws DcxServerError
    *
    */
-  public async checkWeb5Config(
-    firstLaunch: boolean,
-  ): Promise<{ password: string; recoveryPhrase?: string }> {
+  public async checkWeb5Config(): Promise<{ password: string; recoveryPhrase?: string }> {
     const web5Password = this.config.web5Password;
     const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
 
     // TODO: consider generating a new recovery phrase if one is not provided
     // this.config.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
 
-    if (firstLaunch && !web5Password && !web5RecoveryPhrase) {
+    if (!web5Password && !web5RecoveryPhrase) {
       Logger.security(
         'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
         'New APPLICANT_WEB5_PASSWORD saved to applicant.password.key file. ' +
@@ -316,33 +312,9 @@ export class ApplicantCore {
       return { password, recoveryPhrase };
     }
 
-    if (firstLaunch && !web5Password && web5RecoveryPhrase) {
-      throw new DcxError(
-        'APPLICANT_WEB5_RECOVERY_PHRASE found without APPLICANT_WEB5_PASSWORD on first launch! ' +
-        'APPLICANT_WEB5_PASSWORD is required to unlock the vault recovered by APPLICANT_WEB5_RECOVERY_PHRASE. ' +
-        'Please set APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file.', 'DcxApplicantError'
-      );
-    }
-
-    if (!firstLaunch && !web5Password && !web5RecoveryPhrase) {
-      throw new DcxError(
-        'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on non-first launch! ' +
-        'Either set both APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-        'to create a new password and recovery phrase.', 'DcxApplicantError'
-      );
-    }
-
-    if (!firstLaunch && !web5Password && web5RecoveryPhrase) {
-      throw new DcxError(
-        'APPLICANT_WEB5_RECOVERY_PHRASE found without APPLICANT_WEB5_PASSWORD on non-first launch! ' +
-        'Either set both APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE in .env file or delete the local DATA folder ' +
-        'to create a new recovery phrase with the given password.', 'DcxApplicantError'
-      );
-    }
-
-    if (!firstLaunch && web5Password && !web5RecoveryPhrase) {
+    if (web5Password && !web5RecoveryPhrase) {
       Logger.warn(
-        'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE on non-first launch! ' +
+        'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE! ' +
         'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
       );
       return { password: web5Password };
@@ -362,43 +334,28 @@ export class ApplicantCore {
   public async initializeWeb5(): Promise<void> {
     Logger.log('Initializing Web5 ... ');
 
-    // Create a new DcxIdentityVault instance
-    const agentVault = new DcxIdentityVault();
-    const dataPath = this.config.agentDataPath;
-
-    // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({ agentVault, dataPath });
-
-    // Check if this is the first launch of the agent
-    const firstLaunch = await agent.firstLaunch();
-
-    // TODO: consider checking if vault is locked
-    // const isLocked = agent.vault.isLocked();
-
     // Check the state of the password and recovery phrase
-    const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
+    const { password: userPassword, recoveryPhrase: userRecoveryPhrase } = await this.checkWeb5Config();
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.options.dwns!;
-    const initializeParams = !recoveryPhrase
-      ? { password, dwnEndpoints }
-      : { password, recoveryPhrase, dwnEndpoints };
+    const connectParams = !userRecoveryPhrase
+      ? {
+        password         : userPassword,
+        didCreateOptions : { dwnEndpoints }
+      }
+      : {
+        password         : userPassword,
+        recoveryPhrase   : userRecoveryPhrase,
+        didCreateOptions : { dwnEndpoints }
+      };
 
-    // Initialize the agent with the options
-    if (firstLaunch) {
-      await agent.initialize(initializeParams);
-    }
-
-    // Start the agent and create a new Web5 instance
-    await agent.start({ password });
-
-    // Initialize the Web5 instance
-    const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
-
+    const { web5, did } = await Web5.connect(connectParams);
+    const agent = web5.agent as Web5PlatformAgent;
     // Set the DcxManager properties
     ApplicantCore.web5 = web5;
     ApplicantCore.agent = agent;
-    ApplicantCore.agentVault = agentVault;
+    ApplicantCore.did = did;
 
     // Set the server initialized flag
     this._isInitialized = true;

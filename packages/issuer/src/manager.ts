@@ -7,7 +7,7 @@ import {
   DwnUtils,
   Logger,
   manifestSchema,
-  ServerOptions,
+  DcxOptions,
   stringifier
 } from '@dcx-protocol/common';
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
@@ -27,7 +27,7 @@ export class IssuerManager {
   public static web5: Web5;
   public static agent: DcxAgent;
   public static agentVault: DcxIdentityVault;
-  public static serverOptions: ServerOptions;
+  public static dcxOptions: DcxOptions;
 
   /**
    * Query DWN for credential-issuer protocol
@@ -62,10 +62,6 @@ export class IssuerManager {
     const { status: configure, protocol } = await IssuerManager.web5.dwn.protocols.configure({
       message: { definition: issuer },
     });
-
-    Logger.debug('configureProtocols configure', stringifier(configure));
-    Logger.debug('configureProtocols protocol', stringifier(protocol));
-
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
       const { code, detail } = configure;
@@ -152,12 +148,13 @@ export class IssuerManager {
   public static async filterManifestRecords(
     manifestReads: CredentialManifest[],
   ): Promise<CredentialManifest[]> {
-    if (!IssuerManager.serverOptions.manifests) {
+    if (!IssuerManager.dcxOptions.manifests) {
       throw new DcxDwnError('Manifests not provided');
     }
-    return IssuerManager.serverOptions.manifests.filter((manifest: CredentialManifest) =>
-      manifestReads.find((manifestRead: CredentialManifest) => manifest.id !== manifestRead.id),
-    );
+    const localManifestIds = IssuerManager.dcxOptions.manifests.map((manifest) => manifest.id);
+    const remoteManifestIds = manifestReads.map((manifest) => manifest.id);
+    const missingManifestIds = Array.from(new Set([...localManifestIds, ...remoteManifestIds]));
+    return IssuerManager.dcxOptions.manifests.filter((manifest: CredentialManifest) => missingManifestIds.includes(manifest.id));
   }
 
   /**
@@ -231,7 +228,7 @@ export class IssuerManager {
     const port = await IssuerManager.agent.agentDid.export();
     Logger.log('IssuerManager.agent => portableDid', stringifier(port));
     Logger.log('Setting up dwn ...');
-    if (!IssuerManager.serverOptions.manifests) {
+    if (!IssuerManager.dcxOptions.manifests) {
       throw new DcxDwnError('Manifests not provided');
     }
     try {
@@ -255,18 +252,19 @@ export class IssuerManager {
 
       // Read manifest records data
       const { manifests } = await IssuerManager.readManifests(records);
-      Logger.debug(`Read ${manifests.length} manifest records`, manifests);
+      Logger.debug(`Read ${manifests.length} dwn manifest records`);
 
       if (!manifests.length) {
       // Create missing manifest records
-        const manifestRecords = await IssuerManager.createManifests(IssuerManager.serverOptions.manifests);
-        Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+        Logger.log('No dwn manifest records!');
+        const manifestRecords = await IssuerManager.createManifests(IssuerManager.dcxOptions.manifests);
+        Logger.log(`Created ${manifestRecords.length} dwn manifests records`, await manifestRecords?.[0].data.json());
       } else {
         // Filter and create missing manifest records
         const unwrittenManifests = await IssuerManager.filterManifestRecords(manifests);
         Logger.debug(`Found ${unwrittenManifests.length} unwritten manifests`);
         const manifestRecords = await IssuerManager.createManifests(unwrittenManifests);
-        Logger.log(`Created ${manifestRecords.length} records`, manifestRecords);
+        Logger.log(`Created ${manifestRecords.length} dwn manifest records`, await manifestRecords?.[0].data.json());
       }
 
       Logger.log('DWN Setup Complete!');

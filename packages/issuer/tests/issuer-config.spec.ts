@@ -4,7 +4,7 @@ dotenv.config({ path: '.env.test' });
 import { expect } from 'chai';
 import { issuerConfig } from '../src/config.js';
 
-issuerConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
+process.env.NODE_ENV = 'test';
 
 describe('IssuerConfig class', () => {
   describe('default properties', () => {
@@ -78,13 +78,6 @@ describe('IssuerConfig class', () => {
   });
 
   describe('extends Config class', () => {
-    it('should contain property DCX_ENV inherited from Config class as a string matching "development" or "test"', () => {
-      const DCX_ENV = issuerConfig.DCX_ENV;
-      expect(DCX_ENV).to.not.be.null.and.not.be.undefined;
-      expect(DCX_ENV).to.be.a('string');
-      expect(DCX_ENV).to.be.match(/(development|test)/);
-    });
-
     it('should contain property DCX_ENDPOINTS inherited from Config class as an object containing 3 key value pairs', () => {
       const DCX_ENDPOINTS = issuerConfig.DCX_ENDPOINTS;
       expect(DCX_ENDPOINTS).to.not.be.null.and.not.be.undefined;
