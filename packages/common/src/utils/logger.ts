@@ -31,27 +31,22 @@ export class Logger implements Partial<Console> {
 
 
   public static debug(message?: unknown, ...args: unknown[]): void {
-    if (Logger.isTest) return;
     console.debug(chalk.green('debug') + ':', message, ...args);
   }
 
   public static error(message?: unknown, ...args: unknown[]): void {
-    if (Logger.isTest) return;
     console.error(chalk.red('error') + ':', message, ...args);
   }
 
   public static info(message?: unknown, ...args: unknown[]): void {
-    if (Logger.isTest) return;
     console.info(chalk.blue('info') + ':', message, ...args);
   }
 
   public static warn(message?: unknown, ...args: unknown[]): void {
-    if (Logger.isTest) return;
     console.warn(chalk.yellow('warn') + ':', message, ...args);
   }
 
   public static security(message?: unknown, ...args: unknown[]): void {
-    if (Logger.isTest) return;
     console.warn(chalk.red('security') + ':', message, ...args);
   }
 
