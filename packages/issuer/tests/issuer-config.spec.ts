@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 import { expect } from 'chai';
-import { issuerConfig } from '../src/config.js';
+import { issuerConfig } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-describe('IssuerConfig class', () => {
+describe('issuerConfig class', () => {
   describe('default properties', () => {
     it('should contain property ISSUER_PORT as a number equal to 5000', () => {
       const ISSUER_PORT = issuerConfig.port;
