@@ -4,12 +4,13 @@ dotenv.config({ path: '.env.test' });
 import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { applicantConfig, ApplicantCore } from '../src/index.js';
+import { applicantConfig, DcxApplicant } from '../src/index.js';
 
-describe('ApplicantServer class', () => {
-  applicantConfig.DCX_ENV = process.env.NODE_ENV ?? 'test';
+process.env.NODE_ENV = 'test';
 
-  const dcxApplicant = new ApplicantCore({
+describe('DcxApplicant class', () => {
+
+  const dcxApplicant = new DcxApplicant({
     config: {
       ...applicantConfig,
       web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),

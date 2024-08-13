@@ -35,10 +35,19 @@ type ApplicantParams = {
   options? : DcxOptions;
 };
 
+const applicantOptions: DcxOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [applicantConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : applicantConfig.DCX_INPUT_ISSUERS,
+  gateways  : applicantConfig.gatewayUris,
+  dwns      : applicantConfig.dwnEndpoints,
+};
+
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
-export class ApplicantCore {
+export class DcxApplicant {
   options                  : DcxOptions;
   config                   : ApplicantConfig;
   _isSetup                 : boolean = false;
@@ -386,9 +395,9 @@ export class ApplicantCore {
     const { web5 } = await Web5.connect({ agent, agentVault, ...initializeParams});
 
     // Set the DcxManager properties
-    ApplicantCore.web5 = web5;
-    ApplicantCore.agent = agent as Web5PlatformAgent;
-    ApplicantCore.agentVault = agentVault;
+    DcxApplicant.web5 = web5;
+    DcxApplicant.agent = agent;
+    DcxApplicant.agentVault = agentVault;
 
     // Set the server initialized flag
     this._isInitialized = true;

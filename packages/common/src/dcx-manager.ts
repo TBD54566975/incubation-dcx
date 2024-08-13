@@ -1,7 +1,5 @@
-import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Web5 } from '@web5/api';
-import { DcxIdentityVault } from './dcx-identity-vault';
-import { DcxAgent, DcxConfig, DcxOptions } from './index.js';
-import { DcxRecordsQueryResponse, DcxRecordsReadResponse, RecordsParams } from './types/manager';
+import { ProtocolsConfigureResponse, ProtocolsQueryResponse } from '@web5/api';
+import { DcxConfig, DcxOptions, DcxRecordsQueryResponse, DcxRecordsReadResponse, RecordsParams } from './index.js';
 
 export interface DcxManager {
     isSetup: boolean;
@@ -9,10 +7,6 @@ export interface DcxManager {
 
     dcxOptions: DcxOptions;
     dcxConfig: DcxConfig;
-
-    web5: Web5;
-    agent: DcxAgent;
-    agentVault: DcxIdentityVault;
 
     queryProtocols(): Promise<ProtocolsQueryResponse>;
     configureProtocols(): Promise<ProtocolsConfigureResponse>;

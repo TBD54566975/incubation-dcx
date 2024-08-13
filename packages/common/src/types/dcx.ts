@@ -97,11 +97,7 @@ export type VerifiedCredential = {
   vc: VcDataModel;
 };
 
-export type DcxIssuerParams = DcxManagerParams & {
-  web5: Web5;
-  agent: DcxAgent;
-  agentVault: DcxIdentityVault;
-};
+export type DcxIssuerParams = DcxManagerParams;
 
 export type DcxProcessRecordResponse = { record: DwnRecord, manifest: CredentialManifest, providerId?: string }
 
