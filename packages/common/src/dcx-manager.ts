@@ -1,12 +1,10 @@
 import { ProtocolsConfigureResponse, ProtocolsQueryResponse } from '@web5/api';
-import { DcxConfig, DcxOptions, DcxRecordsQueryResponse, DcxRecordsReadResponse, RecordsParams } from './index.js';
+import { DcxOptions, DcxRecordsQueryResponse, DcxRecordsReadResponse, RecordsParams } from './index.js';
 
 export interface DcxManager {
     isSetup: boolean;
     isInitialized: boolean;
-
     options: DcxOptions;
-    config: DcxConfig;
 
     queryProtocols(): Promise<ProtocolsQueryResponse>;
     configureProtocols(): Promise<ProtocolsConfigureResponse>;

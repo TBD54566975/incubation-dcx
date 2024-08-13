@@ -4,10 +4,10 @@ import {
   DcxDwnError,
   DcxIdentityVault,
   DcxIssuerError,
-  DcxIssuerParams,
   DcxIssuerProcessRecordParams,
   DcxManager,
   DcxOptions,
+  DcxParams,
   DcxProtocolHandlerError,
   DcxRecordsCreateResponse,
   DcxRecordsFilterResponse,
@@ -27,7 +27,7 @@ import {
   RecordsParams,
   responseSchema,
   ServerHandler,
-  stringifier
+  stringifier,
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import {
@@ -42,22 +42,12 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { issuerConfig, DcxIssuerConfig, issuer } from './index.js';
-
-const issuerOptions: DcxOptions = {
-  handlers  : [],
-  providers : [],
-  manifests : [issuerConfig.DCX_HANDSHAKE_MANIFEST],
-  issuers   : issuerConfig.DCX_INPUT_ISSUERS,
-  gateways  : issuerConfig.gatewayUris,
-  dwns      : issuerConfig.dwnEndpoints,
-};
+import { issuer } from './index.js';
 
 
 export class DcxIssuer implements DcxManager {
 
   options : DcxOptions;
-  config  : DcxIssuerConfig;
 
   isSetup       : boolean = false;
   isInitialized : boolean = false;
@@ -66,15 +56,15 @@ export class DcxIssuer implements DcxManager {
   public static agent      : DcxAgent;
   public static agentVault : DcxIdentityVault = new DcxIdentityVault();
 
-  constructor(params: DcxIssuerParams = {}) {
+  constructor(params: DcxParams = {}) {
     this.selectCredentials = this.findHandler('selectCredentials', this.selectCredentials);
     this.verifyCredentials = this.findHandler('verifyCredentials', this.verifyCredentials);
     this.requestCredential = this.findHandler('requestCredential', this.requestCredential);
     this.issueCredential = this.findHandler('issueCredential', this.issueCredential);
 
-    this.config = { ...issuerConfig, ...params.config };
     this.options = params.options ?? issuerOptions;
   }
+  config: DcxConfig;
 
   public findHandler(id: string, staticHandler: Handler): Handler {
     return this.options.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler;

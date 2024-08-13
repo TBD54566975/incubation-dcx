@@ -1,11 +1,10 @@
 import {
   applicationSchema,
-  DcxApplicantParams,
   DcxApplicantProcessRecordParams,
   DcxDwnError,
-  DcxError,
   DcxManager,
   DcxOptions,
+  DcxParams,
   DcxRecordsQueryResponse,
   DcxRecordsReadResponse,
   DwnError,
@@ -26,7 +25,6 @@ import {
   Web5
 } from '@web5/api';
 import { PresentationExchange } from '@web5/credentials';
-import { Web5UserAgent } from '@web5/user-agent';
 import { applicant, applicantConfig, DcxApplicantConfig } from './index.js';
 
 
@@ -54,7 +52,7 @@ export class DcxApplicant implements DcxManager {
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
-  constructor(params: DcxApplicantParams = {}) {
+  constructor(params: DcxParams = {}) {
     this.config = { ...applicantConfig, ...params.config };
     this.options = params.options ?? applicantOptions;
   }

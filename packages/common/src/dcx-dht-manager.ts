@@ -7,7 +7,7 @@ import {
   PortableDid,
 } from '@web5/dids';
 import { FileSystem } from './utils/file-system.js';
-import { config as dcxConfig } from './config.js';
+import { config as dcxConfig } from '../../server/src/config.js';
 import { LocalKeyManager } from '@web5/crypto';
 
 /**

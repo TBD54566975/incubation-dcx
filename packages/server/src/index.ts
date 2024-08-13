@@ -1,8 +1,10 @@
 import {
-  config as dcxConfig,
+  config,
   CredentialManifest,
   DcxAgent,
   DcxIdentityVault,
+  DcxOptions,
+  DcxParams,
   DcxServerError,
   FileSystem,
   Issuer,
@@ -11,26 +13,31 @@ import {
   Objects,
   Provider,
   ServerHandler,
-  ServerOptions,
   ServerPath,
   stringifier,
-  Time,
-  Config,
-  config
+  Time
 } from '@dcx-protocol/common';
-import { IssuerManager, IssuerHandlers, issuer } from '@dcx-protocol/issuer';
+import { DcxIssuerConfig, issuer, issuerConfig } from '@dcx-protocol/issuer';
 import { Record, Web5 } from '@web5/api';
 import { argv, exit } from 'process';
 
-type DcxServerParams = { options?: ServerOptions; config?: Config };
+const issuerOptions: DcxOptions = {
+  handlers  : [],
+  providers : [],
+  manifests : [issuer.serverConfig.DCX_HANDSHAKE_MANIFEST],
+  issuers   : issuer.serverConfig.DCX_INPUT_ISSUERS,
+  gateways  : issuer.serverConfig.gatewayUris,
+  dwns      : issuer.serverConfig.dwnEndpoints,
+};
 
 export class DcxServer {
-  config         : Config;
-  options        : ServerOptions;
-  _isPolling     : boolean = false;
-  _isInitialized : boolean = false;
-  _isSetup       : boolean = false;
-  _isTest        : boolean = dcxConfig.DCX_ENV.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  serverConfig  : DcxIssuerConfig;
+  serverOptions : DcxOptions;
+
+  isPolling     : boolean = false;
+  isInitialized : boolean = false;
+  isSetup       : boolean = false;
+  isTest        : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
   /**
    *
@@ -46,16 +53,9 @@ export class DcxServer {
    * @example see README.md for usage information
    *
    */
-  constructor(params: DcxServerParams = {}) {
-    this.config = params.config ?? config;
-    this.options = params.options ?? {
-      handlers  : [],
-      providers : [],
-      manifests : [this.config.DCX_HANDSHAKE_MANIFEST],
-      issuers   : this.config.DCX_INPUT_ISSUERS,
-      gateways  : this.config.gatewayUris,
-      dwns      : this.config.dwnEndpoints,
-    };
+  constructor(params: DcxParams = {}) {
+    this.serverConfig = params.config ?? {...config, ...issuerConfig};
+    this.serverOptions = params.options ?? issuerOptions;
   }
 
   public static create(): DcxServer {
@@ -68,7 +68,7 @@ export class DcxServer {
    *
    * @param path The type of server option; see {@link ServerPath}
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link ServerOptions}
+   * @param obj The object to use; see {@link DcxOptions}
    * @example see README.md for usage information
    *
    */
@@ -80,7 +80,7 @@ export class DcxServer {
       );
     }
     if (validPaths.includes(path)) {
-      this.options[path].push(obj);
+      this.serverOptions[path].push(obj);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${obj}`);
     }
@@ -96,7 +96,7 @@ export class DcxServer {
    *
    */
   public useManifest(manifest: CredentialManifest): void {
-    this.options.manifests.push(manifest);
+    this.serverOptions.manifests.push(manifest);
   }
 
   /**
@@ -109,7 +109,7 @@ export class DcxServer {
    *
    */
   public useHandler(handler: ServerHandler): void {
-    this.options.handlers.push(handler);
+    this.serverOptions.handlers.push(handler);
   }
 
   /**
@@ -122,7 +122,7 @@ export class DcxServer {
    *
    */
   public useProvider(provider: Provider): void {
-    this.options.providers.push(provider);
+    this.serverOptions.providers.push(provider);
   }
 
   /**
@@ -135,7 +135,7 @@ export class DcxServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    this.options.issuers.push(issuer);
+    this.serverOptions.issuers.push(issuer);
   }
 
   /**
@@ -147,7 +147,7 @@ export class DcxServer {
    *
    */
   public useDwn(dwn: string): void {
-    this.options.dwns.push(dwn);
+    this.serverOptions.dwns.push(dwn);
   }
 
   /**
@@ -159,7 +159,7 @@ export class DcxServer {
    *
    */
   public useGateway(gateway: string): void {
-    this.options.gateways.push(gateway);
+    this.serverOptions.gateways.push(gateway);
   }
 
   /**
@@ -174,8 +174,8 @@ export class DcxServer {
   public async checkWeb5Config(
     firstLaunch: boolean
   ): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = this.config.web5Password;
-    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
+    const web5Password = this.serverConfig.web5Password;
+    const web5RecoveryPhrase = this.serverConfig.web5RecoveryPhrase;
 
     if (firstLaunch && !(web5Password && web5RecoveryPhrase)) {
       Logger.security(
@@ -189,8 +189,8 @@ export class DcxServer {
       const recoveryPhrase = Mnemonic.createRecoveryPhrase();
       await FileSystem.overwrite('issuer.recovery.key', recoveryPhrase);
 
-      this.config.web5Password = password;
-      this.config.web5RecoveryPhrase = recoveryPhrase;
+      this.serverConfig.web5Password = password;
+      this.serverConfig.web5RecoveryPhrase = recoveryPhrase;
       return { password, recoveryPhrase };
     }
 
@@ -243,7 +243,7 @@ export class DcxServer {
 
     // Create a new DcxIdentityVault instance
     const agentVault = new DcxIdentityVault();
-    const dataPath = this.config.agentDataPath;
+    const dataPath = this.serverConfig.agentDataPath;
 
     // Create a new DcxAgent instance
     const agent = await DcxAgent.create({ agentVault, dataPath });
@@ -258,7 +258,7 @@ export class DcxServer {
     const { password, recoveryPhrase } = await this.checkWeb5Config(firstLaunch);
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.options.dwns!;
+    const dwnEndpoints = this.serverOptions.dwns!;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
       : { password, dwnEndpoints, recoveryPhrase };
@@ -278,7 +278,7 @@ export class DcxServer {
     IssuerManager.web5 = web5;
     IssuerManager.agent = agent;
     IssuerManager.agentVault = agentVault;
-    IssuerManager.serverOptions = this.options;
+    IssuerManager.serverOptions = this.serverOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;
@@ -293,8 +293,8 @@ export class DcxServer {
     this._isPolling = true;
     Logger.log('DCX server starting ...');
 
-    const CURSOR = this.config.cursorFile;
-    const LAST_RECORD_ID = this.config.lastRecordIdFile;
+    const CURSOR = this.serverConfig.cursorFile;
+    const LAST_RECORD_ID = this.serverConfig.lastRecordIdFile;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
@@ -352,7 +352,7 @@ export class DcxServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = this.options.manifests!.find(
+            const manifest = this.serverOptions.manifests!.find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );

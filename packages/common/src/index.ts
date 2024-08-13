@@ -14,7 +14,7 @@ export * from './utils/mnemonic.js';
 export * from './utils/objects.js';
 export * from './utils/string.js';
 export * from './utils/time.js';
-export * from './config.js';
+export * from '../../server/src/config.js';
 export * from './dcx-agent.js';
 export * from './dcx-dht-manager.js';
 export * from './dcx-identity-vault.js';
