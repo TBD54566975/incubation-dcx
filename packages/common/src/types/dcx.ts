@@ -1,4 +1,9 @@
-import { VcDataModel, VerifiableCredential } from '@web5/credentials';
+import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
+import { Record as DwnRecord } from '@web5/api';
+import { DcxConfig } from '../config';
+
+import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
+import { DcxOptions } from './options';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -89,3 +94,25 @@ export type VerifiedCredential = {
   subject: string;
   vc: VcDataModel;
 };
+
+export type PresentationExchangeArgs = {
+  vcJwts: string[];
+  presentationDefinition: PresentationDefinitionV2
+};
+
+export type DcxIssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
+export type DcxApplicantProcessRecordParams = { pex: PresentationExchangeArgs, recipient: string }
+export type DcxRecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
+export type DcxRecordsReadParams = { records: CredentialManifest[] | any[] };
+export type DcxRecordsCreateResponse = DcxRecordsReadParams;
+export type DcxRecordsFilterResponse = DcxRecordsReadParams;
+export type DcxRecordsReadResponse = DcxRecordsReadParams;
+export type RecordsParams = { records: DwnRecord[] };
+export type ManifestParams = { records: CredentialManifest[] };
+
+export type DcxManagerParams = {
+    options?: DcxOptions;
+    config?: DcxConfig & { [key: string]: any };
+};
+export type DcxIssuerParams = DcxManagerParams;
+export type DcxApplicantParams = DcxManagerParams;

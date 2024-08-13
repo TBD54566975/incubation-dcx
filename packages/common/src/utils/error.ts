@@ -21,6 +21,12 @@ export class DcxServerError extends DcxError {
   }
 }
 
+export class DcxIssuerError extends DcxError {
+  constructor(error: any) {
+    super( 'DcxIssuerError', error);
+  }
+}
+
 export class DcxDwnError extends DcxError {
   constructor(error: any) {
     super( 'DcxDwnError', error);

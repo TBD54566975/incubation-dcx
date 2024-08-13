@@ -17,7 +17,7 @@ describe('DcxAgent class', () => {
   });
 
   after(async () => {
-    await FileSystem.rmdir('__TEST_DATA__', { recursive: true, force: true });
+    await FileSystem.rm('__TEST_DATA__', { recursive: true, force: true });
   });
 
   describe('.create({ agentVault })', () => {

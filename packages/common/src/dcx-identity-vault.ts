@@ -65,6 +65,10 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     this._store = store ?? new MemoryStore<string, string>();
   }
 
+  public static create(): DcxIdentityVault {
+    return new DcxIdentityVault();
+  }
+
   public changePassword(params: { oldPassword: string; newPassword: string; }): Promise<void> {
     Logger.debug('DcxIdentityVault: Changing password...', params);
     throw new Error('Method not implemented.');
