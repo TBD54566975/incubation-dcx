@@ -282,7 +282,7 @@ export class IssuerServer {
     IssuerManager.web5 = web5;
     IssuerManager.agent = agent;
     IssuerManager.agentVault = agentVault;
-    IssuerManager.serverOptions = this.useOptions;
+    IssuerManager.dcxOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;
