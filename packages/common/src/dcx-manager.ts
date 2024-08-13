@@ -5,12 +5,12 @@ export interface DcxManager {
     isSetup: boolean;
     isInitialized: boolean;
 
-    dcxOptions: DcxOptions;
-    dcxConfig: DcxConfig;
+    options: DcxOptions;
+    config: DcxConfig;
 
     queryProtocols(): Promise<ProtocolsQueryResponse>;
     configureProtocols(): Promise<ProtocolsConfigureResponse>;
     queryRecords(params: {}): Promise<DcxRecordsQueryResponse>;
     readRecords(params: RecordsParams): Promise<DcxRecordsReadResponse>;
-    createRecords(params: RecordsParams): Promise<DcxRecordsReadResponse>;
+    createRecords?(params: RecordsParams): Promise<DcxRecordsReadResponse>;
 }

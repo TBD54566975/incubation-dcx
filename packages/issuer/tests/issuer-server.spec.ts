@@ -1,14 +1,14 @@
 import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { dcxIssuerConfig, DcxIssuer } from '../src/index.js';
+import { issuerConfig, DcxIssuer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
 describe('DcxIssuer class', () => {
   const dcxIssuer: DcxIssuer = new DcxIssuer({
     config: {
-      ...dcxIssuerConfig,
+      ...issuerConfig,
       web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
       agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
@@ -35,7 +35,7 @@ describe('DcxIssuer class', () => {
     });
 
     it('should include property useOptions as an object containing 6 entries', () => {
-      const useOptions = dcxIssuer.dcxOptions;
+      const useOptions = dcxIssuer.options;
       expect(useOptions).to.not.be.null.and.not.be.undefined;
       expect(Object.entries(useOptions)).to.have.lengthOf.gte(6);
     });

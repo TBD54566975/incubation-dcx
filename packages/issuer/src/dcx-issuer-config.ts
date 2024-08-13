@@ -1,8 +1,8 @@
 import { config as dcxConfig } from '@dcx-protocol/common';
 
-export type DcxIssuerConfig = typeof dcxIssuerConfig;
+export type DcxIssuerConfig = typeof issuerConfig;
 
-export const dcxIssuerConfig = {
+export const issuerConfig = {
   // TODO: check validity of these values
   ...dcxConfig,
   port               : process.env.ISSUER_PORT                      ?? 4000,

@@ -6,7 +6,7 @@ import { applicantConfig } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-describe('ApplicantConfig class', () => {
+describe('DcxApplicantConfig class', () => {
 
   describe('has properties defined by process.env vars and ', () => {
     it('should contain property APPLICANT_PORT as a number equal to 5000', () => {
