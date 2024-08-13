@@ -56,6 +56,8 @@ async function updateVersion(packagePath: string, releaseType: string) {
 async function version() {
   const args = process.argv.slice(2);
   const releaseTypes = ['patch', 'minor', 'major'];
+  const packageNames = ['root', 'applicant', 'common', 'issuer'];
+  const packageName = args.find(arg => packageNames.find(packageName=> packageName === arg));
   const releaseType = args.find(arg => releaseTypes.find(releaseType => releaseType === arg));
   const doGit = args.some(arg => ['--git', '-g'].includes(arg));
 
@@ -63,15 +65,23 @@ async function version() {
     throw new Error('Invalid argument. Use "patch", "minor", or "major".');
   }
 
-  const packagePaths = [
-    path.resolve(process.cwd(), 'package.json'),
-    path.resolve(process.cwd(), 'packages/applicant/package.json'),
-    path.resolve(process.cwd(), 'packages/common/package.json'),
-    path.resolve(process.cwd(), 'packages/issuer/package.json'),
-  ];
+  const rootPackagePath = path.resolve(process.cwd(), 'package.json');
+  const applicantPackagePath = path.resolve(process.cwd(), 'packages/applicant/package.json');
+  const commonPackagePath = path.resolve(process.cwd(), 'packages/common/package.json');
+  const issuerPackagePath = path.resolve(process.cwd(), 'packages/issuer/package.json');
 
-  for (const packagePath of packagePaths) {
+  const packagePaths = [rootPackagePath, applicantPackagePath, commonPackagePath, issuerPackagePath];
+
+  if(packageName && packageName === 'root') {
+    const packagePath = path.resolve(process.cwd(), 'package.json');
     await updateVersion(packagePath, releaseType);
+  } else if(packageName && packageNames.includes(packageName)) {
+    const packagePath = path.resolve(process.cwd(), `packages/${packageName.toLowerCase()}/package.json`);
+    await updateVersion(packagePath, releaseType);
+  } else {
+    for (const packagePath of packagePaths) {
+      await updateVersion(packagePath, releaseType);
+    }
   }
 
   console.log('Package versions updated:', semvers);

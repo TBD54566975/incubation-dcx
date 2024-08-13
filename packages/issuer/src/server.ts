@@ -11,7 +11,7 @@ import {
   Objects,
   Provider,
   ServerHandler,
-  ServerOptions,
+  DcxOptions,
   ServerPath,
   stringifier,
   Time
@@ -26,11 +26,11 @@ import {
   IssuerManager
 } from './index.js';
 
-type IssuerServerParams = { options?: ServerOptions; config?: IssuerConfig };
+type IssuerServerParams = { options?: DcxOptions; config?: IssuerConfig };
 
 export class IssuerServer {
   config         : IssuerConfig;
-  useOptions     : ServerOptions;
+  useOptions     : DcxOptions;
   _isPolling     : boolean = false;
   _isInitialized : boolean = false;
   _isSetup       : boolean = false;
@@ -72,7 +72,7 @@ export class IssuerServer {
    *
    * @param path The type of server option; see {@link ServerPath}
    * @param id Some unique, accessible identifier to map the obj to
-   * @param obj The object to use; see {@link ServerOptions}
+   * @param obj The object to use; see {@link DcxOptions}
    * @example see README.md for usage information
    *
    */
@@ -282,7 +282,7 @@ export class IssuerServer {
     IssuerManager.web5 = web5;
     IssuerManager.agent = agent;
     IssuerManager.agentVault = agentVault;
-    IssuerManager.serverOptions = this.useOptions;
+    IssuerManager.dcxOptions = this.useOptions;
 
     // Set the server initialized flag
     this._isInitialized = true;

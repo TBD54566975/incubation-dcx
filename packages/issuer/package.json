@@ -1,7 +1,7 @@
 {
   "name": "@dcx-protocol/issuer",
-  "version": "0.0.15",
-  "description": "DCX Issuer Protocol Implementation",
+  "version": "0.2.0",
+  "description": "DCX Issuer protocol and server",
   "type": "module",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -15,9 +15,11 @@
     "test": "pnpm test:node",
     "test:e2e": "tsx tests/e2e/*.spec.ts -t",
     "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
-    "workflow": "pnpm build && pnpm build:tests:node && pnpm test",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
-    "lint:fix": "eslint . --fix -c ../../eslint.config.cjs"
+    "lint:fix": "eslint . --fix -c ../../eslint.config.cjs",
+    "version:patch": "pnpm version patch",
+    "version:minor": "pnpm version minor",
+    "version:major": "pnpm version major"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
