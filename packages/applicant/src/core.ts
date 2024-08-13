@@ -257,7 +257,7 @@ export class ApplicantCore {
    * Setup DWN with credential-applicant protocol and manifest records
    * @returns boolean indicating success or failure
    */
-  public static async setupDwn(): Promise<void> {
+  public async setupDwn(): Promise<void> {
     // Logger.log('Setting up dwn ...');
     try {
       // Query DWN for credential-applicant protocols
