@@ -42,7 +42,7 @@ import {
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { issuerConfig, DcxIssuerConfig, issuer } from './index.js';
+import { DcxIssuerConfig, issuer, issuerConfig } from './index.js';
 
 const issuerOptions: DcxOptions = {
   handlers  : [],
@@ -94,7 +94,7 @@ export class DcxIssuer implements DcxManager {
   ): Promise<VerifiableCredential[]> {
     PresentationExchange.satisfiesPresentationDefinition({
       vcJwts,
-      presentationDefinition: manifest.presentation_definition,
+      presentationDefinition : manifest.presentation_definition,
     });
 
     const verifiedCredentials: VerifiableCredential[] = [];
@@ -173,8 +173,8 @@ export class DcxIssuer implements DcxManager {
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signed));
 
     return {
-      fulfillment: {
-        descriptor_map: [
+      fulfillment : {
+        descriptor_map : [
           {
             id     : manifestOutputDescriptor.id,
             format : 'jwt_vc',
@@ -182,7 +182,7 @@ export class DcxIssuer implements DcxManager {
           },
         ],
       },
-      verifiableCredential: [signed],
+      verifiableCredential : [signed],
     };
   }
 
@@ -226,9 +226,9 @@ export class DcxIssuer implements DcxManager {
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-issuer protocol
     const { status: query, protocols = [] } = await DcxIssuer.web5.dwn.protocols.query({
-      message: {
-        filter: {
-          protocol: issuer.protocol,
+      message : {
+        filter : {
+          protocol : issuer.protocol,
         },
       },
     });
@@ -250,7 +250,7 @@ export class DcxIssuer implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxIssuer.web5.dwn.protocols.configure({
-      message: { definition: issuer },
+      message : { definition: issuer },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -278,8 +278,8 @@ export class DcxIssuer implements DcxManager {
    */
   public async queryRecords(): Promise<DcxRecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxIssuer.web5.dwn.records.query({
-      message: {
-        filter: {
+      message : {
+        filter : {
           protocol     : issuer.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
@@ -307,9 +307,9 @@ export class DcxIssuer implements DcxManager {
     const records = await Promise.all(
       manifestRecords.map(async (manifestRecord: Record) => {
         const { record } = await DcxIssuer.web5.dwn.records.read({
-          message: {
-            filter: {
-              recordId: manifestRecord.id,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
             },
           },
         });
