@@ -18,7 +18,7 @@ import {
   Time
 } from '@dcx-protocol/common';
 import { Record } from '@web5/api';
-import { DcxIssuer, issuer } from 'packages/issuer/dist/types';
+import { DcxIssuer, issuer } from '@dcx-protocol/issuer';
 import { argv, exit } from 'process';
 
 export class DcxServer {
@@ -42,8 +42,8 @@ export class DcxServer {
    * @example see README.md for usage information
    *
    */
-  constructor(params: DcxParams) {
-    this.dcxIssuer = new DcxIssuer(params);
+  constructor(params: DcxParams & { dcxIssuer?: DcxIssuer }) {
+    this.dcxIssuer = params.dcxIssuer ?? new DcxIssuer(params);
     this.serverConfig = params.config ?? this.serverConfig;
     this.serverOptions = params.options ?? dcxOptions;
   }

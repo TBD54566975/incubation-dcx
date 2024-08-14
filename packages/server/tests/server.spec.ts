@@ -1,86 +1,88 @@
-import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
+import { DcxAgent, dcxConfig, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
+import { DcxIssuer } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { DcxServer } from '../src/index.js';
 
-describe('IssuerServer class', () => {
+const dcxIssuer = new DcxIssuer({
+  config : {
+    ...dcxConfig,
+    web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+    web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+    agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
+  }
+});
+const dcxIssuerServer: DcxServer = new DcxServer({ dcxIssuer });
 
-  const issuerServer: DcxServer = new DcxServer({
-    config: {
-      web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-      web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-      agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
-    }
-  });
-
+describe('DcxServer class', () => {
   after(async () => {
     await FileSystem.rmdir('__TEST_DATA__');
   });
 
   describe('default properties', () => {
-    it('should include static property _isPolling as a boolean equal to false', () => {
-      const _isPolling = issuerServer._isPolling;
-      expect(_isPolling).to.not.be.null.and.not.be.undefined;
-      expect(_isPolling).equals(false);
+    it('should include static property isPolling as a boolean equal to false', () => {
+      const isPolling = dcxIssuerServer.isPolling;
+      expect(isPolling).to.not.be.null.and.not.be.undefined;
+      expect(isPolling).equals(false);
     });
 
-    it('should include property _isInitialized as a boolean equal to false', () => {
-      const _isInitialized = issuerServer._isInitialized;
-      expect(_isInitialized).to.not.be.null.and.not.be.undefined;
-      expect(typeof _isInitialized).equals('boolean');
-      expect(_isInitialized).equals(false);
+    it('should include property isInitialized as a boolean equal to false', () => {
+      const isInitialized = dcxIssuer.isInitialized;
+      expect(isInitialized).to.not.be.null.and.not.be.undefined;
+      expect(typeof isInitialized).equals('boolean');
+      expect(isInitialized).equals(false);
     });
 
-    it('should include property _isSetup as a boolean equal to false', () => {
-      const _isSetup = issuerServer._isSetup;
-      expect(_isSetup).to.not.be.null.and.not.be.undefined;
-      expect(typeof _isSetup).equals('boolean');
-      expect(_isSetup).to.be.equals(false);
+    it('should include property isSetup as a boolean equal to false', () => {
+      const isSetup = dcxIssuer.isSetup;
+      expect(isSetup).to.not.be.null.and.not.be.undefined;
+      expect(typeof isSetup).equals('boolean');
+      expect(isSetup).to.be.equals(false);
     });
 
     it('should include property _isTest as a boolean equal to true', () => {
-      const _isTest = issuerServer._isTest;
-      expect(_isTest).to.not.be.null.and.not.be.undefined;
-      expect(typeof _isTest).equals('boolean');
-      expect(_isTest).to.be.equals(true);
+      const isTest = dcxIssuerServer.isTest;
+      expect(isTest).to.not.be.null.and.not.be.undefined;
+      expect(typeof isTest).equals('boolean');
+      expect(isTest).to.be.equals(true);
     });
 
-    it('should include property useOptions as an object containing 6 entries', () => {
-      const useOptions = issuerServer.useOptions;
-      expect(useOptions).to.not.be.null.and.not.be.undefined;
-      expect(Object.entries(useOptions)).to.have.lengthOf.gte(6);
+    it('should include property serverOptions as an object containing 6 entries', () => {
+      const serverOptions = dcxIssuerServer.serverOptions;
+      expect(serverOptions).to.not.be.null.and.not.be.undefined;
+      expect(Object.entries(serverOptions)).to.have.lengthOf.gte(5);
     });
   });
 
   describe('.initialize()', () => {
-    it('should initialize the issuerServer', async () => {
-      await issuerServer.initialize();
-      expect(issuerServer._isInitialized).equals(true);
+    it('should initialize the dcxIssuerServer', async () => {
+      await dcxIssuerServer.dcxIssuer.initializeWeb5();
+      expect(dcxIssuerServer.dcxIssuer).equals(true);
     });
 
     it('should initialize the DcxManager', () => {
-      expect(DcxManager.web5).to.not.be.null.and.not.be.undefined;
-      expect(DcxManager.web5).to.be.instanceof(Web5);
+      expect(DcxIssuer.web5).to.not.be.null.and.not.be.undefined;
+      expect(DcxIssuer.web5).to.be.instanceof(Web5);
 
-      expect(DcxManager.agent).to.not.be.null.and.not.be.undefined;
-      expect(DcxManager.agent).to.be.instanceof(DcxAgent);
+      expect(DcxIssuer.agent).to.not.be.null.and.not.be.undefined;
+      expect(DcxIssuer.agent).to.be.instanceof(DcxAgent);
 
-      expect(DcxManager.agentVault).to.not.be.null.and.not.be.undefined;
-      expect(DcxManager.agentVault).to.be.instanceof(DcxIdentityVault);
+      expect(DcxIssuer.agentVault).to.not.be.null.and.not.be.undefined;
+      expect(DcxIssuer.agentVault).to.be.instanceof(DcxIdentityVault);
     });
   });
 
   describe('.setupDwn()', () => {
     it('should setup the remote DWN', async () => {
-      await issuerServer.setupDwn();
-      expect(issuerServer._isSetup).equals(true);
+      await dcxIssuerServer.dcxIssuer.setupDwn();
+      expect(dcxIssuerServer.dcxIssuer.isSetup).equals(true);
     });
   });
 
   describe('.poll()', () => {
     it('should listen for new DWN record updates', async () => {
-      await issuerServer.poll();
-      expect(issuerServer._isPolling).equals(true);
+      await dcxIssuerServer.poll();
+      expect(dcxIssuerServer.isPolling).equals(true);
     });
   });
 });
