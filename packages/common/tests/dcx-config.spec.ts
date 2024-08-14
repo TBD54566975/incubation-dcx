@@ -20,24 +20,24 @@ describe('dcxConfig', () => {
       expect(issuers).to.have.lengthOf.gte(1);
     });
 
-    it('should contain property dcxConfig.manifests as an object with at least 1 entry', () => {
+    it('should contain property dcxConfig.manifests as an array with at least 1 entry', () => {
       const manifests = dcxConfig.manifests;
       expect(manifests).to.not.be.null.and.not.be.undefined;
-      expect(manifests).to.be.an('object');
+      expect(manifests).to.be.an('array');
       expect(Object.entries(manifests)).to.have.lengthOf.gte(1);
     });
 
     it('should contain property dcxConfig.dwnEndpoints as an object with at least 1 entry', () => {
       const dwnEndpoints = dcxConfig.dwnEndpoints;
       expect(dwnEndpoints).to.not.be.null.and.not.be.undefined;
-      expect(dwnEndpoints).to.be.an('object');
+      expect(dwnEndpoints).to.be.an('array');
       expect(Object.entries(dwnEndpoints)).to.have.lengthOf.gte(1);
     });
 
     it('should contain property dcxConfig.gatewayUris as an object with at least 1 entry', () => {
       const gatewayUris = dcxConfig.gatewayUris;
       expect(gatewayUris).to.not.be.null.and.not.be.undefined;
-      expect(gatewayUris).to.be.an('object');
+      expect(gatewayUris).to.be.an('array');
       expect(Object.entries(gatewayUris)).to.have.lengthOf.gte(1);
     });
 
