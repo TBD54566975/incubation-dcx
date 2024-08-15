@@ -6,3 +6,5 @@ export type Web5ConnectResponse = Web5ConnectResult & {
   agent: Web5PlatformAgent;
   bearerDid: BearerDid;
 };
+
+export type CheckWeb5Response = { password: string; recoveryPhrase?: string }

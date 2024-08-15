@@ -7,7 +7,7 @@ import {
   PortableDid,
 } from '@web5/dids';
 import { FileSystem } from './utils/file-system.js';
-import { config as dcxConfig } from './config.js';
+import { dcxConfig } from './dcx-config.js';
 import { LocalKeyManager } from '@web5/crypto';
 
 /**
@@ -63,7 +63,7 @@ export class DidDhtManager {
    * @returns DidRegistrationResult; see {@link DidRegistrationResult}
    */
   public async publishDidDoc(gatewayUri: string): Promise<DidRegistrationResult> {
-    gatewayUri ??= dcxConfig.DCX_ENDPOINTS.GATEWAY_URIS[0];
+    gatewayUri ??= dcxConfig.endpoints.gateways[0];
     return await DidDht.publish({ did: this.bearerDid, gatewayUri });
   }
 

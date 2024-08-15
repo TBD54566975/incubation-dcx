@@ -11,10 +11,10 @@ export const schema = {
     applicant      : { type: 'string' },
     manifest_id    : { type: 'string' },
     application_id : { type: 'string' },
-    response       : {
+    fulfillment       : {
       type       : 'object',
       properties : {
-        descriptor_map: {
+        descriptor_map : {
           type  : 'array',
           items : { $ref: '#/definitions/descriptor' },
         },
@@ -22,7 +22,7 @@ export const schema = {
       required             : ['descriptor_map'],
       additionalProperties : false,
     },
-    denial: {
+    denial : {
       type       : 'object',
       properties : {
         reason            : { type: 'string' },
@@ -36,16 +36,16 @@ export const schema = {
       additionalProperties : false,
     },
   },
-  oneOf: [
+  oneOf : [
     {
-      required: ['response'],
+      required : ['fulfillment'],
     },
     {
-      required: ['denial'],
+      required : ['denial'],
     },
   ],
-  definitions: {
-    descriptor: {
+  definitions : {
+    descriptor : {
       type       : 'object',
       properties : {
         id          : { type: 'string' },
@@ -54,7 +54,7 @@ export const schema = {
           type : 'object',
           $ref : '#/definitions/descriptor',
         },
-        format: {
+        format : {
           type : 'string',
           enum : ['jwt', 'jwt_vc', 'jwt_vp', 'ldp', 'ldp_vc', 'ldp_vp'],
         },

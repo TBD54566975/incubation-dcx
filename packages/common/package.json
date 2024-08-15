@@ -15,8 +15,8 @@
     "test": "pnpm test:node",
     "test:e2e": "tsx tests/e2e/*.spec.ts",
     "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
-    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.js",
-    "lint:fix": "eslint . --fix -c ../../eslint.config.js"
+    "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
+    "lint:fix": "eslint . --fix -c ../../eslint.config.cjs"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",

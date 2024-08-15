@@ -1,6 +1,6 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
-import { DcxConfig } from '../config';
+import { DcxConfig } from '../dcx-config';
 
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
 import { DcxOptions } from './options';
@@ -110,9 +110,7 @@ export type DcxRecordsReadResponse = DcxRecordsReadParams;
 export type RecordsParams = { records: DwnRecord[] };
 export type ManifestParams = { records: CredentialManifest[] };
 
-export type DcxManagerParams = {
+export type DcxParams = {
     options?: DcxOptions;
     config?: DcxConfig & { [key: string]: any };
 };
-export type DcxIssuerParams = DcxManagerParams;
-export type DcxApplicantParams = DcxManagerParams;
