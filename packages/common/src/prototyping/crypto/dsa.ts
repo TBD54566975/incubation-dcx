@@ -54,22 +54,22 @@ export interface DsaGenerateKeyParams extends GenerateKeyParams {
  * `LocalKeyManager` class.
  */
 const supportedAlgorithms = {
-  'Ed25519': {
+  'Ed25519' : {
     implementation : EdDsaAlgorithm,
     names          : ['Ed25519'],
     operations     : ['bytesToPrivateKey', 'bytesToPublicKey', 'generateKey', 'sign', 'verify'],
   },
-  'secp256k1': {
+  'secp256k1' : {
     implementation : EcdsaAlgorithm,
     names          : ['ES256K', 'secp256k1'],
     operations     : ['bytesToPrivateKey', 'bytesToPublicKey', 'generateKey', 'sign', 'verify'],
   },
-  'secp256r1': {
+  'secp256r1' : {
     implementation : EcdsaAlgorithm,
     names          : ['ES256', 'secp256r1'],
     operations     : ['bytesToPrivateKey', 'bytesToPublicKey', 'generateKey', 'sign', 'verify'],
   },
-  'SHA-256': {
+  'SHA-256' : {
     implementation : Sha2Algorithm,
     names          : ['SHA-256'],
     operations     : ['digest'],

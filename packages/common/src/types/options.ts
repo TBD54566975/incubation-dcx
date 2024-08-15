@@ -46,8 +46,6 @@ export class ServerManifest implements CredentialManifest {
   ) {}
 }
 
-export type ServerPath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
-
 export type DcxOptions = {
   manifests: ServerManifest[];
   providers: Provider[];
@@ -56,3 +54,6 @@ export type DcxOptions = {
   dwns: string[];
   handlers: ServerHandler[];
 };
+
+export type ServerPath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';
+export type ServerOptions = DcxOptions;

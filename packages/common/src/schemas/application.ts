@@ -6,17 +6,17 @@ export const schema = {
   title      : 'Credential Application',
   type       : 'object',
   properties : {
-    '@context': {
+    '@context' : {
       type        : 'array',
       items       : { type: 'string'},
       description : 'The @context of the application',
     },
-    type: {
+    type : {
       type        : 'array',
       items       : { type: 'string'},
       description : 'The type property of the application',
     },
-    presentation_submission: {
+    presentation_submission : {
       type       : 'object',
       properties : {
         definition_id  : { type: 'string' },
@@ -32,13 +32,13 @@ export const schema = {
           },
         },
       },
-      description: 'The Verifiable Credentials that represent your application',
+      description : 'The Verifiable Credentials that represent your application',
     },
-    verifiableCredential: {
+    verifiableCredential : {
       type        : 'array',
       items       : { type: 'string' },
       description : 'The Verifiable Credentials to present in JWT format',
     },
   },
-  required: ['@context', 'type', 'presentation_submission', 'verifiableCredential'],
+  required : ['@context', 'type', 'presentation_submission', 'verifiableCredential'],
 };

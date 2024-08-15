@@ -1,18 +1,20 @@
 import {
   applicationSchema,
-  DcxApplicantParams,
+  DcxAgentRecovery,
   DcxApplicantProcessRecordParams,
+  dcxConfig,
+  DcxConfig,
   DcxDwnError,
   DcxManager,
+  dcxOptions,
   DcxOptions,
+  DcxParams,
   DcxRecordsQueryResponse,
   DcxRecordsReadResponse,
   DwnError,
   DwnUtils,
-  FileSystem,
   Logger,
   manifestSchema,
-  Mnemonic,
   RecordsParams,
   responseSchema
 } from '@dcx-protocol/common';
@@ -25,27 +27,24 @@ import {
   Web5
 } from '@web5/api';
 import { PresentationExchange } from '@web5/credentials';
-import { applicant, applicantConfig, applicantOptions, DcxApplicantConfig } from './index.js';
-
+import { dcxApplicant } from './index.js';
 
 /**
  * DWN manager handles interactions between the DCX server and the DWN
  */
 export class DcxApplicant implements DcxManager {
-
-  options : DcxOptions;
-  config  : DcxApplicantConfig;
-
   isSetup       : boolean = false;
   isInitialized : boolean = false;
+  config        : DcxConfig = dcxConfig;
+  options       : DcxOptions;
 
   public static did   : string;
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
-  constructor(params: DcxApplicantParams = {}) {
-    this.config = { ...applicantConfig, ...params.config };
-    this.options = params.options ?? applicantOptions;
+  constructor(params: DcxParams) {
+    this.options = params.options ?? dcxOptions;
+    this.config = params.config ?? this.config;
   }
 
   /**
@@ -57,7 +56,7 @@ export class DcxApplicant implements DcxManager {
     const { status: query, protocols = [] } = await DcxApplicant.web5.dwn.protocols.query({
       message : {
         filter : {
-          protocol : applicant.protocol,
+          protocol : dcxApplicant.protocol,
         },
       },
     });
@@ -78,7 +77,7 @@ export class DcxApplicant implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxApplicant.web5.dwn.protocols.configure({
-      message : { definition: applicant },
+      message : { definition: dcxApplicant },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -103,7 +102,7 @@ export class DcxApplicant implements DcxManager {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       message : {
         filter : {
-          protocol     : applicant.protocol,
+          protocol     : dcxApplicant.protocol,
           protocolPath : 'application/response',
           schema       : responseSchema.$id,
           dataFormat   : 'application/json',
@@ -153,7 +152,7 @@ export class DcxApplicant implements DcxManager {
       from,
       message : {
         filter : {
-          protocol     : applicant.protocol,
+          protocol     : dcxApplicant.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
           dataFormat   : 'application/json',
@@ -190,7 +189,7 @@ export class DcxApplicant implements DcxManager {
         recipient,
         schema       : applicationSchema.$id,
         dataFormat   : 'application/json',
-        protocol     : applicant.protocol,
+        protocol     : dcxApplicant.protocol,
         protocolPath : 'application'
       }
     });
@@ -254,52 +253,6 @@ export class DcxApplicant implements DcxManager {
 
   /**
    *
-   * Checks the state of the password and recovery phrase
-   *
-   * @param firstLaunch A boolean indicating if this is the first launch of the agent
-   * @returns { password: string, recoveryPhrase?: string }
-   * @throws DcxServerError
-   *
-   */
-  public async checkWeb5Config(): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = this.config.web5Password;
-    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
-
-    // TODO: consider generating a new recovery phrase if one is not provided
-    // this.config.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
-
-    if (!web5Password && !web5RecoveryPhrase) {
-      Logger.security(
-        'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New APPLICANT_WEB5_PASSWORD saved to applicant.password.key file. ' +
-        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to applicant.recovery.key file.',
-      );
-      const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('applicant.password.key', password);
-
-      const recoveryPhrase = Mnemonic.createRecoveryPhrase();
-      await FileSystem.overwrite('applicant.recovery.key', recoveryPhrase);
-
-      this.config.web5Password = password;
-      this.config.web5RecoveryPhrase = recoveryPhrase;
-      return { password, recoveryPhrase };
-    }
-
-    if (web5Password && !web5RecoveryPhrase) {
-      Logger.warn(
-        'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE! ' +
-        'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
-      );
-      return { password: web5Password };
-    }
-
-    return {
-      password       : web5Password,
-      recoveryPhrase : web5RecoveryPhrase,
-    };
-  }
-  /**
-   *
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX applicant protocol
    *
@@ -308,18 +261,21 @@ export class DcxApplicant implements DcxManager {
     Logger.log('Initializing Web5 for DcxApplicant ... ');
 
     // Check the state of the password and recovery phrase
-    const { password: userPassword, recoveryPhrase: userRecoveryPhrase } = await this.checkWeb5Config();
+    const { password, recoveryPhrase } = await DcxAgentRecovery.validate({
+      password       : this.config.applicantProtocol.web5Password,
+      recoveryPhrase : this.config.applicantProtocol.web5RecoveryPhrase,
+      type           : 'applicant'
+    });
 
     // Toggle the initialization options based on the presence of a recovery phrase
     const dwnEndpoints = this.options.dwns!;
-    const connectParams = !userRecoveryPhrase
+    const connectParams = !recoveryPhrase
       ? {
-        password         : userPassword,
+        password,
         didCreateOptions : { dwnEndpoints }
-      }
-      : {
-        password         : userPassword,
-        recoveryPhrase   : userRecoveryPhrase,
+      } : {
+        password,
+        recoveryPhrase,
         didCreateOptions : { dwnEndpoints }
       };
 

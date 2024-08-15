@@ -444,7 +444,7 @@ export class FlattenedJwe {
     // array (the "header" and "encrypted_key" members) in the top-level JSON object (at the same
     // level as the "ciphertext" member).
     const jwe = new FlattenedJwe({
-      ciphertext: Convert.uint8Array(ciphertext).toBase64Url(),
+      ciphertext : Convert.uint8Array(ciphertext).toBase64Url(),
     });
     if (encryptedKey) jwe.encrypted_key = Convert.uint8Array(encryptedKey).toBase64Url();
     if (protectedHeader) jwe.protected = encodedProtectedHeader;
