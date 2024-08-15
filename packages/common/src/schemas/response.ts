@@ -11,7 +11,7 @@ export const schema = {
     applicant      : { type: 'string' },
     manifest_id    : { type: 'string' },
     application_id : { type: 'string' },
-    response       : {
+    fulfillment       : {
       type       : 'object',
       properties : {
         descriptor_map : {
@@ -38,7 +38,7 @@ export const schema = {
   },
   oneOf : [
     {
-      required : ['response'],
+      required : ['fulfillment'],
     },
     {
       required : ['denial'],

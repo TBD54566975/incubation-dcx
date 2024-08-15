@@ -1,4 +1,3 @@
-// Export dcx classes
 export type * from './types/dcx.js';
 export type * from './types/did.js';
 export type * from './types/handlers.js';
@@ -16,8 +15,9 @@ export * from './utils/mnemonic.js';
 export * from './utils/objects.js';
 export * from './utils/string.js';
 export * from './utils/time.js';
-export * from './dcx-config.js';
+export * from './dcx-agent-recovery.js';
 export * from './dcx-agent.js';
+export * from './dcx-config.js';
 export * from './dcx-dht-manager.js';
 export * from './dcx-identity-vault.js';
 export * from './dcx-manager.js';

@@ -43,6 +43,7 @@ export const issuer = {
         {
           who : 'author',
           of  : 'application',
+          // is there an abstract use case instance where we'd want to let applicants update their application?
           can : ['read'],
         },
       ],
