@@ -27,6 +27,7 @@
     "test:node:server": "pnpm --filter server test:node",
     "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
     "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node",
+    "publish:all": "pnpm --filter applicant publish && pnpm --filter common publish && pnpm --filter issuer publish && pnpm --filter server publish",
     "publish:applicant": "pnpm --filter applicant publish",
     "publish:common": "pnpm --filter common publish",
     "publish:issuer": "pnpm --filter issuer publish",
