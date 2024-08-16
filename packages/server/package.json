@@ -1,5 +1,5 @@
 {
-  "name": "@dcx-protocol/server",
+  "name": "@dcxp/server",
   "version": "0.1.0",
   "description": "DCX Server Implementation",
   "type": "module",
