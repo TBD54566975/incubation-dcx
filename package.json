@@ -1,12 +1,13 @@
 {
   "name": "@dcx-protocol/root",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "DCX: Decentralized Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
     "packages/applicant",
     "packages/common",
-    "packages/issuer"
+    "packages/issuer",
+    "packages/server"
   ],
   "scripts": {
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
