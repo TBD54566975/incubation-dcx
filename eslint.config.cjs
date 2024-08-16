@@ -78,13 +78,15 @@ module.exports = [
       'mocha/no-pending-tests'                   : 'off',
       'mocha/no-skipped-tests'                   : 'off',
       'mocha/no-sibling-hooks'                   : 'off',
-    },
-  }, {
+    }
+  },
+  {
     ignores: [
       '**/*.js',
       '**/*.cjs',
       '**/*.mjs',
       '**/*.d.ts',
-    ],
+      '**/prototyping/*'
+    ]
   }
 ];
