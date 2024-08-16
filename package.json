@@ -30,7 +30,7 @@
     "publish:applicant": "pnpm --filter applicant publish",
     "publish:common": "pnpm --filter common publish",
     "publish:issuer": "pnpm --filter issuer publish",
-    "publish:server": "pnpm --filter issuer publish",
+    "publish:server": "pnpm --filter server publish",
     "version": "tsx scripts/version.ts",
     "version:patch:applicant": "tsx scripts/version.ts patch applicant",
     "version:minor:applicant": "tsx scripts/version.ts minor applicant",
