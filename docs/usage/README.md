@@ -1,5 +1,5 @@
 # Usage
-
+# ***OUTDATED*** - TODO: update usage guide
 See below for how to install and use the DCX protocol.
 
 ## Install
