@@ -6,26 +6,29 @@ import {
   dcxConfig,
   DcxDwnError,
   DcxIdentityVault,
-  DcxIssuerProcessRecordParams,
   DcxManager,
   dcxOptions,
   DcxOptions,
   DcxParams,
   DcxProtocolHandlerError,
-  DcxRecordsCreateResponse,
-  DcxRecordsFilterResponse,
-  DcxRecordsQueryResponse,
-  DcxRecordsReadResponse,
   DwnError,
   DwnUtils,
   Handler,
   Issuer,
+  IssuerProcessRecordParams,
   Logger,
-  ManifestParams,
   manifestSchema,
   Objects,
   Provider,
+  RecordCreateParams,
+  RecordCreateResponse,
+  RecordsCreateParams,
+  RecordsCreateResponse,
+  RecordsFilterParams,
+  RecordsFilterResponse,
   RecordsParams,
+  RecordsQueryResponse,
+  RecordsReadResponse,
   RequestCredentialParams,
   responseSchema,
   ServerHandler,
@@ -36,15 +39,14 @@ import {
   ProtocolsConfigureResponse,
   ProtocolsQueryResponse,
   Record,
-  RecordsCreateResponse,
-  Web5,
+  Web5
 } from '@web5/api';
 import {
   PresentationExchange,
   VerifiableCredential,
   VerifiablePresentation,
 } from '@web5/credentials';
-import { issuer } from './index.js';
+import { dcxIssuer } from './index.js';
 
 type VerifyCredentialsParams = {
   vcJwts: string[];
@@ -70,18 +72,18 @@ type DescriptorMap = {
   format?: string;
   path?: string;
 }
-type DcxVerifiableCredentialData = {
+type VerifiableCredentialData = {
   vcJwts?: string[];
   id?: string;
   format?: string;
   path?: string;
 };
-type DcxVerifiableCredentialType = {
+type VerifiableCredentialType = {
   verifiableCredential: string[];
   fulfillment: Fulfillment
 };
 type IssueCredentialParams = {
-  vc: DcxVerifiableCredentialType,
+  vc: VerifiableCredentialType,
   subjectDid: string
 };
 class DcxVerifiableCredential {
@@ -90,7 +92,7 @@ class DcxVerifiableCredential {
     id,
     format,
     path
-  }: DcxVerifiableCredentialData = {
+  }: VerifiableCredentialData = {
     format : 'jwt_vc',
     path   : '$.verifiableCredential[0]'
   }) {
@@ -304,7 +306,7 @@ export class DcxIssuer implements DcxManager {
       },
       message : {
         schema       : responseSchema.$id,
-        protocol     : issuer.protocol,
+        protocol     : dcxIssuer.protocol,
         dataFormat   : 'application/json',
         protocolPath : 'application/response',
       },
@@ -342,7 +344,7 @@ export class DcxIssuer implements DcxManager {
     const { status: query, protocols = [] } = await DcxIssuer.web5.dwn.protocols.query({
       message : {
         filter : {
-          protocol : issuer.protocol,
+          protocol : dcxIssuer.protocol,
         },
       },
     });
@@ -364,7 +366,7 @@ export class DcxIssuer implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxIssuer.web5.dwn.protocols.configure({
-      message : { definition: issuer },
+      message : { definition: dcxIssuer },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -390,11 +392,11 @@ export class DcxIssuer implements DcxManager {
    *
    * @returns Record[]; see {@link Record}
    */
-  public async queryRecords(): Promise<DcxRecordsQueryResponse> {
+  public async queryRecords(): Promise<RecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxIssuer.web5.dwn.records.query({
       message : {
         filter : {
-          protocol     : issuer.protocol,
+          protocol     : dcxIssuer.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
           dataFormat   : 'application/json',
@@ -415,9 +417,9 @@ export class DcxIssuer implements DcxManager {
    * Read records from DWN
    *
    * @param params.records list of Record objects to read; see {@link RecordsParams}
-   * @returns a list of records that have been read into json; see {@link DcxRecordsReadResponse}
+   * @returns a list of records that have been read into json; see {@link RecordsReadResponse}
    */
-  public async readRecords({ records: manifestRecords }: RecordsParams): Promise<DcxRecordsReadResponse> {
+  public async readRecords({ records: manifestRecords }: RecordsParams): Promise<RecordsReadResponse> {
     const records = await Promise.all(
       manifestRecords.map(async (manifestRecord: Record) => {
         const { record } = await DcxIssuer.web5.dwn.records.read({
@@ -434,60 +436,21 @@ export class DcxIssuer implements DcxManager {
   }
 
   /**
-   * Filter manifests passed to to options against manifest record
-   * reads in dwn to find missing manifests; See {@link CredentialManifest}
+   * Filter records passed against ones in the dcx options object
+   * to find ones missing locally vs. the input which is a list of
+   * read dwn reacords; For now, this function should ONLY be use to filter the
+   * manifests pulled from remote dwn store against the ones passed into the DcxIssuer
+   * dcxOptions.manifests field to find ones missing remotely; See {@link CredentialManifest}
    *
-   * @param params.records list of CredentialManifest objects; see {@link ManifestParams}
-   * @returns list of CredentialManifest objects that need writing to remote DWN
+   * @param params.records list of objects to filter through; see {@link RecordsFilterParams}
+   * @param params.type type of record to filter; see {@link RecordsFilterParams}
+   * @returns a list of records that have been filtered; see {@link RecordsFilterResponse}
    */
-  public async filterRecords({ records: manifestRecords }: ManifestParams): Promise<DcxRecordsFilterResponse> {
-    const records = this.options.manifests.filter((manifest: CredentialManifest) =>
-      manifestRecords.find((manifestRecord: CredentialManifest) => manifest.id !== manifestRecord.id),
+  public async filterRecords({ records, type }: RecordsFilterParams): Promise<RecordsFilterResponse> {
+    const data = this.options[type].filter((option: CredentialManifest) =>
+      records.find((record: CredentialManifest) => option.id !== record.id),
     );
-    return { records };
-  }
-
-  /**
-   * Create missing manifest record
-   * @param unwrittenManifest CredentialManifest; see {@link CredentialManifest}
-   * @returns Record | undefined; see {@link Record}
-   */
-  public async createManifestRecord({ manifestRecord }: { manifestRecord: CredentialManifest }): Promise<RecordsCreateResponse> {
-    manifestRecord.issuer.id = DcxIssuer.agent.agentDid.uri;
-    const { record, status: create } = await DcxIssuer.web5.dwn.records.create({
-      store   : true,
-      data    : manifestRecord,
-      message : {
-        schema       : manifestSchema.$id,
-        dataFormat   : 'application/json',
-        protocol     : issuer.protocol,
-        protocolPath : 'manifest',
-        published    : true,
-      },
-    });
-
-    if (DwnUtils.isFailure(create.code)) {
-      const { code, detail } = create;
-      Logger.error('Failed to create missing manifest record', create);
-      throw new DwnError(code, detail);
-    }
-
-    if (!record) {
-      throw new DcxDwnError(
-        `Failed to create missing dwn manifest record: ${manifestRecord.id}`,
-      );
-    }
-
-    const { status: send } = await record.send();
-
-    if (DwnUtils.isFailure(send.code)) {
-      const { code, detail } = send;
-      Logger.error('Failed to send dwn manifest record', send);
-      throw new DwnError(code, detail);
-    }
-
-    Logger.debug(`Sent manifest record to remote dwn`, send);
-    return { status: send, record };
+    return { data };
   }
 
   /**
@@ -495,15 +458,69 @@ export class DcxIssuer implements DcxManager {
    * @param missingManifests CredentialManifest[]; see {@link CredentialManifest}
    * @returns Record[]; see {@link Record}
    */
-  public async createRecords({ records: manifestRecords }: DcxRecordsCreateResponse): Promise<DcxRecordsCreateResponse> {
-    const records = await Promise.all(
-      manifestRecords.map(
-        async (manifestRecord: CredentialManifest) =>
-          (await this.createManifestRecord({ manifestRecord }))?.record,
-      ),
-    );
-    return { records };
+  public async createRecord(
+    { data, schema, protocolPath }: RecordCreateParams
+  ): Promise<RecordCreateResponse> {
+    if(protocolPath === 'manifest') {
+      data.issuer.id = DcxIssuer.agent.agentDid.uri;
+    }
+    const { record, status } = await DcxIssuer.web5.dwn.records.create({
+      data,
+      store   : true,
+      message : {
+        schema,
+        protocolPath,
+        dataFormat   : 'application/json',
+        protocol     : dcxIssuer.protocol,
+      },
+    });
+
+    const { code, detail } = status;
+    if (DwnUtils.isFailure(status.code)) {
+      Logger.error('Failed to create record', status);
+      throw new DwnError(code, detail);
+    }
+
+    if (!record) {
+      throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
+    }
+
+    const { status: issuer } = await record.send();
+    if (DwnUtils.isFailure(issuer.code)) {
+      const { code, detail } = issuer;
+      Logger.error('Failed to send record to issuer dwn', issuer);
+      throw new DwnError(code, detail);
+    }
+    Logger.debug('Sent application record to local dwn', issuer);
+
+    // const manifest = this.findManifest({ id: data.manifest_id });
+    // const { id: recipient } = this.findIssuer({ id: manifest?.issuer.id });
+    if(protocolPath !== 'manifest') {
+      const { status: applicant } = await record.send('did:web5:agent');
+      if (DwnUtils.isFailure(applicant.code)) {
+        const { code, detail } = applicant;
+        Logger.error('Failed to send record to applicant dwn', applicant);
+        throw new DwnError(code, detail);
+      }
+      Logger.debug('Sent application record to remote dwn', applicant);
+      return { record, status: { issuer, applicant } };
+    }
+    return { record, status: { issuer } };
   }
+
+  public async createRecords({ data, protocolPath, schema }: RecordsCreateParams): Promise<RecordsCreateResponse> {
+    // const records: Record[] = await Promise.all(
+    //   data.map(
+    //     async (d: CredentialManifest | any) => {
+    //       return (await this.createRecord({ data: d, protocolPath, schema }))?.record;
+    //     }
+    //   ),
+    // );
+    // return { records };
+    Logger.log('Method not implemented.', { data, protocolPath, schema });
+    return { records: [] };
+  }
+
 
   /**
    *
@@ -512,7 +529,7 @@ export class DcxIssuer implements DcxManager {
    * @param manifest The credential manifest
    * @returns The status of the application record processing
    */
-  public async processRecord({ record, manifest, providerId }: DcxIssuerProcessRecordParams): Promise<DwnResponseStatus> {
+  public async processRecord({ record, manifest, providerId }: IssuerProcessRecordParams): Promise<DwnResponseStatus> {
     Logger.debug('Processing application record', stringifier(record));
 
     // Parse the JSON VP from the application record; this will contain the credentials
@@ -567,14 +584,14 @@ export class DcxIssuer implements DcxManager {
 
       if (!manifests.length) {
       // Create missing manifest records
-        const { records } = await this.createRecords({ records: this.options.manifests });
+        const { records } = await this.createRecords({ protocolPath: 'manifest', schema: manifestSchema.$id, data: this.options.manifests });
         Logger.log(`Created ${records.length} manifest records in dcx issuer dwn`, records);
       } else {
         // Filter and create missing manifest records
-        const { records } = await this.filterRecords({ records: manifests });
+        const { data: records } = await this.filterRecords({ records: manifests, type: 'manifests' });
         Logger.debug(`Found ${records.length} unwritten manifests`);
 
-        const { records: create } = await this.createRecords({ records });
+        const { records: create } = await this.createRecords({ data: records, protocolPath: 'manifest', schema: manifestSchema.$id });
         Logger.log(`Created ${create.length} records`, create);
       }
 

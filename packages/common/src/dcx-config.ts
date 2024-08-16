@@ -3,7 +3,7 @@ import EmailAddressManifest from './manifests/dcx-handshake.json' assert { type:
 import PhoneNumberManifest from './manifests/dcx-handshake.json' assert { type: 'json' };
 import { DcxOptions } from './types/options';
 
-export type DcxConfig = typeof dcxConfig;
+export type DcxConfig = typeof dcxConfig & { [key: string]: any };
 
 export const MX = {
   name : 'mx',

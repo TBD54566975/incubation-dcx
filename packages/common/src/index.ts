@@ -1,3 +1,4 @@
+export * from './interfaces/dcx.js';
 export type * from './types/dcx.js';
 export type * from './types/did.js';
 export type * from './types/handlers.js';

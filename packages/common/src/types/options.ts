@@ -5,7 +5,7 @@ import {
   ManifestFormat,
   ManifestOutputDescriptor,
   PresentationDefinition
-} from './dcx';
+} from '../index.js';
 
 export type Handler = (...args: any[]) => any | Promise<any>;
 
