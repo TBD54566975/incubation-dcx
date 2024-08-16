@@ -18,7 +18,7 @@ import {
   Time
 } from '@dcx-protocol/common';
 import { Record } from '@web5/api';
-import { DcxIssuer, issuer } from '@dcx-protocol/issuer';
+import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
 import { argv, exit } from 'process';
 
 export class DcxServer {
@@ -168,7 +168,7 @@ export class DcxServer {
       const { records = [], cursor: nextCursor } = await DcxIssuer.web5.dwn.records.query({
         message : {
           pagination,
-          filter : { protocol: issuer.protocol },
+          filter : { protocol: dcxIssuer.protocol },
         },
       });
 
