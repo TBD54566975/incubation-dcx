@@ -19,7 +19,7 @@ jobs:
         run: npm install -g pnpm
       
       - name: Install dependencies
-        run: pnpm install -r --frozen-lockfile
+        run: pnpm install -r --no-frozen-lockfile
       
       - name: Run linter for all packages
         run: pnpm lint
@@ -30,8 +30,8 @@ jobs:
       - name: Build all tests
         run: pnpm build:tests:node
       
-      # - name: Run all tests
-      #   run: pnpm test:node
+      - name: Run all tests
+        run: pnpm test:node
       
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
