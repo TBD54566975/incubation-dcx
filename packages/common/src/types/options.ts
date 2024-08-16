@@ -24,6 +24,7 @@ export interface Provider extends AdditionalProperties {
   }
 
 export class ServerProvider implements Provider {
+  [key: string]: any
   constructor(
       public id: string,
       public endpoint: string,
@@ -34,6 +35,7 @@ export class ServerProvider implements Provider {
 
 // Manifest
 export class ServerManifest implements CredentialManifest {
+  [key: string]: any
   constructor(
       public id: string,
       public name: string,
@@ -47,7 +49,7 @@ export class ServerManifest implements CredentialManifest {
 }
 
 export type DcxOptions = {
-  manifests: ServerManifest[];
+  manifests: CredentialManifest[];
   providers: Provider[];
   issuers: Issuer[];
   gateways: string[];

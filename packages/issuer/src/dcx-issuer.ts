@@ -333,7 +333,8 @@ export class DcxIssuer implements DcxManager {
   }
 
   /**
-   * Query DWN for credential-issuer protocol
+   * Query DWN for dcx issuer protocols
+   *
    * @returns Protocol[]; see {@link Protocol}
    */
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
@@ -353,12 +354,12 @@ export class DcxIssuer implements DcxManager {
     }
 
     Logger.debug(`DWN has ${protocols.length} protocols available`);
-    Logger.debug('protocols', stringifier(protocols));
     return { status: query, protocols };
   }
 
   /**
-   * Configure DWN for credential-issuer protocol
+   * Configure DWN with dcx issuer protocol
+   *
    * @returns DwnResponseStatus; see {@link DwnResponseStatus}
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
@@ -501,7 +502,7 @@ export class DcxIssuer implements DcxManager {
           (await this.createManifestRecord({ manifestRecord }))?.record,
       ),
     );
-    return { records: records.filter((record?: Record) => record !== undefined) as Record[]};
+    return { records };
   }
 
   /**
@@ -536,6 +537,55 @@ export class DcxIssuer implements DcxManager {
 
     return { status };
   }
+
+  /**
+   * Setup DWN with credential-issuer protocol and manifest records
+   * @returns boolean indicating success or failure
+   */
+  public async setupDwn(): Promise<void> {
+    Logger.log('Setting up dcx issuer dwn ...');
+
+    try {
+      // Query DWN for credential-issuer protocols
+      const { protocols } = await this.queryProtocols();
+      Logger.log(`Found ${protocols.length} dcx issuer protocol in dwn`, protocols);
+
+      // Configure DWN with credential-issuer protocol if not found
+      if (!protocols.length) {
+        Logger.log('Configuring dcx issuer protocol in dwn ...');
+        const { status, protocol } = await this.configureProtocols();
+        Logger.debug(`Dcx issuer protocol configured: ${status.code} - ${status.detail}`, protocol);
+      }
+
+      // Query DWN for manifest records
+      const { records: query } = await this.queryRecords();
+      Logger.log(`Found ${query.length} manifest records in dcx issuer dwn`);
+
+      // Read manifest records data
+      const { records: manifests } = await this.readRecords({ records: query });
+      Logger.debug(`Read ${manifests.length} manifest records`, manifests);
+
+      if (!manifests.length) {
+      // Create missing manifest records
+        const { records } = await this.createRecords({ records: this.options.manifests });
+        Logger.log(`Created ${records.length} manifest records in dcx issuer dwn`, records);
+      } else {
+        // Filter and create missing manifest records
+        const { records } = await this.filterRecords({ records: manifests });
+        Logger.debug(`Found ${records.length} unwritten manifests`);
+
+        const { records: create } = await this.createRecords({ records });
+        Logger.log(`Created ${create.length} records`, create);
+      }
+
+      Logger.log('Dcx Issuer DWN Setup Complete!');
+      this.isSetup = true;
+    } catch (error: any) {
+      Logger.error('DWN Setup Failed!', error);
+      throw error;
+    }
+  }
+
 
   /**
    * Configures the DCX server by creating a new password, initializing Web5,
@@ -587,51 +637,4 @@ export class DcxIssuer implements DcxManager {
     this.isInitialized = true;
   }
 
-  /**
-   * Setup DWN with credential-issuer protocol and manifest records
-   * @returns boolean indicating success or failure
-   */
-  public async setupDwn(): Promise<void> {
-    Logger.log('Setting up dcx issuer dwn ...');
-
-    try {
-      // Query DWN for credential-issuer protocols
-      const { protocols } = await this.queryProtocols();
-      Logger.log(`Found ${protocols.length} dcx issuer protocol in dwn`, protocols);
-
-      // Configure DWN with credential-issuer protocol if not found
-      if (!protocols.length) {
-        Logger.log('Configuring dcx issuer protocol in dwn ...');
-        const { status, protocol } = await this.configureProtocols();
-        Logger.debug(`Dcx issuer protocol configured: ${status.code} - ${status.detail}`, protocol);
-      }
-
-      // Query DWN for manifest records
-      const { records: query } = await this.queryRecords();
-      Logger.log(`Found ${query.length} manifest records in dcx issuer dwn`);
-
-      // Read manifest records data
-      const { records: manifests } = await this.readRecords({ records: query });
-      Logger.debug(`Read ${manifests.length} manifest records`, manifests);
-
-      if (!manifests.length) {
-      // Create missing manifest records
-        const { records } = await this.createRecords({ records: this.options.manifests });
-        Logger.log(`Created ${records.length} manifest records in dcx issuer dwn`, records);
-      } else {
-        // Filter and create missing manifest records
-        const { records } = await this.filterRecords({ records: manifests });
-        Logger.debug(`Found ${records.length} unwritten manifests`);
-
-        const { records: create } = await this.createRecords({ records });
-        Logger.log(`Created ${create.length} records`, create);
-      }
-
-      Logger.log('Dcx Issuer DWN Setup Complete!');
-      this.isSetup = true;
-    } catch (error: any) {
-      Logger.error('DWN Setup Failed!', error);
-      throw error;
-    }
-  }
 }

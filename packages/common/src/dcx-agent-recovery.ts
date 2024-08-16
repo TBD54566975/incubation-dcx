@@ -169,8 +169,8 @@ export class DcxAgentRecovery {
    */
   static getRecoveryDataNames(type: string): RecoveryDataNames {
     return {
-      web5RecoveryPhraseEnv : `${type}_WEB5_RECOVERY_PHRASE`,
-      web5PasswordEnv        : `${type}_WEB5_PASSWORD`,
+      web5RecoveryPhraseEnv : `${type.toUpperCase()}_WEB5_RECOVERY_PHRASE`,
+      web5PasswordEnv        : `${type.toUpperCase()}_WEB5_PASSWORD`,
       passwordKeyFile       : `${type}.password.key`,
       recoveryKeyFile       : `${type}.recovery.key`,
     };
