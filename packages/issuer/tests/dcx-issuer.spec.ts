@@ -9,9 +9,12 @@ describe('DcxIssuer class', () => {
   const dcxIssuer: DcxIssuer = new DcxIssuer({
     config  : {
       ...dcxConfig,
-      web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-      web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-      agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
+      issuerProtocol : {
+        ...dcxConfig.issuerProtocol,
+        web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+        web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+        agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
+      }
     }
   });
 
