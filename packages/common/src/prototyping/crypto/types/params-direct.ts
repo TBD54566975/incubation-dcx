@@ -1,4 +1,4 @@
-import type { Jwk } from '@web5/crypto';
+import type { Jwk, AlgorithmIdentifier } from '@web5/crypto';
 
 
 export interface BytesToPrivateKeyParams {

@@ -2,12 +2,13 @@ import { version as root } from '../package.json';
 import { version as applicant } from '../packages/applicant/package.json';
 import { version as common } from '../packages/common/package.json';
 import { version as issuer } from '../packages/issuer/package.json';
+import { version as server } from '../packages/server/package.json';
 
 import { execSync } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-const semvers = { root, applicant, common, issuer };
+const semvers = { root, applicant, common, issuer, server };
 
 async function readPackageJson(packagePath: string) {
   const data = await fs.readFile(packagePath, 'utf-8');
@@ -48,6 +49,8 @@ async function updateVersion(packagePath: string, releaseType: string) {
     semvers.common = newVersion;
   } else if (packageJson.name.includes('issuer')) {
     semvers.issuer = newVersion;
+  } else if (packageJson.name.includes('server')) {
+    semvers.server = newVersion;
   }
 
   console.log(`Updated ${packageJson.name} to version ${newVersion}`);
@@ -56,7 +59,7 @@ async function updateVersion(packagePath: string, releaseType: string) {
 async function version() {
   const args = process.argv.slice(2);
   const releaseTypes = ['patch', 'minor', 'major'];
-  const packageNames = ['root', 'applicant', 'common', 'issuer'];
+  const packageNames = ['root', 'applicant', 'common', 'issuer', 'server'];
   const packageName = args.find(arg => packageNames.find(packageName=> packageName === arg));
   const releaseType = args.find(arg => releaseTypes.find(releaseType => releaseType === arg));
   const doGit = args.some(arg => ['--git', '-g'].includes(arg));
@@ -65,12 +68,17 @@ async function version() {
     throw new Error('Invalid argument. Use "patch", "minor", or "major".');
   }
 
+  if(!packageName) {
+    console.info('No package name provided. Updating version of all packages.');
+  }
+
   const rootPackagePath = path.resolve(process.cwd(), 'package.json');
   const applicantPackagePath = path.resolve(process.cwd(), 'packages/applicant/package.json');
   const commonPackagePath = path.resolve(process.cwd(), 'packages/common/package.json');
   const issuerPackagePath = path.resolve(process.cwd(), 'packages/issuer/package.json');
+  const serverPackagePath = path.resolve(process.cwd(), 'packages/server/package.json');
 
-  const packagePaths = [rootPackagePath, applicantPackagePath, commonPackagePath, issuerPackagePath];
+  const packagePaths = [rootPackagePath, applicantPackagePath, commonPackagePath, issuerPackagePath, serverPackagePath];
 
   if(packageName && packageName === 'root') {
     const packagePath = path.resolve(process.cwd(), 'package.json');

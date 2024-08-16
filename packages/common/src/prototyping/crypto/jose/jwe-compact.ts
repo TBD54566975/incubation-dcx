@@ -169,7 +169,7 @@ export class CompactJwe {
 
     // Decrypt the JWE using the provided Key URI.
     const flattenedJwe = await FlattenedJwe.decrypt({
-      jwe: {
+      jwe : {
         ciphertext,
         encrypted_key : encryptedKey || undefined,
         iv            : initializationVector || undefined,

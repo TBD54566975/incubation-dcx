@@ -1,51 +1,76 @@
 import {
-  applicationSchema,
-  DcxApplicantParams,
-  DcxApplicantProcessRecordParams,
+  CreateCredentialApplicationParams,
+  CredentialApplication,
+  CredentialManifest,
+  DcxAgentRecovery,
+  RecordsCreateResponse,
+  dcxConfig,
+  DcxConfig,
   DcxDwnError,
+  DcxError,
   DcxManager,
+  dcxOptions,
   DcxOptions,
-  DcxRecordsQueryResponse,
-  DcxRecordsReadResponse,
+  DcxParams,
+  DcxValidated,
   DwnError,
   DwnUtils,
-  FileSystem,
+  FORMFREE,
+  GetManifestsResponse,
+  Issuer,
   Logger,
   manifestSchema,
-  Mnemonic,
+  PresentationExchangeParams,
+  PresentationSubmission,
+  RecordCreateParams,
+  RecordCreateResponse,
+  RecordReadParams,
+  RecordsCreateParams,
   RecordsParams,
-  responseSchema
+  RecordsQueryParams,
+  RecordsQueryResponse,
+  RecordsReadParams,
+  RecordsReadResponse,
+  responseSchema,
+  ValidateApplicationParams,
+  ValidateVerifiablePresentationResponse
 } from '@dcx-protocol/common';
 import { Web5PlatformAgent } from '@web5/agent';
 import {
   ProtocolsConfigureResponse,
   ProtocolsQueryResponse,
   Record,
-  RecordsCreateResponse,
   Web5
 } from '@web5/api';
-import { PresentationExchange } from '@web5/credentials';
-import { applicant, applicantConfig, applicantOptions, DcxApplicantConfig } from './index.js';
-
+import { PresentationExchange, VerifiablePresentation } from '@web5/credentials';
+import { dcxApplicant } from './index.js';
 
 /**
- * DWN manager handles interactions between the DCX server and the DWN
+ * DcxApplicant is the core class for the applicant side of the DCX protocol.
+ * It handles the credential issuance, verification, selection, as well as
+ * requests to 3rd party VC data provider. It also manages the setup and
+ * initialization of the Web5 connection, the DCX agent, DCX Identity Vault, and the DWN.
+ * @class DcxApplicant implements DcxManager; see {@link DcxManager} for more details.
+ * @param params DcxParams; see {@link DcxParams}: {@link DcxOptions}, {@link DcxConfig}
+ * @returns DcxApplicant
+ * @example
+ * const applicant = new Dcxapplicant({ options: dcxOptions, config: dcxConfig });
+ * applicant.initializeWeb5();
+ * applicant.setupDwn();
  */
 export class DcxApplicant implements DcxManager {
-
-  options : DcxOptions;
-  config  : DcxApplicantConfig;
-
   isSetup       : boolean = false;
   isInitialized : boolean = false;
+  config        : DcxConfig = dcxConfig;
+  options       : DcxOptions;
 
   public static did   : string;
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
-  constructor(params: DcxApplicantParams = {}) {
-    this.config = { ...applicantConfig, ...params.config };
-    this.options = params.options ?? applicantOptions;
+  constructor(params: DcxParams) {
+    this.options = params.options ?? dcxOptions;
+    this.config = params.config ?? this.config;
   }
 
   /**
@@ -57,7 +82,7 @@ export class DcxApplicant implements DcxManager {
     const { status: query, protocols = [] } = await DcxApplicant.web5.dwn.protocols.query({
       message : {
         filter : {
-          protocol : applicant.protocol,
+          protocol : dcxApplicant.protocol,
         },
       },
     });
@@ -78,7 +103,7 @@ export class DcxApplicant implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await DcxApplicant.web5.dwn.protocols.configure({
-      message : { definition: applicant },
+      message : { definition: dcxApplicant },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -99,11 +124,11 @@ export class DcxApplicant implements DcxManager {
     return { status: send, protocol };
   }
 
-  public static async queryRecords(): Promise<DcxRecordsQueryResponse> {
+  public static async queryRecords(): Promise<RecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       message : {
         filter : {
-          protocol     : applicant.protocol,
+          protocol     : dcxApplicant.protocol,
           protocolPath : 'application/response',
           schema       : responseSchema.$id,
           dataFormat   : 'application/json',
@@ -120,41 +145,80 @@ export class DcxApplicant implements DcxManager {
     return { status, records, cursor };
   }
 
+  public async readRecord({ record }: RecordReadParams): Promise<RecordsReadResponse> {
+    throw new DcxError('Method not implemented.', record);
+  }
+
+  public async readApplicationResponseRecords(
+    { records: manifestRecords }: RecordsParams
+  ): Promise<RecordsReadParams> {
+    const records = await Promise.all(
+      manifestRecords.map(async (manifestRecord: Record) => {
+        const { record: read } = await DcxApplicant.web5.dwn.records.read({
+          from    : manifestRecord.author,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
+            },
+          },
+        });
+        return read.data.json();
+      }),
+    );
+    return { records };
+  }
+
+  public async readManifestRecords(
+    { records: manifestRecords }: RecordsParams
+  ): Promise<RecordsReadParams> {
+    const records = await Promise.all(
+      manifestRecords.map(async (manifestRecord: Record) => {
+        const { record: read } = await DcxApplicant.web5.dwn.records.read({
+          from    : manifestRecord.author,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
+            },
+          },
+        });
+        return read.data.json();
+      }),
+    );
+    return { records };
+  }
+
   /**
    * Filter manifest records
    * @param applicationResponseRecords Record[]; see {@link Record}
    * @returns applicationResponses[]; see {@link responseSchema}
    */
-  public async readRecords({ records, type }: RecordsParams & { type: string }): Promise<DcxRecordsReadResponse> {
-    const recordReads = await Promise.all(
+  public async readRecords({ records }: RecordsParams): Promise<RecordsReadResponse> {
+    const reads = await Promise.all(
       records.map(async (record: Record) => {
-        const baseReadRequest = {
+        const { record: read } = await DcxApplicant.web5.dwn.records.read({
+          from    : record.author,
           message : {
             filter : {
               recordId : record.id,
             },
           },
-        };
-        const readRequest = type === 'manifest'
-          ? { ...baseReadRequest, from: record.author }
-          : baseReadRequest;
-        const { record: read } = await DcxApplicant.web5.dwn.records.read(readRequest);
+        });
         return read.data.json();
       }),
     );
-    return { records: recordReads };
+    return { records: reads };
   }
 
   /**
-   * Query records
+   * Query records from DWN
    */
-  public async queryRecords({ from }: { from: string }): Promise<DcxRecordsQueryResponse> {
+  public async queryRecords({ from, protocolPath }: RecordsQueryParams): Promise<RecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       from,
       message : {
         filter : {
-          protocol     : applicant.protocol,
-          protocolPath : 'manifest',
+          protocolPath,
+          protocol     : dcxApplicant.protocol,
           schema       : manifestSchema.$id,
           dataFormat   : 'application/json',
         },
@@ -171,62 +235,201 @@ export class DcxApplicant implements DcxManager {
   }
 
   /**
-   *
-   * { vcJwts: string[], presentationDefinition: PresentationDefinitionV2 }
-   * @param pex Presentation Exchange object; see {@link PresentationExchangeArgs}
-   * @param pex.vcJwts The list of Verifiable Credentials (VCs) in JWT format to be evaluated.
-   * @param pex.presentationDefinition The Presentation Definition V2 to match the VCs against.
-   * @param issuerDid The DID of the issuer to send the application record to.
+   * Query records from DWN
    */
-  public static async processRecord(
-    { pex, recipient }: DcxApplicantProcessRecordParams
-  ): Promise<RecordsCreateResponse> {
-    const presentationResult = PresentationExchange.createPresentationFromCredentials(pex);
-
-    const { record, status: create } = await DcxApplicant.web5.dwn.records.create({
-      store   : true,
-      data    : presentationResult.presentation,
+  public async queryManifestRecords({ from }: RecordsQueryParams): Promise<RecordsQueryResponse> {
+    const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
+      from,
       message : {
-        recipient,
-        schema       : applicationSchema.$id,
-        dataFormat   : 'application/json',
-        protocol     : applicant.protocol,
-        protocolPath : 'application'
-      }
+        filter : {
+          protocol     : dcxApplicant.protocol,
+          protocolPath : 'manifest',
+          schema       : manifestSchema.$id,
+          dataFormat   : 'application/json',
+        },
+      },
     });
 
-    if (DwnUtils.isFailure(create.code)) {
-      const { code, detail } = create;
-      Logger.error('Failed to create missing manifest record', create);
+    if (DwnUtils.isFailure(status.code)) {
+      const { code, detail } = status;
+      Logger.error('DWN manifest records query failed', status);
+      throw new DwnError(code, detail);
+    }
+
+    return { status, records, cursor };
+  }
+
+  public async createVerifiablePresentation(
+    { vcJwts, presentationDefinition }: PresentationExchangeParams
+  ): Promise<{vp: VerifiablePresentation}> {
+    const { presentationSubmission } = PresentationExchange.createPresentationFromCredentials({
+      vcJwts,
+      presentationDefinition
+    });
+    Logger.log('Presentation Submission', presentationSubmission);
+    const vp = await VerifiablePresentation.create({
+      holder         : DcxApplicant.did,
+      vcJwts         : vcJwts,
+      additionalData : { presentationSubmission }
+    });
+    Logger.log('Verifiable Presentation', vp);
+    return { vp };
+  }
+
+  public async createCredentialApplication(
+    { presentationSubmission, manifestId }: CreateCredentialApplicationParams
+  ): Promise<CredentialApplication> {
+    const app = {
+      id                      : crypto.randomUUID(),
+      spec_version            : 'https://identity.foundation/credential-manifest/#versioning',
+      applicant               : DcxApplicant.did,
+      manifest_id             : manifestId,
+      format                  : { jwt_vc: { alg: ['EdDSA'] }},
+      presentation_submission : presentationSubmission,
+    };
+    return new CredentialApplication(
+      app.id,
+      app.spec_version,
+      app.applicant,
+      app.manifest_id,
+      app.format,
+      app.presentation_submission
+    );
+  }
+
+  public validatePresentationSubmission(presentationSubmission: PresentationSubmission): DcxValidated {
+    const validation = PresentationExchange.validateSubmission({ presentationSubmission }) as DcxValidated[];
+    Logger.log('Presentation Submission Validation', validation);
+    const { tag, status, message } = validation?.[0];
+    Logger.log('Presentation Submission Checked: tag, status, message', tag, status, message);
+    return { tag, status, message };
+  }
+
+
+  public validateVerifiablePresentation(
+    { presentationDefinition, presentation }: ValidateApplicationParams
+  ): ValidateVerifiablePresentationResponse {
+    const validation = PresentationExchange.evaluatePresentation({ presentationDefinition, presentation });
+    Logger.log('Verifiable Presentation Validation', validation);
+    const { areRequiredCredentialsPresent, verifiableCredential } = validation;
+    Logger.log('Are required credentials present?', areRequiredCredentialsPresent);
+    Logger.log('Verifiable Credentials', verifiableCredential);
+    return { areRequiredCredentialsPresent, verifiableCredential };
+  }
+
+  public async createRecords({ data, protocolPath, schema }: RecordsCreateParams): Promise<RecordsCreateResponse>{
+    Logger.log('Method not implemented.', { data, protocolPath, schema });
+    return { records: [] };
+  }
+
+
+  public async createRecord(
+    { protocolPath, data, schema }: RecordCreateParams
+  ): Promise<RecordCreateResponse> {
+    const { record, status } = await DcxApplicant.web5.dwn.records.create({
+      data,
+      store   : true,
+      message : {
+        schema,
+        protocolPath,
+        dataFormat   : 'application/json',
+        protocol     : dcxApplicant.protocol,
+      },
+    });
+
+    const { code, detail } = status;
+    if (DwnUtils.isFailure(status.code)) {
+      Logger.error('Failed to create record', status);
       throw new DwnError(code, detail);
     }
 
     if (!record) {
-      throw new DcxDwnError(`Failed to create application record: ${create.code} - ${create.detail}`);
+      throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
     }
 
-    const { status: local } = await record.send();
-    if (DwnUtils.isFailure(local.code)) {
-      const { code, detail } = local;
-      Logger.error('Failed to send dwn application record to local', local);
+    const { status: applicant } = await record.send();
+    if (DwnUtils.isFailure(applicant.code)) {
+      const { code, detail } = applicant;
+      Logger.error('Failed to send record to applicant dwn', applicant);
+      throw new DwnError(code, detail);
+    }
+    Logger.debug('Sent application record to local dwn', applicant);
+
+    const manifest = this.findManifest({ id: data.manifest_id });
+    const { id: recipient } = this.findIssuer({ id: manifest?.issuer.id });
+
+    const { status: issuer } = await record.send(recipient);
+    if (DwnUtils.isFailure(issuer.code)) {
+      const { code, detail } = issuer;
+      Logger.error('Failed to send record to issuer dwn', issuer);
       throw new DwnError(code, detail);
     }
 
-    const { status: remote } = await record.send(recipient);
-    if (DwnUtils.isFailure(remote.code)) {
-      const { code, detail } = remote;
-      Logger.error('Failed to send dwn application record to remote', remote);
-      throw new DwnError(code, detail);
-    }
+    Logger.debug('Sent application record to remote dwn', issuer);
 
-    Logger.debug('Sent application record to remote dwn', remote);
-
-    return { status: remote, record };
+    return { status: { applicant, issuer }, record };
   }
 
   /**
-   * Setup DWN with credential-applicant protocol and manifest records
+   *
+   * Find issuer by name or id
+   *
+   * @param param.name the name of the issuer to find
+   * @param param.id the id of the issuer to find
+   * @returns Issuer or FORMFREE; see {@link Issuer}, {@link FORMFREE}
+   */
+  public findIssuer({ name, id }: Partial<Issuer>): Issuer {
+    return this.options.issuers.find((issuer: Issuer) => issuer.name === name || issuer.id === id) ?? FORMFREE;
+  }
+
+  /**
+   *
+   * Get manifests by issuer name or id
+   *
+   * @param param.name the name of the issuer to find
+   * @param param.id the id of the issuer to find
+   * @returns RecordsReadParams; see {@link RecordsReadParams}
+   */
+  public async getManifests({ name, id }: Partial<Issuer>): Promise<GetManifestsResponse> {
+    const issuer = this.findIssuer({ name, id });
+    const { records: query } = await this.queryRecords({ from: issuer.id, protocolPath: 'manifest' });
+    Logger.log(`Found ${query.length} manifest records in ${issuer.name} dwn`);
+    const { records: manifests } = await this.readRecords({ records: query });
+    Logger.log(`Read ${manifests.length} manifest records from ${issuer.name} dwn`);
+    return { manifests };
+  }
+
+  /**
+   *
+   * Find a manifest by name or id
+   *
+   * @param param.name the name of the manifest to find
+   * @param param.id the id of the manifest to find
+   * @returns CredentialManifest or undefined; see {@link CredentialManifest}
+   */
+  public findManifest({ name, id }: Partial<CredentialManifest>): CredentialManifest | undefined {
+    return this.options.manifests.find(
+      (manifest: CredentialManifest) => manifest.name === name || manifest.id  === id);
+  }
+
+  /**
+   *
+   * Find a manifest by name or id
+   *
+   * @param param.name the name of the manifest to find
+   * @param param.id the id of the manifest to find
+   * @returns CredentialManifest or undefined; see {@link CredentialManifest}
+   */
+  public findManifests({ name, id }: Partial<CredentialManifest>): CredentialManifest[] {
+    return this.options.manifests.filter(
+      (manifest: CredentialManifest) => this.findManifest({ name, id })?.id === manifest.id);
+  }
+
+  /**
+   * Setup DWN with dcx applicant protocol
+   *
    * @returns boolean indicating success or failure
+   * @throws DcxDwnError if the setup fails
    */
   public async setupDwn(): Promise<void> {
     // Logger.log('Setting up dwn ...');
@@ -239,92 +442,46 @@ export class DcxApplicant implements DcxManager {
       if (!protocols.length) {
         Logger.log('Configuring dwn with dcx applicant protocol ...');
         const { status, protocol } = await this.configureProtocols();
-        Logger.log(
-          `Configured credential applicant protocol in dwn: ${status.code} - ${status.detail}`,
-          protocol,
-        );
+        const { code, detail } = status;
+        Logger.log(`Configured dcx applicant protocol in applicant dwn: ${code} - ${detail}`, protocol?.definition.protocol);
       }
+
+      Logger.log('Dcx applicant dwn setup complete');
       this.isSetup = true;
-      Logger.log('DWN Setup Complete!');
     } catch (error: any) {
-      Logger.error(`DWN Setup Failed!`, error);
+      Logger.error(`Dwn setup failed`, error);
       throw error;
     }
   }
 
   /**
-   *
-   * Checks the state of the password and recovery phrase
-   *
-   * @param firstLaunch A boolean indicating if this is the first launch of the agent
-   * @returns { password: string, recoveryPhrase?: string }
-   * @throws DcxServerError
-   *
-   */
-  public async checkWeb5Config(): Promise<{ password: string; recoveryPhrase?: string }> {
-    const web5Password = this.config.web5Password;
-    const web5RecoveryPhrase = this.config.web5RecoveryPhrase;
-
-    // TODO: consider generating a new recovery phrase if one is not provided
-    // this.config.APPLICANT_WEB5_RECOVERY_PHRASE = Mnemonic.createRecoveryPhrase();
-
-    if (!web5Password && !web5RecoveryPhrase) {
-      Logger.security(
-        'APPLICANT_WEB5_PASSWORD and APPLICANT_WEB5_RECOVERY_PHRASE not found on first launch! ' +
-        'New APPLICANT_WEB5_PASSWORD saved to applicant.password.key file. ' +
-        'New APPLICANT_WEB5_RECOVERY_PHRASE saved to applicant.recovery.key file.',
-      );
-      const password = Mnemonic.createPassword();
-      await FileSystem.overwrite('applicant.password.key', password);
-
-      const recoveryPhrase = Mnemonic.createRecoveryPhrase();
-      await FileSystem.overwrite('applicant.recovery.key', recoveryPhrase);
-
-      this.config.web5Password = password;
-      this.config.web5RecoveryPhrase = recoveryPhrase;
-      return { password, recoveryPhrase };
-    }
-
-    if (web5Password && !web5RecoveryPhrase) {
-      Logger.warn(
-        'APPLICANT_WEB5_PASSWORD found without APPLICANT_WEB5_RECOVERY_PHRASE! ' +
-        'Attempting to unlock the vault with APPLICANT_WEB5_PASSWORD.',
-      );
-      return { password: web5Password };
-    }
-
-    return {
-      password       : web5Password,
-      recoveryPhrase : web5RecoveryPhrase,
-    };
-  }
-  /**
-   *
-   * Configures the DCX server by creating a new password, initializing Web5,
-   * connecting to the remote DWN and configuring the DWN with the DCX applicant protocol
-   *
+   * Initialize Web5 for DcxApplicant
    */
   public async initializeWeb5(): Promise<void> {
     Logger.log('Initializing Web5 for DcxApplicant ... ');
 
     // Check the state of the password and recovery phrase
-    const { password: userPassword, recoveryPhrase: userRecoveryPhrase } = await this.checkWeb5Config();
+    const { password, recoveryPhrase } = await DcxAgentRecovery.validate({
+      password       : this.config.applicantProtocol.web5Password,
+      recoveryPhrase : this.config.applicantProtocol.web5RecoveryPhrase,
+      type           : 'applicant'
+    });
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.options.dwns!;
-    const connectParams = !userRecoveryPhrase
+    const dwnEndpoints = this.options.dwns;
+    const connectParams = !recoveryPhrase
       ? {
-        password         : userPassword,
+        password,
         didCreateOptions : { dwnEndpoints }
-      }
-      : {
-        password         : userPassword,
-        recoveryPhrase   : userRecoveryPhrase,
+      } : {
+        password,
+        recoveryPhrase,
         didCreateOptions : { dwnEndpoints }
       };
 
     const { web5, did } = await Web5.connect(connectParams);
     const agent = web5.agent as Web5PlatformAgent;
+
     // Set the DcxManager properties
     DcxApplicant.web5 = web5;
     DcxApplicant.agent = agent;

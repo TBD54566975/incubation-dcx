@@ -2,3 +2,4 @@ packages:
   - 'packages/applicant'
   - 'packages/common'
   - 'packages/issuer'
+  - 'packages/server'

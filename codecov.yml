@@ -23,6 +23,10 @@ component_management:
       name: issuer
       paths: ["packages/issuer/**"]
 
+    - component_id: package-server
+      name: server
+      paths: ["packages/server/**"]
+
 coverage:
   status:
     project:

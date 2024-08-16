@@ -5,8 +5,8 @@ export const schema = {
   $schema    : 'http://json-schema.org/draft-07/schema#',
   type       : 'object',
   properties : {
-    url: {
-      type: 'string',
+    url : {
+      type : 'string',
     },
   },
 };

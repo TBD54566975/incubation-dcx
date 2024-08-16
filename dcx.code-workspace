@@ -16,6 +16,10 @@
       "name": "issuer",
       "path": "packages/issuer",
     },
+    {
+      "name": "server",
+      "path": "packages/server",
+    },
   ],
   "settings": {
     "eslint.workingDirectories": [

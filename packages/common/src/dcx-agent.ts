@@ -148,7 +148,7 @@ implements Web5PlatformAgent<TKeyManager>
     });
 
     dwnApi ??= new AgentDwnApi({
-      dwn: await AgentDwnApi.createDwn({ dataPath, didResolver: didApi }),
+      dwn : await AgentDwnApi.createDwn({ dataPath, didResolver: didApi }),
     });
 
     identityApi ??= new AgentIdentityApi({ store: new DwnIdentityStore() });

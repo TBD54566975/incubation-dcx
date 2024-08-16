@@ -1,6 +1,6 @@
 import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dcx-protocol/common';
 
-export const issuer = {
+export const dcxIssuer = {
   // issuer protocol is a subset of exchange protocol
   // used on server side to interact with applicant & issuer dwn
   protocol  : 'https://decentralized.cx/protocol/credential-exchange',
@@ -43,6 +43,7 @@ export const issuer = {
         {
           who : 'author',
           of  : 'application',
+          // is there an abstract use case instance where we'd want to let applicants update their application?
           can : ['read'],
         },
       ],

@@ -1,9 +1,9 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
-import { DcxConfig } from '../config';
-
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
+import { DcxConfig } from '../dcx-config';
 import { DcxOptions } from './options';
+import { CredentialApplication, CredentialManifest } from '../interfaces/dcx';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -61,58 +61,124 @@ export type PresentationDefinition = {
   input_descriptors: InputDescriptor[];
 };
 
-/**
- * Issuer interface defines objects passed into server.useOptions.issuers
- * DCX issuers are entities that issue credentials to applicants prior to an application submission.
- * These issuers are 3rd party data validators that sign VCs and provide them to applicants.
- * The list of trusted issuers within DCX should be list of entities that are trusted to issue the VCs
- * that are defined in the CredentialManifest.presentation_definition.input_descriptors section as inputs to the DCX.
- * See more details at {@link https://identity.foundation/credential-manifest/#input-evaluation}
- */
-export interface Issuer extends AdditionalProperties {
-  name: string;
-  id: string;
-}
-
-/**
- * CredentialManifest implements DIF spec
- * See more details at {@link https://identity.foundation/credential-manifest/#credential-manifest}
- */
-export interface CredentialManifest extends AdditionalProperties {
-  id: string;
-  name: string;
-  description: string;
-  spec_version: string;
-  issuer: Issuer;
-  output_descriptors: ManifestOutputDescriptor[];
-  format: ManifestFormat;
-  presentation_definition: PresentationDefinition;
-}
-
 export type VerifiedCredential = {
   issuer: string;
   subject: string;
   vc: VcDataModel;
 };
 
-export type PresentationExchangeArgs = {
+export type PresentationExchangeParams = {
   vcJwts: string[];
   presentationDefinition: PresentationDefinitionV2
 };
 
-export type DcxIssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
-export type DcxApplicantProcessRecordParams = { pex: PresentationExchangeArgs, recipient: string }
-export type DcxRecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
-export type DcxRecordsReadParams = { records: CredentialManifest[] | any[] };
-export type DcxRecordsCreateResponse = DcxRecordsReadParams;
-export type DcxRecordsFilterResponse = DcxRecordsReadParams;
-export type DcxRecordsReadResponse = DcxRecordsReadParams;
-export type RecordsParams = { records: DwnRecord[] };
-export type ManifestParams = { records: CredentialManifest[] };
-
-export type DcxManagerParams = {
-    options?: DcxOptions;
-    config?: DcxConfig & { [key: string]: any };
+export type DcxApplicationRecordsCreateResponse = {
+  record: DwnRecord;
+  applicant: DwnResponseStatus;
+  issuer: DwnResponseStatus;
+}
+export type Descriptor = {
+  id: string;
+  format: string;
+  path: string;
 };
-export type DcxIssuerParams = DcxManagerParams;
-export type DcxApplicantParams = DcxManagerParams;
+
+export type PresentationSubmission = {
+  id: string;
+  definition_id: string;
+  descriptor_map: Descriptor[];
+};
+
+export type Format = ManifestFormat;
+
+export type VPCredentialApplication = {
+  '@context': string[];
+  type: string[];
+  credential_application: CredentialApplication;
+  verifiableCredential: VerifiableCredential[];
+  presentation_submission: PresentationSubmission;
+};
+
+export type ValidateApplicationParams = {
+  presentationDefinition: PresentationDefinitionV2;
+  presentation: any
+};
+
+export type DcxValidated = {
+  tag: string;
+  status: string;
+  message: string
+};
+
+export type ValidateVerifiablePresentationResponse = {
+  areRequiredCredentialsPresent: 'info' | 'warn' | 'error';
+  verifiableCredential: Array<any>;
+};
+
+export type CreateCredentialApplicationParams = { presentationSubmission: PresentationSubmission; manifestId: string; };
+
+export type DcxParams = { options?: DcxOptions; config?: DcxConfig };
+export type DcxProtocolPath = 'manifest' | 'application/response' | 'response';
+export type IssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
+export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }
+export type GetManifestsResponse = { manifests: CredentialManifest[] };
+/**
+ * Params & Response types for performing CRUD operations on a list of Records and a single Record
+ *
+ * Generic
+ *   For performing CRUD operations (inclusive) on a list of records or a single record
+ *
+ * Specific
+ *   For performing specifc a CRUD operation (exclusive) on a list of records or a single record
+ *
+ */
+// TODO: define CredentialResponse and CredentialInvoice types
+export type DwnStatus = { code: number; detail: string; }
+export type DcxDwnResponseStatus = { status?: { issuer?: DwnStatus; applicant?: DwnStatus; }}
+export type RecordsDataResponse = { data: CredentialManifest[] | CredentialApplication[] | any[] };
+
+// Record - CRUD
+export type RecordParams = { record: DwnRecord };
+export type RecordResponse = { record: DwnRecord };
+// Record - Create
+export type RecordCreateParams = { data: any; protocolPath?: DcxProtocolPath; schema: string };
+export type RecordCreateResponse = RecordResponse & DcxDwnResponseStatus;
+// Record - Read
+export type RecordReadParams = RecordParams;
+export type RecordReadResponse = { records: any[] } & DcxDwnResponseStatus;
+// TODO: define these types once needed
+// Record - Update
+export type RecordUpdateParams = {};
+export type RecordUpdateResponse = {};
+// Record - Delete
+export type RecordDeleteParams = {};
+export type RecordDeleteResponse = {};
+
+// Records[] - CRUD
+export type RecordsParams = { records: DwnRecord[] };
+export type RecordsResponse = { records: DwnRecord[] };
+// Records[] - Create
+export type RecordsCreateParams = { data: any[]; protocolPath?: DcxProtocolPath; schema: string };
+export type RecordsCreateResponse = RecordsResponse;
+// Records[] - Read
+export type RecordsReadParams = RecordsParams;
+export type RecordsReadResponse = { records: any[] } & DcxDwnResponseStatus;
+// TODO: define these types once needed
+// Records[] - Update
+export type RecordsUpdateParams = {};
+export type RecordsUpdateResponse = {};
+// Records[] - Delete
+export type RecordsDeleteParams = {};
+export type RecordsDeleteResponse = {};
+
+// Records[] - Query
+export type RecordsQueryParams = { from?: string; protocolPath?: DcxProtocolPath }
+export type RecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
+
+export interface DcxDwnRecord<T> extends DwnRecord {
+  record: T;
+  status: DwnResponseStatus;
+}
+// Records[] - Filter
+export type RecordsFilterParams = { records: CredentialManifest[]; type: 'manifests'};
+export type RecordsFilterResponse = { data: CredentialManifest[] };
