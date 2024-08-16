@@ -1,2 +1,2 @@
 export * from './dcx-applicant.js';
-export { protocol as dcxApplicant } from './protocol.js';
+export * from './dcx-applicant-protocol.js';
