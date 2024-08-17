@@ -9,6 +9,7 @@ process.env.NODE_ENV = 'test';
 const dcxIssuer = new DcxIssuer({
   config : {
     ...dcxConfig,
+    dwnEndpoints   : ['http://localhost:3000'],
     issuerProtocol : {
       ...dcxConfig.issuerProtocol,
       web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),

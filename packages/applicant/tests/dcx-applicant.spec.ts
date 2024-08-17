@@ -12,6 +12,7 @@ process.env.NODE_ENV = 'test';
 const dcxApplicant = new DcxApplicant({
   config : {
     ...dcxConfig,
+    dwnEndpoints      : ['http://localhost:3000'],
     applicantProtocol : {
       ...dcxConfig.applicantProtocol,
       web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),

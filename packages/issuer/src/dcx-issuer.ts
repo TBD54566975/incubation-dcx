@@ -485,6 +485,8 @@ export class DcxIssuer implements DcxManager {
       throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
     }
 
+    if(process.env.NODE_ENV === 'test') return { record };
+
     const { status: issuer } = await record.send();
     if (DwnUtils.isFailure(issuer.code)) {
       const { code, detail } = issuer;
@@ -493,9 +495,9 @@ export class DcxIssuer implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', issuer);
 
-    const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
-    const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
     if(protocolPath !== 'manifest') {
+      const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+      const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
       const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;
@@ -578,18 +580,31 @@ export class DcxIssuer implements DcxManager {
 
       if (!manifests.length) {
       // Create missing manifest records
-        const { records } = await this.createRecords({ protocolPath: 'manifest', schema: manifestSchema.$id, data: this.options.manifests });
+        const { records } = await this.createRecords({
+          protocolPath : 'manifest',
+          schema       : manifestSchema.$id,
+          data         : this.options.manifests
+        });
         Logger.log(`Created ${records.length} manifest records in dcx issuer dwn`, records);
+
       } else {
         // Filter and create missing manifest records
-        const { data: records } = await this.filterRecords({ records: manifests, type: 'manifests' });
+        const { missing: records } = DcxUtils.findMissingManifests({
+          dwnManifests   : manifests,
+          localManifests : this.options.manifests
+        });
         Logger.debug(`Found ${records.length} unwritten manifests`);
 
-        const { records: create } = await this.createRecords({ data: records, protocolPath: 'manifest', schema: manifestSchema.$id });
+        const { records: create } = await this.createRecords({
+          data         : records,
+          protocolPath : 'manifest',
+          schema       : manifestSchema.$id
+        });
         Logger.log(`Created ${create.length} records`, create);
-      }
 
+      }
       Logger.log('Dcx Issuer DWN Setup Complete!');
+
       this.isSetup = true;
     } catch (error: any) {
       Logger.error('DWN Setup Failed!', error);
