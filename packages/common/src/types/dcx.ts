@@ -142,10 +142,10 @@ export type RecordParams = { record: DwnRecord };
 export type RecordResponse = { record: DwnRecord };
 // Record - Create
 export type RecordCreateParams = { data: any; protocolPath?: DcxProtocolPath; schema: string };
-export type RecordCreateResponse = RecordResponse & DcxDwnResponseStatus;
+export type RecordCreateResponse = RecordResponse;
 // Record - Read
 export type RecordReadParams = RecordParams;
-export type RecordReadResponse = { records: any[] } & DcxDwnResponseStatus;
+export type RecordReadResponse = { records: any[] };
 // TODO: define these types once needed
 // Record - Update
 export type RecordUpdateParams = {};
@@ -162,7 +162,7 @@ export type RecordsCreateParams = { data: any[]; protocolPath?: DcxProtocolPath;
 export type RecordsCreateResponse = RecordsResponse;
 // Records[] - Read
 export type RecordsReadParams = RecordsParams;
-export type RecordsReadResponse = { records: any[] } & DcxDwnResponseStatus;
+export type RecordsReadResponse = { records: any[] };
 // TODO: define these types once needed
 // Records[] - Update
 export type RecordsUpdateParams = {};

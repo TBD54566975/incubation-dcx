@@ -11,6 +11,7 @@ import {
   DcxOptions,
   DcxParams,
   DcxProtocolHandlerError,
+  DcxUtils,
   DwnError,
   DwnUtils,
   Handler,
@@ -23,7 +24,6 @@ import {
   RecordCreateParams,
   RecordCreateResponse,
   RecordsCreateParams,
-  RecordsCreateResponse,
   RecordsFilterParams,
   RecordsFilterResponse,
   RecordsParams,
@@ -493,32 +493,26 @@ export class DcxIssuer implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', issuer);
 
-    // const manifest = this.findManifest({ id: data.manifest_id });
-    // const { id: recipient } = this.findIssuer({ id: manifest?.issuer.id });
+    const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+    const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
     if(protocolPath !== 'manifest') {
-      const { status: applicant } = await record.send('did:web5:agent');
+      const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;
         Logger.error('Failed to send record to applicant dwn', applicant);
         throw new DwnError(code, detail);
       }
       Logger.debug('Sent application record to remote dwn', applicant);
-      return { record, status: { issuer, applicant } };
     }
-    return { record, status: { issuer } };
+
+    return { record };
   }
 
-  public async createRecords({ data, protocolPath, schema }: RecordsCreateParams): Promise<RecordsCreateResponse> {
-    // const records: Record[] = await Promise.all(
-    //   data.map(
-    //     async (d: CredentialManifest | any) => {
-    //       return (await this.createRecord({ data: d, protocolPath, schema }))?.record;
-    //     }
-    //   ),
-    // );
-    // return { records };
-    Logger.log('Method not implemented.', { data, protocolPath, schema });
-    return { records: [] };
+  public async createRecords({ data: creates, protocolPath, schema }: RecordsCreateParams): Promise<{records: Record[]}>{
+    const records = await Promise.all(
+      creates.map(async (data: any) => (await this.createRecord({ protocolPath, data, schema }))?.record)
+    );
+    return { records };
   }
 
 

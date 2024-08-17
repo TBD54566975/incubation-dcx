@@ -1,9 +1,7 @@
 import {
   CreateCredentialApplicationParams,
   CredentialApplication,
-  CredentialManifest,
   DcxAgentRecovery,
-  RecordsCreateResponse,
   dcxConfig,
   DcxConfig,
   DcxDwnError,
@@ -12,10 +10,10 @@ import {
   dcxOptions,
   DcxOptions,
   DcxParams,
+  DcxUtils,
   DcxValidated,
   DwnError,
   DwnUtils,
-  FORMFREE,
   GetManifestsResponse,
   Issuer,
   Logger,
@@ -23,7 +21,6 @@ import {
   PresentationExchangeParams,
   PresentationSubmission,
   RecordCreateParams,
-  RecordCreateResponse,
   RecordReadParams,
   RecordsCreateParams,
   RecordsParams,
@@ -317,15 +314,16 @@ export class DcxApplicant implements DcxManager {
     return { areRequiredCredentialsPresent, verifiableCredential };
   }
 
-  public async createRecords({ data, protocolPath, schema }: RecordsCreateParams): Promise<RecordsCreateResponse>{
-    Logger.log('Method not implemented.', { data, protocolPath, schema });
-    return { records: [] };
+  public async createRecords({ data: creates, protocolPath, schema }: RecordsCreateParams): Promise<{records: Record[]}>{
+    const records = await Promise.all(
+      creates.map(async (data: any) => (await this.createRecord({ protocolPath, data, schema }))?.record)
+    );
+    return { records };
   }
-
 
   public async createRecord(
     { protocolPath, data, schema }: RecordCreateParams
-  ): Promise<RecordCreateResponse> {
+  ): Promise<{record: Record}> {
     const { record, status } = await DcxApplicant.web5.dwn.records.create({
       data,
       store   : true,
@@ -355,8 +353,8 @@ export class DcxApplicant implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', applicant);
 
-    const manifest = this.findManifest({ id: data.manifest_id });
-    const { id: recipient } = this.findIssuer({ id: manifest?.issuer.id });
+    const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+    const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
 
     const { status: issuer } = await record.send(recipient);
     if (DwnUtils.isFailure(issuer.code)) {
@@ -367,19 +365,7 @@ export class DcxApplicant implements DcxManager {
 
     Logger.debug('Sent application record to remote dwn', issuer);
 
-    return { status: { applicant, issuer }, record };
-  }
-
-  /**
-   *
-   * Find issuer by name or id
-   *
-   * @param param.name the name of the issuer to find
-   * @param param.id the id of the issuer to find
-   * @returns Issuer or FORMFREE; see {@link Issuer}, {@link FORMFREE}
-   */
-  public findIssuer({ name, id }: Partial<Issuer>): Issuer {
-    return this.options.issuers.find((issuer: Issuer) => issuer.name === name || issuer.id === id) ?? FORMFREE;
+    return { record };
   }
 
   /**
@@ -391,38 +377,12 @@ export class DcxApplicant implements DcxManager {
    * @returns RecordsReadParams; see {@link RecordsReadParams}
    */
   public async getManifests({ name, id }: Partial<Issuer>): Promise<GetManifestsResponse> {
-    const issuer = this.findIssuer({ name, id });
+    const issuer = DcxUtils.findIssuer({ issuers: this.options.issuers, name, id });
     const { records: query } = await this.queryRecords({ from: issuer.id, protocolPath: 'manifest' });
     Logger.log(`Found ${query.length} manifest records in ${issuer.name} dwn`);
     const { records: manifests } = await this.readRecords({ records: query });
     Logger.log(`Read ${manifests.length} manifest records from ${issuer.name} dwn`);
     return { manifests };
-  }
-
-  /**
-   *
-   * Find a manifest by name or id
-   *
-   * @param param.name the name of the manifest to find
-   * @param param.id the id of the manifest to find
-   * @returns CredentialManifest or undefined; see {@link CredentialManifest}
-   */
-  public findManifest({ name, id }: Partial<CredentialManifest>): CredentialManifest | undefined {
-    return this.options.manifests.find(
-      (manifest: CredentialManifest) => manifest.name === name || manifest.id  === id);
-  }
-
-  /**
-   *
-   * Find a manifest by name or id
-   *
-   * @param param.name the name of the manifest to find
-   * @param param.id the id of the manifest to find
-   * @returns CredentialManifest or undefined; see {@link CredentialManifest}
-   */
-  public findManifests({ name, id }: Partial<CredentialManifest>): CredentialManifest[] {
-    return this.options.manifests.filter(
-      (manifest: CredentialManifest) => this.findManifest({ name, id })?.id === manifest.id);
   }
 
   /**
