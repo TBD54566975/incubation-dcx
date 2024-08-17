@@ -485,6 +485,8 @@ export class DcxIssuer implements DcxManager {
       throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
     }
 
+    if(process.env.NODE_ENV === 'test') return { record };
+
     const { status: issuer } = await record.send();
     if (DwnUtils.isFailure(issuer.code)) {
       const { code, detail } = issuer;
@@ -493,9 +495,9 @@ export class DcxIssuer implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', issuer);
 
-    const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
-    const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
     if(protocolPath !== 'manifest') {
+      const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+      const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
       const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;

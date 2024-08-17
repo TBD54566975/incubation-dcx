@@ -1,13 +1,13 @@
 import { BearerDid } from '@web5/dids';
 import { expect } from 'chai';
-import { dcxConfig, DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '../src/index.js';
+import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '../src/index.js';
 
 describe('DcxAgent class', () => {
   let agentVault: DcxIdentityVault;
   let agent: DcxAgent;
   let password = Mnemonic.createPassword();
   let recoveryPhrase = Mnemonic.createRecoveryPhrase();
-  let dwnEndpoints = dcxConfig.endpoints.dwns;
+  let dwnEndpoints = ['http://localhost:3000']  ;
   const dataPath = '__TEST_DATA__/DCX_COMMON/AGENT';
 
   before(() => {

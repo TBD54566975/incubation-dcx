@@ -20,7 +20,7 @@
     "publish:all": "pnpm --filter applicant publish && pnpm --filter common publish && pnpm --filter issuer publish && pnpm --filter server publish",
     "test": "pnpm --recursive --stream test",
     "test:node": "pnpm --recursive --stream test:node",
-    "workflow": "pnpm install --frozen-lockfile && pnpm build && pnpm build:tests:node",
+    "workflow": "pnpm install --frozen-lockfile && pnpm lint && pnpm build && pnpm build:tests:node",
     "version": "tsx scripts/version.ts",
     "version:patch": "tsx scripts/version.ts patch",
     "version:minor": "tsx scripts/version.ts minor",
