@@ -6,7 +6,7 @@ import { Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { expect } from 'chai';
 import { DcxApplicant } from '../src/index.js';
-console.log('process.env', process.env);
+
 process.env.NODE_ENV = 'test';
 
 const dcxApplicant = new DcxApplicant({

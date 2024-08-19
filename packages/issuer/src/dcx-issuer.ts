@@ -190,7 +190,7 @@ export class DcxIssuer implements DcxManager {
         presentationDefinition : manifest.presentation_definition,
       });
     } catch (error) {
-      console.log('VC does not satisfy Presentation Definition: ' + error);
+      Logger.error('VC does not satisfy Presentation Definition: ' + error);
     }
     const verifiedCredentials: VerifiableCredential[] = [];
 
