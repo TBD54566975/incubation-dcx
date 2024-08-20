@@ -3,7 +3,7 @@ name: DCX Lint Build Test
 on: [push]
 
 jobs:
-  build:
+  lint-build-test:
     runs-on: ubuntu-latest
 
     steps:

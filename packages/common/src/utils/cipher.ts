@@ -7,7 +7,7 @@ export enum CipherAlgorightm {
   AES_256_CTR = 'aes-256-ctr',
 }
 
-export class StreamCipher {
+export class DcxStreamCipher {
   algorithm: CipherAlgorightm;
   constructor(algorithm: CipherAlgorightm) {
     this.algorithm = algorithm;
@@ -27,9 +27,9 @@ export class StreamCipher {
   ): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return await StreamCipher.aes256CbcEncryptStream(key, initVector, plaintextStream);
+        return await DcxStreamCipher.aes256CbcEncryptStream(key, initVector, plaintextStream);
       case CipherAlgorightm.AES_256_CTR:
-        return await StreamCipher.aes256CtrEncryptStream(key, initVector, plaintextStream);
+        return await DcxStreamCipher.aes256CtrEncryptStream(key, initVector, plaintextStream);
       default:
         throw new Error('Algorithm not supported');
     }
@@ -49,9 +49,9 @@ export class StreamCipher {
   ): Promise<Readable> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return StreamCipher.aes256CbcDecryptStream(key, initVector, cipherStream);
+        return DcxStreamCipher.aes256CbcDecryptStream(key, initVector, cipherStream);
       case CipherAlgorightm.AES_256_CTR:
-        return StreamCipher.aes256CtrDecryptStream(key, initVector, cipherStream);
+        return DcxStreamCipher.aes256CtrDecryptStream(key, initVector, cipherStream);
       default:
         throw new Error('Algorithm unset or not supported');
     }
@@ -214,7 +214,7 @@ export class StreamCipher {
   }
 }
 
-export class Cipher extends StreamCipher {
+export class DcxCipher extends DcxStreamCipher {
   constructor(algorithm: CipherAlgorightm) {
     super(algorithm);
   }
@@ -229,9 +229,9 @@ export class Cipher extends StreamCipher {
   public async encrypt(key: Buffer, initVector: Buffer, plaintext: string): Promise<string> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return Cipher.aes256CbcEncrypt(key, initVector, plaintext);
+        return DcxCipher.aes256CbcEncrypt(key, initVector, plaintext);
       case CipherAlgorightm.AES_256_CTR:
-        return Cipher.aes256CtrEncrypt(key, initVector, plaintext);
+        return DcxCipher.aes256CtrEncrypt(key, initVector, plaintext);
       default:
         throw new Error('Algorithm not set or unsupported');
     }
@@ -247,9 +247,9 @@ export class Cipher extends StreamCipher {
   public async decrypt(key: Buffer, initVector: Buffer, ciphertext: string): Promise<string> {
     switch (this.algorithm) {
       case CipherAlgorightm.AES_256_CBC:
-        return Cipher.aes256CbcDecrypt(key, initVector, ciphertext);
+        return DcxCipher.aes256CbcDecrypt(key, initVector, ciphertext);
       case CipherAlgorightm.AES_256_CTR:
-        return Cipher.aes256CtrDecrypt(key, initVector, ciphertext);
+        return DcxCipher.aes256CtrDecrypt(key, initVector, ciphertext);
       default:
         throw new Error('Algorithm not set or unsupported');
     }

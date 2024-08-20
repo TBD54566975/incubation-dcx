@@ -432,6 +432,9 @@ importers:
 
   packages/server:
     dependencies:
+      '@dcx-protocol/applicant':
+        specifier: workspace:*
+        version: link:../applicant
       '@dcx-protocol/common':
         specifier: workspace:*
         version: link:../common

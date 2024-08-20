@@ -9,7 +9,7 @@ describe('FileSystem class', () => {
   const CURSOR = 'cursor.json';
   const randomUUID = crypto.randomUUID();
 
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm(EXISTS_FILE_PATH);
     await FileSystem.rm(DNE_FILE_PATH);
     await FileSystem.rm(LAST_RECORD_ID);

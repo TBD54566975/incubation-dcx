@@ -11,6 +11,6 @@ esbuild.build({
 esbuild.build({
   ...browserConfig,
   format     : 'iife',
-  globalName : 'DcxApplicant',
+  globalName : 'applicant',
   outfile    : 'dist/browser.js',
 });

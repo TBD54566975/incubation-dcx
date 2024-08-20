@@ -10,7 +10,6 @@ import {
   dcxOptions,
   DcxOptions,
   DcxParams,
-  DcxUtils,
   DcxValidated,
   DwnError,
   DwnUtils,
@@ -18,6 +17,7 @@ import {
   Issuer,
   Logger,
   manifestSchema,
+  OptionsUtil,
   PresentationExchangeParams,
   PresentationSubmission,
   RecordCreateParams,
@@ -56,18 +56,19 @@ import { dcxApplicant } from './index.js';
  * applicant.setupDwn();
  */
 export class DcxApplicant implements DcxManager {
+  options       : DcxOptions = dcxOptions;
+  config        : DcxConfig = dcxConfig;
+
   isSetup       : boolean = false;
   isInitialized : boolean = false;
-  config        : DcxConfig = dcxConfig;
-  options       : DcxOptions;
 
   public static did   : string;
   public static web5  : Web5;
   public static agent : Web5PlatformAgent;
 
   constructor(params: DcxParams) {
-    this.options = params.options ?? dcxOptions;
-    this.config = params.config ?? this.config;
+    this.options = params.options ? { ...this.options, ...params.options } : this.options;
+    this.config = params.config ? { ...this.config, ...params.config } : this.config;
   }
 
   /**
@@ -353,8 +354,8 @@ export class DcxApplicant implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', applicant);
 
-    const manifest = DcxUtils.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
-    const { id: recipient } = DcxUtils.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
+    const manifest = OptionsUtil.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+    const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
 
     const { status: issuer } = await record.send(recipient);
     if (DwnUtils.isFailure(issuer.code)) {
@@ -377,7 +378,7 @@ export class DcxApplicant implements DcxManager {
    * @returns RecordsReadParams; see {@link RecordsReadParams}
    */
   public async getManifests({ name, id }: Partial<Issuer>): Promise<GetManifestsResponse> {
-    const issuer = DcxUtils.findIssuer({ issuers: this.options.issuers, name, id });
+    const issuer = OptionsUtil.findIssuer({ issuers: this.options.issuers, name, id });
     const { records: query } = await this.queryRecords({ from: issuer.id, protocolPath: 'manifest' });
     Logger.log(`Found ${query.length} manifest records in ${issuer.name} dwn`);
     const { records: manifests } = await this.readRecords({ records: query });

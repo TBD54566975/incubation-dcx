@@ -11,6 +11,6 @@ esbuild.build({
 esbuild.build({
   ...browserConfig,
   format     : 'iife',
-  globalName : 'DcxIssuer',
+  globalName : 'server',
   outfile    : 'dist/browser.js',
 });

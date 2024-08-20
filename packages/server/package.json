@@ -66,6 +66,7 @@
     "node": ">=18.0.0 || <22.0.0"
   },
   "dependencies": {
+    "@dcx-protocol/applicant": "workspace:*",
     "@dcx-protocol/common": "workspace:*",
     "@dcx-protocol/issuer": "workspace:*",
     "@noble/ciphers": "0.5.3",
