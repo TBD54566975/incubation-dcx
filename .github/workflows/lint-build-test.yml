@@ -21,12 +21,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install -r --frozen-lockfile
   lint:
+    steps:
       - name: Run linter for all packages
         run: pnpm lint
   build:
+    steps:
       - name: Build all packages
         run: pnpm build
   build-tests:
+    steps:
       - name: Build all tests
         run: pnpm build:tests:node
       
