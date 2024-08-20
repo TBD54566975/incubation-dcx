@@ -1,9 +1,7 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { DcxConfig } from '../dcx-config';
-import { DcxOptions } from './options';
-import { CredentialApplication, CredentialManifest } from '../interfaces/dcx';
+import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptions } from '../index.js';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -175,10 +173,6 @@ export type RecordsDeleteResponse = {};
 export type RecordsQueryParams = { from?: string; protocolPath?: DcxProtocolPath }
 export type RecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
 
-export interface DcxDwnRecord<T> extends DwnRecord {
-  record: T;
-  status: DwnResponseStatus;
-}
 // Records[] - Filter
 export type RecordsFilterParams = { records: CredentialManifest[]; type: 'manifests'};
 export type RecordsFilterResponse = { data: CredentialManifest[] };

@@ -10,7 +10,7 @@ describe('DcxIssuer class', () => {
     config  : {
       ...dcxConfig,
       issuerProtocol : {
-        ...dcxConfig.issuerProtocol,
+        ...dcxConfig.issuer,
         web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
         web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
         agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',

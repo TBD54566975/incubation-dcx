@@ -1,10 +1,10 @@
-import { CredentialManifest, FORMFREE, Issuer, ServerManifest } from '../index.js';
+import { CredentialManifest, FORMFREE, Issuer, Manifest } from '../index.js';
 
 export type FindMissingParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
 export type FindMissingResponse = { missing: CredentialManifest[] };
-export type FindManifestsParams = Partial<CredentialManifest> & { manifests: ServerManifest[] };
+export type FindManifestsParams = Partial<CredentialManifest> & { manifests: Manifest[] };
 export type FindManifestParams = FindManifestsParams;
-export class DcxUtils {
+export class OptionsUtil {
   /**
    *
    * Find a manifest by name or id

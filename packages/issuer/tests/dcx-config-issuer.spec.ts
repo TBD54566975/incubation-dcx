@@ -5,9 +5,9 @@ import { expect } from 'chai';
 import { dcxConfig } from '@dcx-protocol/common';
 
 process.env.NODE_ENV = 'test';
-const issuerConfig = dcxConfig.issuerProtocol;
+const issuerConfig = dcxConfig.issuer;
 
-describe('dcxConfig.issuerProtocol', () => {
+describe('dcxConfig.issuer', () => {
   describe('defines configuration for both sides of the protocol using env vars and static vars', () => {
     it('should contain property cursorFile as a string', () => {
       const cursorFile = issuerConfig.cursorFile;

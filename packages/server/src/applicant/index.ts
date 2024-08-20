@@ -1,13 +1,14 @@
 import {
   CredentialManifest,
+  DcxPath,
   DcxServerError,
   FileSystem,
+  Handler,
   Issuer,
   Logger,
+  Manifest,
   Objects,
   Provider,
-  ServerHandler,
-  ServerPath,
   SleepTime,
   stringifier,
   Time
@@ -16,25 +17,25 @@ import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
 import { Record } from '@web5/api';
 import { argv, exit } from 'process';
 
-export class DcxIssuerServer {
+export class DcxApplicantServer {
   isTest    : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
   isPolling : boolean = false;
   issuer    : DcxIssuer;
 
   /**
-     *
-     * Setup the server with the provided options and config
-     *
-     * @param params.options The options to use for the DcxServer
-     * @param params.options.issuers The issuers to use; array
-     * @param params.options.manifests The manifests to use; array
-     * @param params.options.providers The providers to use; array
-     * @param params.options.handlers The handlers to use; array
-     * @param params.options.dwns The dwns to use; array
-     * @param params.options.gateways The gateways to use; array
-     * @example see README.md for usage information
-     *
-     */
+         *
+         * Setup the server with the provided options and config
+         *
+         * @param params.options The options to use for the DcxServer
+         * @param params.options.issuers The issuers to use; array
+         * @param params.options.manifests The manifests to use; array
+         * @param params.options.providers The providers to use; array
+         * @param params.options.handlers The handlers to use; array
+         * @param params.options.dwns The dwns to use; array
+         * @param params.options.gateways The gateways to use; array
+         * @example see README.md for usage information
+         *
+         */
   constructor(params: { issuer: DcxIssuer; }) {
     this.issuer = params.issuer;
     if(!this.issuer) {
@@ -43,16 +44,16 @@ export class DcxIssuerServer {
   }
 
   /**
-     *
-     * Sets the server options
-     *
-     * @param path The type of server option; see {@link ServerPath}
-     * @param id Some unique, accessible identifier to map the obj to
-     * @param obj The object to use; see {@link DcxOptions}
-     * @example see README.md for usage information
-     *
-     */
-  public use(path: ServerPath, ...args: any[]): void {
+         *
+         * Sets the server options
+         *
+         * @param path The type of server option; see {@link DcxPath}
+         * @param id Some unique, accessible identifier to map the obj to
+         * @param obj The object to use; see {@link DcxOptions}
+         * @example see README.md for usage information
+         *
+         */
+  public use(path: DcxPath, ...args: any[]): void {
     const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
@@ -67,86 +68,86 @@ export class DcxIssuerServer {
   }
 
   /**
-     *
-     * Sets the manifest to use
-     *
-     * @param id Some unique, accessible identifier for the manifest
-     * @param manifest The credential manifest to use
-     * @example see README.md for usage information
-     *
-     */
-  public useManifest(manifest: CredentialManifest): void {
+         *
+         * Sets the manifest to use
+         *
+         * @param id Some unique, accessible identifier for the manifest
+         * @param manifest The credential manifest to use
+         * @example see README.md for usage information
+         *
+         */
+  public useManifest(manifest: Manifest): void {
     this.issuer.options.manifests.push(manifest);
   }
 
   /**
-     *
-     * Sets the handler to use
-     *
-     * @param id Some unique, accessible identifier for the handler
-     * @param handler The handler to use
-     * @example see README.md for usage information
-     *
-     */
-  public useHandler(handler: ServerHandler): void {
+         *
+         * Sets the handler to use
+         *
+         * @param id Some unique, accessible identifier for the handler
+         * @param handler The handler to use
+         * @example see README.md for usage information
+         *
+         */
+  public useHandler(handler: Handler): void {
     this.issuer.options.handlers.push(handler);
   }
 
   /**
-     *
-     * Sets the provider to use
-     *
-     * @param id Some unique, accessible identifier for the provider
-     * @param provider The provider to use
-     * @example see README.md for usage information
-     *
-     */
+         *
+         * Sets the provider to use
+         *
+         * @param id Some unique, accessible identifier for the provider
+         * @param provider The provider to use
+         * @example see README.md for usage information
+         *
+         */
   public useProvider(provider: Provider): void {
     this.issuer.options.providers.push(provider);
   }
 
   /**
-     *
-     * Sets the issuer to use
-     *
-     * @param id Some unique, accessible identifier for the issuer
-     * @param issuer The issuer to use
-     * @example see README.md for usage information
-     *
-     */
+         *
+         * Sets the issuer to use
+         *
+         * @param id Some unique, accessible identifier for the issuer
+         * @param issuer The issuer to use
+         * @example see README.md for usage information
+         *
+         */
   public useIssuer(issuer: Issuer): void {
     this.issuer.options.issuers.push(issuer);
   }
 
   /**
-     *
-     * Sets the dwns to use
-     *
-     * @param dwn The dwn to use
-     * @example see README.md for usage information
-     *
-     */
+         *
+         * Sets the dwns to use
+         *
+         * @param dwn The dwn to use
+         * @example see README.md for usage information
+         *
+         */
   public useDwn(dwn: string): void {
     this.issuer.options.dwns.push(dwn);
   }
 
   /**
-     *
-     * Sets the gateways to use
-     *
-     * @param gateway The gateway to use'
-     * @example see README.md for usage information
-     *
-     */
+         *
+         * Sets the gateways to use
+         *
+         * @param gateway The gateway to use'
+         * @example see README.md for usage information
+         *
+         */
   public useGateway(gateway: string): void {
     this.issuer.options.gateways.push(gateway);
   }
 
   /**
-     *
-     * Polls the DWN for incoming records
-     *
-     */
+         *
+         * Polls the DWN for incoming records
+         *
+         */
   public async poll(params: SleepTime = { ms: 10 }): Promise<void> {
     this.isPolling = true;
     Logger.log('DCX server starting ...');
@@ -240,10 +241,10 @@ export class DcxIssuerServer {
   }
 
   /**
-     *
-     * Stops the DCX server
-     * @returns void
-     */
+         *
+         * Stops the DCX server
+         * @returns void
+         */
   public stop(): void {
     Logger.log('DCX server stopping...');
     this.isPolling = false;
@@ -251,10 +252,10 @@ export class DcxIssuerServer {
   }
 
   /**
-   *
-   * Starts the DCX server
-   * @returns void
-   */
+       *
+       * Starts the DCX server
+       * @returns void
+       */
   public async start(): Promise<void> {
     try {
       if (!this.issuer.isInitialized) {
