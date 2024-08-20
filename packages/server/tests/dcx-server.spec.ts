@@ -6,22 +6,22 @@ import { DcxIssuerServer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-const dcxIssuer = new DcxIssuer({
+const issuer = new DcxIssuer({
   config : {
     ...dcxConfig,
     dwnEndpoints   : ['http://localhost:3000'],
     issuerProtocol : {
-      ...dcxConfig.issuerProtocol,
+      ...dcxConfig.issuer,
       web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
       agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
     }
   }
 });
-const server: DcxIssuerServer = new DcxIssuerServer({ issuer: dcxIssuer });
+const server: DcxIssuerServer = new DcxIssuerServer({ issuer });
 
 describe('DcxServer class', () => {
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm('__TEST_DATA__');
   });
 
@@ -33,14 +33,14 @@ describe('DcxServer class', () => {
     });
 
     it('should include property isInitialized as a boolean equal to false', () => {
-      const isInitialized = dcxIssuer.isInitialized;
+      const isInitialized = issuer.isInitialized;
       expect(isInitialized).to.not.be.null.and.not.be.undefined;
       expect(typeof isInitialized).equals('boolean');
       expect(isInitialized).equals(false);
     });
 
     it('should include property isSetup as a boolean equal to false', () => {
-      const isSetup = dcxIssuer.isSetup;
+      const isSetup = issuer.isSetup;
       expect(isSetup).to.not.be.null.and.not.be.undefined;
       expect(typeof isSetup).equals('boolean');
       expect(isSetup).to.be.equals(false);
@@ -84,11 +84,4 @@ describe('DcxServer class', () => {
       expect(server.issuer.isSetup).equals(true);
     });
   });
-
-  // describe('.poll()', () => {
-  //   it('should listen for new DWN record updates', async () => {
-  //     await dcxIssuerServer.poll();
-  //     expect(dcxIssuerServer.isPolling).equals(true);
-  //   });
-  // });
 });

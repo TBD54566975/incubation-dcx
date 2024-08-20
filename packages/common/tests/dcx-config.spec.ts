@@ -48,8 +48,8 @@ describe('dcxConfig', () => {
       expect(Object.entries(issuerProtocol)).to.have.lengthOf.gte(5);
     });
 
-    it('should contain property dcxConfig.applicantProtocol as an object with at least 2 entries', () => {
-      const dcxApplicantProtocol = dcxConfig.applicantProtocol;
+    it('should contain property dcxConfig.applicant as an object with at least 2 entries', () => {
+      const dcxApplicantProtocol = dcxConfig.applicant;
       expect(dcxApplicantProtocol).to.not.be.null.and.not.be.undefined;
       expect(dcxApplicantProtocol).to.be.an('object');
       expect(Object.entries(dcxApplicantProtocol)).to.have.lengthOf.gte(2);

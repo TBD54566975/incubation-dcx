@@ -16,7 +16,7 @@ describe('DcxAgent class', () => {
     expect(agentVault).to.be.instanceof(DcxIdentityVault);
   });
 
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm('__TEST_DATA__', { recursive: true, force: true });
   });
 

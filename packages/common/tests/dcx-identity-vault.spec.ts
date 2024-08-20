@@ -5,7 +5,7 @@ import { DcxIdentityVault, FileSystem } from '../src/index.js';
 describe('DcxIdentityVault class', () => {
   const location = '__TEST_DATA__/DCX_COMMON/AGENT/DATASTORE';
 
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm('__TEST_DATA__', { recursive: true, force: true });
   });
 

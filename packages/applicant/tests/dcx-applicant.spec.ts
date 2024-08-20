@@ -13,8 +13,7 @@ const dcxApplicant = new DcxApplicant({
   config : {
     ...dcxConfig,
     dwnEndpoints      : ['http://localhost:3000'],
-    applicantProtocol : {
-      ...dcxConfig.applicantProtocol,
+    applicant    : {
       web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
     }
@@ -23,7 +22,7 @@ const dcxApplicant = new DcxApplicant({
 
 describe('DcxApplicant class', () => {
 
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm('DATA');
   });
 
