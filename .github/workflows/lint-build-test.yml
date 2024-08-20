@@ -5,7 +5,6 @@ on: [push]
 jobs:
   setup:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,6 +27,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Run linter for all packages
         run: pnpm lint
 
@@ -38,6 +45,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Build all packages
         run: pnpm build
 
@@ -47,6 +62,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
         
       - name: Build all tests
         run: pnpm build:tests:node
