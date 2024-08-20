@@ -3,9 +3,8 @@ name: dcx lint, build, build tests
 on: [push]
 
 jobs:
-  setup:
+  setup_and_lint_and_build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,30 +20,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install -r --frozen-lockfile
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
       - name: Run linter for all packages
         run: pnpm lint
 
-  build:
+      - name: Build all packages
+        run: pnpm build
+
+  build-tests:
     runs-on: ubuntu-latest
-    needs: lint
+    needs: setup_and_lint_and_build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      - name
-      
-      # - name: Run all tests
-      #   run: pnpm test:node
-      
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@v4.0.1
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     slug: TBD54566975/incubation-dcx
+      - name: Build all tests
+        run: pnpm build:tests:node
+
+# - name: Run all tests
+#   run: pnpm test:node
+
+# - name: Upload coverage reports to Codecov
+#   uses: codecov/codecov-action@v4.0.1
+#   with:
+#     token: ${{ secrets.CODECOV_TOKEN }}
+#     slug: TBD54566975/incubation-dcx
