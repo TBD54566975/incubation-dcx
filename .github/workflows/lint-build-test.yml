@@ -1,9 +1,9 @@
-name: DCX Lint Build Test
+name: dcx lint, build, build tests
 
 on: [push]
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,13 +20,13 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install -r --frozen-lockfile
-      
+  lint:
       - name: Run linter for all packages
         run: pnpm lint
-
+  build:
       - name: Build all packages
         run: pnpm build
-      
+  build-tests:
       - name: Build all tests
         run: pnpm build:tests:node
       
