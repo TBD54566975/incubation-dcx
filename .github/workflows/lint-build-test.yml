@@ -1,10 +1,11 @@
-name: dcx lint, build, build tests
+name: DCX Lint Build Test
 
 on: [push]
 
 jobs:
-  setup:
+  lint-build-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,66 +20,21 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install -r --frozen-lockfile
-
-  lint:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
       
-      - name: Install pnpm
-        run: npm install -g pnpm
-
       - name: Run linter for all packages
         run: pnpm lint
 
-  build:
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-      
-      - name: Install pnpm
-        run: npm install -g pnpm
-
       - name: Build all packages
         run: pnpm build
-
-  build-tests:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
       
-      - name: Install pnpm
-        run: npm install -g pnpm
-        
       - name: Build all tests
         run: pnpm build:tests:node
-
-# - name: Run all tests
-#   run: pnpm test:node
-
-# - name: Upload coverage reports to Codecov
-#   uses: codecov/codecov-action@v4.0.1
-#   with:
-#     token: ${{ secrets.CODECOV_TOKEN }}
-#     slug: TBD54566975/incubation-dcx
+      
+      # - name: Run all tests
+      #   run: pnpm test:node
+      
+      # - name: Upload coverage reports to Codecov
+      #   uses: codecov/codecov-action@v4.0.1
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     slug: TBD54566975/incubation-dcx
