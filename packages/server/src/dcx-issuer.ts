@@ -1,10 +1,5 @@
 import {
   CredentialManifest,
-  dcxConfig,
-  DcxConfig,
-  dcxOptions,
-  DcxOptions,
-  DcxParams,
   DcxServerError,
   FileSystem,
   Issuer,
@@ -17,16 +12,14 @@ import {
   stringifier,
   Time
 } from '@dcx-protocol/common';
-import { Record } from '@web5/api';
 import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
+import { Record } from '@web5/api';
 import { argv, exit } from 'process';
 
-export class DcxServer {
-  dcxIssuer     : DcxIssuer;
-  serverOptions : DcxOptions = dcxOptions;
-  serverConfig  : DcxConfig = dcxConfig;
-  isPolling     : boolean = false;
-  isTest        : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+export class DcxIssuerServer {
+  isTest    : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+  isPolling : boolean = false;
+  issuer    : DcxIssuer;
 
   /**
      *
@@ -42,10 +35,11 @@ export class DcxServer {
      * @example see README.md for usage information
      *
      */
-  constructor(params: DcxParams & { dcxIssuer?: DcxIssuer }) {
-    this.dcxIssuer = params.dcxIssuer ?? new DcxIssuer(params);
-    this.serverConfig = params.config ?? this.serverConfig;
-    this.serverOptions = params.options ?? dcxOptions;
+  constructor(params: { issuer: DcxIssuer; }) {
+    this.issuer = params.issuer;
+    if(!this.issuer) {
+      throw new DcxServerError('DcxServer: No issuer provided');
+    }
   }
 
   /**
@@ -66,7 +60,7 @@ export class DcxServer {
       );
     }
     if (validPaths.includes(path)) {
-      this.serverOptions[path].push(...args);
+      this.issuer.options[path].push(...args);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${args}`);
     }
@@ -82,7 +76,7 @@ export class DcxServer {
      *
      */
   public useManifest(manifest: CredentialManifest): void {
-    this.serverOptions.manifests.push(manifest);
+    this.issuer.options.manifests.push(manifest);
   }
 
   /**
@@ -95,7 +89,7 @@ export class DcxServer {
      *
      */
   public useHandler(handler: ServerHandler): void {
-    this.serverOptions.handlers.push(handler);
+    this.issuer.options.handlers.push(handler);
   }
 
   /**
@@ -108,7 +102,7 @@ export class DcxServer {
      *
      */
   public useProvider(provider: Provider): void {
-    this.serverOptions.providers.push(provider);
+    this.issuer.options.providers.push(provider);
   }
 
   /**
@@ -121,7 +115,7 @@ export class DcxServer {
      *
      */
   public useIssuer(issuer: Issuer): void {
-    this.serverOptions.issuers.push(issuer);
+    this.issuer.options.issuers.push(issuer);
   }
 
   /**
@@ -133,7 +127,7 @@ export class DcxServer {
      *
      */
   public useDwn(dwn: string): void {
-    this.serverOptions.dwns.push(dwn);
+    this.issuer.options.dwns.push(dwn);
   }
 
   /**
@@ -145,7 +139,7 @@ export class DcxServer {
      *
      */
   public useGateway(gateway: string): void {
-    this.serverOptions.gateways.push(gateway);
+    this.issuer.options.gateways.push(gateway);
   }
 
   /**
@@ -157,8 +151,8 @@ export class DcxServer {
     this.isPolling = true;
     Logger.log('DCX server starting ...');
 
-    const CURSOR = this.serverConfig.issuerProtocol.cursorFile;
-    const LAST_RECORD_ID = this.serverConfig.issuerProtocol.lastRecordIdFile;
+    const CURSOR = this.issuer.config.issuerProtocol.cursorFile!;
+    const LAST_RECORD_ID = this.issuer.config.issuerProtocol.lastRecordIdFile!;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
@@ -216,13 +210,13 @@ export class DcxServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = this.serverOptions.manifests!.find(
+            const manifest = this.issuer.options.manifests!.find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );
 
             if (manifest) {
-              const { status } = await this.dcxIssuer.processRecord(
+              const { status } = await this.issuer.processRecord(
                 {
                   record,
                   manifest,
@@ -257,17 +251,17 @@ export class DcxServer {
   }
 
   /**
-     *
-     * Starts the DCX server
-     * @returns void
-     */
+   *
+   * Starts the DCX server
+   * @returns void
+   */
   public async start(): Promise<void> {
     try {
-      if (!this.dcxIssuer.isInitialized) {
-        await this.dcxIssuer.initializeWeb5();
-        Logger.log('Web5 initialized', this.dcxIssuer.isInitialized);
-        await this.dcxIssuer.setupDwn();
-        this.dcxIssuer.isSetup = true;
+      if (!this.issuer.isInitialized) {
+        await this.issuer.initializeWeb5();
+        Logger.log('Web5 initialized', this.issuer.isInitialized);
+        await this.issuer.setupDwn();
+        this.issuer.isSetup = true;
       }
       await this.poll();
     } catch (error: any) {

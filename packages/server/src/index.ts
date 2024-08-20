@@ -1,1 +1,1 @@
-export * from './dcx-server.js';
+export * from './dcx-issuer.js';

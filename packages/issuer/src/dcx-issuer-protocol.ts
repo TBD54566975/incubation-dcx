@@ -1,9 +1,16 @@
-import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dcx-protocol/common';
+import {
+  responseSchema,
+  invoiceSchema,
+  manifestSchema,
+  applicationSchema
+} from '@dcx-protocol/common';
 
 export const dcxIssuer = {
-  // issuer protocol is a subset of exchange protocol
-  // used on server side to interact with applicant & issuer dwn
-  protocol  : 'https://decentralized.cx/protocol/credential-exchange',
+  // issuer protocol is a subset
+  // of exchange protocol used on
+  // server side to interact with
+  // applicant & issuer dwn
+  protocol  : 'https://decentralized.cx/protocol/',
   published : false,
   types     : {
     application : {
@@ -24,7 +31,9 @@ export const dcxIssuer = {
     },
   },
   structure : {
-    // issuers publish manifests to describe the data they can provide
+    // issuers publish manifests
+    // to describe the data they
+    // can provide
     manifest : {
       $actions : [
         {
@@ -33,7 +42,8 @@ export const dcxIssuer = {
         },
       ],
     },
-    // applicants can apply for a credential
+    // applicants can apply
+    // for a credential
     application : {
       $actions : [
         {
@@ -43,11 +53,12 @@ export const dcxIssuer = {
         {
           who : 'author',
           of  : 'application',
-          // is there an abstract use case instance where we'd want to let applicants update their application?
           can : ['read'],
         },
       ],
-      // a credential response might be sent in response to an application
+      // a credential response
+      // might be sent in response
+      // to an application
       response : {
         $actions : [
           {
@@ -62,7 +73,8 @@ export const dcxIssuer = {
           },
         ],
       },
-      // an invoice might be sent in response to an application
+      // an invoice might be sent
+      // in response to an application
       invoice : {
         $actions : [
           {
@@ -80,3 +92,4 @@ export const dcxIssuer = {
     },
   },
 };
+

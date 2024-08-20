@@ -182,3 +182,38 @@ export interface DcxDwnRecord<T> extends DwnRecord {
 // Records[] - Filter
 export type RecordsFilterParams = { records: CredentialManifest[]; type: 'manifests'};
 export type RecordsFilterResponse = { data: CredentialManifest[] };
+
+export type VerifyCredentialsParams = {
+  vcJwts: string[];
+  manifest: CredentialManifest;
+  subjectDid: string;
+}
+export type SelectCredentialsParams = {
+  vp: VerifiablePresentation;
+  manifest: CredentialManifest;
+}
+export type CreateCredentialParams = {
+  data: any,
+  subjectDid: string,
+  manifest: CredentialManifest,
+}
+export type Fulfillment = { fulfillment: { descriptor_map: DescriptorMap; } };
+export type DescriptorMap = {
+  id?: string;
+  format?: string;
+  path?: string;
+}
+export type VerifiableCredentialData = {
+  vcJwts?: string[];
+  id?: string;
+  format?: string;
+  path?: string;
+};
+export type VerifiableCredentialType = {
+  verifiableCredential: string[];
+  fulfillment: Fulfillment
+};
+export type IssueCredentialParams = {
+  vc: VerifiableCredentialType,
+  subjectDid: string
+};

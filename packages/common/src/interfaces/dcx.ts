@@ -4,7 +4,8 @@ import {
   ManifestFormat,
   ManifestOutputDescriptor,
   PresentationDefinition,
-  PresentationSubmission
+  PresentationSubmission,
+  VerifiableCredentialData
 } from '../index.js';
 
 /**
@@ -52,4 +53,29 @@ export class CredentialApplication implements DcxCredentialApplication {
       public format: Format,
       public presentation_submission: PresentationSubmission,
   ) {}
+}
+export class DcxVerifiableCredential {
+  constructor({
+    vcJwts,
+    id,
+    format,
+    path
+  }: VerifiableCredentialData = {
+    format : 'jwt_vc',
+    path   : '$.verifiableCredential[0]'
+  }) {
+
+    return {
+      verifiableCredential : vcJwts,
+      fulfillment          : {
+        descriptor_map : [
+          {
+            id,
+            format,
+            path,
+          },
+        ],
+      },
+    };
+  }
 }

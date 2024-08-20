@@ -1,4 +1,5 @@
 import {
+  CreateCredentialParams,
   CredentialManifest,
   DcxAgent,
   DcxAgentRecovery,
@@ -12,9 +13,11 @@ import {
   DcxParams,
   DcxProtocolHandlerError,
   DcxUtils,
+  DcxVerifiableCredential,
   DwnError,
   DwnUtils,
   Handler,
+  IssueCredentialParams,
   Issuer,
   IssuerProcessRecordParams,
   Logger,
@@ -31,8 +34,10 @@ import {
   RecordsReadResponse,
   RequestCredentialParams,
   responseSchema,
+  SelectCredentialsParams,
   ServerHandler,
-  stringifier
+  stringifier,
+  VerifyCredentialsParams
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import {
@@ -48,69 +53,7 @@ import {
 } from '@web5/credentials';
 import { dcxIssuer } from './index.js';
 
-type VerifyCredentialsParams = {
-  vcJwts: string[];
-  manifest: CredentialManifest;
-  subjectDid: string;
-}
-type SelectCredentialsParams = {
-  vp: VerifiablePresentation;
-  manifest: CredentialManifest;
-}
-type CreateCredentialParams = {
-  data: any,
-  subjectDid: string,
-  manifest: CredentialManifest,
-}
-type Fulfillment = {
-  fulfillment: {
-    descriptor_map: DescriptorMap;
-  }
-}
-type DescriptorMap = {
-  id?: string;
-  format?: string;
-  path?: string;
-}
-type VerifiableCredentialData = {
-  vcJwts?: string[];
-  id?: string;
-  format?: string;
-  path?: string;
-};
-type VerifiableCredentialType = {
-  verifiableCredential: string[];
-  fulfillment: Fulfillment
-};
-type IssueCredentialParams = {
-  vc: VerifiableCredentialType,
-  subjectDid: string
-};
-class DcxVerifiableCredential {
-  constructor({
-    vcJwts,
-    id,
-    format,
-    path
-  }: VerifiableCredentialData = {
-    format : 'jwt_vc',
-    path   : '$.verifiableCredential[0]'
-  }) {
 
-    return {
-      verifiableCredential : vcJwts,
-      fulfillment          : {
-        descriptor_map : [
-          {
-            id,
-            format,
-            path,
-          },
-        ],
-      },
-    };
-  }
-}
 /**
  * DcxIssuer is the core class for the issuer side of the DCX protocol.
  * It handles the credential issuance, verification, selection, as well as
