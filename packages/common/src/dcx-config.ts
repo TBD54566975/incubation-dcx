@@ -2,9 +2,32 @@ import {
   DcxHandshakeManifest,
   DcxOptions,
   EmailAddressManifest,
-  PhoneNumberManifest,
-  defaultTrustedIssuers
+  PhoneNumberManifest
 } from './index.js';
+
+export type DcxIssuerConfig = {
+  cursorFile: string;
+  lastRecordIdFile: string;
+  web5Password: string;
+  web5RecoveryPhrase: string;
+  agentDataPath: string;
+};
+
+export type DcxApplicantConfig = {
+  web5Password: string;
+  web5RecoveryPhrase: string;
+};
+
+export const MX = {
+  name : 'mx',
+  id   : 'did:dht:sa713dw7jyg44ejwcdf8iqcseh7jcz51wj6fjxbooj41ipeg76eo'
+};
+export const FORMFREE = {
+  name : 'formfree',
+  id   : 'did:dht:hcf5e55bbm44s4oixp5z89wtxenxyk35su7f5pd4r5np93ikyowy'
+};
+
+export const defaultTrustedIssuers = [MX, FORMFREE];
 
 export const dcxConfig = {
   ...[DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
@@ -37,3 +60,5 @@ export const dcxOptions: DcxOptions = {
   gateways  : dcxConfig.gatewayUris,
   dwns      : dcxConfig.dwnEndpoints,
 };
+
+export type DcxConfig = typeof dcxConfig & { [key: string]: any };

@@ -152,8 +152,8 @@ export class DcxIssuerServer {
     this.isPolling = true;
     Logger.log('DCX server starting ...');
 
-    const CURSOR = this.issuer.config.issuerProtocol.cursorFile!;
-    const LAST_RECORD_ID = this.issuer.config.issuerProtocol.lastRecordIdFile!;
+    const CURSOR = this.issuer.config.issuer.cursorFile!;
+    const LAST_RECORD_ID = this.issuer.config.issuer.lastRecordIdFile!;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };

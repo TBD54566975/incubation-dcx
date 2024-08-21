@@ -423,8 +423,8 @@ export class DcxApplicant implements DcxManager {
 
     // Check the state of the password and recovery phrase
     const { password, recoveryPhrase } = await DcxAgentRecovery.validate({
-      password       : this.config.applicantProtocol.web5Password,
-      recoveryPhrase : this.config.applicantProtocol.web5RecoveryPhrase,
+      password       : this.config.applicant.web5Password,
+      recoveryPhrase : this.config.applicant.web5RecoveryPhrase,
       type           : 'applicant'
     });
 
