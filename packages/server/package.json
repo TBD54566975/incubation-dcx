@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/server",
-  "version": "0.2.1",
+  "version": "0.3.1",
   "description": "DCX Server Implementation",
   "type": "module",
   "main": "./dist/cjs/index.js",
