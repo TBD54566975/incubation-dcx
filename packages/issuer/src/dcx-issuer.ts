@@ -1,20 +1,21 @@
 import {
-  CredentialManifest,
+  CreateCredentialParams,
   DcxAgent,
   DcxAgentRecovery,
   DcxConfig,
   dcxConfig,
   DcxDwnError,
+  Handler,
   DcxIdentityVault,
   DcxManager,
   dcxOptions,
   DcxOptions,
   DcxParams,
   DcxProtocolHandlerError,
+  OptionsUtil,
   DwnError,
   DwnUtils,
-  Handler,
-  Issuer,
+  IssueCredentialParams,
   IssuerProcessRecordParams,
   Logger,
   manifestSchema,
@@ -23,16 +24,17 @@ import {
   RecordCreateParams,
   RecordCreateResponse,
   RecordsCreateParams,
-  RecordsCreateResponse,
-  RecordsFilterParams,
-  RecordsFilterResponse,
   RecordsParams,
   RecordsQueryResponse,
   RecordsReadResponse,
   RequestCredentialParams,
   responseSchema,
-  ServerHandler,
-  stringifier
+  SelectCredentialsParams,
+  stringifier,
+  VerifiableCredential,
+  VerifyCredentialsParams,
+  HandlerFunction,
+  Issuer
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import {
@@ -43,74 +45,12 @@ import {
 } from '@web5/api';
 import {
   PresentationExchange,
-  VerifiableCredential,
   VerifiablePresentation,
+  VerifiableCredential as Web5VerifiableCredential,
 } from '@web5/credentials';
 import { dcxIssuer } from './index.js';
 
-type VerifyCredentialsParams = {
-  vcJwts: string[];
-  manifest: CredentialManifest;
-  subjectDid: string;
-}
-type SelectCredentialsParams = {
-  vp: VerifiablePresentation;
-  manifest: CredentialManifest;
-}
-type CreateCredentialParams = {
-  data: any,
-  subjectDid: string,
-  manifest: CredentialManifest,
-}
-type Fulfillment = {
-  fulfillment: {
-    descriptor_map: DescriptorMap;
-  }
-}
-type DescriptorMap = {
-  id?: string;
-  format?: string;
-  path?: string;
-}
-type VerifiableCredentialData = {
-  vcJwts?: string[];
-  id?: string;
-  format?: string;
-  path?: string;
-};
-type VerifiableCredentialType = {
-  verifiableCredential: string[];
-  fulfillment: Fulfillment
-};
-type IssueCredentialParams = {
-  vc: VerifiableCredentialType,
-  subjectDid: string
-};
-class DcxVerifiableCredential {
-  constructor({
-    vcJwts,
-    id,
-    format,
-    path
-  }: VerifiableCredentialData = {
-    format : 'jwt_vc',
-    path   : '$.verifiableCredential[0]'
-  }) {
 
-    return {
-      verifiableCredential : vcJwts,
-      fulfillment          : {
-        descriptor_map : [
-          {
-            id,
-            format,
-            path,
-          },
-        ],
-      },
-    };
-  }
-}
 /**
  * DcxIssuer is the core class for the issuer side of the DCX protocol.
  * It handles the credential issuance, verification, selection, as well as
@@ -125,7 +65,7 @@ class DcxVerifiableCredential {
  * issuer.setupDwn();
  */
 export class DcxIssuer implements DcxManager {
-  options : DcxOptions;
+  options : DcxOptions = dcxOptions;
   config  : DcxConfig = dcxConfig;
 
   isSetup       : boolean = false;
@@ -136,8 +76,8 @@ export class DcxIssuer implements DcxManager {
   public static agentVault : DcxIdentityVault = new DcxIdentityVault();
 
   constructor(params: DcxParams) {
-    this.options = params.options ?? dcxOptions;
-    this.config = params.config ?? this.config;
+    this.options = params.options ? { ...this.options, ...params.options } : this.options;
+    this.config = params.config ? { ...this.config, ...params.config } : this.config;
 
     /**
      * Set the default handlers if none are provided
@@ -172,8 +112,10 @@ export class DcxIssuer implements DcxManager {
    * @param staticHandler The static handler to use if the handler is not found
    * @returns The handler if found, otherwise the static handler
    */
-  public findHandler(id: string, staticHandler: Handler): Handler {
-    return this.options.handlers.find((serverHandler: ServerHandler) => serverHandler.id === id)?.handler ?? staticHandler ?? this.options.handlers.push({ id, handler: staticHandler });
+  public findHandler(id: string, staticHandler: HandlerFunction): HandlerFunction {
+    return this.options.handlers.find(
+      (dcxHandler: Handler) => dcxHandler.id === id
+    )?.handler ?? staticHandler ?? this.options.handlers.push({ id, handler: staticHandler });
   }
 
   /**
@@ -183,21 +125,21 @@ export class DcxIssuer implements DcxManager {
    * @param subjectDid The DID of the subject of the credentials
    * @returns An array of verified credentials
    */
-  public async verifyCredentials({ vcJwts, manifest, subjectDid }: VerifyCredentialsParams): Promise<VerifiableCredential[]> {
+  public async verifyCredentials({ vcJwts, manifest, subjectDid }: VerifyCredentialsParams): Promise<Web5VerifiableCredential[]> {
     try {
       PresentationExchange.satisfiesPresentationDefinition({
         vcJwts,
         presentationDefinition : manifest.presentation_definition,
       });
     } catch (error) {
-      console.log('VC does not satisfy Presentation Definition: ' + error);
+      Logger.error('VC does not satisfy Presentation Definition: ' + error);
     }
-    const verifiedCredentials: VerifiableCredential[] = [];
+    const verifiedCredentials: Web5VerifiableCredential[] = [];
 
     for (const vcJwt of vcJwts) {
       Logger.debug('Parsing credential ...', vcJwt);
 
-      const vc = VerifiableCredential.parseJwt({ vcJwt });
+      const vc = Web5VerifiableCredential.parseJwt({ vcJwt });
       Logger.debug('Parsed credential', stringifier(vc));
 
       if (vc.subject !== subjectDid) {
@@ -212,7 +154,7 @@ export class DcxIssuer implements DcxManager {
         continue;
       }
 
-      const verified = await VerifiableCredential.verify({ vcJwt });
+      const verified = await Web5VerifiableCredential.verify({ vcJwt });
       if (!verified || Objects.isEmpty(verified)) {
         Logger.debug('Credential verification failed');
         continue;
@@ -232,7 +174,7 @@ export class DcxIssuer implements DcxManager {
   public selectCredentials({ vp, manifest }: SelectCredentialsParams): string[] {
     Logger.debug('Using verifiable presentation for credential selection', stringifier(vp));
     return PresentationExchange.selectCredentials({
-      vcJwts                 : vp.verifiableCredential,
+      vcJwts                 : vp.Web5VerifiableCredential,
       presentationDefinition : manifest.presentation_definition,
     });
   }
@@ -249,7 +191,7 @@ export class DcxIssuer implements DcxManager {
     const manifestOutputDescriptor = manifest.output_descriptors[0];
     Logger.debug(`Issuing ${manifestOutputDescriptor.id} credential`);
 
-    const vc = await VerifiableCredential.create({
+    const vc = await Web5VerifiableCredential.create({
       data,
       subject : subjectDid,
       issuer  : DcxIssuer.agent.agentDid.uri,
@@ -260,7 +202,7 @@ export class DcxIssuer implements DcxManager {
     const signedVc = await vc.sign({ did: DcxIssuer.agent.agentDid });
     Logger.debug(`Signed ${manifestOutputDescriptor.id} credential`, stringifier(signedVc));
 
-    return new DcxVerifiableCredential({
+    return new VerifiableCredential({
       vcJwts : [signedVc],
       id     : manifestOutputDescriptor.id
     });
@@ -436,24 +378,6 @@ export class DcxIssuer implements DcxManager {
   }
 
   /**
-   * Filter records passed against ones in the dcx options object
-   * to find ones missing locally vs. the input which is a list of
-   * read dwn reacords; For now, this function should ONLY be use to filter the
-   * manifests pulled from remote dwn store against the ones passed into the DcxIssuer
-   * dcxOptions.manifests field to find ones missing remotely; See {@link CredentialManifest}
-   *
-   * @param params.records list of objects to filter through; see {@link RecordsFilterParams}
-   * @param params.type type of record to filter; see {@link RecordsFilterParams}
-   * @returns a list of records that have been filtered; see {@link RecordsFilterResponse}
-   */
-  public async filterRecords({ records, type }: RecordsFilterParams): Promise<RecordsFilterResponse> {
-    const data = this.options[type].filter((option: CredentialManifest) =>
-      records.find((record: CredentialManifest) => option.id !== record.id),
-    );
-    return { data };
-  }
-
-  /**
    * Create missing manifests
    * @param missingManifests CredentialManifest[]; see {@link CredentialManifest}
    * @returns Record[]; see {@link Record}
@@ -485,6 +409,8 @@ export class DcxIssuer implements DcxManager {
       throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
     }
 
+    if(process.env.NODE_ENV === 'test') return { record };
+
     const { status: issuer } = await record.send();
     if (DwnUtils.isFailure(issuer.code)) {
       const { code, detail } = issuer;
@@ -493,32 +419,26 @@ export class DcxIssuer implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', issuer);
 
-    // const manifest = this.findManifest({ id: data.manifest_id });
-    // const { id: recipient } = this.findIssuer({ id: manifest?.issuer.id });
     if(protocolPath !== 'manifest') {
-      const { status: applicant } = await record.send('did:web5:agent');
+      const manifest = OptionsUtil.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
+      const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
+      const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;
         Logger.error('Failed to send record to applicant dwn', applicant);
         throw new DwnError(code, detail);
       }
       Logger.debug('Sent application record to remote dwn', applicant);
-      return { record, status: { issuer, applicant } };
     }
-    return { record, status: { issuer } };
+
+    return { record };
   }
 
-  public async createRecords({ data, protocolPath, schema }: RecordsCreateParams): Promise<RecordsCreateResponse> {
-    // const records: Record[] = await Promise.all(
-    //   data.map(
-    //     async (d: CredentialManifest | any) => {
-    //       return (await this.createRecord({ data: d, protocolPath, schema }))?.record;
-    //     }
-    //   ),
-    // );
-    // return { records };
-    Logger.log('Method not implemented.', { data, protocolPath, schema });
-    return { records: [] };
+  public async createRecords({ data: creates, protocolPath, schema }: RecordsCreateParams): Promise<{records: Record[]}>{
+    const records = await Promise.all(
+      creates.map(async (data: any) => (await this.createRecord({ protocolPath, data, schema }))?.record)
+    );
+    return { records };
   }
 
 
@@ -584,18 +504,31 @@ export class DcxIssuer implements DcxManager {
 
       if (!manifests.length) {
       // Create missing manifest records
-        const { records } = await this.createRecords({ protocolPath: 'manifest', schema: manifestSchema.$id, data: this.options.manifests });
+        const { records } = await this.createRecords({
+          protocolPath : 'manifest',
+          schema       : manifestSchema.$id,
+          data         : this.options.manifests
+        });
         Logger.log(`Created ${records.length} manifest records in dcx issuer dwn`, records);
+
       } else {
         // Filter and create missing manifest records
-        const { data: records } = await this.filterRecords({ records: manifests, type: 'manifests' });
+        const { missing: records } = OptionsUtil.findMissingManifests({
+          dwnManifests   : manifests,
+          localManifests : this.options.manifests
+        });
         Logger.debug(`Found ${records.length} unwritten manifests`);
 
-        const { records: create } = await this.createRecords({ data: records, protocolPath: 'manifest', schema: manifestSchema.$id });
+        const { records: create } = await this.createRecords({
+          data         : records,
+          protocolPath : 'manifest',
+          schema       : manifestSchema.$id
+        });
         Logger.log(`Created ${create.length} records`, create);
-      }
 
+      }
       Logger.log('Dcx Issuer DWN Setup Complete!');
+
       this.isSetup = true;
     } catch (error: any) {
       Logger.error('DWN Setup Failed!', error);
@@ -609,7 +542,7 @@ export class DcxIssuer implements DcxManager {
    * connecting to the remote DWN and configuring the DWN with the DCX issuer protocol
    */
   public async initializeWeb5(): Promise<void> {
-    const issuerConfig = this.config.issuerProtocol;
+    const issuerConfig = this.config.issuer;
     Logger.log('Initializing Web5 for DcxIssuer ... ');
 
     // Create a new DcxAgent instance

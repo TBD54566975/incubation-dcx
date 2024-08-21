@@ -5,9 +5,9 @@ import { expect } from 'chai';
 import { dcxConfig } from '@dcx-protocol/common';
 
 process.env.NODE_ENV = 'test';
-const applicantConfig = dcxConfig.applicantProtocol;
+const applicantConfig = dcxConfig.applicant;
 
-describe('dcxConfig.applicantProtocol', () => {
+describe('dcxConfig.applicant', () => {
   describe('defines configuration for both sides of the protocol using env vars and static vars', () => {
     it('should contain property web5Password as a string', () => {
       const web5Password = applicantConfig.web5Password;

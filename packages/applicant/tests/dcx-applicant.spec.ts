@@ -6,14 +6,14 @@ import { Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { expect } from 'chai';
 import { DcxApplicant } from '../src/index.js';
-console.log('process.env', process.env);
+
 process.env.NODE_ENV = 'test';
 
 const dcxApplicant = new DcxApplicant({
   config : {
     ...dcxConfig,
-    applicantProtocol : {
-      ...dcxConfig.applicantProtocol,
+    dwnEndpoints      : ['http://localhost:3000'],
+    applicant    : {
       web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
       web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
     }
@@ -22,7 +22,7 @@ const dcxApplicant = new DcxApplicant({
 
 describe('DcxApplicant class', () => {
 
-  after(async () => {
+  afterEach(async () => {
     await FileSystem.rm('DATA');
   });
 

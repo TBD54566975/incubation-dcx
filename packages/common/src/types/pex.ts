@@ -1,9 +1,7 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { DcxConfig } from '../dcx-config';
-import { DcxOptions } from './options';
-import { CredentialApplication, CredentialManifest } from '../interfaces/dcx';
+import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptions } from '../index.js';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -142,10 +140,10 @@ export type RecordParams = { record: DwnRecord };
 export type RecordResponse = { record: DwnRecord };
 // Record - Create
 export type RecordCreateParams = { data: any; protocolPath?: DcxProtocolPath; schema: string };
-export type RecordCreateResponse = RecordResponse & DcxDwnResponseStatus;
+export type RecordCreateResponse = RecordResponse;
 // Record - Read
 export type RecordReadParams = RecordParams;
-export type RecordReadResponse = { records: any[] } & DcxDwnResponseStatus;
+export type RecordReadResponse = { records: any[] };
 // TODO: define these types once needed
 // Record - Update
 export type RecordUpdateParams = {};
@@ -162,7 +160,7 @@ export type RecordsCreateParams = { data: any[]; protocolPath?: DcxProtocolPath;
 export type RecordsCreateResponse = RecordsResponse;
 // Records[] - Read
 export type RecordsReadParams = RecordsParams;
-export type RecordsReadResponse = { records: any[] } & DcxDwnResponseStatus;
+export type RecordsReadResponse = { records: any[] };
 // TODO: define these types once needed
 // Records[] - Update
 export type RecordsUpdateParams = {};
@@ -175,10 +173,41 @@ export type RecordsDeleteResponse = {};
 export type RecordsQueryParams = { from?: string; protocolPath?: DcxProtocolPath }
 export type RecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
 
-export interface DcxDwnRecord<T> extends DwnRecord {
-  record: T;
-  status: DwnResponseStatus;
-}
 // Records[] - Filter
 export type RecordsFilterParams = { records: CredentialManifest[]; type: 'manifests'};
 export type RecordsFilterResponse = { data: CredentialManifest[] };
+
+export type VerifyCredentialsParams = {
+  vcJwts: string[];
+  manifest: CredentialManifest;
+  subjectDid: string;
+}
+export type SelectCredentialsParams = {
+  vp: VerifiablePresentation;
+  manifest: CredentialManifest;
+}
+export type CreateCredentialParams = {
+  data: any,
+  subjectDid: string,
+  manifest: CredentialManifest,
+}
+export type Fulfillment = { fulfillment: { descriptor_map: DescriptorMap; } };
+export type DescriptorMap = {
+  id?: string;
+  format?: string;
+  path?: string;
+}
+export type VerifiableCredentialData = {
+  vcJwts?: string[];
+  id?: string;
+  format?: string;
+  path?: string;
+};
+export type VerifiableCredentialType = {
+  verifiableCredential: string[];
+  fulfillment: Fulfillment
+};
+export type IssueCredentialParams = {
+  vc: VerifiableCredentialType,
+  subjectDid: string
+};

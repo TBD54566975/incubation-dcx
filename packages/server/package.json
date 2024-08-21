@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/server",
-  "version": "0.1.1",
+  "version": "1.1.0",
   "description": "DCX Server Implementation",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -66,6 +66,7 @@
     "node": ">=18.0.0 || <22.0.0"
   },
   "dependencies": {
+    "@dcx-protocol/applicant": "workspace:*",
     "@dcx-protocol/common": "workspace:*",
     "@dcx-protocol/issuer": "workspace:*",
     "@noble/ciphers": "0.5.3",
