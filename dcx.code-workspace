@@ -6,20 +6,20 @@
     },
     {
       "name": "applicant",
-      "path": "packages/applicant",
+      "path": "packages/applicant"
     },
     {
       "name": "common",
-      "path": "packages/common",
+      "path": "packages/common"
     },
     {
       "name": "issuer",
-      "path": "packages/issuer",
+      "path": "packages/issuer"
     },
     {
       "name": "server",
-      "path": "packages/server",
-    },
+      "path": "packages/server"
+    }
   ],
   "settings": {
     "eslint.workingDirectories": [

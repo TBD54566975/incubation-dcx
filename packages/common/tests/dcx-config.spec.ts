@@ -49,10 +49,11 @@ describe('dcxConfig', () => {
     });
 
     it('should contain property dcxConfig.applicant as an object with at least 2 entries', () => {
-      const dcxApplicantProtocol = dcxConfig.applicant;
-      expect(dcxApplicantProtocol).to.not.be.null.and.not.be.undefined;
-      expect(dcxApplicantProtocol).to.be.an('object');
-      expect(Object.entries(dcxApplicantProtocol)).to.have.lengthOf.gte(2);
+      const dcxApplicantConfig = dcxConfig.applicant;
+      expect(dcxApplicantConfig).to.not.be.null.and.not.be.undefined;
+      expect(dcxApplicantConfig).to.be.an('object');
+      expect(dcxApplicantConfig).to.be.instanceof(DcxApplicantConfig);
+      expect(Object.entries(dcxApplicantConfig)).to.have.lengthOf.gte(2);
     });
   });
 });
