@@ -21,6 +21,7 @@
     "test": "pnpm --recursive --stream test",
     "test:node": "pnpm --recursive --stream test:node",
     "workflow": "pnpm install --frozen-lockfile && pnpm lint && pnpm build && pnpm build:tests:node",
+    "build-test": "pnpm --recursive --stream build && pnpm --recursive --stream build:tests:node && pnpm --recursive --stream test:node",
     "version": "tsx scripts/version.ts",
     "version:patch": "tsx scripts/version.ts patch",
     "version:minor": "tsx scripts/version.ts minor",
