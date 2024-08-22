@@ -79,7 +79,10 @@
     "@web5/dids": "^1.1.2",
     "@web5/user-agent": "^0.4.1",
     "chalk": "^5.3.0",
-    "ed25519-keygen": "^0.6.2"
+    "ed25519-keygen": "^0.6.2",
+    "next": "^14.2.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.3",
@@ -88,6 +91,8 @@
     "@types/eslint": "^9.6.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20.14.11",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
     "@types/readable-stream": "^4.0.15",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
