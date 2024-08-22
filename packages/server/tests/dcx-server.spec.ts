@@ -1,4 +1,4 @@
-import { DcxAgent, DcxIdentityVault, FileSystem } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { DcxIssuer } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
@@ -50,6 +50,9 @@ describe('DcxServer class', () => {
 
   describe('.initialize()', () => {
     it('should initialize the server', async () => {
+      server.dcx.config.issuer.web5Password = Mnemonic.createPassword();
+      server.dcx.config.issuer.web5RecoveryPhrase = Mnemonic.createRecoveryPhrase();
+
       await server.dcx.initializeWeb5();
       expect(server.dcx.isInitialized).equals(true);
     });
