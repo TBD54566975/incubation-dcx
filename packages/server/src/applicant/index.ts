@@ -1,14 +1,8 @@
 import { DcxApplicant } from '@dcx-protocol/applicant';
 import {
-  DcxPath,
-  DcxServerError,
   FileSystem,
-  Handler,
-  Issuer,
   Logger,
-  Manifest,
   Objects,
-  Provider,
   SleepTime,
   stringifier,
   Time
@@ -31,107 +25,6 @@ export class ApplicantServer extends DcxServer {
   constructor(params: { type: 'applicant', applicant: DcxApplicant; }) {
     super(params);
     this.applicant = params.applicant ?? this.dcx as DcxApplicant ?? new DcxApplicant({});
-  }
-
-
-  /**
-         *
-         * Sets the server options
-         *
-         * @param path The type of server option; see {@link DcxPath}
-         * @param id Some unique, accessible identifier to map the obj to
-         * @param obj The object to use; see {@link DcxOptions}
-         * @example see README.md for usage information
-         *
-         */
-  public use(path: DcxPath, ...args: any[]): void {
-    const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
-    if (!validPaths.includes(path)) {
-      throw new DcxServerError(
-        `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
-      );
-    }
-    if (validPaths.includes(path)) {
-      this.applicant.options[path].push(...args);
-    } else {
-      throw new DcxServerError(`Invalid server.use() object: ${args}`);
-    }
-  }
-
-  /**
-   *
-   * Sets the manifest to use
-   *
-   * @param id Some unique, accessible identifier for the manifest
-   * @param manifest The credential manifest to use
-   * @example see README.md for usage information
-   *
-   */
-  public useManifest(manifest: Manifest): void {
-    this.applicant.options.manifests.push(manifest);
-  }
-
-  /**
-   *
-   * Sets the handler to use
-   *
-   * @param id Some unique, accessible identifier for the handler
-   * @param handler The handler to use
-   * @example see README.md for usage information
-   *
-   */
-  public useHandler(handler: Handler): void {
-    this.applicant.options.handlers.push(handler);
-  }
-
-  /**
-   *
-   * Sets the provider to use
-   *
-   * @param id Some unique, accessible identifier for the provider
-   * @param provider The provider to use
-   * @example see README.md for usage information
-   *
-   */
-  public useProvider(provider: Provider): void {
-    this.applicant.options.providers.push(provider);
-  }
-
-  /**
-   *
-   * Sets the issuer to use
-   *
-   * @param id Some unique, accessible identifier for the issuer
-   * @param issuer The issuer to use
-   * @example see README.md for usage information
-   *
-   */
-  public useIssuer(issuer: Issuer): void {
-    this.applicant.options.issuers.push(issuer);
-  }
-
-  /**
-   *
-   * Sets the dwns to use
-   *
-   * @param dwn The dwn to use
-   * @example see README.md for usage information
-   *
-   */
-  public useDwn(dwn: string): void {
-    this.applicant.options.dwns.push(dwn);
-  }
-
-  /**
-   *
-   * Sets the gateways to use
-   *
-   * @param gateway The gateway to use'
-   * @example see README.md for usage information
-   *
-   */
-  public useGateway(gateway: string): void {
-    this.applicant.options.gateways.push(gateway);
   }
 
   /**
