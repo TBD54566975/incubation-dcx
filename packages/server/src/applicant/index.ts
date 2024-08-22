@@ -30,7 +30,7 @@ export class ApplicantServer extends DcxServer {
    */
   constructor(params: { type: 'applicant', applicant: DcxApplicant; }) {
     super(params);
-    this.applicant = params.applicant ?? this.dcxActor as DcxApplicant ?? new DcxApplicant({});
+    this.applicant = params.applicant ?? this.dcx as DcxApplicant ?? new DcxApplicant({});
   }
 
 

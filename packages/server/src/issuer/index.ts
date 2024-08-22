@@ -25,7 +25,7 @@ export class IssuerServer extends DcxServer {
    */
   constructor(params: { type: 'issuer', issuer: DcxIssuer; }) {
     super(params);
-    this.issuer = params.issuer ?? this.dcxActor as DcxIssuer ?? new DcxIssuer({});
+    this.issuer = params.issuer ?? this.dcx as DcxIssuer ?? new DcxIssuer({});
   }
 
   /**

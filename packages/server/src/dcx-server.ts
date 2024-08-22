@@ -8,7 +8,7 @@ import { IssuerServer } from './issuer/index.js';
 export interface IDcxServer {
     isTest    : boolean;
     isPolling : boolean;
-    dcxActor  : DcxIssuer | DcxApplicant;
+    dcx       : DcxIssuer | DcxApplicant;
     server    : IssuerServer | ApplicantServer;
 
     use(path: string, ...args: any[]): void;
@@ -21,33 +21,33 @@ export interface IDcxServer {
 }
 
 export interface DcxServerParams {
-    type?: 'issuer' | 'applicant';
     issuer?: DcxIssuer;
     applicant?: DcxApplicant
+    type?: 'issuer' | 'applicant';
 }
 
 export class DcxServer implements IDcxServer {
   isPolling : boolean = false;
   isTest    : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
 
-  dcxActor  : DcxIssuer | DcxApplicant;
+  dcx       : DcxIssuer | DcxApplicant;
   server    : IssuerServer | ApplicantServer;
 
   constructor(params: DcxServerParams) {
     if(params.type === 'applicant' || params.applicant) {
-      this.dcxActor = params.applicant ?? new DcxApplicant({});
+      this.dcx = params.applicant ?? new DcxApplicant({});
       this.server = new ApplicantServer({
         type      : 'applicant',
-        applicant : this.dcxActor as DcxApplicant
+        applicant : this.dcx as DcxApplicant
       });
     } else if (params.type === 'issuer' || params.issuer) {
-      this.dcxActor = params.issuer ?? new DcxIssuer({});
+      this.dcx = params.issuer ?? new DcxIssuer({});
       this.server = new IssuerServer({
         type      : 'issuer',
-        issuer    : this.dcxActor as DcxIssuer
+        issuer    : this.dcx as DcxIssuer
       });
     } else {
-      throw new DcxServerError('Invalid server type: must be either "applicant" or "issuer"');
+      throw new DcxServerError('Invalid server params: must be pass type  "applicant" or "issuer" or must pass an applicant or issuer object');
     }
   }
 
@@ -69,7 +69,7 @@ export class DcxServer implements IDcxServer {
       );
     }
     if (validPaths.includes(path)) {
-      this.dcxActor.options[path].push(...args);
+      this.dcx.options[path].push(...args);
     } else {
       throw new DcxServerError(`Invalid server.use() object: ${args}`);
     }
@@ -85,7 +85,7 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useManifest(manifest: Manifest): void {
-    this.dcxActor.options.manifests.push(manifest);
+    this.dcx.options.manifests.push(manifest);
   }
 
   /**
@@ -98,7 +98,7 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useHandler(handler: Handler): void {
-    this.dcxActor.options.handlers.push(handler);
+    this.dcx.options.handlers.push(handler);
   }
 
   /**
@@ -111,7 +111,7 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useProvider(provider: Provider): void {
-    this.dcxActor.options.providers.push(provider);
+    this.dcx.options.providers.push(provider);
   }
 
   /**
@@ -124,7 +124,7 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useIssuer(issuer: Issuer): void {
-    this.dcxActor.options.issuers.push(issuer);
+    this.dcx.options.issuers.push(issuer);
   }
 
   /**
@@ -136,7 +136,7 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useDwn(dwn: string): void {
-    this.dcxActor.options.dwns.push(dwn);
+    this.dcx.options.dwns.push(dwn);
   }
 
   /**
@@ -148,6 +148,6 @@ export class DcxServer implements IDcxServer {
    *
    */
   public useGateway(gateway: string): void {
-    this.dcxActor.options.gateways.push(gateway);
+    this.dcx.options.gateways.push(gateway);
   }
 }

@@ -2,7 +2,7 @@ import { DcxAgent, dcxConfig, DcxIdentityVault, FileSystem, Mnemonic } from '@dc
 import { DcxIssuer } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { DcxIssuerServer } from '../src/index.js';
+import { DcxServer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
@@ -18,7 +18,7 @@ const issuer = new DcxIssuer({
     }
   }
 });
-const server: DcxIssuerServer = new DcxIssuerServer({ issuer });
+const server: DcxServer = new DcxServer({ issuer });
 
 describe('DcxServer class', () => {
   afterEach(async () => {
@@ -54,7 +54,7 @@ describe('DcxServer class', () => {
     });
 
     it('should include property serverOptions as an object containing 6 entries', () => {
-      const serverOptions = server.issuer.options;
+      const serverOptions = server.dcx.options;
       expect(serverOptions).to.not.be.null.and.not.be.undefined;
       expect(Object.entries(serverOptions)).to.have.lengthOf.gte(5);
     });
@@ -62,8 +62,8 @@ describe('DcxServer class', () => {
 
   describe('.initialize()', () => {
     it('should initialize the server', async () => {
-      await server.issuer.initializeWeb5();
-      expect(server.issuer.isInitialized).equals(true);
+      await server.dcx.initializeWeb5();
+      expect(server.dcx.isInitialized).equals(true);
     });
 
     it('should initialize the DcxManager', () => {
@@ -80,8 +80,8 @@ describe('DcxServer class', () => {
 
   describe('.setupDwn()', () => {
     it('should setup the remote DWN', async () => {
-      await server.issuer.setupDwn();
-      expect(server.issuer.isSetup).equals(true);
+      await server.dcx.setupDwn();
+      expect(server.dcx.isSetup).equals(true);
     });
   });
 });
