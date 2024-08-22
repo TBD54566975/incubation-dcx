@@ -210,7 +210,7 @@ export class DcxApplicant implements DcxManager {
   /**
    * Query records from DWN
    */
-  public async queryRecords({ from, protocolPath }: RecordsQueryParams): Promise<RecordsQueryResponse> {
+  public async queryRecords({ from, protocolPath, options }: RecordsQueryParams): Promise<RecordsQueryResponse> {
     const { status, records = [], cursor } = await DcxApplicant.web5.dwn.records.query({
       from,
       message : {
@@ -220,6 +220,7 @@ export class DcxApplicant implements DcxManager {
           schema       : manifestSchema.$id,
           dataFormat   : 'application/json',
         },
+        ...options
       },
     });
 

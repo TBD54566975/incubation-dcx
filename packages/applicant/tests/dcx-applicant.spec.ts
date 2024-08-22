@@ -2,14 +2,14 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 import { dcxConfig, FileSystem, Mnemonic } from '@dcx-protocol/common';
-import { Web5 } from '@web5/api';
+import { Protocol, Web5 } from '@web5/api';
 import { Web5UserAgent } from '@web5/user-agent';
 import { expect } from 'chai';
 import { DcxApplicant } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-const dcxApplicant = new DcxApplicant({
+const applicant = new DcxApplicant({
   config : {
     ...dcxConfig,
     dwnEndpoints      : ['http://localhost:3000'],
@@ -28,28 +28,28 @@ describe('DcxApplicant class', () => {
 
   describe('has default properties that', () => {
     it('should include static property isSetup as a boolean equal to false', () => {
-      const isSetup = dcxApplicant.isSetup;
+      const isSetup = applicant.isSetup;
       expect(isSetup).to.not.be.null.and.not.be.undefined;
       expect(isSetup).equals(false);
     });
 
     it('should include property isInitialized as a boolean equal to false', () => {
-      const isInitialized = dcxApplicant.isInitialized;
+      const isInitialized = applicant.isInitialized;
       expect(isInitialized).to.not.be.null.and.not.be.undefined;
       expect(typeof isInitialized).equals('boolean');
       expect(isInitialized).equals(false);
     });
 
     it('should include property options as an object containing 6 entries', () => {
-      const options = dcxApplicant.options;
+      const options = applicant.options;
       expect(options).to.not.be.null.and.not.be.undefined;
       expect(Object.entries(options)).to.have.lengthOf.gte(6);
     });
 
     describe('.initializeWeb5()', () => {
-      it('should initialize the dcxApplicant web5 connection', async () => {
-        await dcxApplicant.initializeWeb5();
-        expect(dcxApplicant.isInitialized).equals(true);
+      it('should initialize the applicant web5 connection', async () => {
+        await applicant.initializeWeb5();
+        expect(applicant.isInitialized).equals(true);
       });
 
       it('should initialize the DcxApplicant', () => {
@@ -61,10 +61,40 @@ describe('DcxApplicant class', () => {
       });
     });
 
-    describe('.setupDwn()', () => {
+    describe('applicant.setupDwn()', () => {
       it('should setup the remote DWN', async () => {
-        await dcxApplicant.setupDwn();
-        expect(dcxApplicant.isSetup).equals(true);
+        await applicant.setupDwn();
+        expect(applicant.isSetup).equals(true);
+      });
+    });
+
+    describe('applicant.queryProtocols()', () => {
+      it('should query the remote DWN for protocols', async () => {
+        const { protocols } = await applicant.queryProtocols();
+        expect(protocols).to.not.be.null.and.not.be.undefined;
+        expect(protocols).to.be.instanceof(Array);
+      });
+    });
+
+    describe('applicant.configureProtocols()', () => {
+      it('should configure the applicant protocol in the remote DWN', async () => {
+        const { status, protocol } = await applicant.configureProtocols();
+        expect(protocol).to.not.be.null.and.not.be.undefined;
+        expect(protocol).to.be.instanceof(Protocol);
+        const { code, detail } = status;
+        expect(status).to.not.be.null.and.not.be.undefined;
+        expect(typeof code).to.equal('number');
+        expect(code).to.equals(202);
+        expect(typeof detail).to.equal('string');
+        expect(detail).to.equals('Accepted');
+      });
+    });
+
+    describe('applicant.queryRecords()', () => {
+      it('should query the remote DWN for records', async () => {
+        const { records } = await applicant.queryRecords({ protocolPath: 'application/response' });
+        expect(records).to.not.be.null.and.not.be.undefined;
+        expect(records).to.be.instanceof(Array);
       });
     });
   });
