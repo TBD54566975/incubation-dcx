@@ -67,23 +67,23 @@ export class DcxAgentRecovery {
       if (!(password && recoveryPhrase)) {
         Logger.security(
           `${web5PasswordEnv} and ${web5RecoveryPhraseEnv} not found on first launch! ` +
-                `New ${web5PasswordEnv} saved to ${passwordKeyFile} file. ` +
-                `New ${web5RecoveryPhraseEnv} saved to ${recoveryKeyFile} file.`,
+          `New ${web5PasswordEnv} saved to ${passwordKeyFile} file. ` +
+          `New ${web5RecoveryPhraseEnv} saved to ${recoveryKeyFile} file.`,
         );
 
         return await DcxAgentRecovery.createRecoveryData({ passwordKeyFile, recoveryKeyFile });
       } else if (password && !recoveryPhrase) {
         Logger.warn(
           `${web5PasswordEnv} found without ${web5RecoveryPhraseEnv}! ` +
-            `Attempting to unlock the vault with ${web5PasswordEnv}.`,
+          `Attempting to unlock the vault with ${web5PasswordEnv}.`,
         );
         return { password };
       } else if (!password && recoveryPhrase) {
         throw new DcxError(
           'DcxAgentRecoveryError',
           `${web5RecoveryPhraseEnv} found without ${web5PasswordEnv} on first launch! ` +
-            `${web5PasswordEnv} is required to unlock the vault recovered by ${web5RecoveryPhraseEnv}. ` +
-            `To recover an existing vault, set ${web5PasswordEnv} and ${web5RecoveryPhraseEnv} in .env file.`
+          `${web5PasswordEnv} is required to unlock the vault recovered by ${web5RecoveryPhraseEnv}. ` +
+          `To recover an existing vault, set ${web5PasswordEnv} and ${web5RecoveryPhraseEnv} in .env file.`
         );
       }
 
