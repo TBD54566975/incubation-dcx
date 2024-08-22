@@ -1,4 +1,4 @@
-import { DcxAgent, DcxIdentityVault, FileSystem } from '@dcx-protocol/common';
+import { DcxAgent, dcxConfig, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
 import { DcxIssuer } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
@@ -6,7 +6,19 @@ import { DcxServer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-const server: DcxServer = new DcxServer();
+const issuer = new DcxIssuer({
+  config : {
+    ...dcxConfig,
+    dwnEndpoints   : ['http://localhost:3000'],
+    issuer       : {
+      ...dcxConfig.issuer,
+      web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+      web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+      agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
+    }
+  }
+});
+const server: DcxServer = new DcxServer({ issuer });
 
 describe('DcxServer class', () => {
   afterEach(async () => {
@@ -21,14 +33,14 @@ describe('DcxServer class', () => {
     });
 
     it('should include property isInitialized as a boolean equal to false', () => {
-      const isInitialized = server.dcx.isInitialized;
+      const isInitialized = issuer.isInitialized;
       expect(isInitialized).to.not.be.null.and.not.be.undefined;
       expect(typeof isInitialized).equals('boolean');
       expect(isInitialized).equals(false);
     });
 
     it('should include property isSetup as a boolean equal to false', () => {
-      const isSetup = server.dcx.isSetup;
+      const isSetup = issuer.isSetup;
       expect(isSetup).to.not.be.null.and.not.be.undefined;
       expect(typeof isSetup).equals('boolean');
       expect(isSetup).to.be.equals(false);

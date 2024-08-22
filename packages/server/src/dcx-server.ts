@@ -2,14 +2,11 @@ import { DcxApplicant } from '@dcx-protocol/applicant';
 import { DcxPath, DcxServerError, Handler, Issuer, Manifest, Provider } from '@dcx-protocol/common';
 import { DcxIssuer } from '@dcx-protocol/issuer';
 import { argv } from 'process';
-import { ApplicantServer } from './index.js';
-import { IssuerServer } from './issuer/index.js';
 
 export interface IDcxServer {
     isTest    : boolean;
     isPolling : boolean;
     dcx       : DcxIssuer | DcxApplicant;
-    server    : IssuerServer | ApplicantServer;
 
     use(path: string, ...args: any[]): void;
     useManifest(manifest: Manifest): void;
@@ -29,23 +26,13 @@ export interface DcxServerParams {
 export class DcxServer implements IDcxServer {
   isPolling : boolean = false;
   isTest    : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
-
   dcx       : DcxIssuer | DcxApplicant;
-  server    : IssuerServer | ApplicantServer;
 
-  constructor(params: DcxServerParams) {
+  constructor(params: DcxServerParams = { type: 'issuer' }) {
     if(params.type === 'applicant' || params.applicant) {
       this.dcx = params.applicant ?? new DcxApplicant({});
-      this.server = new ApplicantServer({
-        type      : 'applicant',
-        applicant : this.dcx as DcxApplicant
-      });
     } else if (params.type === 'issuer' || params.issuer) {
       this.dcx = params.issuer ?? new DcxIssuer({});
-      this.server = new IssuerServer({
-        type      : 'issuer',
-        issuer    : this.dcx as DcxIssuer
-      });
     } else {
       throw new DcxServerError('Invalid server params: must be pass type  "applicant" or "issuer" or must pass an applicant or issuer object');
     }
