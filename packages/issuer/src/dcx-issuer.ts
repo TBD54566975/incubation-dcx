@@ -5,11 +5,11 @@ import {
   DcxConfig,
   dcxConfig,
   DcxDwnError,
+  DcxIdentityVault,
   DcxManager,
   DcxManagerStatus,
   dcxOptions,
   DcxOptions,
-  DcxParams,
   DcxProtocolHandlerError,
   DwnError,
   DwnUtils,
@@ -34,7 +34,9 @@ import {
   stringifier,
   TrustedIssuer,
   VerifiableCredential,
-  VerifyCredentialsParams
+  VerifyCredentialsParams,
+  InitializeParams,
+  DcxIssuerParams
 } from '@dcx-protocol/common';
 import { DwnResponseStatus } from '@web5/agent';
 import {
@@ -64,8 +66,6 @@ import { dcxIssuer } from './index.js';
  * issuer.setup();
  */
 export class DcxIssuer implements DcxManager {
-  [key: string]: any;
-
   public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
@@ -73,13 +73,21 @@ export class DcxIssuer implements DcxManager {
     initialized : false,
   };
 
-  // public static web5: Web5;
-  // public static agent: DcxAgent;
-  // public static agentVault: DcxIdentityVault;
+  public web5: Web5;
+  public agent: DcxAgent;
+  public agentVault: DcxIdentityVault;
 
-  constructor(params: DcxParams) {
-    this.options = params.options ? { ...this.options, ...params.options } : this.options;
-    this.config = params.config ? { ...this.config, ...params.config } : this.config;
+  constructor({ options, config, web5, agent, agentVault }: DcxIssuerParams) {
+    this.web5 = web5;
+    this.agent = agent;
+    this.agentVault = agentVault;
+
+    this.options = options
+      ? { ...this.options, ...options }
+      : this.options;
+    this.config = config
+      ? { ...this.config, ...config }
+      : this.config;
 
     /**
      * Set the default handlers if none are provided
@@ -539,12 +547,15 @@ export class DcxIssuer implements DcxManager {
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX issuer protocol
    */
-  public async initialize(): Promise<void> {
+  public async initialize({ web5, agent, agentVault }: InitializeParams): Promise<void> {
     const issuerConfig = this.config.issuer;
     Logger.log('Initializing DcxIssuer ... ');
 
-    // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({
+    // Create a new DcxIdentityVault instance if one is not provided
+    agentVault ??= new DcxIdentityVault();
+
+    // Create a new DcxAgent instance if one is not provided
+    agent ??= await DcxAgent.create({
       agentVault : this.agentVault,
       dataPath   : issuerConfig.agentDataPath
     });
@@ -575,7 +586,7 @@ export class DcxIssuer implements DcxManager {
     await agent.start({ password });
 
     // Initialize the Web5 instance
-    const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
+    web5 ??= new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
     this.web5 = web5;

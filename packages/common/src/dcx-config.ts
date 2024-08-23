@@ -39,6 +39,7 @@ export const dcxConfig = {
   applicant : {
     web5Password       : process.env.APPLICANT_WEB5_PASSWORD        ?? '',
     web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? '',
+    agentDataPath      : process.env.APPLICANT_WEB5_AGENT_DATA_PATH ?? `DATA/DCX/APPLICANT/AGENT`,
   }
 };
 
