@@ -24,7 +24,9 @@ export const FF = { name: 'formfree', id: 'did:dht:hcf5e55bbm44s4oixp5z89wtxenxy
 export const defaultTrustedIssuers = [MX, FF];
 
 export const dcxConfig = {
-  ...[DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
+  DcxHandshakeManifest,
+  PhoneNumberManifest,
+  EmailAddressManifest,
   issuers      : defaultTrustedIssuers,
   manifests    : [DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
   dwnEndpoints : ['https://dwn.tbddev.org/beta'],

@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/common",
-  "version": "0.4.3",
+  "version": "1.2.0",
   "description": "Common library shared by the other @dcx-protocol packages",
   "type": "module",
   "main": "./dist/cjs/index.js",

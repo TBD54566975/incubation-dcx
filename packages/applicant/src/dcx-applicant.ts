@@ -57,8 +57,6 @@ import { dcxApplicant } from './index.js';
  * applicant.setup();
  */
 export class DcxApplicant implements DcxManager {
-  [key: string]: any;
-
   public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
@@ -66,11 +64,11 @@ export class DcxApplicant implements DcxManager {
     initialized : false,
   };
 
-  // public static did: string;
-  // public static web5: Web5;
-  // public static agent: Web5PlatformAgent;
+  public did!: string;
+  public web5!: Web5;
+  public agent!: Web5PlatformAgent;
 
-  constructor(params: DcxParams) {
+  constructor(params: DcxParams = {}) {
     this.options = params.options ? { ...this.options, ...params.options } : this.options;
     this.config = params.config ? { ...this.config, ...params.config } : this.config;
   }

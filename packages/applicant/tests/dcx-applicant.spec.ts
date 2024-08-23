@@ -20,80 +20,66 @@ const applicant = new DcxApplicant({
   }
 });
 
-describe('DcxApplicant class', () => {
-
-  afterEach(async () => {
+describe('DcxApplicant', () => {
+  after(async () => {
     await FileSystem.rm('DATA');
   });
 
-  describe('has default properties that', () => {
-    it('should include static property isSetup as a boolean equal to false', () => {
-      const isSetup = applicant.isSetup;
-      expect(isSetup).to.not.be.null.and.not.be.undefined;
-      expect(isSetup).equals(false);
+  describe('constructor: new DcxApplicant({ ... })', () => {
+    it('should contain property initialized as a boolean equal to false', () => {
+      expect(applicant.status.initialized).to.be.a('boolean').and.to.be.false;
     });
 
-    it('should include property isInitialized as a boolean equal to false', () => {
-      const isInitialized = applicant.isInitialized;
-      expect(isInitialized).to.not.be.null.and.not.be.undefined;
-      expect(typeof isInitialized).equals('boolean');
-      expect(isInitialized).equals(false);
+    it('should contain property isInitialized as a boolean equal to false', () => {
+      expect(applicant.status.setup).to.be.a('boolean').and.to.be.false;
     });
 
-    it('should include property options as an object containing 6 entries', () => {
-      const options = applicant.options;
-      expect(options).to.not.be.null.and.not.be.undefined;
-      expect(Object.entries(options)).to.have.lengthOf.gte(6);
+    it('should contain property options as an object containing 6 entries', () => {
+      expect(applicant.options).to.be.an('object');
+      expect(Object.entries(applicant.options)).to.have.lengthOf.gte(6);
     });
 
-    describe('.initializeWeb5()', () => {
+    describe('applicant.initialize()', () => {
       it('should initialize the applicant web5 connection', async () => {
-        await applicant.initializeWeb5();
-        expect(applicant.isInitialized).equals(true);
+        await applicant.initialize();
+        expect(applicant.status.initialized).to.be.true;
       });
 
-      it('should initialize the DcxApplicant', () => {
-        expect(applicant.web5).to.not.be.null.and.not.be.undefined;
+      it('should initialize applicant properties web5 and agent', () => {
         expect(applicant.web5).to.be.instanceof(Web5);
-
-        expect(applicant.agent).to.not.be.null.and.not.be.undefined;
         expect(applicant.agent).to.be.instanceof(Web5UserAgent);
       });
     });
 
-    describe('applicant.setupDwn()', () => {
-      it('should setup the remote DWN', async () => {
-        await applicant.setupDwn();
-        expect(applicant.isSetup).equals(true);
+    describe('applicant.setup()', () => {
+      it('should setup the applicant dwn', async () => {
+        await applicant.setup();
+        expect(applicant.status.setup).to.be.true;
       });
     });
 
     describe('applicant.queryProtocols()', () => {
-      it('should query the remote DWN for protocols', async () => {
+      it('should query the applicant dwn for protocols', async () => {
         const { protocols } = await applicant.queryProtocols();
-        expect(protocols).to.not.be.null.and.not.be.undefined;
         expect(protocols).to.be.instanceof(Array);
       });
     });
 
     describe('applicant.configureProtocols()', () => {
-      it('should configure the applicant protocol in the remote DWN', async () => {
+      it('should configure the applicant protocol in the applicant dwn', async () => {
         const { status, protocol } = await applicant.configureProtocols();
-        expect(protocol).to.not.be.null.and.not.be.undefined;
         expect(protocol).to.be.instanceof(Protocol);
+        expect(status).to.be.an('object');
+
         const { code, detail } = status;
-        expect(status).to.not.be.null.and.not.be.undefined;
-        expect(typeof code).to.equal('number');
-        expect(code).to.equals(202);
-        expect(typeof detail).to.equal('string');
-        expect(detail).to.equals('Accepted');
+        expect(code).to.be.a('number').and.to.equal(202);
+        expect(detail).to.be.a('string').and.to.equal('Accepted');
       });
     });
 
     describe('applicant.queryRecords()', () => {
-      it('should query the remote DWN for records', async () => {
+      it('should query the applicant dwn for records', async () => {
         const { records } = await applicant.queryRecords({ protocolPath: 'application/response' });
-        expect(records).to.not.be.null.and.not.be.undefined;
         expect(records).to.be.instanceof(Array);
       });
     });
