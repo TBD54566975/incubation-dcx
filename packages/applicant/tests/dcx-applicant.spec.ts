@@ -53,11 +53,11 @@ describe('DcxApplicant class', () => {
       });
 
       it('should initialize the DcxApplicant', () => {
-        expect(DcxApplicant.web5).to.not.be.null.and.not.be.undefined;
-        expect(DcxApplicant.web5).to.be.instanceof(Web5);
+        expect(applicant.web5).to.not.be.null.and.not.be.undefined;
+        expect(applicant.web5).to.be.instanceof(Web5);
 
-        expect(DcxApplicant.agent).to.not.be.null.and.not.be.undefined;
-        expect(DcxApplicant.agent).to.be.instanceof(Web5UserAgent);
+        expect(applicant.agent).to.not.be.null.and.not.be.undefined;
+        expect(applicant.agent).to.be.instanceof(Web5UserAgent);
       });
     });
 

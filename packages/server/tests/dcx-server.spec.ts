@@ -90,11 +90,11 @@ describe('Server', () => {
   describe('Server with issuer: DcxIssuer => IssuerServer', () => {
     describe('constructor: new Server({ issuer: new DcxIssuer({}) })', () => {
       const server: Server = new Server({ issuer: new DcxIssuer({}) });
-      const dcx = server.dcx as DcxIssuer;
-      const issuer = server.issuer!;
-      const options = issuer.options;
-      const config = issuer.config;
-      const status = issuer.status;
+      const issuer = server.issuer;
+      const dcx = server.dcx;
+      const options = dcx.options;
+      const config = dcx.config;
+      const status = dcx.status;
 
       it('should contain property dcx as an instanceof DcxIssuer', () => {
         expect(dcx).to.be.an.instanceof(DcxIssuer);
