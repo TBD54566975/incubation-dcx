@@ -5,6 +5,7 @@ import {
   DcxConfig,
   dcxConfig,
   DcxDwnError,
+  DcxIdentityVault,
   DcxManager,
   DcxManagerStatus,
   dcxOptions,
@@ -15,6 +16,7 @@ import {
   DwnUtils,
   Handler,
   HandlerFunction,
+  InitializeParams,
   IssueCredentialParams,
   IssuerProcessRecordParams,
   Logger,
@@ -60,12 +62,16 @@ import { dcxIssuer } from './index.js';
  * @returns DcxIssuer
  * @example
  * const issuer = new DcxIssuer({ options: dcxOptions, config: dcxConfig });
- * issuer.initialize();
- * issuer.setup();
+ * await issuer.initialize();
+ * await issuer.setup();
+ *
+ * @example
+ * const issuer = new DcxIssuer();
+ * const agent = await DcxAgent.create();
+ * const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
+ * await issuer.initialize({ agent, web5 });
  */
 export class DcxIssuer implements DcxManager {
-  [key: string]: any;
-
   public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
@@ -73,13 +79,13 @@ export class DcxIssuer implements DcxManager {
     initialized : false,
   };
 
-  // public static web5: Web5;
-  // public static agent: DcxAgent;
-  // public static agentVault: DcxIdentityVault;
+  public web5!: Web5;
+  public agent!: DcxAgent;
+  public agentVault: DcxIdentityVault = new DcxIdentityVault();
 
-  constructor(params: DcxParams) {
-    this.options = params.options ? { ...this.options, ...params.options } : this.options;
-    this.config = params.config ? { ...this.config, ...params.config } : this.config;
+  constructor({ options, config }: DcxParams = {}) {
+    this.options = options ? { ...this.options, ...options } : this.options;
+    this.config = config ? { ...this.config, ...config } : this.config;
 
     /**
      * Set the default handlers if none are provided
@@ -104,6 +110,7 @@ export class DcxIssuer implements DcxManager {
     this.requestCredentialData = this.findHandler('requestCredentialData', this.requestCredentialData);
     this.createCredential = this.findHandler('createCredential', this.createCredential);
     this.issueCredential = this.findHandler('issueCredential', this.issueCredential);
+
   }
 
   /**
@@ -471,10 +478,8 @@ export class DcxIssuer implements DcxManager {
     Logger.debug('VC data from provider', stringifier(data));
 
     const vc = await this.createCredential({ data, subjectDid, manifest });
-
-    const { status } = await this.issueCredential({vc, subjectDid});
-
-    return { status };
+    const issuance = await this.issueCredential({vc, subjectDid});
+    return { status: issuance.status };
   }
 
   /**
@@ -539,12 +544,12 @@ export class DcxIssuer implements DcxManager {
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX issuer protocol
    */
-  public async initialize(): Promise<void> {
+  public async initialize({ agent, web5 }: InitializeParams = {}): Promise<void> {
     const issuerConfig = this.config.issuer;
     Logger.log('Initializing DcxIssuer ... ');
 
     // Create a new DcxAgent instance
-    const agent = await DcxAgent.create({
+    agent ??= await DcxAgent.create({
       agentVault : this.agentVault,
       dataPath   : issuerConfig.agentDataPath
     });
@@ -575,7 +580,7 @@ export class DcxIssuer implements DcxManager {
     await agent.start({ password });
 
     // Initialize the Web5 instance
-    const web5 = new Web5({ agent, connectedDid: agent.agentDid.uri });
+    web5 ??= new Web5({ agent, connectedDid: agent.agentDid.uri });
 
     // Set the DcxManager properties
     this.web5 = web5;

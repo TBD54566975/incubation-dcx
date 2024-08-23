@@ -5,7 +5,11 @@ import { DcxIssuer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-describe('DcxIssuer class', () => {
+describe('issuer = new DcxIssuer({ ... })', () => {
+  afterEach(async () => {
+    await FileSystem.rm('__TEST_DATA__');
+  });
+
   const issuer: DcxIssuer = new DcxIssuer({
     config  : {
       ...dcxConfig,
@@ -17,55 +21,92 @@ describe('DcxIssuer class', () => {
       }
     }
   });
+  const status = issuer.status;
+  const options = issuer.options;
 
-  afterEach(async () => {
-    await FileSystem.rm('__TEST_DATA__');
-  });
-
-  describe('default properties', () => {
-    it('should include property isInitialized as a boolean equal to false', () => {
-      const isInitialized = issuer.isInitialized;
-      expect(isInitialized).to.not.be.null.and.not.be.undefined;
-      expect(typeof isInitialized).equals('boolean');
-      expect(isInitialized).equals(false);
+  // Check issuer property.status
+  describe('issuer.status', () => {
+    // Check issuer.status property "initialized"
+    it('should contain property "initialized" as a boolean equal to false', () => {
+      expect(status).to.have.property('initialized').that.is.a('boolean').and.to.be.false;
     });
 
-    it('should include property isSetup as a boolean equal to false', () => {
-      const isSetup = issuer.isSetup;
-      expect(isSetup).to.not.be.null.and.not.be.undefined;
-      expect(typeof isSetup).equals('boolean');
-      expect(isSetup).to.be.equals(false);
+    // Check issuer.status property "setup"
+    it('should contain property "setup" as a boolean equal to false', () => {
+      expect(status).to.have.property('setup').that.is.a('boolean').and.to.be.false;
     });
 
-    it('should include property useOptions as an object containing 6 entries', () => {
-      const useOptions = issuer.options;
-      expect(useOptions).to.not.be.null.and.not.be.undefined;
-      expect(Object.entries(useOptions)).to.have.lengthOf.gte(6);
+    // Check issuer.status property "error"
+    it('should contain property "options" as an object containing 6 entries', () => {
+      expect(options).to.be.an('object');
+      expect(Object.entries(options)).to.have.lengthOf.gte(6);
     });
   });
 
-  describe('.initialize()', () => {
-    it('should initialize the issuer', async () => {
+  /**
+   * @property {array} issuer.options.handlers
+   * @property {array} issuer.options.providers
+   * @property {array} issuer.options.manifests
+   * @property {array} issuer.options.issuers
+   * @property {array} issuer.options.gateways
+   * @property {array} issuer.options.dwns
+   */
+  describe('issuer.options', () => {
+    // Check issuer.options property "handlers"
+    it('should contain an array property "handlers" with length >= 0', () => {
+      expect(options).to.have.property('handlers').that.is.an('array').and.has.lengthOf.gte(0);
+    });
+
+    // Check issuer.options property "providers"
+    it('should contain an array property "providers" with length >= 0', () => {
+      expect(options).to.have.property('providers').that.is.an('array').and.has.lengthOf.gte(0);
+    });
+
+    // Check issuer.options property "manifests"
+    it('should contain an array property "manifests" with length >= 3', () => {
+      expect(options).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(1);
+    });
+
+    // Check issuer.options property "issuers"
+    it('should contain an array property "issuers" with length >= 2', () => {
+      expect(options).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(1);
+    });
+
+    // Check issuer.options property "gateways"
+    it('should contain an array property "gateways" with length >= 1', () => {
+      expect(options).to.have.property('gateways').that.is.an('array').and.has.lengthOf.gte(1);
+    });
+
+    // Check issuer.options property "dwns"
+    it('should contain an array property "dwns" with length >= 1', () => {
+      expect(options).to.have.property('dwns').that.is.an('array').and.has.lengthOf.gte(1);
+    });
+  });
+
+  /**
+   * @async @method issuer.initialize()
+   */
+  describe('await issuer.initialize()', () => {
+    it('should initialize the DcxIssuer', async () => {
       await issuer.initialize();
-      expect(issuer.isInitialized).equals(true);
+      expect(issuer.status.initialized).equals(true);
     });
 
-    it('should initialize the IssuerManager', () => {
-      expect(issuer.web5).to.not.be.null.and.not.be.undefined;
+    it('should initialize the DcxIssuer properties: web5, agent and agentVault', () => {
       expect(issuer.web5).to.be.instanceof(Web5);
-
-      expect(issuer.agent).to.not.be.null.and.not.be.undefined;
       expect(issuer.agent).to.be.instanceof(DcxAgent);
-
-      expect(issuer.agentVault).to.not.be.null.and.not.be.undefined;
       expect(issuer.agentVault).to.be.instanceof(DcxIdentityVault);
     });
   });
 
-  describe('.setupDwn()', () => {
-    it('should setup the remote DWN', async () => {
-      await issuer.setupDwn();
-      expect(issuer.isSetup).equals(true);
+  /**
+   * @async @method issuer.initialize()
+   */
+  describe('await issuer.setup()', () => {
+    // Check issuer.setup()
+    it('should setup the issuer protocol in local and remote dwn', async () => {
+      await issuer.setup();
+      expect(issuer.status.setup).equals(true);
     });
   });
 });
