@@ -1,4 +1,4 @@
-import { CredentialManifest, FORMFREE, Issuer, Manifest } from '../index.js';
+import { CredentialManifest, FF, TrustedIssuer, Manifest } from '../index.js';
 
 export type FindMissingParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
 export type FindMissingResponse = { missing: CredentialManifest[] };
@@ -35,10 +35,10 @@ export class OptionsUtil {
    *
    * @param param.name the name of the issuer to find
    * @param param.id the id of the issuer to find
-   * @returns Issuer or FORMFREE; see {@link Issuer}, {@link FORMFREE}
+   * @returns TrustedIssuer or FF; see {@link TrustedIssuer}, {@link FF}
    */
-  public static findIssuer({ issuers, name, id }: Partial<Issuer> & { issuers: Issuer[] }): Issuer {
-    return issuers.find((issuer: Issuer) => issuer.name === name || issuer.id === id) ?? FORMFREE;
+  public static findIssuer({ issuers, name, id }: Partial<TrustedIssuer> & { issuers: TrustedIssuer[] }): TrustedIssuer {
+    return issuers.find((issuer: TrustedIssuer) => issuer.name === name || issuer.id === id) ?? FF;
   }
 
   public static findMissingManifests({ dwnManifests, localManifests }: FindMissingParams): FindMissingResponse {

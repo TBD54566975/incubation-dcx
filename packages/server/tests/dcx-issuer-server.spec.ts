@@ -26,10 +26,10 @@ describe('DcxServer class', () => {
   });
 
   describe('default properties', () => {
-    it('should include static property isPolling as a boolean equal to false', () => {
-      const isPolling = server.isPolling;
-      expect(isPolling).to.not.be.null.and.not.be.undefined;
-      expect(isPolling).equals(false);
+    it('should include static property running as a boolean equal to false', () => {
+      const running = server.running;
+      expect(running).to.not.be.null.and.not.be.undefined;
+      expect(running).equals(false);
     });
 
     it('should include property isInitialized as a boolean equal to false', () => {
@@ -46,11 +46,11 @@ describe('DcxServer class', () => {
       expect(isSetup).to.be.equals(false);
     });
 
-    it('should include property isTest as a boolean equal to true', () => {
-      const isTest = server.isTest;
-      expect(isTest).to.not.be.null.and.not.be.undefined;
-      expect(typeof isTest).equals('boolean');
-      expect(isTest).to.be.equals(true);
+    it('should include property testing as a boolean equal to true', () => {
+      const testing = server.testing;
+      expect(testing).to.not.be.null.and.not.be.undefined;
+      expect(typeof testing).equals('boolean');
+      expect(testing).to.be.equals(true);
     });
 
     it('should include property serverOptions as an object containing 6 entries', () => {

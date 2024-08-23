@@ -6,13 +6,6 @@ import { dcxConfig } from '../src/index.js';
 
 describe('dcxConfig', () => {
   describe('defines configuration for both sides of the protocol using env vars and static vars', () => {
-    it('should contain property dcxConfig.endpoints as an object containing 2 key value pairs', () => {
-      const endpoints = dcxConfig.endpoints;
-      expect(endpoints).to.not.be.null.and.not.be.undefined;
-      expect(endpoints).to.be.an('object');
-      expect(Object.entries(endpoints)).have.lengthOf.gte(2);
-    });
-
     it('should contain property dcxConfig.issuers as an array with a length of at least 1', () => {
       const issuers = dcxConfig.issuers;
       expect(issuers).to.not.be.null.and.not.be.undefined;

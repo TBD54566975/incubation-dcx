@@ -8,7 +8,7 @@ import {
 } from '../index.js';
 
 /**
- * Issuer interface defines objects passed into DcxIssuer or DcxApplicant
+ * ITrustedIssuer interface defines objects passed into DcxIssuer or DcxApplicant
  * DCX issuers are entities that issue credentials to applicants either prior to an application submission
  * or after a credential application response fulfillment. Meaning, the issuers listed in the DCX configuration
  * are either issuers you trust to sign credentials that are required for an application and/or issuers that you trust
@@ -18,11 +18,11 @@ import {
  * The input VCs required for an application are defined in Credential Manifests: specifically the presentation_definition.input_descriptors
  * field. For more details, see {@link https://identity.foundation/credential-manifest/#input-evaluation}
  */
-export interface IIssuer extends AdditionalProperties {
+export interface ITrustedIssuer extends AdditionalProperties {
   name: string;
   id: string;
 }
-export class Issuer implements IIssuer {
+export class TrustedIssuer implements ITrustedIssuer {
   constructor(
       public name: string,
       public id: string) {}
@@ -64,7 +64,7 @@ export class Manifest implements CredentialManifest {
         public name: string,
         public description: string,
         public spec_version: string,
-        public issuer: Issuer,
+        public issuer: TrustedIssuer,
         public output_descriptors: ManifestOutputDescriptor[],
         public format: ManifestFormat,
         public presentation_definition: PresentationDefinition,
