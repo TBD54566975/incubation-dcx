@@ -1,11 +1,11 @@
-import { Handler, Issuer, Manifest, Provider } from '../index.js';
+import { Handler, Manifest, Provider, TrustedIssuer } from '../index.js';
 
 export type HandlerFunction = (...args: any[]) => any | Promise<any>;
 export type DcxOptions = {
   handlers: Handler[];
   providers: Provider[];
   manifests: Manifest[];
-  issuers: Issuer[];
+  issuers: TrustedIssuer[];
   gateways: string[];
   dwns: string[];
 };

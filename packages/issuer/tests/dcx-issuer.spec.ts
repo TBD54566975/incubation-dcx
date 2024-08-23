@@ -46,19 +46,19 @@ describe('DcxIssuer class', () => {
 
   describe('.initialize()', () => {
     it('should initialize the issuer', async () => {
-      await issuer.initializeWeb5();
+      await issuer.initialize();
       expect(issuer.isInitialized).equals(true);
     });
 
     it('should initialize the IssuerManager', () => {
-      expect(DcxIssuer.web5).to.not.be.null.and.not.be.undefined;
-      expect(DcxIssuer.web5).to.be.instanceof(Web5);
+      expect(issuer.web5).to.not.be.null.and.not.be.undefined;
+      expect(issuer.web5).to.be.instanceof(Web5);
 
-      expect(DcxIssuer.agent).to.not.be.null.and.not.be.undefined;
-      expect(DcxIssuer.agent).to.be.instanceof(DcxAgent);
+      expect(issuer.agent).to.not.be.null.and.not.be.undefined;
+      expect(issuer.agent).to.be.instanceof(DcxAgent);
 
-      expect(DcxIssuer.agentVault).to.not.be.null.and.not.be.undefined;
-      expect(DcxIssuer.agentVault).to.be.instanceof(DcxIdentityVault);
+      expect(issuer.agentVault).to.not.be.null.and.not.be.undefined;
+      expect(issuer.agentVault).to.be.instanceof(DcxIdentityVault);
     });
   });
 

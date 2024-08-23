@@ -1,6 +1,6 @@
 import {
   Format,
-  Issuer,
+  TrustedIssuer,
   ManifestFormat,
   ManifestOutputDescriptor,
   PresentationDefinition,
@@ -17,7 +17,7 @@ export interface ICredentialManifest {
   name?: string,
   description?: string
   spec_version: string,
-  issuer: Issuer,
+  issuer: TrustedIssuer,
   output_descriptors: ManifestOutputDescriptor[],
   format?: ManifestFormat,
   presentation_definition?: PresentationDefinition,
@@ -26,7 +26,7 @@ export class CredentialManifest implements ICredentialManifest{
   constructor(
     public id: string,
     public spec_version: string,
-    public issuer: Issuer,
+    public issuer: TrustedIssuer,
     public output_descriptors: ManifestOutputDescriptor[],
     public presentation_definition: PresentationDefinition,
     public name?: string,
