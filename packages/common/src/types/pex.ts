@@ -1,7 +1,7 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
-import { Record as DwnRecord } from '@web5/api';
+import { Record as DwnRecord, Web5 } from '@web5/api';
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptions } from '../index.js';
+import { CredentialApplication, CredentialManifest, DcxAgent, DcxConfig, DcxIdentityVault, DcxOptions, InitializeParams } from '../index.js';
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -115,7 +115,20 @@ export type ValidateVerifiablePresentationResponse = {
 
 export type CreateCredentialApplicationParams = { presentationSubmission: PresentationSubmission; manifestId: string; };
 
-export type DcxParams = { options?: DcxOptions; config?: DcxConfig };
+export type DcxParams = {
+  options?: DcxOptions;
+  config?: DcxConfig
+};
+export type DcxIssuerParams = DcxParams & {
+  web5: Web5;
+  agent: DcxAgent;
+  agentVault: DcxIdentityVault
+}
+export type DcxAPplicantParams = DcxParams & {
+  web5?: Web5;
+  agent?: DcxAgent;
+  agentVault?: DcxIdentityVault
+}
 export type DcxProtocolPath = 'manifest' | 'application/response' | 'response';
 export type IssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
 export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }

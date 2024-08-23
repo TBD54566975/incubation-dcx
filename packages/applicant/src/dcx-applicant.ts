@@ -1,7 +1,6 @@
 import {
   CreateCredentialApplicationParams,
   CredentialApplication,
-  DcxAgent,
   DcxAgentRecovery,
   dcxConfig,
   DcxConfig,
@@ -57,7 +56,7 @@ import { dcxApplicant } from './index.js';
  * applicant.setup();
  */
 export class DcxApplicant implements DcxManager {
-  [key: string]: any;
+  // [key: string]: any;
 
   public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
@@ -66,13 +65,13 @@ export class DcxApplicant implements DcxManager {
     initialized : false,
   };
 
-  // public static did: string;
-  // public static web5: Web5;
-  // public static agent: Web5PlatformAgent;
+  public did: string = '';
+  public web5: Web5 = {} as Web5;
+  public agent: Web5PlatformAgent = {} as Web5PlatformAgent;
 
-  constructor(params: DcxParams) {
-    this.options = params.options ? { ...this.options, ...params.options } : this.options;
-    this.config = params.config ? { ...this.config, ...params.config } : this.config;
+  constructor({ options, config }: DcxParams & { did?: string; web5?: Web5; agent?: Web5PlatformAgent }) {
+    this.options = options ? { ...this.options, ...options } : this.options;
+    this.config = config ? { ...this.config, ...config } : this.config;
   }
 
   /**
@@ -422,11 +421,10 @@ export class DcxApplicant implements DcxManager {
       };
 
     const { web5, did } = await Web5.connect(connectParams);
-    const agent = web5.agent as Web5PlatformAgent;
 
     // Set the DcxManager properties
-    this.web5 = web5 as Web5;
-    this.agent = agent as DcxAgent;
+    this.web5 = web5;
+    this.agent = web5.agent as Web5PlatformAgent;
     this.did = did;
 
     // Set the server initialized flag
