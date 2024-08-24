@@ -51,6 +51,7 @@ import {
   VerifiableCredential as Web5VerifiableCredential,
 } from '@web5/credentials';
 import { dcxIssuer } from './index.js';
+import { LevelStore } from '@web5/common';
 
 /**
  * DcxIssuer is the core class for the issuer side of the DCX protocol.
@@ -81,11 +82,14 @@ export class DcxIssuer implements DcxManager {
 
   public web5!: Web5;
   public agent!: DcxAgent;
-  public agentVault: DcxIdentityVault = new DcxIdentityVault();
+  public agentVault: DcxIdentityVault;
 
   constructor({ options, config }: DcxParams = {}) {
     this.options = options ? { ...this.options, ...options } : this.options;
     this.config = config ? { ...this.config, ...config } : this.config;
+    this.agentVault = new DcxIdentityVault({
+      store : new LevelStore<string, string>({ location: `${this.config.issuer.agentDataPath}/VAULT_STORE` })
+    });
 
     /**
      * Set the default handlers if none are provided

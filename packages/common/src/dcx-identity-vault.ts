@@ -2,6 +2,7 @@ import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@scure/bip39
 import { wordlist } from '@scure/bip39/wordlists/english';
 import {
   AgentCryptoApi,
+  HdIdentityVault,
   IdentityVault,
   IdentityVaultBackup,
   IdentityVaultBackupData,
@@ -9,12 +10,10 @@ import {
   IdentityVaultStatus,
   LocalKeyManager,
 } from '@web5/agent';
-import { Convert, KeyValueStore, MemoryStore } from '@web5/common';
+import { Convert, KeyValueStore, LevelStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
 import { BearerDid, DidDht, DidDhtCreateOptions } from '@web5/dids';
 import { HDKey } from 'ed25519-keygen/hdkey';
-import { CompactJwe } from './prototyping/crypto/jose/jwe-compact.js';
-import { DeterministicKeyGenerator } from './prototyping/crypto/utils.js';
 import {
   isEmptyString,
   isIdentityVaultBackup,
@@ -22,6 +21,8 @@ import {
   isPortableDid,
   Logger
 } from './index.js';
+import { CompactJwe } from './prototyping/crypto/jose/jwe-compact.js';
+import { DeterministicKeyGenerator } from './prototyping/crypto/utils.js';
 
 export type DcxIdentityVaultInitializeParams = {
   /**
@@ -48,21 +49,23 @@ export type DcxIdentityVaultInitializeParams = {
   dwnEndpoints: string[];
 };
 
-export class DcxIdentityVault implements IdentityVault<{ InitializeResult: string }> {
+export class DcxIdentityVault extends HdIdentityVault implements IdentityVault<{ InitializeResult: string }> {
   /** Provides cryptographic functions needed for secure storage and management of the vault. */
   public crypto = new AgentCryptoApi();
 
   /** Determines the computational intensity of the key derivation process. */
-  private _keyDerivationWorkFactor: number;
+  keyDerivationWorkFactor: number;
 
   /** The underlying key-value store for the vault's encrypted content. */
-  private _store: KeyValueStore<string, string>;
+  store: KeyValueStore<string, string>;
 
   /** The cryptographic key used to encrypt and decrypt the vault's content securely. */
-  private _contentEncryptionKey: Jwk | undefined;
+  contentEncryptionKey: Jwk | undefined;
+
   constructor({ keyDerivationWorkFactor, store }: IdentityVaultParams = {}) {
-    this._keyDerivationWorkFactor = keyDerivationWorkFactor ?? 210_000;
-    this._store = store ?? new MemoryStore<string, string>();
+    super({ keyDerivationWorkFactor, store });
+    this.keyDerivationWorkFactor = keyDerivationWorkFactor ?? 210_000;
+    this.store = store ?? new LevelStore<string, string>({ location: 'DATA/DCX/VAULT_STORE' });
   }
 
   public static create(): DcxIdentityVault {
@@ -75,7 +78,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
   }
 
   public async getStatus(): Promise<IdentityVaultStatus> {
-    const storedStatus = await this._store.get('vaultStatus');
+    const storedStatus = await this.store.get('vaultStatus');
     if (!storedStatus) {
       return {
         initialized : false,
@@ -92,8 +95,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     return vaultStatus;
   }
 
-  private async getStoredDid(): Promise<string> {
-    const didJwe = await this._store.get('did');
+  private async getStoredDidDcx(): Promise<string> {
+    const didJwe = await this.store.get('did');
     if (!didJwe) {
       throw new Error(
         'DcxIdentityVault: Unable to retrieve the DID record from the vault. Please check the ' +
@@ -110,10 +113,10 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       throw new Error(`DcxIdentityVault: Vault has not been initialized and unlocked.`);
     }
 
-    const didJwe = await this.getStoredDid();
+    const didJwe = await this.getStoredDidDcx();
     const { plaintext: portableDidBytes } = await CompactJwe.decrypt({
       jwe        : didJwe,
-      key        : this._contentEncryptionKey!,
+      key        : this.contentEncryptionKey!,
       crypto     : this.crypto,
       keyManager : new LocalKeyManager(),
     });
@@ -131,7 +134,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
   }
 
   public isLocked(): boolean {
-    return !this._contentEncryptionKey;
+    return !this.contentEncryptionKey;
   }
 
   public async lock(): Promise<void> {
@@ -139,8 +142,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       throw new Error(`DcxIdentityVault: Lock operation failed. Vault has not been initialized.`);
     }
 
-    if (this._contentEncryptionKey) this._contentEncryptionKey.k = '';
-    this._contentEncryptionKey = undefined;
+    if (this.contentEncryptionKey) this.contentEncryptionKey.k = '';
+    this.contentEncryptionKey = undefined;
   }
 
   public async restore({
@@ -161,8 +164,8 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     let previousContentEncryptionKey: string;
     let previousDid: string;
     try {
-      previousDid = await this.getStoredDid();
-      previousContentEncryptionKey = await this.getStoredContentEncryptionKey();
+      previousDid = await this.getStoredDidDcx();
+      previousContentEncryptionKey = await this.getStoredContentEncryptionKeyDcx();
       previousStatus = await this.getStatus();
     } catch {
       throw new Error(
@@ -177,18 +180,18 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       const backupData = Convert.base64Url(backup.data).toObject() as IdentityVaultBackupData;
 
       // Restore the backup to the data store.
-      await this._store.set('did', backupData.did);
-      await this._store.set('contentEncryptionKey', backupData.contentEncryptionKey);
-      await this.setStatus(backupData.status);
+      await this.store.set('did', backupData.did);
+      await this.store.set('contentEncryptionKey', backupData.contentEncryptionKey);
+      await this.setStatusDcx(backupData.status);
 
       // Attempt to unlock the vault with the given `password`.
       await this.unlock({ password });
     } catch (error: any) {
       // If the restore operation fails, revert the data store to the status and contents that were
       // saved before the restore operation was attempted.
-      await this.setStatus(previousStatus);
-      await this._store.set('contentEncryptionKey', previousContentEncryptionKey);
-      await this._store.set('did', previousDid);
+      await this.setStatusDcx(previousStatus);
+      await this.store.set('contentEncryptionKey', previousContentEncryptionKey);
+      await this.store.set('did', previousDid);
 
       throw new Error(
         'DcxIdentityVault: Restore operation failed due to invalid backup data or an incorrect ' +
@@ -197,7 +200,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     }
 
     // Update the last restore timestamp in the data store.
-    await this.setStatus({ lastRestore: new Date().toISOString() });
+    await this.setStatusDcx({ lastRestore: new Date().toISOString() });
   }
 
   public async unlock({ password }: { password: string }): Promise<void> {
@@ -205,7 +208,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     await this.lock();
 
     // Retrieve the content encryption key (CEK) record as a compact JWE from the data store.
-    const cekJwe = await this.getStoredContentEncryptionKey();
+    const cekJwe = await this.getStoredContentEncryptionKeyDcx();
 
     // Decrypt the compact JWE.
     try {
@@ -218,7 +221,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       const contentEncryptionKey = Convert.uint8Array(contentEncryptionKeyBytes).toObject() as Jwk;
 
       // Save the content encryption key in memory, thereby unlocking the vault.
-      this._contentEncryptionKey = contentEncryptionKey;
+      this.contentEncryptionKey = contentEncryptionKey;
     } catch (error: any) {
       throw new Error(`DcxIdentityVault: Unable to unlock the vault due to an incorrect password.`);
     }
@@ -286,7 +289,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
         alg : 'PBES2-HS512+A256KW',
         enc : 'A256GCM',
         cty : 'text/plain',
-        p2c : this._keyDerivationWorkFactor,
+        p2c : this.keyDerivationWorkFactor,
         p2s : Convert.uint8Array(saltInput).toBase64Url(),
       },
       plaintext  : Convert.object(contentEncryptionKey).toUint8Array(),
@@ -294,7 +297,7 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
       keyManager : new LocalKeyManager(),
     });
 
-    await this._store.set('contentEncryptionKey', cekJwe);
+    await this.store.set('contentEncryptionKey', cekJwe);
 
     const identityHdKey = rootHdKey.derive(`m/44'/0'/1708523827'/0'/0'`);
     const identityPrivateKey = await this.crypto.bytesToPrivateKey({
@@ -352,16 +355,16 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     });
 
     // Store the compact JWE in the data store.
-    await this._store.set('did', didJwe);
+    await this.store.set('did', didJwe);
 
-    this._contentEncryptionKey = contentEncryptionKey;
+    this.contentEncryptionKey = contentEncryptionKey;
 
-    await this.setStatus({ initialized: true });
+    await this.setStatusDcx({ initialized: true });
 
     return recoveryPhrase;
   }
 
-  private async setStatus({
+  private async setStatusDcx({
     initialized,
     lastBackup,
     lastRestore,
@@ -375,14 +378,14 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     vaultStatus.lastRestore = lastRestore ?? vaultStatus.lastRestore;
 
     // Write the changes to the store.
-    await this._store.set('vaultStatus', JSON.stringify(vaultStatus));
+    await this.store.set('vaultStatus', JSON.stringify(vaultStatus));
 
     return true;
   }
 
-  private async getStoredContentEncryptionKey(): Promise<string> {
+  private async getStoredContentEncryptionKeyDcx(): Promise<string> {
     // Retrieve the content encryption key (CEK) record as a compact JWE from the data store.
-    const cekJwe = await this._store.get('contentEncryptionKey');
+    const cekJwe = await this.store.get('contentEncryptionKey');
 
     if (!cekJwe) {
       throw new Error(
