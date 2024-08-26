@@ -9,63 +9,60 @@ import { DcxApplicant } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
-const applicant = new DcxApplicant({
-  config : {
-    ...dcxConfig,
-    dwnEndpoints      : ['http://localhost:3000'],
-    applicant    : {
-      web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-      web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-    }
-  }
-});
-
 describe('DcxApplicant', () => {
+  const applicant = new DcxApplicant({
+    config : {
+      ...dcxConfig,
+      dwnEndpoints : ['http://localhost:3000'],
+      applicant    : {
+        web5Password       : process.env.APPLICANT_WEB5_PASSWORD ?? Mnemonic.createPassword(),
+        web5RecoveryPhrase : process.env.APPLICANT_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
+      }
+    }
+  });
+
   after(async () => {
     await FileSystem.rm('DATA');
   });
 
-  describe('constructor: new DcxApplicant({ ... })', () => {
-    it('should contain property initialized as a boolean equal to false', () => {
+  describe('applicant = new DcxApplicant({ ... })', () => {
+    it('should contain property applicant.status.initialized as a boolean equal to false', () => {
       expect(applicant.status.initialized).to.be.a('boolean').and.to.be.false;
     });
 
-    it('should contain property isInitialized as a boolean equal to false', () => {
+    it('should contain property applicant.status.setup as a boolean equal to false', () => {
       expect(applicant.status.setup).to.be.a('boolean').and.to.be.false;
     });
 
-    it('should contain property options as an object containing 6 entries', () => {
+    it('should contain property applicant.options as an object containing 6 entries', () => {
       expect(applicant.options).to.be.an('object');
       expect(Object.entries(applicant.options)).to.have.lengthOf.gte(6);
     });
 
-    describe('applicant.initialize()', () => {
-      it('should initialize the applicant web5 connection', async () => {
+    describe('await applicant.initialize()', () => {
+      it('should initialize applicant properties "web5" and "agent"', async () => {
         await applicant.initialize();
         expect(applicant.status.initialized).to.be.true;
-      });
-
-      it('should initialize applicant properties web5 and agent', () => {
         expect(applicant.web5).to.be.instanceof(Web5);
         expect(applicant.agent).to.be.instanceof(Web5UserAgent);
       });
     });
 
-    describe('applicant.setup()', () => {
+    describe('await applicant.setup()', () => {
       it('should setup the applicant dwn', async () => {
         await applicant.setup();
         expect(applicant.status.setup).to.be.true;
       });
     });
 
-    describe('applicant.queryProtocols()', () => {
+    describe('await applicant.queryProtocols()', () => {
       it('should query the applicant dwn for protocols', async () => {
         const { protocols } = await applicant.queryProtocols();
         expect(protocols).to.be.instanceof(Array);
       });
     });
 
-    describe('applicant.configureProtocols()', () => {
+    describe('await applicant.configureProtocols()', () => {
       it('should configure the applicant protocol in the applicant dwn', async () => {
         const { status, protocol } = await applicant.configureProtocols();
         expect(protocol).to.be.instanceof(Protocol);
@@ -77,7 +74,7 @@ describe('DcxApplicant', () => {
       });
     });
 
-    describe('applicant.queryRecords()', () => {
+    describe('await applicant.queryRecords()', () => {
       it('should query the applicant dwn for records', async () => {
         const { records } = await applicant.queryRecords({ protocolPath: 'application/response' });
         expect(records).to.be.instanceof(Array);
