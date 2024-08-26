@@ -5,38 +5,74 @@ import { expect } from 'chai';
 import { dcxConfig } from '@dcx-protocol/common';
 
 process.env.NODE_ENV = 'test';
-const issuerConfig = dcxConfig.issuer;
 
-describe('dcxConfig.issuer', () => {
-  describe('defines configuration for both sides of the protocol using env vars and static vars', () => {
-    it('should contain property cursorFile as a string', () => {
-      const cursorFile = issuerConfig.cursorFile;
-      expect(cursorFile).to.not.be.null.and.not.be.undefined;
-      expect(cursorFile).to.be.a('string');
+describe('dcxConfig', () => {
+  // Check dcxConfig property "DcxHandshakeManifest"
+  it('should contain 3 objects properties named: "DcxHandshakeManifest", "PhoneNumberManifest", "EmailAddressManifest"', () => {
+    expect(dcxConfig).to.have.property('DcxHandshakeManifest').that.is.an('object');
+    expect(dcxConfig).to.have.property('PhoneNumberManifest').that.is.an('object');
+    expect(dcxConfig).to.have.property('EmailAddressManifest').that.is.an('object');
+  });
+
+  // Check dcxConfig property "issuers"
+  it('should contain an array property "issuers" with length >= 2', () => {
+    expect(dcxConfig).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(2);
+  });
+
+  // Check dcxConfig property "manifests"
+  it('should contain an array property "manifests" with length >= 3', () => {
+    expect(dcxConfig).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(3);
+  });
+
+  // Check dcxConfig property "dwnEndpoints"
+  it('should contain an array property "dwnEndpoints" with length >= 1', () => {
+    expect(dcxConfig).to.have.property('dwnEndpoints').that.is.an('array').and.has.lengthOf.gte(1);
+  });
+
+  // Check dcxConfig property "gatewayUris"
+  it('should contain an array property "gatewayUris" with length >= 1', () => {
+    expect(dcxConfig).to.have.property('gatewayUris').that.is.an('array').and.has.lengthOf.gte(1);
+  });
+
+  // Check dcxConfig property "issuer"
+  it('should contain an object property "issuer" with entries length >= 5', () => {
+    expect(dcxConfig).to.have.property('issuer').that.is.an('object');
+    expect(Object.entries(dcxConfig.issuer)).to.have.lengthOf.gte(5);
+  });
+
+  // Check dcxConfig property "applicant"
+  it('should contain an array property "applicant" with length >= 2', () => {
+    expect(dcxConfig).to.have.property('applicant').that.is.an('object');
+    expect(Object.entries(dcxConfig.applicant)).to.have.lengthOf.gte(2);
+  });
+
+  // Check dcxConfig.issuer
+  describe('dcxConfig.issuer', () => {
+    const issuer = dcxConfig.issuer;
+
+    // Check dcxConfig.issuer property "cursorFile"
+    it('should contain property "cursorFile" as a string', () => {
+      expect(issuer.cursorFile).to.be.a('string');
     });
 
-    it('should contain property lastRecordIdFile as a string', () => {
-      const lastRecordIdFile = issuerConfig.lastRecordIdFile;
-      expect(lastRecordIdFile).to.not.be.null.and.not.be.undefined;
-      expect(lastRecordIdFile).to.be.a('string');
+    // Check dcxConfig.issuer property "lastRecordIdFile"
+    it('should contain property "lastRecordIdFile" as a string', () => {
+      expect(issuer.lastRecordIdFile).to.be.a('string');
     });
 
-    it('should contain property agentDataPath as a string', () => {
-      const agentDataPath = issuerConfig.agentDataPath;
-      expect(agentDataPath).to.not.be.null.and.not.be.undefined;
-      expect(agentDataPath).to.be.a('string');
+    // Check dcxConfig.issuer property "agentDataPath"
+    it('should contain property "agentDataPath" as a string', () => {
+      expect(issuer.agentDataPath).to.be.a('string');
     });
 
-    it('should contain property web5Password as a string', () => {
-      const web5Password = issuerConfig.web5Password;
-      expect(web5Password).to.not.be.null.and.not.be.undefined;
-      expect(web5Password).to.be.a('string');
+    // Check dcxConfig.issuer property "web5Password"
+    it('should contain property "web5Password" as a string', () => {
+      expect(issuer.web5Password).to.be.a('string');
     });
 
-    it('should contain property web5RecoveryPhrase as a string', () => {
-      const web5RecoveryPhrase = issuerConfig.web5RecoveryPhrase;
-      expect(web5RecoveryPhrase).to.not.be.null.and.not.be.undefined;
-      expect(web5RecoveryPhrase).to.be.a('string');
+    // Check dcxConfig.issuer property "web5RecoveryPhrase"
+    it('should contain property "web5RecoveryPhrase" as a string', () => {
+      expect(issuer.web5RecoveryPhrase).to.be.a('string');
     });
   });
 });

@@ -2,21 +2,36 @@ import {
   DcxHandshakeManifest,
   DcxOptions,
   EmailAddressManifest,
-  PhoneNumberManifest,
-  defaultTrustedIssuers
+  PhoneNumberManifest
 } from './index.js';
 
+export type DcxIssuerConfig = {
+  cursorFile: string;
+  lastRecordIdFile: string;
+  web5Password: string;
+  web5RecoveryPhrase: string;
+  agentDataPath: string;
+};
+
+export type DcxApplicantConfig = {
+  web5Password: string;
+  web5RecoveryPhrase: string;
+};
+
+export const MX = { name: 'mx', id: 'did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y' };
+export const FF = { name: 'formfree', id: 'did:dht:hcf5e55bbm44s4oixp5z89wtxenxyk35su7f5pd4r5np93ikyowy' };
+
+export const defaultTrustedIssuers = [MX, FF];
+
 export const dcxConfig = {
-  ...[DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
+  DcxHandshakeManifest,
+  PhoneNumberManifest,
+  EmailAddressManifest,
   issuers      : defaultTrustedIssuers,
   manifests    : [DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
   dwnEndpoints : ['https://dwn.tbddev.org/beta'],
   gatewayUris  : ['https://diddht.tbddev.org/'],
-  endpoints    : {
-    dwns     : ['https://dwn.tbddev.org/beta'],
-    gateways : ['https://diddht.tbddev.org/'],
-  },
-  issuer : {
+  issuer       : {
     cursorFile         : 'issuer-cursor.json',
     lastRecordIdFile   : 'lastRecordId.issuer',
     web5Password       : process.env.ISSUER_WEB5_PASSWORD        ?? '',
@@ -37,3 +52,5 @@ export const dcxOptions: DcxOptions = {
   gateways  : dcxConfig.gatewayUris,
   dwns      : dcxConfig.dwnEndpoints,
 };
+
+export type DcxConfig = typeof dcxConfig & { [key: string]: any };

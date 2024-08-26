@@ -170,7 +170,7 @@ export type RecordsDeleteParams = {};
 export type RecordsDeleteResponse = {};
 
 // Records[] - Query
-export type RecordsQueryParams = { from?: string; protocolPath?: DcxProtocolPath }
+export type RecordsQueryParams = { from?: string; protocolPath?: DcxProtocolPath; schema?: {}; options?: any };
 export type RecordsQueryResponse = DwnResponseStatus & { records: DwnRecord[]; cursor?: DwnPaginationCursor };
 
 // Records[] - Filter

@@ -63,7 +63,7 @@ export class DidDhtManager {
    * @returns DidRegistrationResult; see {@link DidRegistrationResult}
    */
   public async publishDidDoc(gatewayUri: string): Promise<DidRegistrationResult> {
-    gatewayUri ??= dcxConfig.endpoints.gateways[0];
+    gatewayUri ??= dcxConfig.gatewayUris[0];
     return await DidDht.publish({ did: this.bearerDid, gatewayUri });
   }
 
