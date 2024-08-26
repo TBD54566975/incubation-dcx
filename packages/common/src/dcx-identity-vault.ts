@@ -2,13 +2,12 @@ import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@scure/bip39
 import { wordlist } from '@scure/bip39/wordlists/english';
 import {
   AgentCryptoApi,
-  HdIdentityVault,
   IdentityVault,
   IdentityVaultBackup,
   IdentityVaultBackupData,
   IdentityVaultParams,
   IdentityVaultStatus,
-  LocalKeyManager,
+  LocalKeyManager
 } from '@web5/agent';
 import { Convert, KeyValueStore, LevelStore } from '@web5/common';
 import { Jwk } from '@web5/crypto';
@@ -18,10 +17,10 @@ import {
   isEmptyString,
   isIdentityVaultBackup,
   isIdentityVaultStatus,
-  isPortableDid,
-  Logger
+  isPortableDid
 } from './index.js';
 import { CompactJwe } from './prototyping/crypto/jose/jwe-compact.js';
+import { JweHeaderParams } from './prototyping/crypto/jose/jwe.js';
 import { DeterministicKeyGenerator } from './prototyping/crypto/utils.js';
 
 export type DcxIdentityVaultInitializeParams = {
@@ -49,7 +48,8 @@ export type DcxIdentityVaultInitializeParams = {
   dwnEndpoints: string[];
 };
 
-export class DcxIdentityVault extends HdIdentityVault implements IdentityVault<{ InitializeResult: string }> {
+export type DcxIdentityVaultParams = IdentityVaultParams & { location?: string };
+export class DcxIdentityVault implements IdentityVault<{ InitializeResult: string }> {
   /** Provides cryptographic functions needed for secure storage and management of the vault. */
   public crypto = new AgentCryptoApi();
 
@@ -62,21 +62,70 @@ export class DcxIdentityVault extends HdIdentityVault implements IdentityVault<{
   /** The cryptographic key used to encrypt and decrypt the vault's content securely. */
   contentEncryptionKey: Jwk | undefined;
 
-  constructor({ keyDerivationWorkFactor, store }: IdentityVaultParams = {}) {
-    super({ keyDerivationWorkFactor, store });
+  constructor({
+    keyDerivationWorkFactor,
+    store,
+    location
+  }: DcxIdentityVaultParams = { location: 'DATA/DCX/AGENT/VAULT_STORE' }) {
     this.keyDerivationWorkFactor = keyDerivationWorkFactor ?? 210_000;
-    this.store = store ?? new LevelStore<string, string>({ location: 'DATA/DCX/VAULT_STORE' });
+    this.store = store ?? new LevelStore<string, string>({ location });
   }
 
   public static create(): DcxIdentityVault {
     return new DcxIdentityVault();
   }
 
-  public changePassword(params: { oldPassword: string; newPassword: string; }): Promise<void> {
-    Logger.debug('DcxIdentityVault: Changing password...', params);
-    throw new Error('Method not implemented.');
-  }
+  public async changePassword({ oldPassword, newPassword }: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<void> {
+    // Verify the identity vault has already been initialized.
+    if (await this.isInitialized() === false) {
+      throw new Error(
+        'DcxIdentityVault: Unable to proceed with the change password operation because the ' +
+        'identity vault has not been initialized. Please ensure the vault is properly ' +
+        'initialized with a secure password before trying again.'
+      );
+    }
 
+    // Lock the vault.
+    await this.lock();
+
+    // Retrieve the content encryption key (CEK) record as a compact JWE from the data store.
+    const cekJwe = await this.getStoredContentEncryptionKeyDcx();
+
+    // Decrypt the compact JWE using the given `oldPassword` to verify it is correct.
+    let protectedHeader: JweHeaderParams;
+    let contentEncryptionKey: Jwk;
+    try {
+      let contentEncryptionKeyBytes: Uint8Array;
+      ({ plaintext: contentEncryptionKeyBytes, protectedHeader } = await CompactJwe.decrypt({
+        jwe        : cekJwe,
+        key        : Convert.string(oldPassword).toUint8Array(),
+        crypto     : this.crypto,
+        keyManager : new LocalKeyManager()
+      }));
+      contentEncryptionKey = Convert.uint8Array(contentEncryptionKeyBytes).toObject() as Jwk;
+
+    } catch (error: any) {
+      throw new Error(`DcxIdentityVault: Unable to change the vault password due to an incorrectly entered old password.`);
+    }
+
+    // Re-encrypt the vault content encryption key (CEK) using the new password.
+    const newCekJwe = await CompactJwe.encrypt({
+      key        : Convert.string(newPassword).toUint8Array(),
+      protectedHeader, // Re-use the protected header from the original JWE.
+      plaintext  : Convert.object(contentEncryptionKey).toUint8Array(),
+      crypto     : this.crypto,
+      keyManager : new LocalKeyManager()
+    });
+
+    // Update the vault with the new CEK JWE.
+    await this.store.set('contentEncryptionKey', newCekJwe);
+
+    // Update the vault CEK in memory, effectively unlocking the vault.
+    this.contentEncryptionKey = contentEncryptionKey;
+  }
   public async getStatus(): Promise<IdentityVaultStatus> {
     const storedStatus = await this.store.get('vaultStatus');
     if (!storedStatus) {

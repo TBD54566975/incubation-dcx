@@ -88,7 +88,8 @@ export class DcxIssuer implements DcxManager {
     this.options = options ? { ...this.options, ...options } : this.options;
     this.config = config ? { ...this.config, ...config } : this.config;
     this.agentVault = new DcxIdentityVault({
-      store : new LevelStore<string, string>({ location: `${this.config.issuer.agentDataPath}/VAULT_STORE` })
+      store : new LevelStore<string, string>({
+        location : `${this.config.issuer.agentDataPath}/VAULT_STORE` })
     });
 
     /**
