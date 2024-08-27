@@ -1,7 +1,7 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptionsConfig } from '../index.js';
+import { CredentialApplication, CredentialManifest, DcxConfig } from '../index.js';
 
 export type HandlerFunction = (...args: any[]) => any | Promise<any>;
 
