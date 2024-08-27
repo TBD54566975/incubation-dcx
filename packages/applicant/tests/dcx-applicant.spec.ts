@@ -51,12 +51,12 @@ describe('applicant = new DcxApplicant({ config: applicantConfig })', () => {
   describe('applicant.config', () => {
     // Check applicant.config property "web5Password"
     it('should contain property "web5Password" as a string', () => {
-      expect(applicant.config.web5Password).to.be.a('boolean').and.to.be.false;
+      expect(applicant.config.web5Password).to.be.a('string');
     });
 
     // Check applicant.config property "web5RecoveryPhrase"
     it('should contain property "web5RecoveryPhrase" as a string', () => {
-      expect(applicant.config.web5RecoveryPhrase).to.be.a('boolean').and.to.be.false;
+      expect(applicant.config.web5RecoveryPhrase).to.be.a('string');
     });
 
     // Check applicant.config property "handlers"

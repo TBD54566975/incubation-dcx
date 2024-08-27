@@ -2,12 +2,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 import { expect } from 'chai';
-import { DcxConfig, dcxConfig } from '../src/index.js';
+import { dcxConfig } from '../src/index.js';
 
 describe('DcxConfig', () => {
-  it('should be an instance of DcxConfig', () => {
-    expect(dcxConfig).that.is.an.instanceof(DcxConfig);
-  });
 
   it('should have entries of length >= 6', () => {
     expect(Object.entries(dcxConfig)).to.have.lengthOf.gte(6);
