@@ -8,7 +8,7 @@ export { schema as manifestSchema } from './schemas/manifest.js';
 
 export type * from './types/did.js';
 export type * from './types/handlers.js';
-export type * from './types/pex.js';
+export type * from './types/dcx.js';
 export type * from './types/server.js';
 export type * from './types/web5.js';
 

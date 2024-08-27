@@ -3,13 +3,10 @@ import {
   CredentialManifest,
   DcxAgent,
   DcxAgentRecovery,
-  DcxConfig,
-  dcxConfig,
   DcxDwnError,
   DcxIdentityVault,
   DcxManager,
   DcxManagerStatus,
-  DcxParams,
   DcxProtocolHandlerError,
   DwnError,
   DwnUtils,
@@ -50,7 +47,7 @@ import {
   VerifiablePresentation,
   VerifiableCredential as Web5VerifiableCredential,
 } from '@web5/credentials';
-import { dcxIssuer } from './index.js';
+import { dcxIssuer, issuerConfig, IssuerConfig } from './index.js';
 
 /**
  * DcxIssuer is the core class for the issuer side of the DCX protocol.
@@ -72,30 +69,29 @@ import { dcxIssuer } from './index.js';
  * await issuer.initialize({ agent, web5 });
  */
 export class DcxIssuer implements DcxManager {
-  public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
     setup       : false,
     initialized : false,
   };
 
+  public config: IssuerConfig;
   public web5!: Web5;
   public agent!: DcxAgent;
   public agentVault: DcxIdentityVault;
 
-  constructor(params?: DcxParams) {
+  constructor(params?: { config: IssuerConfig }) {
     this.config = params?.config
-      ? { ...this.config, ...params.config }
-      : this.config;
-    this.agentVault = new DcxIdentityVault({
-      store : new LevelStore<string, string>({
-        location : `${this.config.issuer.agentDataPath}/VAULT_STORE` })
-    });
+      ? { ...issuerConfig, ...params.config }
+      : issuerConfig;
+
+    const store = new LevelStore<string, string>({ location: `${this.config.agentDataPath}/VAULT_STORE` });
+    this.agentVault = new DcxIdentityVault({ store });
 
     /**
      * Set the default handlers if none are provided
      */
-    if(!this.config.options.handlers || this.config.options.handlers.length === 0) {
-      this.config.options.handlers = [
+    if(!this.config.handlers || this.config.handlers.length === 0) {
+      this.config.handlers = [
         { id: 'selectCredentials', handler: this.selectCredentials },
         { id: 'verifyCredentials', handler: this.verifyCredentials },
         { id: 'requestCredentialData', handler: this.requestCredentialData },
@@ -126,9 +122,9 @@ export class DcxIssuer implements DcxManager {
    * @returns The handler if found, otherwise the static handler
    */
   public findHandler(id: string, staticHandler: HandlerFunction): HandlerFunction {
-    return this.config.options.handlers.find(
+    return this.config.handlers.find(
       (dcxHandler: Handler) => dcxHandler.id === id
-    )?.handler ?? staticHandler ?? this.config.options.handlers.push({ id, handler: staticHandler });
+    )?.handler ?? staticHandler ?? this.config.handlers.push({ id, handler: staticHandler });
   }
 
   /**
@@ -160,7 +156,7 @@ export class DcxIssuer implements DcxManager {
         continue;
       }
 
-      const issuers = [...this.config.options.issuers, ...this.config.issuers].map((issuer: TrustedIssuer) => issuer.id);
+      const issuers = [...this.config.issuers, ...this.config.issuers].map((issuer: TrustedIssuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -230,7 +226,7 @@ export class DcxIssuer implements DcxManager {
    * @returns The response from the VC data provider
    */
   public async requestCredentialData(params: RequestCredentialParams): Promise<any> {
-    const provider = this.config.options.providers.find((provider: Provider) => provider.id === params?.id);
+    const provider = this.config.providers.find((provider: Provider) => provider.id === params?.id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -433,8 +429,8 @@ export class DcxIssuer implements DcxManager {
     Logger.debug('Sent application record to local dwn', issuer);
 
     if(protocolPath !== 'manifest') {
-      const manifest = OptionsUtil.findManifest({ manifests: this.config.options.manifests, id: data.manifest_id });
-      const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.config.options.issuers, id: manifest?.issuer.id });
+      const manifest = OptionsUtil.findManifest({ manifests: this.config.manifests, id: data.manifest_id });
+      const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.config.issuers, id: manifest?.issuer.id });
       const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;
@@ -515,7 +511,7 @@ export class DcxIssuer implements DcxManager {
         const { records } = await this.createRecords({
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
-          data         : this.config.options.manifests
+          data         : this.config.manifests
         });
         Logger.log(`Created ${records.length} manifest records in DcxIssuer dwn`, records);
 
@@ -523,7 +519,7 @@ export class DcxIssuer implements DcxManager {
         // Filter and create missing manifest records
         const { missing: records } = OptionsUtil.findMissingManifests({
           dwnManifests   : manifests,
-          localManifests : this.config.options.manifests
+          localManifests : this.config.manifests
         });
         Logger.debug(`Found ${records.length} unwritten manifests`);
 
@@ -549,13 +545,12 @@ export class DcxIssuer implements DcxManager {
    * connecting to the remote DWN and configuring the DWN with the DCX issuer protocol
    */
   public async initialize({ agent, web5 }: InitializeParams = {}): Promise<void> {
-    const issuerConfig = this.config.issuer;
     Logger.log('Initializing DcxIssuer ... ');
 
     // Create a new DcxAgent instance
     agent ??= await DcxAgent.create({
       agentVault : this.agentVault,
-      dataPath   : issuerConfig.agentDataPath
+      dataPath   : this.config.agentDataPath
     });
 
     // Check if this is the first launch of the agent
@@ -565,12 +560,12 @@ export class DcxIssuer implements DcxManager {
     const { password, recoveryPhrase } = await DcxAgentRecovery.validate({
       firstLaunch,
       type           : 'issuer',
-      password       : issuerConfig.web5Password,
-      recoveryPhrase : issuerConfig.web5RecoveryPhrase,
+      password       : this.config.web5Password,
+      recoveryPhrase : this.config.web5RecoveryPhrase,
     });
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.config.options.dwns;
+    const dwnEndpoints = this.config.dwns;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
       : { password, dwnEndpoints, recoveryPhrase };

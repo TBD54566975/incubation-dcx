@@ -1,90 +1,106 @@
-import { DcxAgent, dcxConfig, DcxIdentityVault, FileSystem, Mnemonic } from '@dcx-protocol/common';
+import { DcxAgent, DcxIdentityVault, FileSystem } from '@dcx-protocol/common';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { DcxIssuer } from '../src/index.js';
+import { DcxIssuer, issuerConfig } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
 describe('issuer = new DcxIssuer({ ... })', () => {
+  issuerConfig.agentDataPath = '__TEST_DATA__/DCX/ISSUER/AGENT';
+  const issuer: DcxIssuer = new DcxIssuer({ config: issuerConfig });
+
   afterEach(async () => {
     await FileSystem.rm('__TEST_DATA__');
   });
-
-  const issuer: DcxIssuer = new DcxIssuer({
-    config  : {
-      ...dcxConfig,
-      issuer : {
-        ...dcxConfig.issuer,
-        web5Password       : process.env.ISSUER_WEB5_PASSWORD ?? Mnemonic.createPassword(),
-        web5RecoveryPhrase : process.env.ISSUER_WEB5_RECOVERY_PHRASE ?? Mnemonic.createRecoveryPhrase(),
-        agentDataPath      : '__TEST_DATA__/DCX/ISSUER/AGENT',
-      }
-    }
-  });
-  const status = issuer.status;
-  const options = issuer.options;
 
   // Check issuer property.status
   describe('issuer.status', () => {
     // Check issuer.status property "initialized"
     it('should contain property "initialized" as a boolean equal to false', () => {
-      expect(status).to.have.property('initialized').that.is.a('boolean').and.to.be.false;
+      expect(issuer.status).to.have.property('initialized').that.is.a('boolean').and.to.be.false;
     });
 
     // Check issuer.status property "setup"
     it('should contain property "setup" as a boolean equal to false', () => {
-      expect(status).to.have.property('setup').that.is.a('boolean').and.to.be.false;
-    });
-
-    // Check issuer.status property "error"
-    it('should contain property "options" as an object containing 6 entries', () => {
-      expect(options).to.be.an('object');
-      expect(Object.entries(options)).to.have.lengthOf.gte(6);
+      expect(issuer.status).to.have.property('setup').that.is.a('boolean').and.to.be.false;
     });
   });
 
   /**
-   * @property {array} issuer.options.handlers
-   * @property {array} issuer.options.providers
-   * @property {array} issuer.options.manifests
-   * @property {array} issuer.options.issuers
-   * @property {array} issuer.options.gateways
-   * @property {array} issuer.options.dwns
+   * @description the configuration object for the DcxIssuer
+   * @type {object} see {@link issuerConfig}
+   * @property {string} issuer.config.cursorFile
+   * @property {string} issuer.config.lastRecordIdFile
+   * @property {string} issuer.config.agentDataPath
+   * @property {boolean} issuer.config.web5Password
+   * @property {boolean} issuer.config.web5RecoveryPhrase
+   * @property {array} issuer.config.handlers
+   * @property {array} issuer.config.providers
+   * @property {array} issuer.config.manifests
+   * @property {array} issuer.config.issuers
+   * @property {array} issuer.config.gateways
+   * @property {array} issuer.config.dwns
    */
-  describe('issuer.options', () => {
-    // Check issuer.options property "handlers"
+  describe('issuer.config', () => {
+    // Check issuer.config property "cursorFile"
+    it('should have property "cursorFile" as a string', () => {
+      expect(issuer.config.cursorFile).to.be.a('string');
+    });
+
+    // Check issuer.config property "lastRecordIdFile"
+    it('should have property "lastRecordIdFile" as a string', () => {
+      expect(issuer.config.lastRecordIdFile).to.be.a('string');
+    });
+
+    // Check issuer.config property "agentDataPath"
+    it('should have property "agentDataPath" as a string', () => {
+      expect(issuer.config.agentDataPath).to.be.a('string');
+    });
+
+    // Check issuer.config property "web5Password"
+    it('should contain property "web5Password" as a string', () => {
+      expect(issuer.config.web5Password).to.be.a('boolean').and.to.be.false;
+    });
+
+    // Check issuer.config property "web5RecoveryPhrase"
+    it('should contain property "web5RecoveryPhrase" as a string', () => {
+      expect(issuer.config.web5RecoveryPhrase).to.be.a('boolean').and.to.be.false;
+    });
+
+    // Check issuer.config property "handlers"
     it('should contain an array property "handlers" with length >= 0', () => {
-      expect(options).to.have.property('handlers').that.is.an('array').and.has.lengthOf.gte(0);
+      expect(issuer.config).to.have.property('handlers').that.is.an('array').and.has.lengthOf.gte(0);
     });
 
-    // Check issuer.options property "providers"
+    // Check issuer.config property "providers"
     it('should contain an array property "providers" with length >= 0', () => {
-      expect(options).to.have.property('providers').that.is.an('array').and.has.lengthOf.gte(0);
+      expect(issuer.config).to.have.property('providers').that.is.an('array').and.has.lengthOf.gte(0);
     });
 
-    // Check issuer.options property "manifests"
+    // Check issuer.config property "manifests"
     it('should contain an array property "manifests" with length >= 3', () => {
-      expect(options).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(1);
+      expect(issuer.config).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(1);
     });
 
-    // Check issuer.options property "issuers"
+    // Check issuer.config property "issuers"
     it('should contain an array property "issuers" with length >= 2', () => {
-      expect(options).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(1);
+      expect(issuer.config).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(1);
     });
 
-    // Check issuer.options property "gateways"
+    // Check issuer.config property "gateways"
     it('should contain an array property "gateways" with length >= 1', () => {
-      expect(options).to.have.property('gateways').that.is.an('array').and.has.lengthOf.gte(1);
+      expect(issuer.config).to.have.property('gateways').that.is.an('array').and.has.lengthOf.gte(1);
     });
 
-    // Check issuer.options property "dwns"
+    // Check issuer.config property "dwns"
     it('should contain an array property "dwns" with length >= 1', () => {
-      expect(options).to.have.property('dwns').that.is.an('array').and.has.lengthOf.gte(1);
+      expect(issuer.config).to.have.property('dwns').that.is.an('array').and.has.lengthOf.gte(1);
     });
   });
 
   /**
-   * @async @method issuer.initialize()
+   * @description method to initialize the DcxIssuer
+   * @type {method} issuer.initialize(); see {@link DcxIssuer.initialize}
    */
   describe('await issuer.initialize()', () => {
     it('should initialize the DcxIssuer', async () => {
@@ -100,7 +116,8 @@ describe('issuer = new DcxIssuer({ ... })', () => {
   });
 
   /**
-   * @async @method issuer.initialize()
+   * @description method to setup the DcxIssuer Dwn
+   * @type {method} issuer.setup(); see {@link DcxIssuer.setup}
    */
   describe('await issuer.setup()', () => {
     // Check issuer.setup()

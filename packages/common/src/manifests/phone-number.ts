@@ -39,10 +39,11 @@ export const PhoneNumberManifest = {
   },
   presentation_definition : {
     id                  : 'phone-number-presentation',
+    purpose           : 'Used to present proof that an applicant owns the enclosed phone number by providing the enclosed one-time password (otp)',
     input_descriptors : [
       {
-        id            : 'phone-number-input-descriptor',
-        purpose       : 'Prove ownership of a phone number',
+        id          : 'phone-number-input-descriptor',
+        purpose     : 'The holder of this credential has proven ownership of the enclosed phone number by providing the correct one-time password (otp)',
         constraints : {
           fields : [
             {
