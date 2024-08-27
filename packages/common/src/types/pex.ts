@@ -1,7 +1,9 @@
 import { DwnPaginationCursor, DwnResponseStatus } from '@web5/agent';
 import { Record as DwnRecord } from '@web5/api';
 import { PresentationDefinitionV2, VcDataModel, VerifiableCredential } from '@web5/credentials';
-import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptions } from '../index.js';
+import { CredentialApplication, CredentialManifest, DcxConfig, DcxOptionsConfig } from '../index.js';
+
+export type HandlerFunction = (...args: any[]) => any | Promise<any>;
 
 export type AdditionalProperties = Record<string, any>;
 
@@ -115,7 +117,7 @@ export type ValidateVerifiablePresentationResponse = {
 
 export type CreateCredentialApplicationParams = { presentationSubmission: PresentationSubmission; manifestId: string; };
 
-export type DcxParams = { options?: DcxOptions; config?: DcxConfig };
+export type DcxParams = { config?: DcxConfig };
 export type DcxProtocolPath = 'manifest' | 'application/response' | 'response';
 export type IssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
 export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }

@@ -9,8 +9,6 @@ import {
   DcxError,
   DcxManager,
   DcxManagerStatus,
-  dcxOptions,
-  DcxOptions,
   DcxParams,
   DcxValidated,
   DwnError,
@@ -49,7 +47,7 @@ import { dcxApplicant } from './index.js';
  * requests to 3rd party VC data provider. It also manages the setup and
  * initialization of the Web5 connection, the DCX agent, DCX Identity Vault, and the DWN.
  * @class DcxApplicant implements DcxManager; see {@link DcxManager} for more details.
- * @param params DcxParams; see {@link DcxParams}: {@link DcxOptions}, {@link DcxConfig}
+ * @param params DcxParams; see {@link DcxParams} and {@link DcxConfig}
  * @returns DcxApplicant
  * @example
  * const applicant = new Dcxapplicant({ options: dcxOptions, config: dcxConfig });
@@ -57,7 +55,6 @@ import { dcxApplicant } from './index.js';
  * applicant.setup();
  */
 export class DcxApplicant implements DcxManager {
-  public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
     setup       : false,
@@ -68,9 +65,10 @@ export class DcxApplicant implements DcxManager {
   public web5!: Web5;
   public agent!: Web5PlatformAgent;
 
-  constructor(params: DcxParams = {}) {
-    this.options = params.options ? { ...this.options, ...params.options } : this.options;
-    this.config = params.config ? { ...this.config, ...params.config } : this.config;
+  constructor(params?: DcxParams) {
+    this.config = params?.config
+      ? { ...this.config, ...params.config }
+      : this.config;
   }
 
   /**
@@ -336,8 +334,8 @@ export class DcxApplicant implements DcxManager {
     }
     Logger.debug('Sent application record to local dwn', applicant);
 
-    const manifest = OptionsUtil.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
-    const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
+    const manifest = OptionsUtil.findManifest({ manifests: this.config.options.manifests, id: data.manifest_id });
+    const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.config.options.issuers, id: manifest?.issuer.id });
 
     const { status: issuer } = await record.send(recipient);
     if (DwnUtils.isFailure(issuer.code)) {
@@ -360,7 +358,7 @@ export class DcxApplicant implements DcxManager {
    * @returns RecordsReadParams; see {@link RecordsReadParams}
    */
   public async getManifests({ name, id }: Partial<TrustedIssuer>): Promise<GetManifestsResponse> {
-    const issuer = OptionsUtil.findIssuer({ issuers: this.options.issuers, name, id });
+    const issuer = OptionsUtil.findIssuer({ issuers: this.config.options.issuers, name, id });
     const { records: query } = await this.queryRecords({ from: issuer.id, protocolPath: 'manifest', schema: manifestSchema.$id });
     // TODO: application/response query
     //  const { records: query } = await this.queryRecords({ protocolPath: 'application/response', schema: responseSchema.$id, options: { author: issuer.id } });
@@ -408,7 +406,7 @@ export class DcxApplicant implements DcxManager {
     });
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.options.dwns;
+    const dwnEndpoints = this.config.options.dwns;
     const connectParams = !recoveryPhrase
       ? {
         password,

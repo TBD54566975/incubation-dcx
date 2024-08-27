@@ -1,8 +1,8 @@
 import { DcxApplicant } from '@dcx-protocol/applicant';
-import { DcxPath, DcxServerError, Handler, Manifest, Provider, stringifier, TrustedIssuer } from '@dcx-protocol/common';
+import { CredentialManifest, DcxPath, DcxServerError, Handler, Provider, stringifier, TrustedIssuer } from '@dcx-protocol/common';
 import { DcxIssuer } from '@dcx-protocol/issuer';
-import { IssuerServer } from './issuer-server.js';
 import { ApplicantServer } from './applicant-server.js';
+import { IssuerServer } from './issuer-server.js';
 import { IServer } from './types.js';
 
 export type ServerParams = {
@@ -101,16 +101,16 @@ export class DcxServer implements IServer  {
         `Invalid path: ${path} must be one of ${validPaths.join(', ')}`,
       );
     }
-    this._dcx.options[path].push(...args);
+    this._dcx.config.options[path].unshift(...args);
   }
 
   /**
    * Sets the manifest to use
-   * @param manifest The manifest to use; see {@link Manifest}
+   * @param manifest The manifest to use; see {@link CredentialManifest}
    * @example see docs/usage/README.md for usage information
    */
-  public useManifest(manifest: Manifest): void {
-    this._dcx.options.manifests.push(manifest);
+  public useManifest(manifest: CredentialManifest): void {
+    this._dcx.config.options.manifests.unshift(manifest);
   }
 
   /**
@@ -119,7 +119,7 @@ export class DcxServer implements IServer  {
    * @example see docs/usage/README.md for usage information
    */
   public useHandler(handler: Handler): void {
-    this._dcx.options.handlers.push(handler);
+    this._dcx.config.options.handlers.unshift(handler);
   }
 
   /**
@@ -128,7 +128,7 @@ export class DcxServer implements IServer  {
    * @example see docs/usage/README.md for usage information
    */
   public useProvider(provider: Provider): void {
-    this._dcx.options.providers.push(provider);
+    this._dcx.config.options.providers.unshift(provider);
   }
 
   /**
@@ -137,7 +137,7 @@ export class DcxServer implements IServer  {
    * @example see docs/usage/README.md for usage information
    */
   public useIssuer(issuer: TrustedIssuer): void {
-    this._dcx.options.issuers.push(issuer);
+    this._dcx.config.options.issuers.unshift(issuer);
   }
 
   /**
@@ -146,7 +146,7 @@ export class DcxServer implements IServer  {
    * @example see docs/usage/README.md for usage information
    */
   public useDwn(dwn: string): void {
-    this._dcx.options.dwns.push(dwn);
+    this._dcx.config.options.dwns.unshift(dwn);
   }
 
   /**
@@ -155,6 +155,6 @@ export class DcxServer implements IServer  {
    * @example see docs/usage/README.md for usage information
    */
   public useGateway(gateway: string): void {
-    this._dcx.options.gateways.push(gateway);
+    this._dcx.config.options.gateways.unshift(gateway);
   }
 }

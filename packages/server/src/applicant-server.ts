@@ -1,9 +1,21 @@
-import { SleepTime, Logger, Objects, stringifier, Time, FileSystem, DcxPath, Handler, Manifest, Provider, TrustedIssuer } from '@dcx-protocol/common';
+import { DcxApplicant } from '@dcx-protocol/applicant';
+import {
+  CredentialManifest,
+  DcxPath,
+  FileSystem,
+  Handler,
+  Logger,
+  Objects,
+  Provider,
+  SleepTime,
+  stringifier,
+  Time,
+  TrustedIssuer
+} from '@dcx-protocol/common';
+import { Record } from '@web5/api';
 import ms from 'ms';
 import { DcxServer } from './dcx-server.js';
-import { Record } from '@web5/api';
 import { IServer } from './types.js';
-import { DcxApplicant } from '@dcx-protocol/applicant';
 
 /**
  * @class ApplicantServer
@@ -28,7 +40,7 @@ export class ApplicantServer implements IServer {
     this.server.use(path, ...args);
   }
 
-  public useManifest(manifest: Manifest): void {
+  public useManifest(manifest: CredentialManifest): void {
     this.server.useManifest(manifest);
   }
 

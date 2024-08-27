@@ -1,5 +1,6 @@
 import {
   CreateCredentialParams,
+  CredentialManifest,
   DcxAgent,
   DcxAgentRecovery,
   DcxConfig,
@@ -8,8 +9,6 @@ import {
   DcxIdentityVault,
   DcxManager,
   DcxManagerStatus,
-  dcxOptions,
-  DcxOptions,
   DcxParams,
   DcxProtocolHandlerError,
   DwnError,
@@ -45,13 +44,13 @@ import {
   Record,
   Web5
 } from '@web5/api';
+import { LevelStore } from '@web5/common';
 import {
   PresentationExchange,
   VerifiablePresentation,
   VerifiableCredential as Web5VerifiableCredential,
 } from '@web5/credentials';
 import { dcxIssuer } from './index.js';
-import { LevelStore } from '@web5/common';
 
 /**
  * DcxIssuer is the core class for the issuer side of the DCX protocol.
@@ -73,7 +72,6 @@ import { LevelStore } from '@web5/common';
  * await issuer.initialize({ agent, web5 });
  */
 export class DcxIssuer implements DcxManager {
-  public options: DcxOptions = dcxOptions;
   public config: DcxConfig = dcxConfig;
   public status: DcxManagerStatus = {
     setup       : false,
@@ -84,9 +82,10 @@ export class DcxIssuer implements DcxManager {
   public agent!: DcxAgent;
   public agentVault: DcxIdentityVault;
 
-  constructor({ options, config }: DcxParams = {}) {
-    this.options = options ? { ...this.options, ...options } : this.options;
-    this.config = config ? { ...this.config, ...config } : this.config;
+  constructor(params?: DcxParams) {
+    this.config = params?.config
+      ? { ...this.config, ...params.config }
+      : this.config;
     this.agentVault = new DcxIdentityVault({
       store : new LevelStore<string, string>({
         location : `${this.config.issuer.agentDataPath}/VAULT_STORE` })
@@ -95,8 +94,8 @@ export class DcxIssuer implements DcxManager {
     /**
      * Set the default handlers if none are provided
      */
-    if(!this.options.handlers || this.options.handlers.length === 0) {
-      dcxOptions.handlers = [
+    if(!this.config.options.handlers || this.config.options.handlers.length === 0) {
+      this.config.options.handlers = [
         { id: 'selectCredentials', handler: this.selectCredentials },
         { id: 'verifyCredentials', handler: this.verifyCredentials },
         { id: 'requestCredentialData', handler: this.requestCredentialData },
@@ -127,9 +126,9 @@ export class DcxIssuer implements DcxManager {
    * @returns The handler if found, otherwise the static handler
    */
   public findHandler(id: string, staticHandler: HandlerFunction): HandlerFunction {
-    return this.options.handlers.find(
+    return this.config.options.handlers.find(
       (dcxHandler: Handler) => dcxHandler.id === id
-    )?.handler ?? staticHandler ?? this.options.handlers.push({ id, handler: staticHandler });
+    )?.handler ?? staticHandler ?? this.config.options.handlers.push({ id, handler: staticHandler });
   }
 
   /**
@@ -161,7 +160,7 @@ export class DcxIssuer implements DcxManager {
         continue;
       }
 
-      const issuers = [...this.options.issuers, ...this.config.issuers].map((issuer: TrustedIssuer) => issuer.id);
+      const issuers = [...this.config.options.issuers, ...this.config.issuers].map((issuer: TrustedIssuer) => issuer.id);
       const issuerDidSet = new Set<string>(issuers);
 
       if (!issuerDidSet.has(vc.vcDataModel.issuer as string)) {
@@ -231,7 +230,7 @@ export class DcxIssuer implements DcxManager {
    * @returns The response from the VC data provider
    */
   public async requestCredentialData(params: RequestCredentialParams): Promise<any> {
-    const provider = this.options.providers.find((provider: Provider) => provider.id === params?.id);
+    const provider = this.config.options.providers.find((provider: Provider) => provider.id === params?.id);
 
     if (!provider) {
       throw new DcxProtocolHandlerError('No VC data provider configured');
@@ -400,7 +399,7 @@ export class DcxIssuer implements DcxManager {
     { data, schema, protocolPath }: RecordCreateParams
   ): Promise<RecordCreateResponse> {
     if(protocolPath === 'manifest') {
-      data.issuer.id = this.agent.agentDid.uri;
+      data = data as CredentialManifest;
     }
     const { record, status } = await this.web5.dwn.records.create({
       data,
@@ -434,8 +433,8 @@ export class DcxIssuer implements DcxManager {
     Logger.debug('Sent application record to local dwn', issuer);
 
     if(protocolPath !== 'manifest') {
-      const manifest = OptionsUtil.findManifest({ manifests: this.options.manifests, id: data.manifest_id });
-      const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.options.issuers, id: manifest?.issuer.id });
+      const manifest = OptionsUtil.findManifest({ manifests: this.config.options.manifests, id: data.manifest_id });
+      const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.config.options.issuers, id: manifest?.issuer.id });
       const { status: applicant } = await record.send(recipient);
       if (DwnUtils.isFailure(applicant.code)) {
         const { code, detail } = applicant;
@@ -516,7 +515,7 @@ export class DcxIssuer implements DcxManager {
         const { records } = await this.createRecords({
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
-          data         : this.options.manifests
+          data         : this.config.options.manifests
         });
         Logger.log(`Created ${records.length} manifest records in DcxIssuer dwn`, records);
 
@@ -524,7 +523,7 @@ export class DcxIssuer implements DcxManager {
         // Filter and create missing manifest records
         const { missing: records } = OptionsUtil.findMissingManifests({
           dwnManifests   : manifests,
-          localManifests : this.options.manifests
+          localManifests : this.config.options.manifests
         });
         Logger.debug(`Found ${records.length} unwritten manifests`);
 
@@ -571,7 +570,7 @@ export class DcxIssuer implements DcxManager {
     });
 
     // Toggle the initialization options based on the presence of a recovery phrase
-    const dwnEndpoints = this.options.dwns;
+    const dwnEndpoints = this.config.options.dwns;
     const initializeParams = !recoveryPhrase
       ? { password, dwnEndpoints }
       : { password, dwnEndpoints, recoveryPhrase };
