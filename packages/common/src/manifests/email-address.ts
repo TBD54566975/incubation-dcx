@@ -38,11 +38,14 @@ export const EmailAddressManifest = {
     }
   },
   presentation_definition : {
-    id                  : 'email-address-mfa-presentation',
+    id      : 'email-address-mfa-presentation',
+    name    : 'Email Address Presentation',
+    purpose : 'Used to present proof that an applicant owns the enclosed email address by providing the enclosed otp',
+
     input_descriptors : [
       {
-        id            : 'email-address-mfa-input-descriptor',
-        purpose       : 'Prove ownership of an email address',
+        id          : 'email-address-input-descriptor',
+        purpose     : 'The holder of this credential has proven ownership of the enclosed email address by providing the correct one-time password (otp)',
         constraints : {
           fields : [
             {

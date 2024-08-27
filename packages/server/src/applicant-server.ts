@@ -1,9 +1,17 @@
-import { SleepTime, Logger, Objects, stringifier, Time, FileSystem, DcxPath, Handler, Manifest, Provider, TrustedIssuer } from '@dcx-protocol/common';
-import ms from 'ms';
-import { DcxServer } from './dcx-server.js';
-import { Record } from '@web5/api';
-import { IServer } from './types.js';
 import { DcxApplicant } from '@dcx-protocol/applicant';
+import {
+  CredentialManifest,
+  DcxPath,
+  Handler,
+  Logger,
+  Provider,
+  SleepTime,
+  Time,
+  TrustedIssuer
+} from '@dcx-protocol/common';
+import { Record } from '@web5/api';
+import ms from 'ms';
+import { DcxServer, IServer } from './dcx-server.js';
 
 /**
  * @class ApplicantServer
@@ -28,7 +36,7 @@ export class ApplicantServer implements IServer {
     this.server.use(path, ...args);
   }
 
-  public useManifest(manifest: Manifest): void {
+  public useManifest(manifest: CredentialManifest): void {
     this.server.useManifest(manifest);
   }
 
@@ -63,32 +71,12 @@ export class ApplicantServer implements IServer {
     const milliseconds = ms(params.ms);
     Logger.log('ApplicantServer listening ...');
 
-    const CURSOR = this.applicant.config.issuer.cursorFile;
-    const LAST_RECORD_ID = this.applicant.config.issuer.lastRecordIdFile;
-
-    let currentCursor = await FileSystem.readToJson(CURSOR);
-    const pagination = Objects.isEmpty(currentCursor) ? {} : { cursor: currentCursor };
-    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
-
     while (this.server.listening) {
-      const { records = [], cursor: nextCursor } = await this.applicant.queryRecords({
+      const { records = [] } = await this.applicant.queryRecords({
         protocolPath : 'application/response',
-        options      : { pagination }
       });
 
       Logger.log(`Found ${records.length} records`);
-      if (nextCursor) {
-        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
-        currentCursor = nextCursor;
-        const overwritten = await FileSystem.overwrite(CURSOR, currentCursor);
-        Logger.log(`${CURSOR} overwritten ${overwritten}`, currentCursor);
-      } else {
-        Logger.log(`Next cursor not found!`);
-      }
-
-      if (currentCursor && !records.length) {
-        currentCursor = undefined;
-      }
 
       if (this.server.testing) {
         Logger.log('Test Complete! Stopping applicant server ...');
@@ -101,7 +89,7 @@ export class ApplicantServer implements IServer {
       }
 
       const responses = records.filter(
-        (record: Record) => record.id != lastRecordId && record.protocolPath === 'application/response'
+        (record: Record) => record.protocolPath === 'application/response'
       );
       const { records: reads } = await this.applicant.readRecords({ records: responses });
       Logger.debug(`Processed ${reads.length} application/responses`);

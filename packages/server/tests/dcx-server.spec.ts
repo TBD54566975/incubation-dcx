@@ -3,9 +3,9 @@ import { DcxAgent, DcxIdentityVault, DcxServerError, FileSystem, Mnemonic } from
 import { DcxIssuer } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
+import { ApplicantServer } from '../src/applicant-server.js';
 import { DcxServer } from '../src/dcx-server.js';
 import { IssuerServer } from '../src/issuer-server.js';
-import { ApplicantServer } from '../src/applicant-server.js';
 
 process.env.NODE_ENV = 'test';
 
@@ -119,17 +119,15 @@ describe('DcxServer', () => {
   describe('with { issuer: new DcxIssuer() }', () => {
     describe('server = new DcxServer({ issuer: new DcxIssuer() })', () => {
       const server: DcxServer = new DcxServer({ issuer: new DcxIssuer() });
-      const issuerServer = server.issuerServer;
       const issuer = server.issuer;
-      const options = issuer.options;
       const config = issuer.config;
       const status = issuer.status;
 
       /**
        * @property {IssuerServer} server.issuerServer
        */
-      it('should contain property "server.issuerServer" as an instanceof IssuerServer', () => {
-        expect(issuerServer).to.be.an.instanceof(IssuerServer);
+      it('should contain property "issuerServer" as an instanceof IssuerServer', () => {
+        expect(server.issuerServer).to.be.an.instanceof(IssuerServer);
       });
 
       /**
@@ -140,12 +138,6 @@ describe('DcxServer', () => {
         // Check server.issuer instance
         it('should be an instanceof DcxIssuer', () => {
           expect(issuer).to.be.an.instanceof(DcxIssuer);
-        });
-
-        // Check server.issuer property "options"
-        it('should contain an object property "options" with at least 6 entries', () => {
-          expect(options).to.be.an('object');
-          expect(Object.entries(options)).to.have.lengthOf.gte(6);
         });
 
         // check server.issuer property "config"
@@ -161,101 +153,76 @@ describe('DcxServer', () => {
         });
 
         /**
-         * @property {array} server.issuer.options.handlers
-         * @property {array} server.issuer.options.providers
-         * @property {array} server.issuer.options.manifests
-         * @property {array} server.issuer.options.issuers
-         * @property {array} server.issuer.options.gateways
-         * @property {array} server.issuer.options.dwns
+         * server.issuer.config; see {@link IssuerConfig}
+         * @property {array} server.issuer.config.handlers
+         * @property {array} server.issuer.config.providers
+         * @property {array} server.issuer.config.manifests
+         * @property {array} server.issuer.config.issuers
+         * @property {array} server.issuer.config.gateways
+         * @property {array} server.issuer.config.dwns
          */
-        describe('server.issuer.options', () => {
+        describe('server.issuer.config', () => {
           // Check server.issuer.options property "handlers"
           it('should contain an array property "handlers" with length >= 0', () => {
-            expect(options).to.have.property('handlers').that.is.an('array').and.has.lengthOf.gte(0);
+            expect(config).to.have.property('handlers').that.is.an('array').and.has.lengthOf.gte(0);
           });
 
           // Check server.issuer.options property "providers"
           it('should contain an array property "providers" with length >= 0', () => {
-            expect(options).to.have.property('providers').that.is.an('array').and.has.lengthOf.gte(0);
+            expect(config).to.have.property('providers').that.is.an('array').and.has.lengthOf.gte(0);
           });
 
           // Check server.issuer.options property "manifests"
           it('should contain an array property "manifests" with length >= 3', () => {
-            expect(options).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(1);
+            expect(config).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(1);
           });
 
           // Check server.issuer.options property "issuers"
           it('should contain an array property "issuers" with length >= 2', () => {
-            expect(options).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(1);
+            expect(config).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(1);
           });
 
           // Check server.issuer.options property "gateways"
           it('should contain an array property "gateways" with length >= 1', () => {
-            expect(options).to.have.property('gateways').that.is.an('array').and.has.lengthOf.gte(1);
+            expect(config).to.have.property('gateways').that.is.an('array').and.has.lengthOf.gte(1);
           });
 
           // Check server.issuer.options property "dwns"
           it('should contain an array property "dwns" with length >= 1', () => {
-            expect(options).to.have.property('dwns').that.is.an('array').and.has.lengthOf.gte(1);
-          });
-        });
-
-        /**
-         * server.issuer.config; see {@link DcxConfig}
-         * @property {object} server.issuer.config.DcxHandshakeManifest
-         * @property {object} server.issuer.config.PhoneNumberManifest
-         * @property {object} server.issuer.config.EmailAddressManifest
-         * @property {array} server.issuer.config.issuers
-         * @property {array} server.issuer.config.manifests
-         * @property {array} server.issuer.config.dwnEndpoints
-         * @property {array} server.issuer.config.gatewayUris
-         * @property {array} server.issuer.config.issuer
-         * @property {array} server.issuer.config.applicant
-         */
-        describe('server.issuer.config', () => {
-          // Check server.issuer.config property "DcxHandshakeManifest"
-          it('should contain 3 objects properties named: DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest', () => {
-            expect(config).to.have.property('DcxHandshakeManifest').that.is.an('object');
-            expect(config).to.have.property('PhoneNumberManifest').that.is.an('object');
-            expect(config).to.have.property('EmailAddressManifest').that.is.an('object');
+            expect(config).to.have.property('dwns').that.is.an('array').and.has.lengthOf.gte(1);
           });
 
-          // Check server.issuer.config property "issuers"
-          it('should contain an array property "issuers" with length >= 2', () => {
-            expect(config).to.have.property('issuers').that.is.an('array').and.has.lengthOf.gte(2);
+          // Check server.issuer.config property "cursorFile"
+          it('should contain string property "cursorFile"', () => {
+            expect(config).to.have.property('cursorFile').that.is.a('string');
           });
 
-          // Check server.issuer.config property "manifests"
-          it('should contain an array property "manifests" with length >= 3', () => {
-            expect(config).to.have.property('manifests').that.is.an('array').and.has.lengthOf.gte(3);
+          // Check server.issuer.config property "lastRecordIdFile"
+          it('should contain string property "lastRecordIdFile"', () => {
+            expect(config).to.have.property('lastRecordIdFile').that.is.a('string');
           });
 
-          // Check server.issuer.config property "dwnEndpoints"
-          it('should contain an array property "dwnEndpoints" with length >= 1', () => {
-            expect(config).to.have.property('dwnEndpoints').that.is.an('array').and.has.lengthOf.gte(1);
+          // Check server.issuer.config property "agentDataPath"
+          it('should contain string property "agentDataPath"', () => {
+            expect(config).to.have.property('agentDataPath').that.is.a('string');
           });
 
-          // Check server.issuer.config property "gatewayUris"
-          it('should contain an array property "gatewayUris" with length >= 1', () => {
-            expect(config).to.have.property('gatewayUris').that.is.an('array').and.has.lengthOf.gte(1);
+          // Check server.issuer.config property "web5Password"
+          it('should contain string property "web5Password"', () => {
+            expect(config).to.have.property('web5Password').that.is.a('string');
           });
 
-          // Check server.issuer.config property "issuer"
-          it('should contain an object property "issuer" with entries length >= 5', () => {
-            expect(config).to.have.property('issuer').that.is.an('object');
-            expect(Object.entries(config.issuer)).to.have.lengthOf.gte(5);
-          });
-
-          // Check server.issuer.config property "applicant"
-          it('should contain an array property "applicant" with length >= 2', () => {
-            expect(config).to.have.property('applicant').that.is.an('object');
-            expect(Object.entries(config.applicant)).to.have.lengthOf.gte(2);
+          // Check server.issuer.config property "web5RecoveryPhrase"
+          it('should contain string property "web5RecoveryPhrase"', () => {
+            expect(config).to.have.property('web5RecoveryPhrase').that.is.a('string');
           });
         });
 
 
         /**
-         * @property {object} server.issuer.status
+         * server.issuer.status; see {@link DcxManagerStatus}
+         * @property {boolean} server.issuer.status.setup
+         * @property {boolean} server.issuer.status.initialized
          */
         describe('server.issuer.status', () => {
           // Check server.issuer.status property "setup"
@@ -271,13 +238,14 @@ describe('DcxServer', () => {
       });
 
       /**
+       * see {@link DcxIssuer.initialize()}
        * @method server.issuer.initialize()
        */
-      describe('server.issuer.initialize()', () => {
+      describe('await server.issuer.initialize()', () => {
         // Set the issuer config variables
-        server.issuer.config.issuer.web5Password = Mnemonic.createPassword();
-        server.issuer.config.issuer.web5RecoveryPhrase = Mnemonic.createRecoveryPhrase();
-        server.issuer.config.issuer.agentDataPath = '__TEST_DATA__/DCX/ISSUER/AGENT';
+        server.issuer.config.web5Password = Mnemonic.createPassword();
+        server.issuer.config.web5RecoveryPhrase = Mnemonic.createRecoveryPhrase();
+        server.issuer.config.agentDataPath = '__TEST_DATA__/DCX/ISSUER/AGENT';
 
         // Check the issuer initialized status post initialization
         it('should initialize the DcxIssuer', async () => {
@@ -294,6 +262,7 @@ describe('DcxServer', () => {
       });
 
       /**
+       * see {@link DcxIssuer.setup}
        * @method server.issuer.setup()
        */
       describe('server.issuer.setup()', () => {

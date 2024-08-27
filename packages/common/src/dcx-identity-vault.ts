@@ -71,10 +71,6 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     this.store = store ?? new LevelStore<string, string>({ location });
   }
 
-  public static create(): DcxIdentityVault {
-    return new DcxIdentityVault();
-  }
-
   public async changePassword({ oldPassword, newPassword }: {
     oldPassword: string;
     newPassword: string;

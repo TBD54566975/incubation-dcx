@@ -1,9 +1,20 @@
-import { CredentialManifest, DcxPath, FileSystem, Handler, Logger, Manifest, Objects, Provider, SleepTime, stringifier, Time, TrustedIssuer } from '@dcx-protocol/common';
+import {
+  CredentialManifest,
+  DcxPath,
+  FileSystem,
+  Handler,
+  Logger,
+  Objects,
+  Provider,
+  SleepTime,
+  stringifier,
+  Time,
+  TrustedIssuer
+} from '@dcx-protocol/common';
 import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
 import { Record } from '@web5/api';
 import ms from 'ms';
-import { DcxServer } from './dcx-server.js';
-import { IServer } from './types.js';
+import { DcxServer, IServer } from './dcx-server.js';
 
 /**
  * @class IssuerServer
@@ -18,18 +29,18 @@ import { IServer } from './types.js';
  */
 export class IssuerServer implements IServer {
   private server: DcxServer;
-  private _issuer: DcxIssuer;
+  private issuer: DcxIssuer;
 
   constructor({ server, issuer }: { server: DcxServer, issuer: DcxIssuer }) {
     this.server = server;
-    this._issuer = issuer;
+    this.issuer = issuer;
   }
 
   public use(path: DcxPath, ...args: any[]): void {
     this.server.use(path, ...args);
   }
 
-  public useManifest(manifest: Manifest): void {
+  public useManifest(manifest: CredentialManifest): void {
     this.server.useManifest(manifest);
   }
 
@@ -53,10 +64,6 @@ export class IssuerServer implements IServer {
     this.server.useGateway(gateway);
   }
 
-  get issuer(): DcxIssuer {
-    return this._issuer;
-  }
-
   /**
    * Listens for incoming records from the DWN
    */
@@ -66,8 +73,8 @@ export class IssuerServer implements IServer {
     const milliseconds = ms(params.ms);
     Logger.log('IssuerServer listening ...');
 
-    const CURSOR = this.issuer.config.issuer.cursorFile!;
-    const LAST_RECORD_ID = this.issuer.config.issuer.lastRecordIdFile!;
+    const CURSOR = this.issuer.config.cursorFile;
+    const LAST_RECORD_ID = this.issuer.config.lastRecordIdFile;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
@@ -125,7 +132,7 @@ export class IssuerServer implements IServer {
       for (const record of recordReads) {
         if (record.id != lastRecordId) {
           if (record.protocolPath === 'application') {
-            const manifest = this.issuer.options.manifests!.find(
+            const manifest = this.issuer.config.manifests.find(
               (manifest: CredentialManifest) =>
                 manifest.presentation_definition.id === record.schema,
             );
