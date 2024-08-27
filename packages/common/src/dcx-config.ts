@@ -8,22 +8,13 @@ import {
   TrustedIssuer
 } from './index.js';
 
-export interface IDcxConfig {
+export type DcxConfig = {
   handlers: Handler[];
   providers: Provider[];
   manifests: CredentialManifest[];
   issuers: TrustedIssuer[];
   gateways: string[];
   dwns: string[];
-}
-
-export class DcxConfig implements IDcxConfig {
-  handlers: Handler[] = [];
-  providers: Provider[] = [];
-  manifests: CredentialManifest[] = [];
-  issuers: TrustedIssuer[] = [];
-  gateways: string[] = [];
-  dwns: string[] = [];
 }
 
 export const MX = { name: 'mx', id: 'did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y' };
@@ -34,6 +25,6 @@ export const dcxConfig: DcxConfig = {
   providers : [],
   manifests : [DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
   issuers   : [MX, FF],
-  gateways  : ['https://dwn.tbddev.org/beta'],
-  dwns      : ['https://diddht.tbddev.org/'],
+  gateways  : ['https://diddht.tbddev.org/'],
+  dwns      : ['https://dwn.tbddev.org/beta'],
 };

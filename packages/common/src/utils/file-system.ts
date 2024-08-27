@@ -6,6 +6,7 @@ export class FileSystem {
     try {
       options ??= { recursive: true, force: true };
       await rm(path, options);
+      close();
       return true;
     } catch (error: any) {
       Logger.error(`Failed to remove ${path}`);

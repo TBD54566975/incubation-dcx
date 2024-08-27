@@ -6,6 +6,7 @@ import { DcxIssuer, issuerConfig } from '../src/index.js';
 process.env.NODE_ENV = 'test';
 
 describe('issuer = new DcxIssuer({ ... })', () => {
+  issuerConfig.dwns = ['http://localhost:3000'];
   issuerConfig.agentDataPath = '__TEST_DATA__/DCX/ISSUER/AGENT';
   const issuer: DcxIssuer = new DcxIssuer({ config: issuerConfig });
 
@@ -59,12 +60,12 @@ describe('issuer = new DcxIssuer({ ... })', () => {
 
     // Check issuer.config property "web5Password"
     it('should contain property "web5Password" as a string', () => {
-      expect(issuer.config.web5Password).to.be.a('boolean').and.to.be.false;
+      expect(issuer.config.web5Password).to.be.a('string');
     });
 
     // Check issuer.config property "web5RecoveryPhrase"
     it('should contain property "web5RecoveryPhrase" as a string', () => {
-      expect(issuer.config.web5RecoveryPhrase).to.be.a('boolean').and.to.be.false;
+      expect(issuer.config.web5RecoveryPhrase).to.be.a('string');
     });
 
     // Check issuer.config property "handlers"
