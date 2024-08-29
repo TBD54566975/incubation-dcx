@@ -176,12 +176,13 @@ export class IssuerServer implements IServer {
   public async start(): Promise<void> {
     try {
       if (!this.issuer.status.initialized) {
-        await this.issuer.initialize({});
-        Logger.log('Initialized IssuerServer.DcxIssuer', this.issuer.status.initialized);
-        await this.issuer.setup();
-        this.issuer.status.setup = true;
-        Logger.log('Setup IssuerServer.DcxIssuer', this.issuer.status.setup);
+        await this.issuer.initialize();
       }
+
+      if(!this.issuer.status.setup) {
+        await this.issuer.setup();
+      }
+
       await this.listen();
     } catch (error: any) {
       Logger.error(error);

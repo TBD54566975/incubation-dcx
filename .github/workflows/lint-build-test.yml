@@ -19,7 +19,7 @@ jobs:
         run: npm install -g pnpm
       
       - name: Install dependencies
-        run: pnpm install -r --frozen-lockfile
+        run: pnpm install -r --no-lockfile
       
       - name: Run linter for all packages
         run: pnpm lint

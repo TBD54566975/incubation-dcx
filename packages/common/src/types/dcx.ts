@@ -116,7 +116,7 @@ export type ValidateVerifiablePresentationResponse = {
 };
 
 export type CreateCredentialApplicationParams = { presentationSubmission: PresentationSubmission; manifestId: string; };
-export type DcxProtocolPath = 'manifest' | 'application/response' | 'response';
+export type DcxProtocolPath = 'manifest' | 'application' | 'application/response' | 'response' | any;
 export type IssuerProcessRecordParams = { record: DwnRecord, manifest: CredentialManifest, providerId?: string };
 export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }
 export type GetManifestsResponse = { manifests: CredentialManifest[] };
