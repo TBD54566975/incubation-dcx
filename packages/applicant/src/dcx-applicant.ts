@@ -367,6 +367,22 @@ export class DcxApplicant implements DcxManager {
   }
 
   /**
+   * Check if the DcxIssuer is initialized
+   * @returns boolean
+   */
+  public isInitialized(): boolean {
+    return this.status.initialized && !!(this.web5 && this.agent);
+  }
+
+  /**
+   * Check if the DcxIssuer is setup
+   * @returns boolean
+   */
+  public isSetup(): boolean {
+    return this.status.setup === true;
+  }
+
+  /**
    * Setup Dwn associated with the DcxApplicant
    */
   public async setup(): Promise<void> {
