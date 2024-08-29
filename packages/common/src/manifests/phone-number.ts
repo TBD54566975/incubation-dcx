@@ -1,5 +1,5 @@
 export const PhoneNumberManifest = {
-  id           : 'PHONE-NUMBER-MFA-MANIFEST',
+  id           : 'phone-number-mfa-manifest',
   name         : 'Phone Number MFA Manifest',
   description  : 'Defines the presentation requirements for proving ownership of a phone number',
   spec_version : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',

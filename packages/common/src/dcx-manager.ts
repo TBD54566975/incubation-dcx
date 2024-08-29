@@ -24,6 +24,8 @@ export interface DcxManager {
     status                                     : DcxManagerStatus;
     setup()                                    : Promise<void>;
     initialize(params?: InitializeParams)      : Promise<void>;
+    isInitialized()                            : boolean;
+    isSetup()                                  : boolean;
     queryProtocols()                           : Promise<ProtocolsQueryResponse>;
     configureProtocols()                       : Promise<ProtocolsConfigureResponse>;
     queryRecords(params?: RecordsQueryParams)  : Promise<RecordsQueryResponse>;

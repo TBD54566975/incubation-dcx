@@ -5,6 +5,7 @@ import {
   DcxAgentRecovery,
   DcxDwnError,
   DcxIdentityVault,
+  DcxIssuerError,
   DcxManager,
   DcxManagerStatus,
   DcxProtocolHandlerError,
@@ -483,10 +484,29 @@ export class DcxIssuer implements DcxManager {
   }
 
   /**
+   * Check if the DcxIssuer is initialized
+   * @returns boolean
+   */
+  public isInitialized(): boolean {
+    return this.status.initialized && !!(this.web5 && this.agent);
+  }
+
+  /**
+   * Check if the DcxIssuer is setup
+   * @returns boolean
+   */
+  public isSetup(): boolean {
+    return this.status.setup === true;
+  }
+
+  /**
    * Setup Dwn associated with the DcxIssuer
    */
   public async setup(): Promise<void> {
     try {
+      if(!this.isInitialized()) {
+        throw new DcxIssuerError('DcxIssuer not initialized');
+      }
       // Query DWN for credential-issuer protocols
       const { protocols } = await this.queryProtocols();
       Logger.log(`Found ${protocols.length} DcxIssuer dwn protocol(s)`, protocols);
@@ -539,7 +559,6 @@ export class DcxIssuer implements DcxManager {
     }
   }
 
-
   /**
    * Configures the DCX server by creating a new password, initializing Web5,
    * connecting to the remote DWN and configuring the DWN with the DCX issuer protocol
@@ -588,5 +607,4 @@ export class DcxIssuer implements DcxManager {
     // Set the server initialized flag
     this.status.initialized = true;
   }
-
 }
