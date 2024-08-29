@@ -1,7 +1,6 @@
 import {
   CreateCredentialApplicationParams,
   CredentialApplication,
-  DcxAgent,
   DcxAgentRecovery,
   DcxDwnError,
   DcxError,
