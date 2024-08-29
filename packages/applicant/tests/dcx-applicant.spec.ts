@@ -3,10 +3,10 @@ dotenv.config({ path: '.env.test' });
 
 import { FileSystem } from '@dcx-protocol/common';
 import { Protocol, Web5 } from '@web5/api';
-import { Web5UserAgent } from '@web5/user-agent';
 import { expect } from 'chai';
 import { applicantConfig } from '../src/dcx-applicant-config.js';
 import { DcxApplicant } from '../src/index.js';
+import { Web5UserAgent } from '@web5/user-agent';
 
 process.env.NODE_ENV = 'test';
 
@@ -93,8 +93,17 @@ describe('applicant = new DcxApplicant({ config: applicantConfig })', () => {
   describe('await applicant.initialize()', () => {
     it('should initialize applicant properties "web5" and "agent"', async () => {
       await applicant.initialize();
+    });
+
+    it('should have property status.initialized as a boolean equal to true', async () => {
       expect(applicant.status.initialized).to.be.true;
+    });
+
+    it('should have property applicant.web5 as an instanceof Web5', async () => {
       expect(applicant.web5).to.be.instanceof(Web5);
+    });
+
+    it('should have property applicant.agent as an instance of Web5UserAgent', async () => {
       expect(applicant.agent).to.be.instanceof(Web5UserAgent);
     });
   });

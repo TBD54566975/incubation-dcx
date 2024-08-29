@@ -436,7 +436,7 @@ export class DcxApplicant implements DcxManager {
 
     // Set the DcxManager properties
     this.web5 = web5 as Web5;
-    this.agent = agent as DcxAgent;
+    this.agent = agent;
     this.did = did;
 
     // Set the server initialized flag
