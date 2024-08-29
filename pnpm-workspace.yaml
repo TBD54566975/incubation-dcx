@@ -1,5 +1,5 @@
 packages:
-  - 'packages/applicant'
-  - 'packages/common'
-  - 'packages/issuer'
-  - 'packages/server'
+  - packages/applicant
+  - packages/common
+  - packages/issuer
+  - packages/server
