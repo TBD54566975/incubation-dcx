@@ -1,9 +1,7 @@
 import {
   DcxHandshakeManifest,
-  EmailAddressManifest,
   Handler,
   CredentialManifest,
-  PhoneNumberManifest,
   Provider,
   TrustedIssuer
 } from './index.js';
@@ -23,7 +21,7 @@ export const FF = { name: 'formfree', id: 'did:dht:hcf5e55bbm44s4oixp5z89wtxenxy
 export const dcxConfig: DcxConfig = {
   handlers  : [],
   providers : [],
-  manifests : [DcxHandshakeManifest, PhoneNumberManifest, EmailAddressManifest],
+  manifests : [DcxHandshakeManifest],
   issuers   : [MX, FF],
   gateways  : ['https://diddht.tbddev.org/'],
   dwns      : ['https://dwn.tbddev.org/beta'],

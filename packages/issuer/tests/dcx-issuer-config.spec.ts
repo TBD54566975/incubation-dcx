@@ -36,8 +36,8 @@ describe('IssuerConfig', () => {
     expect(issuerConfig.providers).to.be.an('array').and.to.have.lengthOf(0);
   });
 
-  it('should have property "manifests" as an array with length 3', () => {
-    expect(issuerConfig.manifests).to.be.an('array').and.to.have.lengthOf(3);
+  it('should have property "manifests" as an array with length 1', () => {
+    expect(issuerConfig.manifests).to.be.an('array').and.to.have.lengthOf(1);
   });
 
   it('should have property "issuers" as an array with length 2', () => {

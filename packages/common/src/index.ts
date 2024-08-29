@@ -1,6 +1,4 @@
-export { EmailAddressManifest } from './manifests/email-address.js';
 export { DcxHandshakeManifest } from './manifests/handshake.js';
-export { PhoneNumberManifest } from './manifests/phone-number.js';
 export { schema as applicationSchema } from './schemas/application.js';
 export { schema as responseSchema } from './schemas/response.js';
 export { schema as invoiceSchema } from './schemas/invoice.js';
