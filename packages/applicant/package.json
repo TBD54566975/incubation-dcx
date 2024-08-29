@@ -1,6 +1,6 @@
 {
   "name": "@dcx-protocol/applicant",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "DCX Applicant protocol and server",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -17,9 +17,7 @@
     "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
     "lint:fix": "eslint . --fix -c ../../eslint.config.cjs",
-    "version:patch": "tsx scripts/version.ts patch applicant",
-    "version:minor": "tsx scripts/version.ts minor applicant",
-    "version:major": "tsx scripts/version.ts major applicant"
+    "version": "tsx ../../scripts/version.ts applicant"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",

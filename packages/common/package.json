@@ -17,9 +17,7 @@
     "test": "pnpm test:node",
     "test:e2e": "tsx tests/e2e/*.spec.ts",
     "test:node": "pnpm build:tests:node && NODE_ENV=test pnpm c8 mocha --require dotenv/config",
-    "version:patch": "tsx scripts/version.ts patch common",
-    "version:minor": "tsx scripts/version.ts minor common",
-    "version:major": "tsx scripts/version.ts major common"
+    "version": "tsx ../../scripts/version.ts common"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",

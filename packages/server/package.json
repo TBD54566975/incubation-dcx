@@ -18,9 +18,7 @@
     "workflow": "pnpm build && pnpm build:tests:node && pnpm test",
     "lint": "eslint . --max-warnings 0 -c ../../eslint.config.cjs",
     "lint:fix": "eslint . --fix -c ../../eslint.config.cjs",
-    "version:minor": "tsx scripts/version.ts minor server",
-    "version:major": "tsx scripts/version.ts major server",
-    "version:patch": "tsx scripts/version.ts patch server"
+    "version": "tsx ../../scripts/version.ts server"
   },
   "homepage": "https://github.com/TBD54566975/incubation-dcx#readme",
   "bugs": "https://github.com/TBD54566975/incubation-dcx/issues",
