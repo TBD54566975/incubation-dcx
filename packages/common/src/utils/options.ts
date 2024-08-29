@@ -1,9 +1,9 @@
-import { CredentialManifest, FF, TrustedIssuer, Manifest } from '../index.js';
+import { CredentialManifest, FF, TrustedIssuer } from '../index.js';
 
-export type FindMissingParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
-export type FindMissingResponse = { missing: CredentialManifest[] };
-export type FindManifestsParams = Partial<CredentialManifest> & { manifests: Manifest[] };
 export type FindManifestParams = FindManifestsParams;
+export type FindMissingResponse = { missing: CredentialManifest[] };
+export type FindManifestsParams = { manifests: CredentialManifest[]; name?: string; id?: string };
+export type FindMissingParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
 export class OptionsUtil {
   /**
    *

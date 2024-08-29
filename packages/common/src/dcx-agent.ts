@@ -4,6 +4,7 @@ import {
   AgentDwnApi,
   AgentIdentityApi,
   AgentKeyManager,
+  AgentPermissionsApi,
   AgentSyncApi,
   DidInterface,
   DidRequest,
@@ -49,6 +50,13 @@ export type DcxAgentInitializeParams = {
   dwnEndpoints: string[];
 };
 
+export type DcxAgentStartParams = {
+  /**
+   * The password used to unlock the previously initialized Agent vault.
+   */
+  password: string;
+ }
+
 export type DcxAgentParams<TKeyManager extends AgentKeyManager = LocalKeyManager> = {
   /** Optional. The Decentralized Identifier (DID) representing this Web5 User Agent. */
   agentDid?: BearerDid;
@@ -66,20 +74,21 @@ export type DcxAgentParams<TKeyManager extends AgentKeyManager = LocalKeyManager
   identityApi: AgentIdentityApi<TKeyManager>;
   /** Responsible for securely managing the cryptographic keys of the agent. */
   keyManager: TKeyManager;
+  /** Facilitates fetching, requesting, creating, revoking and validating revocation status of permissions */
+  permissionsApi: AgentPermissionsApi;
   /** Remote procedure call (RPC) client used to communicate with other Web5 services. */
   rpcClient: Web5Rpc;
   /** Facilitates data synchronization of DWN records between nodes. */
   syncApi: AgentSyncApi;
 };
 
-export class DcxAgent<TKeyManager extends AgentKeyManager = LocalKeyManager>
-implements Web5PlatformAgent<TKeyManager>
-{
+export class DcxAgent<TKeyManager extends AgentKeyManager = LocalKeyManager> implements Web5PlatformAgent<TKeyManager> {
   public crypto: AgentCryptoApi;
   public did: AgentDidApi<TKeyManager>;
   public dwn: AgentDwnApi;
   public identity: AgentIdentityApi<TKeyManager>;
   public keyManager: TKeyManager;
+  public permissions: AgentPermissionsApi;
   public rpc: Web5Rpc;
   public sync: AgentSyncApi;
   public vault: DcxIdentityVault;
@@ -93,6 +102,7 @@ implements Web5PlatformAgent<TKeyManager>
     this.dwn = params.dwnApi;
     this.identity = params.identityApi;
     this.keyManager = params.keyManager;
+    this.permissions = params.permissionsApi;
     this.rpc = params.rpcClient;
     this.sync = params.syncApi;
     this.vault = params.agentVault;
@@ -102,6 +112,7 @@ implements Web5PlatformAgent<TKeyManager>
     this.dwn.agent = this;
     this.identity.agent = this;
     this.keyManager.agent = this;
+    this.permissions.agent = this;
     this.sync.agent = this;
   }
 
@@ -124,16 +135,10 @@ implements Web5PlatformAgent<TKeyManager>
    */
   public static async create({
     dataPath = 'DATA/DCX/AGENT',
-    agentDid,
-    agentVault,
-    cryptoApi,
-    didApi,
-    dwnApi,
-    identityApi,
-    keyManager,
-    rpcClient,
-    syncApi,
-  }: Partial<DcxAgentParams> = {}): Promise<DcxAgent> {
+    agentDid, agentVault, cryptoApi, didApi, dwnApi, identityApi, keyManager, permissionsApi, rpcClient, syncApi
+  }: Partial<DcxAgentParams> = {}
+  ): Promise<DcxAgent> {
+
     agentVault ??= new DcxIdentityVault({
       keyDerivationWorkFactor : 210_000,
       store                   : new LevelStore<string, string>({ location: `${dataPath}/VAULT_STORE` }),
@@ -157,6 +162,8 @@ implements Web5PlatformAgent<TKeyManager>
 
     rpcClient ??= new Web5RpcClient();
 
+    permissionsApi ??= new AgentPermissionsApi();
+
     syncApi ??= new AgentSyncApi({ syncEngine: new SyncEngineLevel({ dataPath }) });
 
     // Instantiate the Agent using the provided or default components.
@@ -167,6 +174,7 @@ implements Web5PlatformAgent<TKeyManager>
       didApi,
       dwnApi,
       keyManager,
+      permissionsApi,
       identityApi,
       rpcClient,
       syncApi,

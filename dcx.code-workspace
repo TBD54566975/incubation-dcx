@@ -31,7 +31,7 @@
     "editor.codeActionsOnSave": {
       "source.fixAll": "always"
     },
-    "typescript.tsdk": "root/node_modules/typescript/lib",
+    "typescript.tsdk": "${workspaceFolder:root}/node_modules/.pnpm/typescript@5.5.4/node_modules/typescript/lib",
     "search.exclude": {
       "**/dist/**": true,
       "**/coverage/**": true,

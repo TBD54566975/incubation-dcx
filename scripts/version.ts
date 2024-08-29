@@ -58,8 +58,8 @@ async function updateVersion(packagePath: string, releaseType: string) {
 
 async function version() {
   const args = process.argv.slice(2);
-  const releaseTypes = ['patch', 'minor', 'major'];
   const packageNames = ['root', 'applicant', 'common', 'issuer', 'server'];
+  const releaseTypes = ['patch', 'minor', 'major'];
   const packageName = args.find(arg => packageNames.find(packageName=> packageName === arg));
   const releaseType = args.find(arg => releaseTypes.find(releaseType => releaseType === arg));
   const doGit = args.some(arg => ['--git', '-g'].includes(arg));
@@ -68,25 +68,25 @@ async function version() {
     throw new Error('Invalid argument. Use "patch", "minor", or "major".');
   }
 
-  if(!packageName) {
-    console.info('No package name provided. Updating version of all packages.');
-  }
+  const rootDir = process.cwd().split('packages')[0];
+  const rootPackagePath = path.resolve(rootDir, 'package.json');
 
-  const rootPackagePath = path.resolve(process.cwd(), 'package.json');
-  const applicantPackagePath = path.resolve(process.cwd(), 'packages/applicant/package.json');
-  const commonPackagePath = path.resolve(process.cwd(), 'packages/common/package.json');
-  const issuerPackagePath = path.resolve(process.cwd(), 'packages/issuer/package.json');
-  const serverPackagePath = path.resolve(process.cwd(), 'packages/server/package.json');
-
-  const packagePaths = [rootPackagePath, applicantPackagePath, commonPackagePath, issuerPackagePath, serverPackagePath];
-
-  if(packageName && packageName === 'root') {
-    const packagePath = path.resolve(process.cwd(), 'package.json');
-    await updateVersion(packagePath, releaseType);
-  } else if(packageName && packageNames.includes(packageName)) {
-    const packagePath = path.resolve(process.cwd(), `packages/${packageName.toLowerCase()}/package.json`);
-    await updateVersion(packagePath, releaseType);
+  if(packageName){
+    if(packageName === 'root') {
+      await updateVersion(rootPackagePath, releaseType);
+    } else {
+      const specificPackagePath = path.resolve(rootDir, `packages/${packageName.toLowerCase()}/package.json`);
+      await updateVersion(specificPackagePath, releaseType);
+    }
   } else {
+    console.info('No package name provided. Updating version for all packages.');
+    const packagePaths = [
+      rootPackagePath,
+      path.resolve(rootDir, 'packages/applicant/package.json'),
+      path.resolve(rootDir, 'packages/common/package.json'),
+      path.resolve(rootDir, 'packages/issuer/package.json'),
+      path.resolve(rootDir, 'packages/server/package.json')
+    ];
     for (const packagePath of packagePaths) {
       await updateVersion(packagePath, releaseType);
     }

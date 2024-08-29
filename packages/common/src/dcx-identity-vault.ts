@@ -71,10 +71,6 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     this.store = store ?? new LevelStore<string, string>({ location });
   }
 
-  public static create(): DcxIdentityVault {
-    return new DcxIdentityVault();
-  }
-
   public async changePassword({ oldPassword, newPassword }: {
     oldPassword: string;
     newPassword: string;
@@ -276,8 +272,35 @@ export class DcxIdentityVault implements IdentityVault<{ InitializeResult: strin
     }
   }
 
-  async backup(): Promise<IdentityVaultBackup> {
-    throw new Error('Method not implemented.');
+  public async backup(): Promise<IdentityVaultBackup> {
+    // Verify the identity vault has already been initialized and unlocked.
+    if (this.isLocked() || await this.isInitialized() === false) {
+      throw new Error(
+        'HdIdentityVault: Unable to proceed with the backup operation because the identity vault ' +
+        'has not been initialized and unlocked. Please ensure the vault is properly initialized ' +
+        'with a secure password before attempting to backup its contents.'
+      );
+    }
+
+    // Encode the encrypted CEK and DID as a single Base64Url string.
+    const backupData: IdentityVaultBackupData = {
+      did                  : await this.getStoredDidDcx(),
+      contentEncryptionKey : await this.getStoredContentEncryptionKeyDcx(),
+      status               : await this.getStatus()
+    };
+    const backupDataString = Convert.object(backupData).toBase64Url();
+
+    // Create a backup object containing the encrypted vault contents.
+    const backup: IdentityVaultBackup = {
+      data        : backupDataString,
+      dateCreated : new Date().toISOString(),
+      size        : backupDataString.length
+    };
+
+    // Update the last backup timestamp in the data store.
+    await this.setStatusDcx({ lastBackup: backup.dateCreated });
+
+    return backup;
   }
 
   public async initialize({

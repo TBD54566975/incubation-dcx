@@ -1,7 +1,6 @@
 import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Web5 } from '@web5/api';
 import {
   DcxAgent,
-  DcxOptions,
   RecordCreateParams,
   RecordCreateResponse,
   RecordsCreateParams,
@@ -22,10 +21,11 @@ export type InitializeParams = {
   web5?: Web5
 }
 export interface DcxManager {
-    options                                    : DcxOptions;
     status                                     : DcxManagerStatus;
     setup()                                    : Promise<void>;
     initialize(params?: InitializeParams)      : Promise<void>;
+    isInitialized()                            : boolean;
+    isSetup()                                  : boolean;
     queryProtocols()                           : Promise<ProtocolsQueryResponse>;
     configureProtocols()                       : Promise<ProtocolsConfigureResponse>;
     queryRecords(params?: RecordsQueryParams)  : Promise<RecordsQueryResponse>;
