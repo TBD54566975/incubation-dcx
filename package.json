@@ -4,10 +4,7 @@
   "description": "DCX: Decentralized Credential Exchange. DWN protocol for verifiable credential exchange.",
   "type": "module",
   "workspaces": [
-    "packages/applicant",
-    "packages/common",
-    "packages/issuer",
-    "packages/server"
+    "packages/*"
   ],
   "scripts": {
     "audit-ci": "audit-ci --config ./audit-ci.json",
