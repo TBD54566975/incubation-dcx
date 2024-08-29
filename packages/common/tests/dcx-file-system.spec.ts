@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { FileSystem } from '../src/index.js';
 import crypto from 'crypto';
 
-describe('FileSystem class', () => {
+describe('FileSystem', () => {
   const EXISTS_FILE_PATH = 'exists.txt';
   const DNE_FILE_PATH = 'dne.txt';
   const LAST_RECORD_ID = 'lastRecordId';
@@ -16,14 +16,14 @@ describe('FileSystem class', () => {
     await FileSystem.rm(CURSOR);
   });
 
-  describe('.touch()', () => {
+  describe('await FileSystem.touch()', () => {
     it(`should create a new file called ${EXISTS_FILE_PATH} and return true`, async ()  => {
       const touched = await FileSystem.touch(EXISTS_FILE_PATH, 'Hello, World!');
       expect(touched).to.be.true;
     });
   });
 
-  describe('.access()', () => {
+  describe('await FileSystem.access()', () => {
     it('should try to access a file', async ()  =>{
       const dne = await FileSystem.access(DNE_FILE_PATH);
       expect(dne).to.be.false;
@@ -32,7 +32,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.exists()', () => {
+  describe('await FileSystem.exists()', () => {
     let exists;
 
     it('should return false for files that do not exist', async ()  => {
@@ -46,7 +46,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.read()', () => {
+  describe('await FileSystem.read()', () => {
     let read;
 
     it('should return undefined for files that do not exist', async ()  => {
@@ -63,7 +63,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.write()', () => {
+  describe('await FileSystem.write()', () => {
 
     it('should write data to a file', async ()  => {
       const write = await FileSystem.write(LAST_RECORD_ID, randomUUID);
@@ -76,7 +76,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.readToString()', () => {
+  describe('await FileSystem.readToString()', () => {
     let readToString;
 
     it('should create the file if it does not exist and return undefined', async ()  => {
@@ -92,7 +92,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.readToJson()', () => {
+  describe('await FileSystem.readToJson()', () => {
     let readToJson;
 
     it('should create the file if it does not exist and return {}', async ()  => {
@@ -108,7 +108,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.append()', () => {
+  describe('await FileSystem.append()', () => {
     const newUUID = crypto.randomUUID();
 
     it('should append data to a file', async ()  => {
@@ -117,7 +117,7 @@ describe('FileSystem class', () => {
     });
   });
 
-  describe('.overwrite()', () => {
+  describe('await FileSystem.overwrite()', () => {
     it('should overwrite the contents of a file', async ()  => {
       const overwrite = await FileSystem.overwrite(LAST_RECORD_ID, 'Hello, World!');
       expect(overwrite).to.be.true;

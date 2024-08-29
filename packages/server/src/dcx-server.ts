@@ -1,278 +1,168 @@
-import {
-  CredentialManifest,
-  dcxConfig,
-  DcxConfig,
-  dcxOptions,
-  DcxOptions,
-  DcxParams,
-  DcxServerError,
-  FileSystem,
-  Issuer,
-  Logger,
-  Objects,
-  Provider,
-  ServerHandler,
-  ServerPath,
-  SleepTime,
-  stringifier,
-  Time
-} from '@dcx-protocol/common';
-import { Record } from '@web5/api';
-import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
-import { argv, exit } from 'process';
+import { DcxApplicant } from '@dcx-protocol/applicant';
+import { CredentialManifest, DcxPath, DcxServerError, Handler, Provider, stringifier, TrustedIssuer } from '@dcx-protocol/common';
+import { DcxIssuer } from '@dcx-protocol/issuer';
+import { ApplicantServer } from './applicant-server.js';
+import { IssuerServer } from './issuer-server.js';
+export interface IServer {
+    use(path: DcxPath, ...args: any[]): void;
+    useManifest(manifest: CredentialManifest): void;
+    useHandler(handler: Handler): void;
+    useProvider(provider: Provider): void;
+    useIssuer(issuer: TrustedIssuer): void;
+    useDwn(dwn: string): void;
+    useGateway(gateway: string): void;
+}
 
-export class DcxServer {
-  dcxIssuer     : DcxIssuer;
-  serverOptions : DcxOptions = dcxOptions;
-  serverConfig  : DcxConfig = dcxConfig;
-  isPolling     : boolean = false;
-  isTest        : boolean = process.env.NODE_ENV?.includes('test') || argv.slice(2).some((arg) => ['--test', '-t'].includes(arg));
+export type ServerParams = {
+    issuer?: DcxIssuer;
+    applicant?: DcxApplicant
+    type?: 'issuer' | 'applicant';
+}
+
+/**
+ * @class Server
+ * @classdesc The Server class is used to setup the DCX server
+ * @implements IServer
+ * @param {ServerParams} params The server parameters
+ * @param {DcxIssuer} params.issuer The issuer to use for the Server
+ * @param {DcxApplicant} params.applicant The applicant to use for the Server
+ * @param {string} params.type The type of server to use; either 'issuer' or 'applicant'
+ * @example
+ * import { Server } from '@dcx-protocol/server';
+ * const server = new Server({ type: 'issuer' });
+ * server.use('dwns', 'http://localhost:3000');
+ * server.use('providers', providerOne);
+ * await server.initilaize();
+ * await server.model.setup();
+ * await server.model.start();
+ */
+export class DcxServer implements IServer  {
+  public listening: boolean = false;
+  public testing: boolean = process.env.NODE_ENV?.includes('test') ?? false;
+
+  private _dcx: DcxIssuer | DcxApplicant;
+  private _server: IssuerServer | ApplicantServer;
 
   /**
-     *
-     * Setup the server with the provided options and config
-     *
-     * @param params.options The options to use for the DcxServer
-     * @param params.options.issuers The issuers to use; array
-     * @param params.options.manifests The manifests to use; array
-     * @param params.options.providers The providers to use; array
-     * @param params.options.handlers The handlers to use; array
-     * @param params.options.dwns The dwns to use; array
-     * @param params.options.gateways The gateways to use; array
-     * @example see README.md for usage information
-     *
-     */
-  constructor(params: DcxParams & { dcxIssuer?: DcxIssuer }) {
-    this.dcxIssuer = params.dcxIssuer ?? new DcxIssuer(params);
-    this.serverConfig = params.config ?? this.serverConfig;
-    this.serverOptions = params.options ?? dcxOptions;
+   *
+   * Setup the server with the provided options and config
+   * @param params The server parameters; see {@link ServerParams}
+   * @param params.type Required; The type of server to use; either 'issuer' or 'applicant'
+   * @param params.applicant Optional; The applicant to use for the Server. Pass a custom DcxApplicant object if desired
+   * @param params.issuer Optional; The issuer to use for the Ser\ver. Pass a custom DcxIssuer object if desired
+   */
+  constructor({ type, applicant, issuer }: ServerParams = {}) {
+    if (issuer || type === 'issuer') {
+      this._dcx = issuer ?? new DcxIssuer();
+      this._server = new IssuerServer({ server: this, issuer: this._dcx });
+    } else if(applicant || type === 'applicant') {
+      this._dcx = applicant ?? new DcxApplicant();
+      this._server = new ApplicantServer({ server: this, applicant: this._dcx });
+    } else {
+      throw new DcxServerError(
+        `invalid server params: ${stringifier({ type, applicant, issuer })}` +
+        'expected 1 of 3 optional params: "type" to be one of ["issuer", "applicant"], ' +
+        '"issuer" to be DcxIssuer() or "applicant" to be DcxApplicant()'
+      );
+    }
+  }
+
+  get applicantServer(): ApplicantServer {
+    if (!(this._server instanceof ApplicantServer)) {
+      throw new DcxServerError('ApplicantServerNotFound - DcxServer is not an ApplicantServer');
+    }
+    return this._server;
+  }
+
+  get issuerServer(): IssuerServer {
+    if (!(this._server instanceof IssuerServer)) {
+      throw new DcxServerError('IssuerServerNotFound - DcxServer is not an IssuerServer');
+    }
+    return this._server;
+  }
+
+  get issuer(): DcxIssuer {
+    if (!(this._dcx instanceof DcxIssuer)) {
+      throw new DcxServerError('DcxIssuerNotFound - DcxServer is not an IssuerServer');
+    }
+    return this._dcx as DcxIssuer;
+  }
+
+  get applicant(): DcxApplicant {
+    if (!(this._dcx instanceof DcxApplicant)) {
+      throw new DcxServerError('DcxApplicantNotFound - DcxServer is not an ApplicantServer');
+    }
+    return this._dcx as DcxApplicant;
   }
 
   /**
-     *
-     * Sets the server options
-     *
-     * @param path The type of server option; see {@link ServerPath}
-     * @param id Some unique, accessible identifier to map the obj to
-     * @param obj The object to use; see {@link DcxOptions}
-     * @example see README.md for usage information
-     *
-     */
-  public use(path: ServerPath, ...args: any[]): void {
+   * Sets the server options
+   * @param path The type of server option; see {@link DcxPath}
+   * @param args The server options to use; see {@link DcxOptions}
+   * @throws DcxServerError if the path is invalid
+   * @example see docs/usage/README.md for usage information
+   */
+  public use(path: DcxPath, ...args: any[]): void {
     const validPaths = ['gateways', 'dwns', 'issuers', 'manifests', 'providers', 'handlers'];
     if (!validPaths.includes(path)) {
       throw new DcxServerError(
-        `Invalid server.use() name: ${path}. Must be one of: ${validPaths.join(', ')}`,
+        `Invalid path: ${path} must be one of ${validPaths.join(', ')}`,
       );
     }
-    if (validPaths.includes(path)) {
-      this.serverOptions[path].push(...args);
-    } else {
-      throw new DcxServerError(`Invalid server.use() object: ${args}`);
-    }
+    this._dcx.config[path].unshift(...args);
   }
 
   /**
-     *
-     * Sets the manifest to use
-     *
-     * @param id Some unique, accessible identifier for the manifest
-     * @param manifest The credential manifest to use
-     * @example see README.md for usage information
-     *
-     */
+   * Sets the manifest to use
+   * @param manifest The manifest to use; see {@link CredentialManifest}
+   * @example see docs/usage/README.md for usage information
+   */
   public useManifest(manifest: CredentialManifest): void {
-    this.serverOptions.manifests.push(manifest);
+    this._dcx.config.manifests.unshift(manifest);
   }
 
   /**
-     *
-     * Sets the handler to use
-     *
-     * @param id Some unique, accessible identifier for the handler
-     * @param handler The handler to use
-     * @example see README.md for usage information
-     *
-     */
-  public useHandler(handler: ServerHandler): void {
-    this.serverOptions.handlers.push(handler);
+   * Sets the handler to use
+   * @param handler The handler to use; see {@link Handler}
+   * @example see docs/usage/README.md for usage information
+   */
+  public useHandler(handler: Handler): void {
+    this._dcx.config.handlers.unshift(handler);
   }
 
   /**
-     *
-     * Sets the provider to use
-     *
-     * @param id Some unique, accessible identifier for the provider
-     * @param provider The provider to use
-     * @example see README.md for usage information
-     *
-     */
+   * Sets the provider to use
+   * @param provider The provider to use; see {@link Provider}
+   * @example see docs/usage/README.md for usage information
+   */
   public useProvider(provider: Provider): void {
-    this.serverOptions.providers.push(provider);
+    this._dcx.config.providers.unshift(provider);
   }
 
   /**
-     *
-     * Sets the issuer to use
-     *
-     * @param id Some unique, accessible identifier for the issuer
-     * @param issuer The issuer to use
-     * @example see README.md for usage information
-     *
-     */
-  public useIssuer(issuer: Issuer): void {
-    this.serverOptions.issuers.push(issuer);
+   * Sets the issuer to use
+   * @param issuer The issuer to use; see {@link TrustedIssuer}
+   * @example see docs/usage/README.md for usage information
+   */
+  public useIssuer(issuer: TrustedIssuer): void {
+    this._dcx.config.issuers.unshift(issuer);
   }
 
   /**
-     *
-     * Sets the dwns to use
-     *
-     * @param dwn The dwn to use
-     * @example see README.md for usage information
-     *
-     */
+   * Sets the dwn(s) to use
+   * @param dwn The dwn to use
+   * @example see docs/usage/README.md for usage information
+   */
   public useDwn(dwn: string): void {
-    this.serverOptions.dwns.push(dwn);
+    this._dcx.config.dwns.unshift(dwn);
   }
 
   /**
-     *
-     * Sets the gateways to use
-     *
-     * @param gateway The gateway to use'
-     * @example see README.md for usage information
-     *
-     */
+   * Sets the gateways to use
+   * @param gateway The gateway to use'
+   * @example see docs/usage/README.md for usage information
+   */
   public useGateway(gateway: string): void {
-    this.serverOptions.gateways.push(gateway);
-  }
-
-  /**
-     *
-     * Polls the DWN for incoming records
-     *
-     */
-  public async poll(params: SleepTime = { ms: 10 }): Promise<void> {
-    this.isPolling = true;
-    Logger.log('DCX server starting ...');
-
-    const CURSOR = this.serverConfig.issuerProtocol.cursorFile;
-    const LAST_RECORD_ID = this.serverConfig.issuerProtocol.lastRecordIdFile;
-
-    let cursor = await FileSystem.readToJson(CURSOR);
-    const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
-    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
-
-    while (this.isPolling) {
-      const { records = [], cursor: nextCursor } = await DcxIssuer.web5.dwn.records.query({
-        message : {
-          pagination,
-          filter : { protocol: dcxIssuer.protocol },
-        },
-      });
-
-      Logger.log(`Found ${records.length} records`);
-      if (nextCursor) {
-        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
-        cursor = nextCursor;
-        const overwritten = await FileSystem.overwrite(CURSOR, cursor);
-        Logger.log(`${CURSOR} overwritten ${overwritten}`, cursor);
-      } else {
-        Logger.log(`Next cursor not found!`);
-      }
-
-      if (cursor && !records.length) {
-        cursor = undefined;
-      }
-
-      const recordIds = records.map((record: Record) => record.id);
-
-      const recordReads: Record[] = await Promise.all(
-        recordIds.map(async (recordId: string) => {
-          const { record }: { record: Record } = await DcxIssuer.web5.dwn.records.read({
-            message : {
-              filter : {
-                recordId,
-              },
-            },
-          });
-          return record;
-        }),
-      );
-
-      Logger.log(`Read ${recordReads.length} records`);
-
-      if (this.isTest) {
-        Logger.log('Test Complete! Stopping DCX server ...');
-        this.stop();
-      }
-
-      if (!recordReads.length) {
-        Logger.log('No records found!', recordReads.length);
-        await Time.sleep(params.ms);
-      }
-
-      for (const record of recordReads) {
-        if (record.id != lastRecordId) {
-          if (record.protocolPath === 'application') {
-            const manifest = this.serverOptions.manifests!.find(
-              (manifest: CredentialManifest) =>
-                manifest.presentation_definition.id === record.schema,
-            );
-
-            if (manifest) {
-              const { status } = await this.dcxIssuer.processRecord(
-                {
-                  record,
-                  manifest,
-                  providerId : manifest.output_descriptors[0].id,
-                }
-              );
-              Logger.debug(`Processed application id ${record.id}`, status);
-            } else {
-              Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
-            }
-
-            lastRecordId = record.id;
-            const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.log(`Overwritten last record id: ${overwritten}`, lastRecordId);
-          }
-        } else {
-          await Time.sleep();
-        }
-      }
-    }
-  }
-
-  /**
-     *
-     * Stops the DCX server
-     * @returns void
-     */
-  public stop(): void {
-    Logger.log('DCX server stopping...');
-    this.isPolling = false;
-    exit(0);
-  }
-
-  /**
-     *
-     * Starts the DCX server
-     * @returns void
-     */
-  public async start(): Promise<void> {
-    try {
-      if (!this.dcxIssuer.isInitialized) {
-        await this.dcxIssuer.initializeWeb5();
-        Logger.log('Web5 initialized', this.dcxIssuer.isInitialized);
-        await this.dcxIssuer.setupDwn();
-        this.dcxIssuer.isSetup = true;
-      }
-      await this.poll();
-    } catch (error: any) {
-      Logger.error(error);
-      this.stop();
-    }
+    this._dcx.config.gateways.unshift(gateway);
   }
 }

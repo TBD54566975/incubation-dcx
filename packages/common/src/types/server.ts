@@ -1,1 +1,2 @@
-export type SleepTime = { ms: number };
+export type SleepTime = { ms: string };
+export type DcxPath = 'manifests' | 'handlers' | 'providers' | 'issuers' | 'gateways' | 'dwns';

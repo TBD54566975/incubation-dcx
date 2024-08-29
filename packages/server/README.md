@@ -1,15 +1,18 @@
-# @dcx-protocol/issuer
+# @dcx-protocol/server
 
-[![codecov](https://codecov.io/github/TBD54566975/incubation-dcx/graph/badge.svg?token=6PYX9498RD)](https://codecov.io/github/TBD54566975/incubation-dcx/tree/main/packages%2Fissuer)
-
-Issuer side of the DCX protocol
-- [`/packages/issuer/src/protocol.ts`](/packages/issuer/src/protocol.ts) credential issuer protocol definition
-- [`/packages/issuer/src/handlers.ts`](/packages/issuer/src/handlers.ts) pre-defined credential issuer protocol handlers
-- [`/packages/issuer/src/server.ts`](/packages/issuer/src/server.ts) pre-built server to run credential issuer side
+Dcx Server provides a pre-built server-like looping mechamism that runs the issuer side of the dcx protocol.
+- [`/packages/server/src/dcx-server.ts`](/packages/server/src/dcx-server.ts) core dcx server logic
 
 
-## Package Version
+## Package Versions
 
-|                  Name                          |                                                          Latest Version                                                 |
-| -----------------------------------------------| :---------------------------------------------------------------------------------------------------------------------: |
-|    [@dcx-protocol/issuer](/packages/issuer/)   |    [![badge](https://img.shields.io/npm/v/@dcx-protocol/issuer)](https://www.npmjs.com/package/@dcx-protocol/issuer)    |
+|                   package                      |                             npm                           |                               issues                            |                               prs                            |
+| ---------------------------------------------- | :-------------------------------------------------------: | :-------------------------------------------------------------: | :----------------------------------------------------------: |
+| [@dcx-protocol/server](/packages/server/)      | [![NPM Package][server-npm-badge]][server-npm-link]       | [![Open Issues][server-issues-badge]][server-issues-link]       | [![Open PRs][server-pulls-badge]][server-pulls-link]         |
+
+[server-npm-badge]: https://img.shields.io/npm/v/@dcx-protocol/server.svg?&color=green&santize=true
+[server-npm-link]: https://www.npmjs.com/package/@dcx-protocol/server
+[server-issues-badge]: https://img.shields.io/github/issues/TBD54566975/incubation-dcx/package:%20server?label=issues
+[server-issues-link]: https://github.com/TBD54566975/incubation-dcx/issues?q=is%3Aopen+is%3Aissue+label%3A%22package%3A+server%22
+[server-pulls-badge]: https://img.shields.io/github/issues-pr/TBD54566975/incubation-dcx/package%3A%20server?label=PRs
+[server-pulls-link]: https://github.com/TBD54566975/incubation-dcx/pulls?q=is%3Aopen+is%3Apr+label%3A%22package%3A+server%22

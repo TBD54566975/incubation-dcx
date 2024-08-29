@@ -1,6 +1,6 @@
 {
   "name": "@dcxp/server",
-  "version": "0.1.0",
+  "version": "3.0.0",
   "description": "DCX Server Implementation",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -8,7 +8,7 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "clean": "rimraf dist coverage tests/compiled",
-    "build": "pnpm clean && pnpm build:esm && pnpm build:cjs",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:cjs && pnpm build:tests:node",
     "build:esm": "rimraf dist/esm dist/types && pnpm tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && node build/cjs-bundle.js && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
     "build:tests:node": "rimraf tests/compiled && pnpm tsc -p tests/tsconfig.json",
@@ -66,6 +66,7 @@
     "node": ">=18.0.0 || <22.0.0"
   },
   "dependencies": {
+    "@dcx-protocol/applicant": "workspace:*",
     "@dcx-protocol/common": "workspace:*",
     "@dcx-protocol/issuer": "workspace:*",
     "@noble/ciphers": "0.5.3",
@@ -78,7 +79,11 @@
     "@web5/dids": "^1.1.2",
     "@web5/user-agent": "^0.4.1",
     "chalk": "^5.3.0",
-    "ed25519-keygen": "^0.6.2"
+    "ed25519-keygen": "^0.6.2",
+    "ms": "^2.1.3",
+    "next": "^14.2.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.3",
@@ -86,7 +91,10 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/eslint": "^9.6.0",
     "@types/mocha": "^10.0.7",
+    "@types/ms": "^0.7.34",
     "@types/node": "^20.14.11",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
     "@types/readable-stream": "^4.0.15",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",

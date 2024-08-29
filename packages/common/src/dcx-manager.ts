@@ -1,6 +1,6 @@
-import { ProtocolsConfigureResponse, ProtocolsQueryResponse } from '@web5/api';
+import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Web5 } from '@web5/api';
 import {
-  DcxOptions,
+  DcxAgent,
   RecordCreateParams,
   RecordCreateResponse,
   RecordsCreateParams,
@@ -11,16 +11,23 @@ import {
   RecordsReadResponse
 } from './index.js';
 
+export type DcxManagerStatus = {
+    setup       : boolean;
+    initialized : boolean;
+}
+
+export type InitializeParams = {
+  agent?: DcxAgent;
+  web5?: Web5
+}
 export interface DcxManager {
-    options: DcxOptions;
-
-    queryProtocols(): Promise<ProtocolsQueryResponse>;
-    configureProtocols(): Promise<ProtocolsConfigureResponse>;
-    queryRecords(params?: RecordsQueryParams): Promise<RecordsQueryResponse>;
-    readRecords(params: RecordsReadParams): Promise<RecordsReadResponse>;
-    createRecord(params: RecordCreateParams): Promise<RecordCreateResponse>;
-    createRecords(params: RecordsCreateParams): Promise<RecordsCreateResponse>;
-
-    initializeWeb5(): Promise<void>;
-    setupDwn(): Promise<void>;
+    status                                     : DcxManagerStatus;
+    setup()                                    : Promise<void>;
+    initialize(params?: InitializeParams)      : Promise<void>;
+    queryProtocols()                           : Promise<ProtocolsQueryResponse>;
+    configureProtocols()                       : Promise<ProtocolsConfigureResponse>;
+    queryRecords(params?: RecordsQueryParams)  : Promise<RecordsQueryResponse>;
+    readRecords(params: RecordsReadParams)     : Promise<RecordsReadResponse>;
+    createRecord(params: RecordCreateParams)   : Promise<RecordCreateResponse>;
+    createRecords(params: RecordsCreateParams) : Promise<RecordsCreateResponse>;
 }

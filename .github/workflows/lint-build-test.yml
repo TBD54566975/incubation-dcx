@@ -1,9 +1,9 @@
-name: DCX Build
+name: DCX Lint Build Test
 
 on: [push]
 
 jobs:
-  build:
+  lint-build-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,17 +21,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install -r --frozen-lockfile
       
-      - name: Verify crypto module
-        run: |
-          node -e "console.log(require('crypto').randomBytes(8).toString('hex'));"
+      - name: Run linter for all packages
+        run: pnpm lint
 
-      - name: Build packages
+      - name: Build all packages
         run: pnpm build
       
-      - name: Build tests
+      - name: Build all tests
         run: pnpm build:tests:node
       
-      # - name: Run tests
+      # - name: Run all tests
       #   run: pnpm test:node
       
       # - name: Upload coverage reports to Codecov
