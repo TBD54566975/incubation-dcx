@@ -64,6 +64,7 @@ export class ApplicantServer implements IServer {
    * Listens for incoming records from the DWN
    * @param params.ms The time to sleep between each poll
    *    Optional, default is 2 minutes
+   *
    *    See {@link SleepTime}
    */
   public async listen(params: SleepTime = { ms: '2m' }): Promise<void> {
@@ -73,6 +74,7 @@ export class ApplicantServer implements IServer {
 
     while (this.server.listening) {
       const { records = [] } = await this.applicant.queryRecords({
+        from         : this.applicant.did,
         protocolPath : 'application/response',
       });
 
@@ -88,10 +90,7 @@ export class ApplicantServer implements IServer {
         await Time.sleep(milliseconds);
       }
 
-      const responses = records.filter(
-        (record: Record) => record.protocolPath === 'application/response'
-      );
-      const { records: reads } = await this.applicant.readRecords({ records: responses });
+      const { reads } = await this.applicant.readRecords({ records });
       Logger.debug(`Processed ${reads.length} application/responses`);
     }
   }

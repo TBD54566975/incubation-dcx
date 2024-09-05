@@ -23,7 +23,7 @@ export interface CredentialManifest {
 // export class CredentialManifest {
 //   constructor(public credentialManifestModel: CredentialManifestModel) {}
 // }
-export interface VPCredentialManifest {
+export interface CredentialManifestVP {
   '@context': string[];
   type: string[];
   credential_manifest: CredentialManifest;
@@ -51,7 +51,7 @@ export interface CredentialApplication {
 // export class CredentialApplication {
 //   constructor(public credentialApplicationModel: CredentialApplicationModel) {}
 // }
-export interface VPCredentialApplication {
+export interface CredentialApplicationVP {
   '@context': string[];
   type: string[];
   credential_application: CredentialApplication;
@@ -75,7 +75,7 @@ export interface CredentialResponse {
 // export class CredentialResponse {
 //   constructor(public credentialResponseModel: CredentialResponseModel) {}
 // }
-export interface VPCredentialResponse {
+export interface CredentialResponseVP {
   '@context': string[];
   type: string[];
   credential_response: CredentialResponse;

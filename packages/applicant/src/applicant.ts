@@ -1,7 +1,9 @@
 import {
+  applicationSchema,
   CredentialApplication,
+  CredentialApplicationVP,
+  CredentialManifest,
   DcxAgentRecovery,
-  DcxApplicantError,
   DcxDwnError,
   DcxError,
   DcxManager,
@@ -9,34 +11,32 @@ import {
   DwnError,
   DwnUtils,
   Format,
-  GetManifestsResponse,
   Logger,
   manifestSchema,
   OptionsUtil,
-  PresentationExchangeParams,
+  PresentationDefinition,
   PresentationSubmission,
   RecordCreateParams,
-  RecordReadParams,
+  RecordResponse,
   RecordsCreateParams,
   RecordsParams,
   RecordsQueryParams,
   RecordsQueryResponse,
   RecordsReadParams,
   RecordsReadResponse,
-  TrustedIssuer,
-  ValidateVerifiablePresentationResponse
+  TrustedIssuer
 } from '@dcx-protocol/common';
-import { Web5PlatformAgent } from '@web5/agent';
-import {
-  ProtocolsConfigureResponse,
-  ProtocolsQueryResponse,
-  Record,
-  Web5
-} from '@web5/api';
-import { PresentationDefinitionV2, PresentationExchange, VerifiablePresentation } from '@web5/credentials';
+import { DwnResponseStatus, Web5PlatformAgent } from '@web5/agent';
+import { ProtocolsConfigureResponse, ProtocolsQueryResponse, Record, Web5 } from '@web5/api';
+import { PresentationDefinitionV2, PresentationExchange } from '@web5/credentials';
 import { ApplicantConfig, applicantConfig } from './config.js';
 import { applicant } from './index.js';
-export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }
+
+export type GetManifestsResponse = { manifests: CredentialManifest[] };
+export type ValidateVerifiablePresentationResponse = {
+  areRequiredCredentialsPresent: 'info' | 'warn' | 'error';
+  verifiableCredential: Array<any>;
+};
 export type DcxValidated = {
   tag: string;
   status: string;
@@ -91,6 +91,7 @@ export class DcxApplicant implements DcxManager {
   public async queryProtocols(): Promise<ProtocolsQueryResponse> {
     // Query DWN for credential-applicant protocol
     const { status: query, protocols = [] } = await this.web5.dwn.protocols.query({
+      from    : this.did,
       message : {
         filter : {
           protocol : applicant.protocol,
@@ -124,7 +125,6 @@ export class DcxApplicant implements DcxManager {
     }
 
     const { status: send } = await protocol.send(this.did);
-
     if (DwnUtils.isFailure(send.code)) {
       const { code, detail } = send;
       Logger.error('DWN protocols send failed', send);
@@ -135,46 +135,8 @@ export class DcxApplicant implements DcxManager {
     return { status: send, protocol };
   }
 
-  public async readRecord({ record }: RecordReadParams): Promise<RecordsReadResponse> {
-    throw new DcxError('Method not implemented.', record);
-  }
-
-  public async readApplicationResponseRecords(
-    { records: manifestRecords }: RecordsParams
-  ): Promise<RecordsReadParams> {
-    const records = await Promise.all(
-      manifestRecords.map(async (manifestRecord: Record) => {
-        const { record: read } = await this.web5.dwn.records.read({
-          from    : manifestRecord.author,
-          message : {
-            filter : {
-              recordId : manifestRecord.id,
-            },
-          },
-        });
-        return read.data.json();
-      }),
-    );
-    return { records };
-  }
-
-  public async readManifestRecords(
-    { records: manifestRecords }: RecordsParams
-  ): Promise<RecordsReadParams> {
-    const records = await Promise.all(
-      manifestRecords.map(async (manifestRecord: Record) => {
-        const { record: read } = await this.web5.dwn.records.read({
-          from    : manifestRecord.author,
-          message : {
-            filter : {
-              recordId : manifestRecord.id,
-            },
-          },
-        });
-        return read.data.json();
-      }),
-    );
-    return { records };
+  public async readRecord(): Promise<RecordsReadResponse> {
+    throw new DcxError('Method not implemented');
   }
 
   /**
@@ -196,7 +158,7 @@ export class DcxApplicant implements DcxManager {
         return read.data.json();
       }),
     );
-    return { records: reads };
+    return { reads };
   }
 
   /**
@@ -250,64 +212,81 @@ export class DcxApplicant implements DcxManager {
     return { status, records, cursor };
   }
 
-  public async createVerifiablePresentation(
-    { vcJwts, presentationDefinition }: PresentationExchangeParams
-  ): Promise<{vp: VerifiablePresentation}> {
-    const { presentationSubmission } = PresentationExchange.createPresentationFromCredentials({
-      vcJwts,
-      presentationDefinition
-    });
-    Logger.log('Presentation Submission', presentationSubmission);
-    const vp = await VerifiablePresentation.create({
-      holder         : this.did,
-      vcJwts         : vcJwts,
-      additionalData : { presentationSubmission }
-    });
-    Logger.log('Verifiable Presentation', vp);
-    return { vp };
+  public async readManifestRecords(
+    { records: manifestRecords }: RecordsParams
+  ): Promise<RecordsReadParams> {
+    const records = await Promise.all(
+      manifestRecords.map(async (manifestRecord: Record) => {
+        const { record: read } = await this.web5.dwn.records.read({
+          from    : manifestRecord.author,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
+            },
+          },
+        });
+        return read.data.json();
+      }),
+    );
+    return { records };
   }
 
-  public createApplication(
-    { id, spec_version, applicant, manifest_id, format, presentation_submission }: CreateApplicationParams
-  ): CredentialApplication {
-    if(!manifest_id) {
-      throw new DcxApplicantError('Manifest ID is required to create a credential application');
-    }
-    if(!presentation_submission) {
-      throw new DcxApplicantError('Presentation Submission is required to create a credential application');
-    }
-    id ??= crypto.randomUUID();
-    spec_version ??= 'https://identity.foundation/credential-manifest/#versioning';
-    applicant ??= this.did;
-    format ??= { jwt_vc: { alg: ['EdDSA'] }};
-    return new CredentialApplication({
-      id,
-      spec_version,
-      applicant,
-      manifest_id,
-      format,
-      presentation_submission,
-    });
+  public async readApplicationResponseRecords(
+    { records: manifestRecords }: RecordsParams
+  ): Promise<RecordsReadParams> {
+    const records = await Promise.all(
+      manifestRecords.map(async (manifestRecord: Record) => {
+        const { record: read } = await this.web5.dwn.records.read({
+          from    : manifestRecord.author,
+          message : {
+            filter : {
+              recordId : manifestRecord.id,
+            },
+          },
+        });
+        return read.data.json();
+      }),
+    );
+    return { records };
   }
 
-  public validatePresentationSubmission(presentationSubmission: PresentationSubmission): DcxValidated {
-    const validation = PresentationExchange.validateSubmission({ presentationSubmission }) as DcxValidated[];
-    Logger.log('Presentation Submission Validation', validation);
-    const { tag, status, message } = validation?.[0];
-    Logger.log('Presentation Submission Checked: tag, status, message', tag, status, message);
-    return { tag, status, message };
+  public createPresentationSubmission({ vcJwts, definition }: { vcJwts: string[], definition: PresentationDefinition }): PresentationSubmission {
+    return PresentationExchange.createPresentationFromCredentials({ vcJwts, presentationDefinition: definition })?.presentationSubmission;
   }
 
+  public createCredentialApplication({ manifest, presentation_submission }: {
+    manifest: CredentialManifest;
+    presentation_submission: PresentationSubmission
+  },): CredentialApplication {
+    return {
+      id                      : crypto.randomUUID(),
+      spec_version            : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
+      applicant               : this.did,
+      manifest_id             : manifest.id,
+      format                  : { jwt: { alg: ['EdDSA'] }},
+      presentation_submission
+    };
+  }
 
-  public validateVerifiablePresentation(
-    { presentationDefinition, presentation }: ValidateApplicationParams
-  ): ValidateVerifiablePresentationResponse {
-    const validation = PresentationExchange.evaluatePresentation({ presentationDefinition, presentation });
-    Logger.log('Verifiable Presentation Validation', validation);
-    const { areRequiredCredentialsPresent, verifiableCredential } = validation;
-    Logger.log('Are required credentials present?', areRequiredCredentialsPresent);
-    Logger.log('Verifiable Credentials', verifiableCredential);
-    return { areRequiredCredentialsPresent, verifiableCredential };
+  public createCredentialApplicationVP({ manifest, verifiableCredential, submission }: {
+    manifest: CredentialManifest,
+    verifiableCredential: string[],
+    submission?: PresentationSubmission
+  }): CredentialApplicationVP {
+    submission ??= this.createPresentationSubmission({ vcJwts: verifiableCredential, definition: manifest.presentation_definition });
+    return {
+      '@context'             : ['https://www.w3.org/2018/credentials/v1', 'https://identity.foundation/credential-manifest/response/v1'],
+      'type'                 : ['VerifiablePresentation', 'CredentialResponse'],
+      credential_application : {
+        id                      : crypto.randomUUID(),
+        spec_version            : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
+        applicant               : this.did,
+        manifest_id             : manifest.id,
+        format                  : { jwt: { alg: ['EdDSA'] }},
+        presentation_submission : submission,
+      },
+      verifiableCredential
+    };
   }
 
   public async createRecords({ data: creates, protocolPath, schema }: RecordsCreateParams): Promise<{records: Record[]}>{
@@ -340,28 +319,65 @@ export class DcxApplicant implements DcxManager {
     if (!record) {
       throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
     }
+    Logger.debug('Created application record in local dwn', status);
 
-    const { status: applicant } = await record.send();
-    if (DwnUtils.isFailure(applicant.code)) {
-      const { code, detail } = applicant;
-      Logger.error('Failed to send record to applicant dwn', applicant);
+    const { status: applicantSend } = await record.send();
+    if (DwnUtils.isFailure(applicantSend.code)) {
+      const { code, detail } = applicantSend;
+      Logger.error('Failed to send record to applicantSend dwn', applicantSend);
       throw new DwnError(code, detail);
     }
-    Logger.debug('Sent application record to local dwn', applicant);
+    Logger.debug('Sent application record to applicant dwn', applicantSend);
 
     const manifest = OptionsUtil.findManifest({ manifests: this.config.manifests, id: data.manifest_id });
-    const { id: recipient } = OptionsUtil.findIssuer({ issuers: this.config.issuers, id: manifest?.issuer.id });
+    const { id: issuer } = OptionsUtil.findIssuer({ issuers: this.config.issuers, id: manifest?.issuer.id });
 
-    const { status: issuer } = await record.send(recipient);
-    if (DwnUtils.isFailure(issuer.code)) {
-      const { code, detail } = issuer;
-      Logger.error('Failed to send record to issuer dwn', issuer);
+    const { status: issuerSend } = await record.send(issuer);
+    if (DwnUtils.isFailure(issuerSend.code)) {
+      const { code, detail } = issuerSend;
+      Logger.error('Failed to send record to issuer dwn', issuerSend);
+      throw new DwnError(code, detail);
+    }
+    Logger.debug('Sent application record to issuer dwn', issuerSend);
+
+    return { record };
+  }
+
+  public async createApplicationRecord({ application, issuer }: {
+    application: CredentialApplicationVP;
+    issuer: string
+  }): Promise<DwnResponseStatus & RecordResponse> {
+    const { record, status } = await this.web5.dwn.records.create({
+      data    : application,
+      store   : true,
+      message : {
+        protocol     : applicant.protocol,
+        protocolPath : 'application',
+        schema       : applicationSchema.$id,
+        dataFormat   : 'application/json',
+      },
+    });
+
+    const { code, detail } = status;
+    if (DwnUtils.isFailure(status.code)) {
+      Logger.error('Failed to create record', status);
       throw new DwnError(code, detail);
     }
 
-    Logger.debug('Sent application record to remote dwn', issuer);
+    if (!record) {
+      throw new DcxDwnError(`Record not returned from create: ${code} - ${detail}`);
+    }
+    Logger.debug('Created application record in local dwn', status);
 
-    return { record };
+    const { status: issuerSend } = await record.send(issuer);
+    if (DwnUtils.isFailure(issuerSend.code)) {
+      const { code, detail } = issuerSend;
+      Logger.error('Failed to send record to issuer dwn', issuerSend);
+      throw new DwnError(code, detail);
+    }
+    Logger.debug('Sent application record to issuer dwn', issuerSend);
+
+    return { status: issuerSend, record };
   }
 
   /**
@@ -372,13 +388,13 @@ export class DcxApplicant implements DcxManager {
    * @param param.id the id of the issuer to find
    * @returns RecordsReadParams; see {@link RecordsReadParams}
    */
-  public async getManifests({ name, id }: Partial<TrustedIssuer>): Promise<GetManifestsResponse> {
+  public async getManifestRecords({ name, id }: Partial<TrustedIssuer>): Promise<GetManifestsResponse> {
     const issuer = OptionsUtil.findIssuer({ issuers: this.config.issuers, name, id });
     const { records: query } = await this.queryRecords({ from: issuer.id, protocolPath: 'manifest', schema: manifestSchema.$id });
     // TODO: application/response query
     //  const { records: query } = await this.queryRecords({ protocolPath: 'application/response', schema: responseSchema.$id, options: { author: issuer.id } });
     Logger.log(`Found ${query.length} manifest records in ${issuer.name} dwn`);
-    const { records: manifests } = await this.readRecords({ records: query });
+    const { reads: manifests } = await this.readRecords({ records: query });
     Logger.log(`Read ${manifests.length} manifest records from ${issuer.name} dwn`);
     return { manifests };
   }

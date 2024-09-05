@@ -42,7 +42,7 @@ export type RecordsCreateParams = { data: any[]; protocolPath?: DcxProtocolPath;
 export type RecordsCreateResponse = RecordsResponse;
 // Records[] - Read
 export type RecordsReadParams = RecordsParams;
-export type RecordsReadResponse = { records: any[] };
+export type RecordsReadResponse = { reads: any[] };
 // TODO: define these types once needed
 // Records[] - Update
 export type RecordsUpdateParams = {};

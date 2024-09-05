@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.test' });
 
 import { expect } from 'chai';
-import { issuerConfig } from '../src/dcx-issuer-config.js';
+import { issuerConfig } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 
