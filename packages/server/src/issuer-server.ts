@@ -80,11 +80,9 @@ export class IssuerServer implements IServer {
     const milliseconds = ms(params.ms);
 
     const CURSOR = this.issuer.config.cursorFile;
-    const LAST_RECORD_ID = this.issuer.config.lastRecordIdFile;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
-    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
 
     while (this.server.listening) {
       const { records = [] } = await this.issuer.web5.dwn.records.query({

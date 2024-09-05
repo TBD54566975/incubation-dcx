@@ -9,7 +9,6 @@ import {
   Time,
   TrustedIssuer
 } from '@dcx-protocol/common';
-import { Record } from '@web5/api';
 import ms from 'ms';
 import { DcxServer, IServer } from './dcx-server.js';
 
