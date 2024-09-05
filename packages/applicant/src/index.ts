@@ -1,3 +1,3 @@
-export * from './dcx-applicant-config.js';
-export * from './dcx-applicant-protocol.js';
-export * from './dcx-applicant.js';
+export * from './applicant.js';
+export * from './config.js';
+export * from './protocol.js';

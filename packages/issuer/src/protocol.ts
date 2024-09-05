@@ -5,13 +5,13 @@ import {
   applicationSchema
 } from '@dcx-protocol/common';
 
-export const dcxIssuer = {
+export const issuer = {
   // issuer protocol is a subset
   // of exchange protocol used on
   // server side to interact with
   // applicant & issuer dwn
-  protocol  : 'https://decentralized.cx/protocol/',
-  published : false,
+  protocol  : 'https://decentralized.cx/protocol',
+  published : true,
   types     : {
     application : {
       schema      : applicationSchema.$id,

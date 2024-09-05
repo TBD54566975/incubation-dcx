@@ -1,14 +1,14 @@
 import {
-  CreateCredentialApplicationParams,
   CredentialApplication,
   DcxAgentRecovery,
+  DcxApplicantError,
   DcxDwnError,
   DcxError,
   DcxManager,
   DcxManagerStatus,
-  DcxValidated,
   DwnError,
   DwnUtils,
+  Format,
   GetManifestsResponse,
   Logger,
   manifestSchema,
@@ -24,7 +24,6 @@ import {
   RecordsReadParams,
   RecordsReadResponse,
   TrustedIssuer,
-  ValidateApplicationParams,
   ValidateVerifiablePresentationResponse
 } from '@dcx-protocol/common';
 import { Web5PlatformAgent } from '@web5/agent';
@@ -34,10 +33,27 @@ import {
   Record,
   Web5
 } from '@web5/api';
-import { PresentationExchange, VerifiablePresentation } from '@web5/credentials';
-import { ApplicantConfig, applicantConfig } from './dcx-applicant-config.js';
-import { dcxApplicant } from './index.js';
-
+import { PresentationDefinitionV2, PresentationExchange, VerifiablePresentation } from '@web5/credentials';
+import { ApplicantConfig, applicantConfig } from './config.js';
+import { applicant } from './index.js';
+export type ApplicantProcessRecordParams = { pex: PresentationExchangeParams, recipient: string }
+export type DcxValidated = {
+  tag: string;
+  status: string;
+  message: string
+};
+export type ValidateApplicationParams = {
+  presentation: any;
+  presentationDefinition: PresentationDefinitionV2;
+};
+export type CreateApplicationParams = {
+  id?: string;
+  spec_version?: string;
+  applicant?: string;
+  manifest_id: string;
+  format?: Format;
+  presentation_submission: PresentationSubmission;
+};
 /**
  * DcxApplicant is the core class for the applicant side of the DCX protocol.
  * It handles the credential issuance, verification, selection, as well as
@@ -77,7 +93,7 @@ export class DcxApplicant implements DcxManager {
     const { status: query, protocols = [] } = await this.web5.dwn.protocols.query({
       message : {
         filter : {
-          protocol : dcxApplicant.protocol,
+          protocol : applicant.protocol,
         },
       },
     });
@@ -98,7 +114,7 @@ export class DcxApplicant implements DcxManager {
    */
   public async configureProtocols(): Promise<ProtocolsConfigureResponse> {
     const { status: configure, protocol } = await this.web5.dwn.protocols.configure({
-      message : { definition: dcxApplicant },
+      message : { definition: applicant },
     });
 
     if (DwnUtils.isFailure(configure.code) || !protocol) {
@@ -193,7 +209,7 @@ export class DcxApplicant implements DcxManager {
         filter : {
           protocolPath,
           schema,
-          protocol     : dcxApplicant.protocol,
+          protocol     : applicant.protocol,
           dataFormat   : 'application/json',
         },
         ...options
@@ -217,7 +233,7 @@ export class DcxApplicant implements DcxManager {
       from,
       message : {
         filter : {
-          protocol     : dcxApplicant.protocol,
+          protocol     : applicant.protocol,
           protocolPath : 'manifest',
           schema       : manifestSchema.$id,
           dataFormat   : 'application/json',
@@ -251,25 +267,27 @@ export class DcxApplicant implements DcxManager {
     return { vp };
   }
 
-  public async createCredentialApplication(
-    { presentationSubmission, manifestId }: CreateCredentialApplicationParams
-  ): Promise<CredentialApplication> {
-    const app = {
-      id                      : crypto.randomUUID(),
-      spec_version            : 'https://identity.foundation/credential-manifest/#versioning',
-      applicant               : this.did,
-      manifest_id             : manifestId,
-      format                  : { jwt_vc: { alg: ['EdDSA'] }},
-      presentation_submission : presentationSubmission,
-    };
-    return new CredentialApplication(
-      app.id,
-      app.spec_version,
-      app.applicant,
-      app.manifest_id,
-      app.format,
-      app.presentation_submission
-    );
+  public createApplication(
+    { id, spec_version, applicant, manifest_id, format, presentation_submission }: CreateApplicationParams
+  ): CredentialApplication {
+    if(!manifest_id) {
+      throw new DcxApplicantError('Manifest ID is required to create a credential application');
+    }
+    if(!presentation_submission) {
+      throw new DcxApplicantError('Presentation Submission is required to create a credential application');
+    }
+    id ??= crypto.randomUUID();
+    spec_version ??= 'https://identity.foundation/credential-manifest/#versioning';
+    applicant ??= this.did;
+    format ??= { jwt_vc: { alg: ['EdDSA'] }};
+    return new CredentialApplication({
+      id,
+      spec_version,
+      applicant,
+      manifest_id,
+      format,
+      presentation_submission,
+    });
   }
 
   public validatePresentationSubmission(presentationSubmission: PresentationSubmission): DcxValidated {
@@ -309,7 +327,7 @@ export class DcxApplicant implements DcxManager {
         schema,
         protocolPath,
         dataFormat   : 'application/json',
-        protocol     : dcxApplicant.protocol,
+        protocol     : applicant.protocol,
       },
     });
 

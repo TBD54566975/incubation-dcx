@@ -1,7 +1,7 @@
 export type ResponseSchema = typeof schema;
 
 export const schema = {
-  $id        : 'https://decentralized.cx/protocol/credential-exchange/schemas/response',
+  $id        : 'https://decentralized.cx/protocol/schemas/response',
   $schema    : 'http://json-schema.org/draft-07/schema#',
   title      : 'Credential Response',
   type       : 'object',

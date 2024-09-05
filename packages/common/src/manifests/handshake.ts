@@ -31,7 +31,7 @@ export const DcxHandshakeManifest = {
     }
   ],
   format : {
-    jwt_vc : {
+    jwt : {
       alg : [
         'EdDSA'
       ]

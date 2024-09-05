@@ -1,9 +1,9 @@
 import { CredentialManifest, FF, TrustedIssuer } from '../index.js';
 
-export type FindManifestParams = FindManifestsParams;
-export type FindMissingResponse = { missing: CredentialManifest[] };
-export type FindManifestsParams = { manifests: CredentialManifest[]; name?: string; id?: string };
-export type FindMissingParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
+export type FindManifestParams = { manifests: CredentialManifest[]; name?: string; id?: string };
+export type FindIssuerParams = Partial<TrustedIssuer> & { issuers: TrustedIssuer[] }
+export type FindMissingManifestResponse = { missing: CredentialManifest[] };
+export type FindMissingManifestParams = { dwnManifests: CredentialManifest[], localManifests: CredentialManifest[] };
 export class OptionsUtil {
   /**
    *
@@ -25,7 +25,7 @@ export class OptionsUtil {
    * @param param.id the id of the manifest to find
    * @returns CredentialManifest or undefined; see {@link CredentialManifest}
    */
-  public static findManifests({ manifests, name, id }: FindManifestsParams): CredentialManifest[] {
+  public static findManifests({ manifests, name, id }: FindManifestParams): CredentialManifest[] {
     return manifests.filter((manifest: CredentialManifest) => this.findManifest({ manifests, name, id })?.id === manifest.id);
   }
 
@@ -37,11 +37,11 @@ export class OptionsUtil {
    * @param param.id the id of the issuer to find
    * @returns TrustedIssuer or FF; see {@link TrustedIssuer}, {@link FF}
    */
-  public static findIssuer({ issuers, name, id }: Partial<TrustedIssuer> & { issuers: TrustedIssuer[] }): TrustedIssuer {
+  public static findIssuer({ issuers, name, id }: FindIssuerParams): TrustedIssuer {
     return issuers.find((issuer: TrustedIssuer) => issuer.name === name || issuer.id === id) ?? FF;
   }
 
-  public static findMissingManifests({ dwnManifests, localManifests }: FindMissingParams): FindMissingResponse {
+  public static findMissingManifests({ dwnManifests, localManifests }: FindMissingManifestParams): FindMissingManifestResponse {
     const dwnManifestIds = new Set(dwnManifests.map(dwnManifest => dwnManifest.id));
     const missing = localManifests.filter(localManifest => !dwnManifestIds.has(localManifest.id));
     return { missing };
