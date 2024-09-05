@@ -7,11 +7,10 @@ import {
   Objects,
   Provider,
   SleepTime,
-  stringifier,
   Time,
   TrustedIssuer
 } from '@dcx-protocol/common';
-import { DcxIssuer, dcxIssuer } from '@dcx-protocol/issuer';
+import { DcxIssuer, issuer } from '@dcx-protocol/issuer';
 import { Record } from '@web5/api';
 import ms from 'ms';
 import { DcxServer, IServer } from './dcx-server.js';
@@ -64,49 +63,42 @@ export class IssuerServer implements IServer {
     this.server.useGateway(gateway);
   }
 
+  public async sync(): Promise<void> {
+    Logger.log('IssuerServer syncing ...');
+    await this.issuer.agent.sync.sync();
+  }
+
   /**
    * Listens for incoming records from the DWN
    */
   public async listen(params: SleepTime = { ms: '2m' }): Promise<void> {
-    this.server.listening = true;
+    await this.sync();
 
-    const milliseconds = ms(params.ms);
+    this.server.listening = true;
     Logger.log('IssuerServer listening ...');
 
+    const milliseconds = ms(params.ms);
+
     const CURSOR = this.issuer.config.cursorFile;
-    const LAST_RECORD_ID = this.issuer.config.lastRecordIdFile;
 
     let cursor = await FileSystem.readToJson(CURSOR);
     const pagination = Objects.isEmpty(cursor) ? {} : { cursor };
-    let lastRecordId = await FileSystem.readToString(LAST_RECORD_ID);
 
     while (this.server.listening) {
-      const { records = [], cursor: nextCursor } = await this.issuer.web5.dwn.records.query({
+      const { records = [] } = await this.issuer.web5.dwn.records.query({
+        from    : this.issuer.agent.agentDid.uri,
         message : {
           pagination,
-          filter : { protocol: dcxIssuer.protocol },
+          filter : { protocol: issuer.protocol },
         },
       });
-
-      Logger.log(`Found ${records.length} records`);
-      if (nextCursor) {
-        Logger.log(`Next cursor update for next query`, stringifier(nextCursor));
-        cursor = nextCursor;
-        const overwritten = await FileSystem.overwrite(CURSOR, cursor);
-        Logger.log(`${CURSOR} overwritten ${overwritten}`, cursor);
-      } else {
-        Logger.log(`Next cursor not found!`);
-      }
-
-      if (cursor && !records.length) {
-        cursor = undefined;
-      }
 
       const recordIds = records.map((record: Record) => record.id);
 
       const recordReads: Record[] = await Promise.all(
         recordIds.map(async (recordId: string) => {
           const { record }: { record: Record } = await this.issuer.web5.dwn.records.read({
+            from    : this.issuer.agent.agentDid.uri,
             message : {
               filter : {
                 recordId,
@@ -116,8 +108,6 @@ export class IssuerServer implements IServer {
           return record;
         }),
       );
-
-      Logger.log(`Read ${recordReads.length} records`);
 
       if (this.server.testing) {
         Logger.log('Test Complete! Stopping DCX server ...');
@@ -130,34 +120,31 @@ export class IssuerServer implements IServer {
       }
 
       for (const record of recordReads) {
-        if (record.id != lastRecordId) {
-          if (record.protocolPath === 'application') {
-            const manifest = this.issuer.config.manifests.find(
-              (manifest: CredentialManifest) =>
-                manifest.presentation_definition.id === record.schema,
-            );
+        if (record.protocolPath === 'application') {
+          const data = await record.data.json();
+          Logger.debug(`Found application with id: ${record.id}`, data);
 
-            if (manifest) {
-              const { status } = await this.issuer.processRecord(
-                {
-                  record,
-                  manifest,
-                  providerId : manifest.output_descriptors[0].id,
-                }
-              );
-              Logger.debug(`Processed application id ${record.id}`, status);
-            } else {
-              Logger.log(`Skipped message with protocol path ${record.protocolPath}`);
-            }
+          const manifest = this.issuer.config.manifests.find(
+            (manifest: CredentialManifest) =>
+              manifest.id.toLowerCase() === data.vpDataModel.credential_application.manifest_id,
+          );
 
-            lastRecordId = record.id;
-            const overwritten = await FileSystem.overwrite(LAST_RECORD_ID, lastRecordId);
-            Logger.log(`Overwritten last record id: ${overwritten}`, lastRecordId);
+          if (!manifest) {
+            Logger.error(`Manifest not found for application with id: ${record.id}`);
+            continue;
           }
-        } else {
-          await Time.sleep(milliseconds);
+
+          const { status } = await this.issuer.processApplicationRecord(
+            {
+              record,
+              manifest,
+              providerId : manifest.issuer.id,
+            }
+          );
+          Logger.debug(`Processed application with id: ${record.id}`, status);
         }
       }
+      await Time.sleep(20000);
     }
   }
 

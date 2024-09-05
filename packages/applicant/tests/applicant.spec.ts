@@ -4,8 +4,7 @@ dotenv.config({ path: '.env.test' });
 import { FileSystem } from '@dcx-protocol/common';
 import { Protocol, Web5 } from '@web5/api';
 import { expect } from 'chai';
-import { applicantConfig } from '../src/dcx-applicant-config.js';
-import { DcxApplicant } from '../src/index.js';
+import { DcxApplicant, applicantConfig } from '../src/index.js';
 import { Web5UserAgent } from '@web5/user-agent';
 
 process.env.NODE_ENV = 'test';

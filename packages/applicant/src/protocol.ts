@@ -1,9 +1,9 @@
 import { responseSchema, invoiceSchema, manifestSchema, applicationSchema } from '@dcx-protocol/common';
 
-export const dcxApplicant = {
+export const applicant = {
   // applicant protocol is a subset of exchange protocol
   // used on client side to interact with applicant & issuer dwn
-  protocol  : 'https://decentralized.cx/protocol/credential-exchange',
+  protocol  : 'https://decentralized.cx/protocol',
   published : true,
   types     : {
     application : {

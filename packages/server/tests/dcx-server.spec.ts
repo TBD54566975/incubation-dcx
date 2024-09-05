@@ -4,8 +4,8 @@ import { DcxIssuer, issuerConfig } from '@dcx-protocol/issuer';
 import { Web5 } from '@web5/api';
 import { expect } from 'chai';
 import { ApplicantServer } from '../src/applicant-server.js';
-import { DcxServer } from '../src/dcx-server.js';
 import { IssuerServer } from '../src/issuer-server.js';
+import { DcxServer } from '../src/index.js';
 
 process.env.NODE_ENV = 'test';
 

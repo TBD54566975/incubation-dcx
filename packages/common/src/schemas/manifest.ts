@@ -1,7 +1,7 @@
 export type ManifestSchema = typeof schema;
 
 export const schema = {
-  $id        : 'https://decentralized.cx/protocol/credential-exchange/schemas/manifest',
+  $id        : 'https://decentralized.cx/protocol/schemas/manifest',
   $schema    : 'http://json-schema.org/draft-07/schema',
   title      : 'Credential Manifest Record Schema',
   type       : 'object',

@@ -1,19 +1,19 @@
 export type ApplicationSchema = typeof schema;
 
 export const schema = {
-  $id        : 'https://decentralized.cx/protocol/credential-exchange/schemas/application',
+  $id        : 'https://decentralized.cx/protocol/schemas/application',
   $schema    : 'http://json-schema.org/draft-07/schema#',
   title      : 'Credential Application',
   type       : 'object',
   properties : {
     '@context' : {
       type        : 'array',
-      items       : { type: 'string'},
+      items       : { type: 'string' },
       description : 'The @context of the application',
     },
     type : {
       type        : 'array',
-      items       : { type: 'string'},
+      items       : { type: 'string' },
       description : 'The type property of the application',
     },
     credential_application : {
@@ -33,11 +33,7 @@ export const schema = {
         type        : 'string',
         description : 'The id of a valid Credential Manifest'
       },
-      format : {
-        jwt_vc : {
-          alg : ['EdDSA']
-        }
-      },
+      format                  : { jwt_vc: { alg: ['EdDSA'] } },
       presentation_submission : {
         type       : 'object',
         properties : {

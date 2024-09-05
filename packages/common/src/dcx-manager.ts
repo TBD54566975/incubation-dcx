@@ -12,8 +12,8 @@ import {
 } from './index.js';
 
 export type DcxManagerStatus = {
-    setup       : boolean;
-    initialized : boolean;
+  setup       : boolean;
+  initialized : boolean;
 }
 
 export type InitializeParams = {
