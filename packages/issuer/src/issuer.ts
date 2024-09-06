@@ -526,11 +526,9 @@ export class DcxIssuer implements DcxManager {
     const applicationVP: CredentialApplicationVP = await record.data.json();
     Logger.info('Processing vp credential application ...', stringifier(applicationVP));
 
+    const { verifiableCredential, credential_application: application } = applicationVP;
     // Select valid credentials against the manifest
-    const vcJwts = this.selectCredentials({
-      manifest,
-      verifiableCredential : applicationVP.verifiableCredential,
-    });
+    const vcJwts = this.selectCredentials({ manifest, verifiableCredential });
     Logger.info(`Selected ${vcJwts.length} credentials`, stringifier(vcJwts));
 
     const applicant = record.author;
@@ -541,15 +539,10 @@ export class DcxIssuer implements DcxManager {
     const data = await this.requestCredentialData({ body: { vcs: verified }, id: providerId});
     Logger.info('Requested data from provider', stringifier(data));
 
-    const application = applicationVP.credential_application;
     const { signedVc } = await this.createCredential({ data, manifest, application });
     Logger.info('Created credential', signedVc);
 
-    const response = this.createCredentialResponseVP({
-      manifest,
-      application,
-      verifiableCredential : [signedVc],
-    });
+    const response = this.createCredentialResponseVP({ manifest, application, verifiableCredential: [signedVc] });
     Logger.info('Created credential response', stringifier(response));
 
     const issuance = await this.createResponseRecord({ response, applicant  });
