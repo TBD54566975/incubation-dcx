@@ -110,7 +110,6 @@ export class IssuerServer implements IServer {
         );
 
         if (this.server.testing) {
-          Logger.log('Test Complete! Stopping DCX server ...');
           this.stop();
         }
 
