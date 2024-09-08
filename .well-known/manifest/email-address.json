@@ -1,0 +1,59 @@
+{
+    "id": "email-address-mfa-manifest:8647c467680fc77c0581bcf5b1390c60",
+    "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
+    "issuer": {
+        "id": "",
+        "name": "",
+        "styles": {
+            "thumbnail": {
+                "uri": "https://dcxprotocol.com/images/thumbnail.jpg",
+                "alt": ""
+            },
+            "hero": {
+                "uri": "https://dcxprotocol.com/images/hero.jpg",
+                "alt": ""
+            },
+            "background": {
+                "color": "#FFFFFF"
+            },
+            "text": {
+                "color": "#000000"
+            }
+        }
+    },
+    "output_descriptors": [
+        {
+            "id": "email-address-credential",
+            "name": "Email Address Credential",
+            "schema": "https://dcxprotocol.com/.well-known/credential/EmailAddressCredential.json"
+        }
+    ],
+    "format": {
+        "jwt": {
+            "alg": [
+                "EdDSA"
+            ]
+        }
+    },
+    "presentation_definition": {
+        "id": "email-address-presentation",
+        "name": "Email Address Presentation",
+        "purpose": "Used to present proof that an applicant owns the enclosed email address by providing the enclosed otp",
+        "input_descriptors": [
+            {
+                "id": "email-address-input-descriptor",
+                "purpose": "The holder of this credential has proven ownership of the enclosed email address by providing the correct one-time password (otp)",
+                "constraints": {
+                    "fields": [
+                        {
+                            "path": [
+                                "$.credentialSubject.emailAddress",
+                                "$.credentialSubject.otp"
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

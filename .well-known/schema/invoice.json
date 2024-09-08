@@ -1,0 +1,12 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://dcxprotocol.com/.well-known/schema/invoice.json",
+    "title": "Credential Application DWN Record Schema",
+    "description": "DWN record schema used to store information about an invoice",
+    "type": "object",
+    "properties": {
+        "url": {
+            "type": "string"
+        }
+    }
+}
