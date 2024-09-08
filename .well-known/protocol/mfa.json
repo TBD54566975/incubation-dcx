@@ -1,9 +1,9 @@
 {
-    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa",
+    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa.json",
     "published": true,
     "types": {
         "mfa": {
-            "schema": "https://dcxprotocol.com/.well-known/schema/mfa-record.json",
+            "schema": "https://dcxprotocol.com/.well-known/schema/mfa.json",
             "dataFormats": [
                 "application/json"
             ]
@@ -11,28 +11,8 @@
     },
     "structure": {
         "mfa": {
-            "$actions": [
-                {
-                    "who": "author",
-                    "of": "mfa",
-                    "can": [
-                        "update",
-                        "delete"
-                    ]
-                }
-            ],
             "phone": {
                 "$actions": [
-                    {
-                        "who": "author",
-                        "of": "mfa",
-                        "can": [
-                            "create",
-                            "update",
-                            "read",
-                            "delete"
-                        ]
-                    },
                     {
                         "who": "recipient",
                         "of": "mfa",
@@ -44,16 +24,6 @@
             },
             "email": {
                 "$actions": [
-                    {
-                        "who": "author",
-                        "of": "mfa",
-                        "can": [
-                            "create",
-                            "read",
-                            "update",
-                            "delete"
-                        ]
-                    },
                     {
                         "who": "recipient",
                         "of": "mfa",

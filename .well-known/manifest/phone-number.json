@@ -1,5 +1,5 @@
 {
-    "id": "PHONE-NUMBER-MFA-MANIFEST",
+    "id": "phone-number-mfa-manifest:68cf3dca2457d5c720cb6dd06d08ae5c",
     "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
     "issuer": {
         "id": "",
