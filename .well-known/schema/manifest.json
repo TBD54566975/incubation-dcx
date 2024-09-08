@@ -1,0 +1,184 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://dcxprotocol.com/.well-known/schema/manifest.json",
+    "title": "Credential Manifest DWN Record Schema",
+    "description": "DWN record schema used to store information about a credential manifest",
+    "type": "object",
+    "properties": {
+        "@context": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "The @context of the application"
+        },
+        "type": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "The type property of the application"
+        },
+        "credential_manifest": {
+            "type": "object",
+            "description": "The credential_manifest object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "A unique ID for the Credential Manifest used to map back from the Credential Application"
+                },
+                "name": {
+                    "type": "string",
+                    "description": ""
+                },
+                "description": {
+                    "type": "string",
+                    "description": ""
+                },
+                "spec_version": {
+                    "type": "string",
+                    "description": ""
+                },
+                "issuer": {
+                    "type": "object",
+                    "description": "",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "description": ""
+                        }
+                    },
+                    "required": [
+                        "id"
+                    ],
+                    "additionalProperties": false
+                },
+                "output_descriptors": {
+                    "type": "array",
+                    "description": "A list of objects used to describe the verifiable credentials the Issuer will return to the Applicant upon submission and verification of a valid Credential Application",
+                    "items": {
+                        "type": "object",
+                        "description": "An object used to describe the verifiable credentials returned",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "description": "A unique id that does not conflict with the id of another Output Descriptor Object in the same Credential Manifest"
+                            },
+                            "schema": {
+                                "type": "string",
+                                "description": "The schema of the credential to be issued"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "schema"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "format": {
+                    "type": "object",
+                    "properties": {
+                        "jwt": {
+                            "type": "object",
+                            "description": "An object used to describe the JWT format of the verifiable credentials",
+                            "properties": {
+                                "alg": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "description": "The algorithm used to sign the JWT",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "pattern": "^EdDSA$"
+                                }
+                            },
+                            "required": [
+                                "alg"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "jwt"
+                    ],
+                    "additionalProperties": false
+                },
+                "presentation_definition": {
+                    "type": "object",
+                    "description": "An object that articulates an an input object presented to the issuer by an applicant that wants to satisfy the credential manifest and receive credentials listed in the output_descriptors",
+                    "id": {
+                        "type": "string",
+                        "description": "A unique ID for the desired context used to map back to from the presentation_submission in the Credential Application"
+                    },
+                    "input_descriptors": {
+                        "type": "array",
+                        "description": "A list of objects used to describe the required verifiable credentials and their fields",
+                        "items": {
+                            "type": "object",
+                            "description": "An object used to describe the required verifiable credentials",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "The id property of the Input Descriptor in the Presentation Definition found in the Credential Manifest related to this Credential Application"
+                                },
+                                "constraints": {
+                                    "type": "object",
+                                    "description": "The value must match the format definition of the Credential Application above",
+                                    "properties": {
+                                        "fields": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "description": "one or more JSONPath string expressions that select a target value from the input_descriptors",
+                                                "properties": {
+                                                    "path": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "path"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "fields"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "constraints"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "required": [
+                            "id",
+                            "input_descriptors"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "spec_version",
+                "issuer",
+                "output_descriptors",
+                "presentation_definition",
+                "format"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "credential_manifest"
+    ],
+    "additionalProperties": false
+}

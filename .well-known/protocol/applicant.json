@@ -1,0 +1,82 @@
+{
+    "protocol": "https://dcxprotocol.com/.well-known/protocol/dcx.json",
+    "published": true,
+    "types": {
+        "application": {
+            "schema": "https://dcxprotocol.com/.well-known/schema/application.json",
+            "dataFormats": [
+                "application/json"
+            ]
+        },
+        "manifest": {
+            "schema": "https://dcxprotocol.com/.well-known/schema/dcx-manifest.json",
+            "dataFormats": [
+                "application/json"
+            ]
+        },
+        "response": {
+            "schema": "https://dcxprotocol.com/.well-known/schema/dcx-response.json",
+            "dataFormats": [
+                "application/json"
+            ]
+        },
+        "invoice": {
+            "schema": "https://dcxprotocol.com/.well-known/schema/invoice.json",
+            "dataFormats": [
+                "application/json"
+            ]
+        }
+    },
+    "structure": {
+        "manifest": {},
+        "application": {
+            "$actions": [
+                {
+                    "who": "author",
+                    "of": "application",
+                    "can": [
+                        "update"
+                    ]
+                }
+            ],
+            "response": {
+                "$actions": [
+                    {
+                        "who": "recipient",
+                        "of": "application",
+                        "can": [
+                            "create",
+                            "update"
+                        ]
+                    },
+                    {
+                        "who": "author",
+                        "of": "application",
+                        "can": [
+                            "read"
+                        ]
+                    }
+                ]
+            },
+            "invoice": {
+                "$actions": [
+                    {
+                        "who": "recipient",
+                        "of": "application",
+                        "can": [
+                            "create",
+                            "update"
+                        ]
+                    },
+                    {
+                        "who": "author",
+                        "of": "application",
+                        "can": [
+                            "read"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

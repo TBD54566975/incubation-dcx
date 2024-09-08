@@ -1,19 +1,19 @@
 export const DcxHandshakeManifest = {
-  id           : 'dcx-handshake-manifest',
+  id           : 'dcx-handshake-manifest:506a093652f5dec58394c2497602427d',
   name         : 'Dcx Handshake Manifest',
   description  : 'Defines the presentation requirements for proving ownership of a DID',
   spec_version : 'https://identity.foundation/credential-manifest/spec/v1.0.0/',
   issuer       : {
-    id       : 'https://formfree.github.io/.well-known/issuers/formfree.json',
-    name     : 'FormFree',
+    id       : 'did:web:dcxprotocol.com',
+    name     : 'dcxprotocol.com',
     styles : {
       thumbnail : {
-        uri : 'https://formfree.github.io/images/thumbnail.jpg',
-        alt : 'FormFree Logo'
+        uri : 'https://dcxprotocol.com/images/thumbnail.jpg',
+        alt : 'DCX Protocol Logo'
       },
       hero : {
-        uri : 'https://formfree.github.io/images/hero.jpg',
-        alt : 'FormFree Hero Image'
+        uri : 'https://dcxprotocol.com/images/hero.jpg',
+        alt : 'DCX Protocol Hero Image'
       },
       background : {
         color : '#FFFFFF'
@@ -27,7 +27,7 @@ export const DcxHandshakeManifest = {
     {
       id     : 'dcx-handshake-output',
       name   : 'DcxHandshakeCredential',
-      schema : 'https://formfree.github.io/.well-known/credential/DcxHandshakeCredential.json'
+      schema : 'https://dcxprotocol.com/.well-known/credential/DcxHandshakeCredential.json'
     }
   ],
   format : {

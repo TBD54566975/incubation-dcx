@@ -1,0 +1,90 @@
+{
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://identity.foundation/credential-manifest/response/v1"
+    ],
+    "type": [
+        "VerifiablePresentation",
+        "CredentialResponse"
+    ],
+    "credential_response": {
+        "id": "a30e3b91-fb77-4d22-95fa-871689c322e2",
+        "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
+        "applicant": "did:example:123",
+        "manifest_id": "32f54163-7166-48f1-93d8-ff217bdb0653",
+        "application_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+        "fulfillment": {
+            "descriptor_map": [
+                {
+                    "id": "banking_output_2",
+                    "format": "jwt",
+                    "path": "$.verifiableCredential[0]"
+                },
+                {
+                    "id": "employment_output",
+                    "format": "jwt",
+                    "path": "$.verifiableCredential[1]"
+                },
+                {
+                    "id": "citizenship_output_1",
+                    "format": "jwt",
+                    "path": "$.verifiableCredential[2]"
+                }
+            ]
+        }
+    },
+    "verifiableCredential": [
+        {
+            "@context": "https://www.w3.org/2018/credentials/v1",
+            "id": "https://eu.com/claims/DriversLicense",
+            "type": [
+                "EUDriversLicense"
+            ],
+            "issuer": "did:example:123",
+            "issuanceDate": "2010-01-01T19:73:24Z",
+            "credentialSubject": {
+                "id": "did:example:ebfeb1f712ebc6f1c276e12ec21",
+                "accounts": [
+                    {
+                        "id": "1234567890",
+                        "route": "DE-9876543210"
+                    },
+                    {
+                        "id": "2457913570",
+                        "route": "DE-0753197542"
+                    }
+                ]
+            }
+        },
+        {
+            "@context": "https://www.w3.org/2018/credentials/v1",
+            "id": "https://business-standards.org/schemas/employment-history.json",
+            "type": [
+                "VerifiableCredential",
+                "GenericEmploymentCredential"
+            ],
+            "issuer": "did:foo:123",
+            "issuanceDate": "2010-01-01T19:73:24Z",
+            "credentialSubject": {
+                "id": "did:example:ebfeb1f712ebc6f1c276e12ec21",
+                "active": true
+            }
+        },
+        {
+            "@context": "https://www.w3.org/2018/credentials/v1",
+            "id": "https://eu.com/claims/DriversLicense",
+            "type": [
+                "EUDriversLicense"
+            ],
+            "issuer": "did:foo:123",
+            "issuanceDate": "2010-01-01T19:73:24Z",
+            "credentialSubject": {
+                "id": "did:example:ebfeb1f712ebc6f1c276e12ec21",
+                "license": {
+                    "number": "34DGE352",
+                    "dob": "07/13/80"
+                }
+            }
+        }
+    ]
+}
