@@ -12,6 +12,7 @@
     "build:tests:node": "pnpm --recursive --stream build:tests:node",
     "clean": "pnpm npkill -d $(pwd)/packages -t dist && pnpm npkill -d $(pwd) -t node_modules",
     "coverage": "codecov upload-process -t $CODECOV_TOKEN -r TBD54566975/incubation-dcx",
+    "md5": "tsx scripts/md5.ts",
     "lint": "pnpm --recursive --stream lint",
     "lint:fix": "pnpm --recursive --stream lint:fix",
     "publish:all": "pnpm --filter applicant publish && pnpm --filter common publish && pnpm --filter issuer publish && pnpm --filter server publish",

@@ -1,0 +1,73 @@
+{
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://identity.foundation/credential-manifest/application/v1"
+    ],
+    "type": [
+        "VerifiablePresentation",
+        "CredentialManifest"
+    ],
+    "credential_manifest": {
+        "id": "DCX-EXAMPLE",
+        "name": "DCX Example Manifest",
+        "description": "Basic example manifest.",
+        "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
+        "issuer": {
+            "id": "did:issuer:123",
+            "name": "DCX Issuer",
+            "styles": {
+                "thumbnail": {
+                    "uri": "https://example.com/images/thumbnail.jpg",
+                    "alt": "Example Logo"
+                },
+                "hero": {
+                    "uri": "https://example.com/images/hero.jpg",
+                    "alt": "Example Hero Image"
+                },
+                "background": {
+                    "color": "#FFFFFF"
+                },
+                "text": {
+                    "color": "#000000"
+                }
+            }
+        },
+        "output_descriptors": [
+            {
+                "id": "dcx-example-output-descriptor",
+                "name": "DCX Example Credential",
+                "schema": "https://example.com/credential/DcxExampleCredential.json"
+            }
+        ],
+        "format": {
+            "jwt": {
+                "alg": [
+                    "EdDSA"
+                ]
+            }
+        },
+        "presentation_definition": {
+            "id": "dcx-example-presentation",
+            "input_descriptors": [
+                {
+                    "id": "dcx-example-presentation-input",
+                    "purpose": "DCX Example Presentation",
+                    "constraints": {
+                        "fields": [
+                            {
+                                "path": [
+                                    "$.credentialSubject.challenge"
+                                ]
+                            },
+                            {
+                                "path": [
+                                    "$.credentialSubject.signedChallenge"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

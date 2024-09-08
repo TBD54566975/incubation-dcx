@@ -1,20 +1,23 @@
-# Usage
-# ***OUTDATED*** - TODO: update usage guide
+# Usage (***deprecated***)
+
 See below for how to install and use the DCX protocol.
 
 ## Install
 
 To install the entire protocol suite
+
 ```bash
 npm install @dcx-protocol/root
 ```
 
 To install only the applicant side
+
 ```bash
 npm install @dcx-protocol/common @dcx-protocol/applicant
 ```
 
 To install only the issuer side
+
 ```bash
 npm install @dcx-protocol/common @dcx-protocol/issuer
 ```
@@ -29,6 +32,7 @@ await server.start();
 ```
 
 You can also import the `DcxServer` class and pass options to customize the server
+
 ```ts
 import ExampleManifest from '@dcx-protocol/root';
 import DcxServer from "@dcx-protocol/issuer";
@@ -199,10 +203,9 @@ server.use('handler', 'requestCredential', requestCredentialCustom);
 await server.start();
 ```
 
-### Use Gateway
+### Use Gateway (not implemented)
 
 You can define your own DHT Gateway using `server.use('gateway' ...`. At the moment, this has no impact.
-DCX defaults to using TBD or FormFree DHT gateways.
 
 ```ts
 import { server } from '@dcx-protocol/issuer';
@@ -216,6 +219,7 @@ await server.start();
 ### Use DWN
 
 You can define your own DWN endpoint using `server.use('dwn' ...`.
+
 ```ts
 import { server } from '@dcx-protocol/issuer';
 

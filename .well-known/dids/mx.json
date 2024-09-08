@@ -1,0 +1,62 @@
+{
+    "@context": "https://w3id.org/did-resolution/v1",
+    "didResolutionMetadata": {},
+    "didDocument": {
+        "id": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y",
+        "verificationMethod": [
+            {
+                "id": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#0",
+                "type": "JsonWebKey",
+                "controller": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y",
+                "publicKeyJwk": {
+                    "kty": "OKP",
+                    "crv": "Ed25519",
+                    "x": "4wu0b2EK9atqFXt3c_6RegTwKzu0-l20eibE3-aqBCg",
+                    "kid": "-VR8gBA1rFo25DV63BmsxQ3bXYEptwu94QsUAcMzTGA",
+                    "alg": "EdDSA"
+                }
+            },
+            {
+                "id": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#sig",
+                "type": "JsonWebKey",
+                "controller": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y",
+                "publicKeyJwk": {
+                    "kty": "OKP",
+                    "crv": "Ed25519",
+                    "x": "wgJJSud6AupDaaam9jxZv_evpzQQorD4WIGV0xUXtIc",
+                    "kid": "Ay0A46vqeeTbchPbBKMMHWucDFyBttAcyaDyukLZLcA",
+                    "alg": "EdDSA"
+                }
+            }
+        ],
+        "service": [
+            {
+                "enc": "#enc",
+                "sig": "#sig",
+                "id": "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#dwn",
+                "type": "DecentralizedWebNode",
+                "serviceEndpoint": [
+                    "https://dwn.tbddev.org/beta"
+                ]
+            }
+        ],
+        "authentication": [
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#0",
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#sig"
+        ],
+        "assertionMethod": [
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#0",
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#sig"
+        ],
+        "capabilityDelegation": [
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#0"
+        ],
+        "capabilityInvocation": [
+            "did:dht:kfcakjzahwimgo9zzjw6yknt9srdtkmfqbeybekcg3xzz1ztg95y#0"
+        ]
+    },
+    "didDocumentMetadata": {
+        "published": true,
+        "versionId": "1723859632"
+    }
+}
