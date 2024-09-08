@@ -1,0 +1,4 @@
+include: [".well-known"]
+theme: jekyll-theme-minimal
+title: DCX
+description: Decentralized Credential Exchange
