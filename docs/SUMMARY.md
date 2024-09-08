@@ -2,7 +2,7 @@
 
 The Decentralized Credential Exchange (DCX) project creates a new DWeb Node procotol to facilitate the decentralized exchange of credentials between applicants and issuers. The DCX protocol is open and permissionless leveraging the benefits of DWeb Nodes, Verifiable Credentials and many other powerful Web5 primitives.
 
-The DCX project is a perfect fit for the consumer lending industry. Leveraging DCX would make this process more efficient and secure benefiting all actors in the flow of applying for a mortgage loan: borrowers, lenders and data verifiers. DCX achieves this by leveraging the strengths of Web5 -- specifically, the power of VCs. 
+The DCX project is a perfect fit for the consumer lending industry. Leveraging DCX would make this process more efficient and secure benefiting all actors in the flow of applying for a mortgage loan: borrowers, lenders and data verifiers. DCX achieves this by leveraging the strengths of Web5 -- specifically, the power of VCs.
 
 Benefits to Borrowers
 
@@ -24,7 +24,7 @@ Benefits to Aggregators
 
 DCX strengthens the Web5 ecosystem by introducing a credential real-world use case for protocol development. We expect this will tighten the feedback loop for both Web5 and tbDEX development, allowing Web5 FOSS engineering groups to benefit from the contributions of DCX participants.
 
-By participating in the DCX protocol, all three participant groups will receive more volume and higher quality services at more competitive prices all thanks to data sovereignty provided by the Web5 platform resulting in a completely open and competitive data market place. Early participants in DCX protocol include MX.com, Sophtron.com and FormFree.com.
+By participating in the DCX protocol, all three participant groups will receive more volume and higher quality services at more competitive prices all thanks to data sovereignty provided by the Web5 platform resulting in a completely open and competitive data market place.
 
 ## Preview
 
