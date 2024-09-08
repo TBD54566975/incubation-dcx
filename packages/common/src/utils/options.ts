@@ -1,4 +1,4 @@
-import { CredentialManifest, FF, TrustedIssuer } from '../index.js';
+import { CredentialManifest, MX, TrustedIssuer } from '../index.js';
 
 export type FindManifestParams = { manifests: CredentialManifest[]; name?: string; id?: string };
 export type FindIssuerParams = Partial<TrustedIssuer> & { issuers: TrustedIssuer[] }
@@ -35,10 +35,10 @@ export class OptionsUtil {
    *
    * @param param.name the name of the issuer to find
    * @param param.id the id of the issuer to find
-   * @returns TrustedIssuer or FF; see {@link TrustedIssuer}, {@link FF}
+   * @returns TrustedIssuer; see {@link TrustedIssuer}
    */
   public static findIssuer({ issuers, name, id }: FindIssuerParams): TrustedIssuer {
-    return issuers.find((issuer: TrustedIssuer) => issuer.name === name || issuer.id === id) ?? FF;
+    return issuers.find((issuer: TrustedIssuer) => issuer.name === name || issuer.id === id) ?? MX;
   }
 
   public static findMissingManifests({ dwnManifests, localManifests }: FindMissingManifestParams): FindMissingManifestResponse {
