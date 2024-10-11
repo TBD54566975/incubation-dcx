@@ -1,6 +1,6 @@
 {
+    "$id": "https://dcxprotocol.com/.well-known/schema/response",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://dcxprotocol.com/.well-known/schema/dcx-response.json",
     "title": "Credential Response DWN Record Schema",
     "description": "DWN record schema used to store information about a credential response",
     "type": "object",

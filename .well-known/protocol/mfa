@@ -3,7 +3,7 @@
     "published": true,
     "types": {
         "mfa": {
-            "schema": "https://dcxprotocol.com/.well-known/schema/mfa.json",
+            "schema": "https://dcxprotocol.com/.well-known/schema/mfa",
             "dataFormats": [
                 "application/json"
             ]
@@ -53,7 +53,7 @@
                         ]
                     }
                 ]
-            },
+            }
         }
     }
 }

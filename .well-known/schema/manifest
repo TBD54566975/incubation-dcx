@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://dcxprotocol.com/.well-known/schema/manifest.json",
+    "$id": "https://dcxprotocol.com/.well-known/schema/manifest",
     "title": "Credential Manifest DWN Record Schema",
     "description": "DWN record schema used to store information about a credential manifest",
     "type": "object",

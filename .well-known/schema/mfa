@@ -1,5 +1,5 @@
 {
-    "$id": "https://dcxprotocol.com/.well-known/schema/mfa.json",
+    "$id": "https://dcxprotocol.com/.well-known/schema/mfa",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "MFA DWN Record Schema",
     "description": "DWN record schema used to store information about MFA for phone or email verification",

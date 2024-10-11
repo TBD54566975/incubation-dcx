@@ -27,7 +27,7 @@
         {
             "id": "dcx-handshake-output",
             "name": "DCX Handshake Credential",
-            "schema": "https://dcxprotocol.com/.well-known/credential/DcxHandshakeCredential.json"
+            "schema": "https://dcxprotocol.com/.well-known/credential/HandshakeCredential"
         }
     ],
     "format": {
@@ -38,25 +38,16 @@
         }
     },
     "presentation_definition": {
-        "id": "dcx-handshake-presentation",
+        "id": "handshake-presentation",
         "input_descriptors": [
             {
-                "id": "dcx-handshake-input",
-                "purpose": "DCX Applicant initiates handshake with challenge 'Hello-DCX-<random_uuid>' in plain text and a signed challenge which is a signature on that plain text challenge.",
+                "id": "handshake-input",
+                "purpose": "",
                 "constraints": {
                     "fields": [
                         {
                             "path": [
-                                "$.credentialSubject.challenge"
-                            ],
-                            "filter": {
-                                "type": "string",
-                                "pattern": "^Hello-DCX-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-                            }
-                        },
-                        {
-                            "path": [
-                                "$.credentialSubject.signedChallenge"
+                                "$.credentialSubject.timestamp"
                             ]
                         }
                     ]
