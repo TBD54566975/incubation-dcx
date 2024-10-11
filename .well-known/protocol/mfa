@@ -1,9 +1,9 @@
 {
-    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa.json",
+    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa",
     "published": true,
     "types": {
         "mfa": {
-            "schema": "https://dcxprotocol.com/.well-known/schema/mfa.json",
+            "schema": "https://dcxprotocol.com/.well-known/schema/mfa",
             "dataFormats": [
                 "application/json"
             ]

@@ -1,0 +1,24 @@
+{
+    "@context": [
+        "https://www.w3.org/ns/did/v1"
+    ],
+    "id": "did:web:dcxprotocol.com",
+    "service": [
+        {
+            "id": "did:web:dcxprotocol.com",
+            "type": "DecentralizedWebNode",
+            "serviceEndpoint": [
+                "https://dwn.dpm.software/"
+            ],
+            "enc": "#enc",
+            "sig": "#sig"
+        },
+        {
+            "id": "did:web:dcxprotocol.com",
+            "type": "DecentralizedPackageManagerRegistry",
+            "serviceEndpoint": [
+                "https://registry.dpm.software/"
+            ]
+        }
+    ]
+}

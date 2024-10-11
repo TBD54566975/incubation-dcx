@@ -1,5 +1,5 @@
 {
-    "id": "email-address-mfa-manifest:8647c467680fc77c0581bcf5b1390c60",
+    "id": "phone-number-mfa-manifest:68cf3dca2457d5c720cb6dd06d08ae5c",
     "spec_version": "https://identity.foundation/credential-manifest/spec/v1.0.0/",
     "issuer": {
         "id": "",
@@ -23,9 +23,9 @@
     },
     "output_descriptors": [
         {
-            "id": "email-address-credential",
-            "name": "Email Address Credential",
-            "schema": "https://dcxprotocol.com/.well-known/credential/EmailAddressCredential.json"
+            "id": "phone-number-credential",
+            "name": "Phone Number Credential",
+            "schema": "https://dcxprotocol.com/.well-known/credential/PhoneNumberCredential"
         }
     ],
     "format": {
@@ -36,18 +36,18 @@
         }
     },
     "presentation_definition": {
-        "id": "email-address-presentation",
-        "name": "Email Address Presentation",
-        "purpose": "Used to present proof that an applicant owns the enclosed email address by providing the enclosed otp",
+        "id": "phone-number-presentation",
+        "name": "Phone Number Presentation",
+        "purpose": "Used to present proof that an applicant owns the enclosed phone number by providing the enclosed one-time password (otp)",
         "input_descriptors": [
             {
-                "id": "email-address-input-descriptor",
-                "purpose": "The holder of this credential has proven ownership of the enclosed email address by providing the correct one-time password (otp)",
+                "id": "phone-number-input-descriptor",
+                "purpose": "The holder of this credential has proven ownership of the enclosed phone number by providing the correct one-time password (otp)",
                 "constraints": {
                     "fields": [
                         {
                             "path": [
-                                "$.credentialSubject.emailAddress",
+                                "$.credentialSubject.phoneNumber",
                                 "$.credentialSubject.otp"
                             ]
                         }
