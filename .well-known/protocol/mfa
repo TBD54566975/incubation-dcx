@@ -1,5 +1,5 @@
 {
-    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa",
+    "protocol": "https://dcxprotocol.com/.well-known/protocol/mfa.json",
     "published": true,
     "types": {
         "mfa": {
@@ -53,7 +53,7 @@
                         ]
                     }
                 ]
-            },
+            }
         }
     }
 }
