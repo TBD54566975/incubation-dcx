@@ -1,1 +1,0 @@
-{"version":3,"file":"test-event-stream.d.ts","sourceRoot":"","sources":["../../../tests/test-event-stream.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,iBAAiB,CAAC;AAInD;;;;;GAKG;AACH,qBAAa,eAAe;IAC1B,OAAO,CAAC,MAAM,CAAC,WAAW,CAAC,CAAc;IAEzC;;;OAGG;WACW,QAAQ,CAAC,SAAS,CAAC,EAAE;QAAE,WAAW,CAAC,EAAE,WAAW,CAAA;KAAE,GAAG,IAAI;IAIvE;;OAEG;WACW,GAAG,IAAI,WAAW;CAIjC"}

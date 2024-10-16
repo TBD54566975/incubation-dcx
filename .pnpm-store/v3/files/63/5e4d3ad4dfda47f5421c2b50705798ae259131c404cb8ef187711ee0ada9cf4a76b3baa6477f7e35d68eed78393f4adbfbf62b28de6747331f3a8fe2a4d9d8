@@ -1,7 +1,0 @@
-var n=typeof globalThis=="object"&&"crypto"in globalThis?globalThis.crypto:void 0;var g=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;var w={}.toString;function s(t=32){if(n&&typeof n.getRandomValues=="function")return n.getRandomValues(new Uint8Array(t));throw new Error("crypto.getRandomValues must be defined")}function u(t){let e={Ed25519:"EdDSA","P-256":"ES256","P-384":"ES384","P-521":"ES512",secp256k1:"ES256K"};if(t.alg&&Object.values(e).includes(t.alg))return t.alg;if(t.crv&&Object.keys(e).includes(t.crv))return e[t.crv];throw new Error(`Unable to determine algorithm based on provided input: alg=${t.alg}, crv=${t.crv}. Supported 'alg' values: ${Object.values(e).join(", ")}. Supported 'crv' values: ${Object.keys(e).join(", ")}.`)}function c(t){return s(t)}function a(){return n.randomUUID()}function p({length:t}){if(3>t||t>10)throw new Error("randomPin() can securely generate a PIN between 3 to 10 digits.");let e=Math.pow(10,t)-1,o;if(t<=6){let r=Math.pow(10,t);do{let i=c(Math.ceil(t/2));o=new DataView(i.buffer).getUint16(0,!1)%r}while(o>e)}else{let r=Math.pow(10,10);do{let i=c(4);o=new DataView(i.buffer).getUint32(0,!1)%r}while(o>e)}return o.toString().padStart(t,"0")}var b={randomPin:p,randomUuid:a,randomBytes:c,getJoseSignatureAlgorithmFromPublicKey:u};export{b as CryptoUtils};
-/*! Bundled license information:
-
-@noble/hashes/esm/utils.js:
-  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-*/
-//# sourceMappingURL=utils.js.map

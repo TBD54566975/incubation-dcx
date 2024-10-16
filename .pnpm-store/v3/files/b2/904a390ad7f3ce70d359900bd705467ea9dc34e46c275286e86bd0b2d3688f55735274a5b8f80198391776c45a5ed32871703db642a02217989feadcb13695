@@ -1,8 +1,0 @@
-{
-  "Bucket": "https://ipfs.github.io/js-hamt-sharding/classes/Bucket.html",
-  "BucketChild": "https://ipfs.github.io/js-hamt-sharding/interfaces/BucketChild.html",
-  "BucketOptions": "https://ipfs.github.io/js-hamt-sharding/interfaces/BucketOptions.html",
-  "BucketPosition": "https://ipfs.github.io/js-hamt-sharding/interfaces/BucketPosition.html",
-  "createHAMT": "https://ipfs.github.io/js-hamt-sharding/functions/createHAMT.html",
-  ".:createHAMT": "https://ipfs.github.io/js-hamt-sharding/functions/createHAMT.html"
-}

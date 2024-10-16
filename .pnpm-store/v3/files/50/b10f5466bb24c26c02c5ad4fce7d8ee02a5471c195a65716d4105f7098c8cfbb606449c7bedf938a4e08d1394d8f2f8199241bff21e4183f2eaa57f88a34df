@@ -1,1 +1,0 @@
-{"version":3,"file":"key-compressor.d.ts","sourceRoot":"","sources":["../../../src/types/key-compressor.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,WAAW,aAAa;IAE5B;;;;;;;OAOG;IACH,iBAAiB,CAAC,MAAM,EAAE;QAAE,cAAc,EAAE,UAAU,CAAA;KAAE,GAAG,OAAO,CAAC,UAAU,CAAC,CAAC;IAE/E;;;;;;;OAOG;IACH,mBAAmB,CAAC,MAAM,EAAE;QAAE,cAAc,EAAE,UAAU,CAAA;KAAE,GAAG,OAAO,CAAC,UAAU,CAAC,CAAC;CAClF"}

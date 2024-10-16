@@ -1,1 +1,0 @@
-{"version":3,"file":"IonPublicKeyModel.d.ts","sourceRoot":"","sources":["../../../lib/models/IonPublicKeyModel.ts"],"names":[],"mappings":"AAAA,OAAO,mBAAmB,MAAM,iCAAiC,CAAC;AAElE;;GAEG;AACH,MAAM,CAAC,OAAO,WAAW,iBAAiB;IACxC,EAAE,EAAE,MAAM,CAAC;IACX,IAAI,EAAE,MAAM,CAAC;IACb,YAAY,EAAE,MAAM,CAAC;IACrB,QAAQ,CAAC,EAAE,mBAAmB,EAAE,CAAC;CAClC"}

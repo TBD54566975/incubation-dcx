@@ -1,1 +1,0 @@
-{"version":3,"file":"ed25519.d.ts","sourceRoot":"","sources":["../../../../../../src/jose/algorithms/signing/ed25519.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAyB,kBAAkB,EAAE,MAAM,8BAA8B,CAAC;AAwB9F,eAAO,MAAM,OAAO,EAAE,kBAgCrB,CAAC"}
