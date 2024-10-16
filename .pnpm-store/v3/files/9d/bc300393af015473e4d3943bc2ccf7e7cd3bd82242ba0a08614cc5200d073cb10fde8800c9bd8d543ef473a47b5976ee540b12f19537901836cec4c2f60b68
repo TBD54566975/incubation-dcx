@@ -1,0 +1,1 @@
+{"version":3,"file":"JwkEd25519.d.ts","sourceRoot":"","sources":["../../../lib/models/JwkEd25519.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,CAAC,OAAO,WAAW,UAAU;IACjC,GAAG,EAAE,MAAM,CAAC;IACZ,GAAG,EAAE,MAAM,CAAC;IACZ,CAAC,EAAE,MAAM,CAAC;IACV,CAAC,CAAC,EAAE,MAAM,CAAC;CACZ"}

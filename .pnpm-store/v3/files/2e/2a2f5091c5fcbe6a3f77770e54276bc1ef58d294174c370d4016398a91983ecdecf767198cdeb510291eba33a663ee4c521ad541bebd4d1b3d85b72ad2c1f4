@@ -1,0 +1,35 @@
+import type { SyncEngine, SyncIdentityOptions } from './types/sync.js';
+import type { Web5PlatformAgent } from './types/agent.js';
+export type SyncApiParams = {
+    agent?: Web5PlatformAgent;
+    syncEngine: SyncEngine;
+};
+export declare class AgentSyncApi implements SyncEngine {
+    /**
+     * Holds the instance of a `Web5PlatformAgent` that represents the current execution context for
+     * the `AgentSyncApi`. This agent is used to interact with other Web5 agent components. It's vital
+     * to ensure this instance is set to correctly contextualize operations within the broader Web5
+     * Agent framework.
+     */
+    private _agent?;
+    private _syncEngine;
+    constructor({ agent, syncEngine }: SyncApiParams);
+    /**
+     * Retrieves the `Web5PlatformAgent` execution context.
+     *
+     * @returns The `Web5PlatformAgent` instance that represents the current execution context.
+     * @throws Will throw an error if the `agent` instance property is undefined.
+     */
+    get agent(): Web5PlatformAgent;
+    set agent(agent: Web5PlatformAgent);
+    registerIdentity(params: {
+        did: string;
+        options?: SyncIdentityOptions;
+    }): Promise<void>;
+    sync(direction?: 'push' | 'pull'): Promise<void>;
+    startSync(params: {
+        interval: string;
+    }): Promise<void>;
+    stopSync(): void;
+}
+//# sourceMappingURL=sync-api.d.ts.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"signature-algorithms.d.ts","sourceRoot":"","sources":["../../../../../../src/jose/algorithms/signing/signature-algorithms.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,kBAAkB,EAAE,MAAM,8BAA8B,CAAC;AAOvE,eAAO,MAAM,mBAAmB,EAAE,MAAM,CAAC,MAAM,EAAE,kBAAkB,CAclE,CAAC"}

@@ -1,0 +1,20 @@
+import { MsoMdocObject } from './msoMdocObject';
+import { LdpObject } from './ldpObject';
+import { DiObject } from './diObject';
+import { SdJwtObject } from './sdJwtObject';
+import { JwtObject } from './jwtObject';
+export interface Format {
+    jwt?: JwtObject;
+    jwt_vc?: JwtObject;
+    jwt_vc_json?: JwtObject;
+    jwt_vp?: JwtObject;
+    jwt_vp_json?: JwtObject;
+    ldp?: LdpObject;
+    ldp_vc?: LdpObject;
+    ldp_vp?: LdpObject;
+    di?: DiObject;
+    di_vc?: DiObject;
+    di_vp?: DiObject;
+    ['vc+sd-jwt']?: SdJwtObject;
+    mso_mdoc?: MsoMdocObject;
+}

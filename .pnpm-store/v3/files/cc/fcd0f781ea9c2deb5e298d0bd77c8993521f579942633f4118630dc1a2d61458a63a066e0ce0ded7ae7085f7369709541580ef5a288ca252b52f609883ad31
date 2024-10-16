@@ -1,0 +1,1 @@
+{"version":3,"file":"IonDocumentModel.d.ts","sourceRoot":"","sources":["../../../lib/models/IonDocumentModel.ts"],"names":[],"mappings":"AAAA,OAAO,iBAAiB,MAAM,wBAAwB,CAAC;AACvD,OAAO,eAAe,MAAM,sBAAsB,CAAC;AAEnD;;GAEG;AACH,MAAM,CAAC,OAAO,WAAW,gBAAgB;IACvC,UAAU,CAAC,EAAE,iBAAiB,EAAE,CAAC;IACjC,QAAQ,CAAC,EAAE,eAAe,EAAE,CAAC;CAC9B"}

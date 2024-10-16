@@ -1,0 +1,524 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+import ms from 'ms';
+import { Level } from 'level';
+import { monotonicFactory } from 'ulidx';
+import { NodeStream } from '@web5/common';
+import { DwnInterfaceName, DwnMethodName, } from '@tbd54566975/dwn-sdk-js';
+import { DwnInterface } from './types/dwn.js';
+import { getDwnServiceEndpointUrls, isRecordsWrite } from './utils.js';
+import { CachedPermissions } from './cached-permissions.js';
+export class SyncEngineLevel {
+    constructor({ agent, dataPath, db }) {
+        this._agent = agent;
+        this._cachedPermissionsApi = new CachedPermissions({ agent: agent, cachedDefault: true });
+        this._db = (db) ? db : new Level(dataPath !== null && dataPath !== void 0 ? dataPath : 'DATA/AGENT/SYNC_STORE');
+        this._ulidFactory = monotonicFactory();
+    }
+    /**
+     * Retrieves the `Web5PlatformAgent` execution context.
+     *
+     * @returns The `Web5PlatformAgent` instance that represents the current execution context.
+     * @throws Will throw an error if the `agent` instance property is undefined.
+     */
+    get agent() {
+        if (this._agent === undefined) {
+            throw new Error('SyncEngineLevel: Unable to determine agent execution context.');
+        }
+        return this._agent;
+    }
+    set agent(agent) {
+        this._agent = agent;
+        this._cachedPermissionsApi = new CachedPermissions({ agent: agent, cachedDefault: true });
+    }
+    clear() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._cachedPermissionsApi.clear();
+            yield this._db.clear();
+        });
+    }
+    close() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._db.close();
+        });
+    }
+    pull() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const syncPeerState = yield this.getSyncPeerState({ syncDirection: 'pull' });
+            yield this.enqueueOperations({ syncDirection: 'pull', syncPeerState });
+            const pullQueue = this.getPullQueue();
+            const pullJobs = yield pullQueue.iterator().all();
+            const deleteOperations = [];
+            const errored = new Set();
+            for (let job of pullJobs) {
+                const [key] = job;
+                const { did, dwnUrl, messageCid, delegateDid, protocol } = SyncEngineLevel.parseSyncMessageParamsKey(key);
+                // If a particular DWN service endpoint is unreachable, skip subsequent pull operations.
+                if (errored.has(dwnUrl)) {
+                    continue;
+                }
+                const messageExists = yield this.messageExists(did, messageCid);
+                if (messageExists) {
+                    deleteOperations.push({ type: 'del', key: key });
+                    continue;
+                }
+                let permissionGrantId;
+                let granteeDid;
+                if (delegateDid) {
+                    try {
+                        const messagesReadGrant = yield this._cachedPermissionsApi.getPermission({
+                            connectedDid: did,
+                            messageType: DwnInterface.MessagesRead,
+                            delegateDid,
+                            protocol,
+                        });
+                        permissionGrantId = messagesReadGrant.grant.id;
+                        granteeDid = delegateDid;
+                    }
+                    catch (error) {
+                        console.error('SyncEngineLevel: pull - Error fetching MessagesRead permission grant for delegate DID', error);
+                        continue;
+                    }
+                }
+                const messagesRead = yield this.agent.processDwnRequest({
+                    store: false,
+                    author: did,
+                    target: did,
+                    messageType: DwnInterface.MessagesRead,
+                    granteeDid,
+                    messageParams: {
+                        messageCid,
+                        permissionGrantId
+                    }
+                });
+                let reply;
+                try {
+                    reply = (yield this.agent.rpc.sendDwnRequest({
+                        dwnUrl, targetDid: did,
+                        message: messagesRead.message,
+                    }));
+                }
+                catch (e) {
+                    errored.add(dwnUrl);
+                    continue;
+                }
+                if (reply.status.code !== 200 || !((_a = reply.entry) === null || _a === void 0 ? void 0 : _a.message)) {
+                    yield this.addMessage(did, messageCid);
+                    deleteOperations.push({ type: 'del', key: key });
+                    continue;
+                }
+                const replyEntry = reply.entry;
+                const message = replyEntry.message;
+                // if the message includes data we convert it to a Node readable stream
+                // otherwise we set it as undefined, as the message does not include data
+                // this occurs when the message is a RecordsWrite message that has been updated
+                const dataStream = isRecordsWrite(replyEntry) && replyEntry.data ?
+                    NodeStream.fromWebReadable({ readableStream: replyEntry.data })
+                    : undefined;
+                const pullReply = yield this.agent.dwn.node.processMessage(did, message, { dataStream });
+                if (SyncEngineLevel.syncMessageReplyIsSuccessful(pullReply)) {
+                    yield this.addMessage(did, messageCid);
+                    deleteOperations.push({ type: 'del', key: key });
+                }
+            }
+            yield pullQueue.batch(deleteOperations);
+        });
+    }
+    push() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const syncPeerState = yield this.getSyncPeerState({ syncDirection: 'push' });
+            yield this.enqueueOperations({ syncDirection: 'push', syncPeerState });
+            const pushQueue = this.getPushQueue();
+            const pushJobs = yield pushQueue.iterator().all();
+            const deleteOperations = [];
+            const errored = new Set();
+            for (let job of pushJobs) {
+                const [key] = job;
+                const { did, delegateDid, protocol, dwnUrl, messageCid } = SyncEngineLevel.parseSyncMessageParamsKey(key);
+                // If a particular DWN service endpoint is unreachable, skip subsequent push operations.
+                if (errored.has(dwnUrl)) {
+                    continue;
+                }
+                // Attempt to retrieve the message from the local DWN.
+                const dwnMessage = yield this.getDwnMessage({ author: did, messageCid, delegateDid, protocol });
+                // If the message does not exist on the local DWN, remove the sync operation from the
+                // push queue, update the push watermark for this DID/DWN endpoint combination, add the
+                // message to the local message store, and continue to the next job.
+                if (!dwnMessage) {
+                    deleteOperations.push({ type: 'del', key: key });
+                    yield this.addMessage(did, messageCid);
+                    continue;
+                }
+                try {
+                    const reply = yield this.agent.rpc.sendDwnRequest({
+                        dwnUrl,
+                        targetDid: did,
+                        data: dwnMessage.data,
+                        message: dwnMessage.message
+                    });
+                    // Update the watermark and add the messageCid to the Sync Message Store if either:
+                    if (SyncEngineLevel.syncMessageReplyIsSuccessful(reply)) {
+                        yield this.addMessage(did, messageCid);
+                        deleteOperations.push({ type: 'del', key: key });
+                    }
+                }
+                catch (_a) {
+                    // Error is intentionally ignored; 'errored' set is updated with 'dwnUrl'.
+                    errored.add(dwnUrl);
+                }
+            }
+            yield pushQueue.batch(deleteOperations);
+        });
+    }
+    registerIdentity({ did, options }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get a reference to the `registeredIdentities` sublevel.
+            const registeredIdentities = this._db.sublevel('registeredIdentities');
+            // if no options are provided, we default to no delegateDid and all protocols (empty array)
+            options !== null && options !== void 0 ? options : (options = { protocols: [] });
+            // Add (or overwrite, if present) the Identity's DID as a registered identity.
+            yield registeredIdentities.put(did, JSON.stringify(options));
+        });
+    }
+    sync(direction) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._syncIntervalId) {
+                throw new Error('SyncEngineLevel: Cannot call sync while a sync interval is active. Call `stopSync()` first.');
+            }
+            if (!direction || direction === 'push') {
+                yield this.push();
+            }
+            if (!direction || direction === 'pull') {
+                yield this.pull();
+            }
+        });
+    }
+    startSync({ interval }) {
+        // Convert the interval string to milliseconds.
+        const intervalMilliseconds = ms(interval);
+        return new Promise((resolve, reject) => {
+            const intervalSync = () => __awaiter(this, void 0, void 0, function* () {
+                if (this._syncIntervalId) {
+                    clearInterval(this._syncIntervalId);
+                }
+                try {
+                    yield this.push();
+                    yield this.pull();
+                }
+                catch (error) {
+                    this.stopSync();
+                    reject(error);
+                }
+                // then we start sync again
+                this._syncIntervalId = setInterval(intervalSync, intervalMilliseconds);
+            });
+            this._syncIntervalId = setInterval(intervalSync, intervalMilliseconds);
+        });
+    }
+    stopSync() {
+        if (this._syncIntervalId) {
+            clearInterval(this._syncIntervalId);
+            this._syncIntervalId = undefined;
+        }
+    }
+    /**
+     * 202: message was successfully written to the remote DWN
+     * 204: an initial write message was written without any data, cannot yet be read until a subsequent message is written with data
+     * 409: message was already present on the remote DWN
+     * RecordsDelete and the status code is 404: the initial write message was not found or the message was already deleted
+     */
+    static syncMessageReplyIsSuccessful(reply) {
+        var _a, _b;
+        return reply.status.code === 202 ||
+            // a 204 status code is returned when the message was accepted without any data.
+            // This is the case for an initial RecordsWrite messages for records that have been updated.
+            // For context: https://github.com/TBD54566975/dwn-sdk-js/issues/695
+            reply.status.code === 204 ||
+            reply.status.code === 409 ||
+            (
+            // If the message is a RecordsDelete and the status code is 404, the initial write message was not found or the message was already deleted
+            ((_a = reply.entry) === null || _a === void 0 ? void 0 : _a.message.descriptor.interface) === DwnInterfaceName.Records &&
+                ((_b = reply.entry) === null || _b === void 0 ? void 0 : _b.message.descriptor.method) === DwnMethodName.Delete &&
+                reply.status.code === 404);
+    }
+    enqueueOperations({ syncDirection, syncPeerState }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let syncState of syncPeerState) {
+                // Get the event log from the remote DWN if pull sync, or local DWN if push sync.
+                const eventLog = yield this.getDwnEventLog({
+                    did: syncState.did,
+                    delegateDid: syncState.delegateDid,
+                    dwnUrl: syncState.dwnUrl,
+                    cursor: syncState.cursor,
+                    protocol: syncState.protocol,
+                    syncDirection
+                });
+                const syncOperations = [];
+                for (let messageCid of eventLog) {
+                    const watermark = this._ulidFactory();
+                    const operationKey = SyncEngineLevel.generateSyncMessageParamsKey(Object.assign(Object.assign({}, syncState), { watermark,
+                        messageCid }));
+                    syncOperations.push({ type: 'put', key: operationKey, value: '' });
+                }
+                if (syncOperations.length > 0) {
+                    const syncQueue = (syncDirection === 'pull')
+                        ? this.getPullQueue()
+                        : this.getPushQueue();
+                    yield syncQueue.batch(syncOperations);
+                }
+            }
+        });
+    }
+    static generateSyncMessageParamsKey({ did, delegateDid, dwnUrl, protocol, watermark, messageCid }) {
+        // Use "did~dwnUrl~watermark~messageCid" as the key in the sync queue.
+        // Note: It is critical that `watermark` precedes `messageCid` to ensure that when the sync
+        //       jobs are pulled off the queue, they are lexographically sorted oldest to newest.
+        //
+        //        `protocol` and `delegateDid` may be undefined, which is fine, its part of the key will be stored as an empty string.
+        //        Later, when parsing the key, we will handle this case and return an actual undefined.
+        //        This is information useful for subset and delegated sync.
+        return [did, delegateDid, dwnUrl, protocol, watermark, messageCid].join('~');
+    }
+    static parseSyncMessageParamsKey(key) {
+        // The order is import here, see `generateKey` for more information.
+        const [did, delegateDidString, dwnUrl, protocolString, watermark, messageCid] = key.split('~');
+        // `protocol` or `delegateDid` may be parsed as an empty string, so we need to handle that case and returned an actual undefined.
+        const protocol = protocolString === '' ? undefined : protocolString;
+        const delegateDid = delegateDidString === '' ? undefined : delegateDidString;
+        return { did, delegateDid, dwnUrl, watermark, messageCid, protocol };
+    }
+    getDwnEventLog({ did, delegateDid, dwnUrl, syncDirection, cursor, protocol }) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let messagesReply = {};
+            let permissionGrantId;
+            if (delegateDid) {
+                // fetch the grants for the delegate DID
+                try {
+                    const messagesQueryGrant = yield this._cachedPermissionsApi.getPermission({
+                        connectedDid: did,
+                        messageType: DwnInterface.MessagesQuery,
+                        delegateDid,
+                        protocol,
+                    });
+                    permissionGrantId = messagesQueryGrant.grant.id;
+                }
+                catch (error) {
+                    console.error('SyncEngineLevel: Error fetching MessagesQuery permission grant for delegate DID', error);
+                    return [];
+                }
+            }
+            if (syncDirection === 'pull') {
+                // filter for a specific protocol if one is provided
+                const filters = protocol ? [{ protocol }] : [];
+                // When sync is a pull, get the event log from the remote DWN.
+                const messagesQueryMessage = yield this.agent.dwn.processRequest({
+                    store: false,
+                    target: did,
+                    author: did,
+                    messageType: DwnInterface.MessagesQuery,
+                    granteeDid: delegateDid,
+                    messageParams: { filters, cursor, permissionGrantId }
+                });
+                try {
+                    messagesReply = (yield this.agent.rpc.sendDwnRequest({
+                        dwnUrl: dwnUrl,
+                        targetDid: did,
+                        message: messagesQueryMessage.message,
+                    }));
+                }
+                catch (_b) {
+                    // If a particular DWN service endpoint is unreachable, silently ignore.
+                }
+            }
+            else if (syncDirection === 'push') {
+                const filters = protocol ? [{ protocol }] : [];
+                // When sync is a push, get the event log from the local DWN.
+                const messagesQueryDwnResponse = yield this.agent.dwn.processRequest({
+                    author: did,
+                    target: did,
+                    messageType: DwnInterface.MessagesQuery,
+                    granteeDid: delegateDid,
+                    messageParams: { filters, cursor, permissionGrantId }
+                });
+                messagesReply = messagesQueryDwnResponse.reply;
+            }
+            const eventLog = (_a = messagesReply.entries) !== null && _a !== void 0 ? _a : [];
+            if (messagesReply.cursor) {
+                this.setCursor(did, dwnUrl, syncDirection, messagesReply.cursor, protocol);
+            }
+            return eventLog;
+        });
+    }
+    getDwnMessage({ author, delegateDid, protocol, messageCid }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let permissionGrantId;
+            if (delegateDid) {
+                try {
+                    const messagesReadGrant = yield this._cachedPermissionsApi.getPermission({
+                        connectedDid: author,
+                        messageType: DwnInterface.MessagesRead,
+                        delegateDid,
+                        protocol,
+                    });
+                    permissionGrantId = messagesReadGrant.grant.id;
+                }
+                catch (error) {
+                    console.error('SyncEngineLevel: push - Error fetching MessagesRead permission grant for delegate DID', error);
+                    return;
+                }
+            }
+            let { reply } = yield this.agent.dwn.processRequest({
+                author: author,
+                target: author,
+                messageType: DwnInterface.MessagesRead,
+                granteeDid: delegateDid,
+                messageParams: { messageCid, permissionGrantId }
+            });
+            // Absence of a messageEntry or message within messageEntry can happen because updating a
+            // Record creates another RecordsWrite with the same recordId. Only the first and
+            // most recent RecordsWrite messages are kept for a given recordId. Any RecordsWrite messages
+            // that aren't the first or most recent are discarded by the DWN.
+            if (reply.status.code !== 200 || !reply.entry) {
+                return undefined;
+            }
+            const messageEntry = reply.entry;
+            let dwnMessageWithBlob = { message: messageEntry.message };
+            // If the message is a RecordsWrite, either data will be present,
+            // OR we have to fetch it using a RecordsRead.
+            if (isRecordsWrite(messageEntry) && messageEntry.data) {
+                const dataBytes = yield NodeStream.consumeToBytes({ readable: messageEntry.data });
+                dwnMessageWithBlob.data = new Blob([dataBytes], { type: messageEntry.message.descriptor.dataFormat });
+            }
+            return dwnMessageWithBlob;
+        });
+    }
+    getSyncPeerState({ syncDirection }) {
+        var _a, e_1, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            // Array to accumulate the list of sync peers for each DID.
+            const syncPeerState = [];
+            try {
+                // iterate over all registered identities
+                for (var _d = true, _e = __asyncValues(this._db.sublevel('registeredIdentities').iterator()), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {
+                    _c = _f.value;
+                    _d = false;
+                    const [did, options] = _c;
+                    const { protocols, delegateDid } = JSON.parse(options);
+                    // First, confirm the DID can be resolved and extract the DWN service endpoint URLs.
+                    const dwnEndpointUrls = yield getDwnServiceEndpointUrls(did, this.agent.did);
+                    if (dwnEndpointUrls.length === 0) {
+                        // Silently ignore and do not try to perform Sync for any DID that does not have a DWN
+                        // service endpoint published in its DID document.
+                        continue;
+                    }
+                    // Get the cursor (or undefined) for each (DID, DWN service endpoint, sync direction)
+                    // combination and add it to the sync peer state array.
+                    for (let dwnUrl of dwnEndpointUrls) {
+                        if (protocols.length === 0) {
+                            const cursor = yield this.getCursor(did, dwnUrl, syncDirection);
+                            syncPeerState.push({ did, delegateDid, dwnUrl, cursor });
+                        }
+                        else {
+                            for (const protocol of protocols) {
+                                const cursor = yield this.getCursor(did, dwnUrl, syncDirection, protocol);
+                                syncPeerState.push({ did, delegateDid, dwnUrl, cursor, protocol });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (!_d && !_a && (_b = _e.return)) yield _b.call(_e);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return syncPeerState;
+        });
+    }
+    getCursor(did, dwnUrl, direction, protocol) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // if a protocol is provided, we append it to the key
+            const cursorKey = protocol ? `${did}~${dwnUrl}~${direction}-${protocol}` :
+                `${did}~${dwnUrl}~${direction}`;
+            const cursorsStore = this.getCursorStore();
+            try {
+                const cursorValue = yield cursorsStore.get(cursorKey);
+                if (cursorValue) {
+                    return JSON.parse(cursorValue);
+                }
+            }
+            catch (error) {
+                // Don't throw when a key wasn't found.
+                if (error.notFound) {
+                    return undefined;
+                }
+            }
+        });
+    }
+    setCursor(did, dwnUrl, direction, cursor, protocol) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cursorKey = protocol ? `${did}~${dwnUrl}~${direction}-${protocol}` :
+                `${did}~${dwnUrl}~${direction}`;
+            const cursorsStore = this.getCursorStore();
+            yield cursorsStore.put(cursorKey, JSON.stringify(cursor));
+        });
+    }
+    /**
+     * The message store is used to prevent "echoes" that occur during a sync pull operation.
+     * After a message is confirmed to already be synchronized on the local DWN, its CID is added
+     * to the message store to ensure that any subsequent pull attempts are skipped.
+     */
+    messageExists(did, messageCid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const messageStore = this.getMessageStore(did);
+            // If the `messageCid` exists in this DID's store, return true. Otherwise, return false.
+            try {
+                yield messageStore.get(messageCid);
+                return true;
+            }
+            catch (error) {
+                if (error.notFound) {
+                    return false;
+                }
+                throw error;
+            }
+        });
+    }
+    addMessage(did, messageCid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const messageStore = this.getMessageStore(did);
+            return yield messageStore.put(messageCid, '');
+        });
+    }
+    getMessageStore(did) {
+        return this._db.sublevel('history').sublevel(did).sublevel('messages');
+    }
+    getCursorStore() {
+        return this._db.sublevel('cursors');
+    }
+    getPushQueue() {
+        return this._db.sublevel('pushQueue');
+    }
+    getPullQueue() {
+        return this._db.sublevel('pullQueue');
+    }
+}
+//# sourceMappingURL=sync-engine-level.js.map

@@ -1,0 +1,66 @@
+import { Dwn, DwnConfig, GenericMessage } from '@tbd54566975/dwn-sdk-js';
+import type { Web5PlatformAgent } from './types/agent.js';
+import type { DwnMessage, DwnMessagesPermissionScope, DwnPermissionScope, DwnRecordsInterfaces, DwnRecordsPermissionScope, DwnResponse, ProcessDwnRequest, SendDwnRequest } from './types/dwn.js';
+import { DwnInterface } from './types/dwn.js';
+export type DwnMessageWithBlob<T extends DwnInterface> = {
+    message: DwnMessage[T];
+    data?: Blob;
+};
+export type DwnApiParams = {
+    agent?: Web5PlatformAgent;
+    dwn: Dwn;
+};
+export interface DwnApiCreateDwnParams extends Partial<DwnConfig> {
+    dataPath?: string;
+}
+export declare function isDwnRequest<T extends DwnInterface>(dwnRequest: ProcessDwnRequest<DwnInterface>, messageType: T): dwnRequest is ProcessDwnRequest<T>;
+export declare function isDwnMessage<T extends DwnInterface>(messageType: T, message: GenericMessage): message is DwnMessage[T];
+export declare function isRecordsType(messageType: DwnInterface): messageType is DwnRecordsInterfaces;
+export declare function isRecordPermissionScope(scope: DwnPermissionScope): scope is DwnRecordsPermissionScope;
+export declare function isMessagesPermissionScope(scope: DwnPermissionScope): scope is DwnMessagesPermissionScope;
+export declare class AgentDwnApi {
+    /**
+     * Holds the instance of a `Web5PlatformAgent` that represents the current execution context for
+     * the `AgentDwnApi`. This agent is used to interact with other Web5 agent components. It's vital
+     * to ensure this instance is set to correctly contextualize operations within the broader Web5
+     * Agent framework.
+     */
+    private _agent?;
+    /**
+     * The DWN instance to use for this API.
+     */
+    private _dwn;
+    constructor({ agent, dwn }: DwnApiParams);
+    /**
+     * Retrieves the `Web5PlatformAgent` execution context.
+     *
+     * @returns The `Web5PlatformAgent` instance that represents the current execution context.
+     * @throws Will throw an error if the `agent` instance property is undefined.
+     */
+    get agent(): Web5PlatformAgent;
+    set agent(agent: Web5PlatformAgent);
+    /**
+     * Public getter for the DWN instance used by this API.
+     *
+     * Notes:
+     * - This getter is public to allow advanced developers to access the DWN instance directly.
+     *   However, it is recommended to use the `processRequest` method to interact with the DWN
+     *   instance to ensure that the DWN message is constructed correctly.
+     * - The getter is named `node` to avoid confusion with the `dwn` property of the
+     *   `Web5PlatformAgent`. In other words, so that a developer can call `agent.dwn.node` to access
+     *   the DWN instance and not `agent.dwn.dwn`.
+     */
+    get node(): Dwn;
+    static createDwn({ dataPath, dataStore, didResolver, eventLog, eventStream, messageStore, tenantGate, resumableTaskStore }: DwnApiCreateDwnParams): Promise<Dwn>;
+    processRequest<T extends DwnInterface>(request: ProcessDwnRequest<T>): Promise<DwnResponse<T>>;
+    sendRequest<T extends DwnInterface>(request: SendDwnRequest<T>): Promise<DwnResponse<T>>;
+    private sendDwnRpcRequest;
+    private constructDwnMessage;
+    private hasGrantParams;
+    private getSigner;
+    /**
+     * FURTHER REFACTORING NEEDED BELOW THIS LINE
+     */
+    private getDwnMessage;
+}
+//# sourceMappingURL=dwn-api.d.ts.map

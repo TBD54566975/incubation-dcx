@@ -1,0 +1,36 @@
+import { Web5Agent } from './types/agent.js';
+import { DwnInterface } from './types/dwn.js';
+import { CreateGrantParams, CreateRequestParams, CreateRevocationParams, FetchPermissionRequestParams, FetchPermissionsParams, IsGrantRevokedParams, PermissionGrantEntry, PermissionRequestEntry, PermissionRevocationEntry, PermissionsApi } from './types/permissions.js';
+export declare class AgentPermissionsApi implements PermissionsApi {
+    private _agent?;
+    get agent(): Web5Agent;
+    set agent(agent: Web5Agent);
+    constructor({ agent }?: {
+        agent?: Web5Agent;
+    });
+    fetchGrants({ author, target, grantee, grantor, protocol, remote }: FetchPermissionsParams): Promise<PermissionGrantEntry[]>;
+    fetchRequests({ author, target, protocol, remote }: FetchPermissionRequestParams): Promise<PermissionRequestEntry[]>;
+    isGrantRevoked({ author, target, grantRecordId, remote }: IsGrantRevokedParams): Promise<boolean>;
+    createGrant(params: CreateGrantParams): Promise<PermissionGrantEntry>;
+    createRequest(params: CreateRequestParams): Promise<PermissionRequestEntry>;
+    createRevocation(params: CreateRevocationParams): Promise<PermissionRevocationEntry>;
+    /**
+     * Matches the appropriate grant from an array of grants based on the provided parameters.
+     *
+     * @param delegated if true, only delegated grants are turned, if false all grants are returned including delegated ones.
+     */
+    static matchGrantFromArray<T extends DwnInterface>(grantor: string, grantee: string, messageParams: {
+        messageType: T;
+        protocol?: string;
+        protocolPath?: string;
+        contextId?: string;
+    }, grants: PermissionGrantEntry[], delegated?: boolean): Promise<PermissionGrantEntry | undefined>;
+    private static matchScopeFromGrant;
+    private static matchesProtocol;
+    /**
+     *  Checks if the scope is restricted to a specific protocol
+     */
+    private static protocolScopeUnrestricted;
+    private static isUnrestrictedProtocolScope;
+}
+//# sourceMappingURL=permissions-api.d.ts.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"IonServiceModel.d.ts","sourceRoot":"","sources":["../../../lib/models/IonServiceModel.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,CAAC,OAAO,WAAW,eAAe;IACtC,EAAE,EAAE,MAAM,CAAC;IACX,IAAI,EAAE,MAAM,CAAC;IACb,eAAe,EAAE,MAAM,GAAG,MAAM,CAAE;CACnC"}

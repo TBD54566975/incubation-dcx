@@ -1,0 +1,1 @@
+{"version":3,"file":"jws-types.d.ts","sourceRoot":"","sources":["../../../../src/types/jws-types.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,MAAM,MAAM,UAAU,GAAG;IACvB,OAAO,EAAE,MAAM,CAAA;IACf,UAAU,EAAE,cAAc,EAAE,CAAA;CAC7B,CAAC;AAEF;;GAEG;AACH,MAAM,MAAM,cAAc,GAAG;IAC3B;;;;;OAKG;IACH,SAAS,EAAE,MAAM,CAAA;IAEjB;;;OAGG;IACH,SAAS,EAAE,MAAM,CAAA;CAClB,CAAC"}

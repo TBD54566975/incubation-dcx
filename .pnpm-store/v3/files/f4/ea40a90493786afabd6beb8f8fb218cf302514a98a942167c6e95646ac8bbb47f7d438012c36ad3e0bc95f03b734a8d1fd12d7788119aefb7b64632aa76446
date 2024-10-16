@@ -1,0 +1,6 @@
+{
+  "ParallelOptions": "https://achingbrain.github.io/it/interfaces/it_parallel.ParallelOptions.html",
+  ".:ParallelOptions": "https://achingbrain.github.io/it/interfaces/it_parallel.ParallelOptions.html",
+  "default": "https://achingbrain.github.io/it/functions/it_parallel.default.html",
+  ".:default": "https://achingbrain.github.io/it/functions/it_parallel.default.html"
+}

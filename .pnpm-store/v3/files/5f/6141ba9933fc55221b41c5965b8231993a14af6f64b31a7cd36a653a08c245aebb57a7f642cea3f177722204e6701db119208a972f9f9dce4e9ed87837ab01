@@ -1,0 +1,73 @@
+/// <reference types="node" resolution-mode="require"/>
+import type { KeyValueStore } from '@web5/common';
+import type { AbstractLevel } from 'abstract-level';
+import { DataStoreLevel, Dwn, EventLogLevel, MessageStoreLevel, ResumableTaskStoreLevel } from '@tbd54566975/dwn-sdk-js';
+import { DidResolutionResult, DidResolverCache } from '@web5/dids';
+import type { Web5PlatformAgent } from './types/agent.js';
+import { BearerIdentity } from './bearer-identity.js';
+import { LocalKeyManager } from './local-key-manager.js';
+import { DwnDidStore } from './store-did.js';
+import { DwnKeyStore } from './store-key.js';
+import { DwnIdentityStore } from './store-identity.js';
+type PlatformAgentTestHarnessParams = {
+    agent: Web5PlatformAgent<LocalKeyManager>;
+    agentStores: 'dwn' | 'memory';
+    didResolverCache: DidResolverCache;
+    dwn: Dwn;
+    dwnDataStore: DataStoreLevel;
+    dwnEventLog: EventLogLevel;
+    dwnMessageStore: MessageStoreLevel;
+    dwnResumableTaskStore: ResumableTaskStoreLevel;
+    syncStore: AbstractLevel<string | Buffer | Uint8Array>;
+    vaultStore: KeyValueStore<string, string>;
+    dwnStores: {
+        keyStore: DwnKeyStore;
+        identityStore: DwnIdentityStore;
+        didStore: DwnDidStore;
+        clear: () => void;
+    };
+};
+export declare class PlatformAgentTestHarness {
+    agent: Web5PlatformAgent<LocalKeyManager>;
+    agentStores: 'dwn' | 'memory';
+    didResolverCache: DidResolverCache;
+    dwn: Dwn;
+    dwnDataStore: DataStoreLevel;
+    dwnEventLog: EventLogLevel;
+    dwnMessageStore: MessageStoreLevel;
+    dwnResumableTaskStore: ResumableTaskStoreLevel;
+    syncStore: AbstractLevel<string | Buffer | Uint8Array>;
+    vaultStore: KeyValueStore<string, string>;
+    /**
+     * Custom DWN Stores for `keyStore`, `identityStore` and `didStore`.
+     * This allows us to clear the store cache between tests
+     */
+    dwnStores: {
+        keyStore: DwnKeyStore;
+        identityStore: DwnIdentityStore;
+        didStore: DwnDidStore;
+        /** clears the protocol initialization caches */
+        clear: () => void;
+    };
+    constructor(params: PlatformAgentTestHarnessParams);
+    clearStorage(): Promise<void>;
+    closeStorage(): Promise<void>;
+    createAgentDid(): Promise<void>;
+    createIdentity({ name, testDwnUrls }: {
+        name: string;
+        testDwnUrls: string[];
+    }): Promise<BearerIdentity>;
+    preloadResolverCache({ didUri, resolutionResult }: {
+        didUri: string;
+        resolutionResult: DidResolutionResult;
+    }): Promise<void>;
+    static setup({ agentClass, agentStores, testDataLocation }: {
+        agentClass: new (params: any) => Web5PlatformAgent<LocalKeyManager>;
+        agentStores?: 'dwn' | 'memory';
+        testDataLocation?: string;
+    }): Promise<PlatformAgentTestHarness>;
+    private static useDiskStores;
+    private static useMemoryStores;
+}
+export {};
+//# sourceMappingURL=test-harness.d.ts.map

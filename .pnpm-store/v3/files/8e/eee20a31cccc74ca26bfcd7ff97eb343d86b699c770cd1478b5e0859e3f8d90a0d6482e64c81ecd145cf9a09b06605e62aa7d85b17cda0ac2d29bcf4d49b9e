@@ -1,0 +1,33 @@
+import type { DidUrlDereferencer } from '@web5/dids';
+import { PaginationCursor, RecordsDeleteMessage, RecordsWriteMessage } from '@tbd54566975/dwn-sdk-js';
+import { Readable } from '@web5/common';
+import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
+import { DateSort, RecordsWrite } from '@tbd54566975/dwn-sdk-js';
+export declare function blobToIsomorphicNodeReadable(blob: Blob): Readable;
+export declare function getDwnServiceEndpointUrls(didUri: string, dereferencer: DidUrlDereferencer): Promise<string[]>;
+export declare function getRecordAuthor(record: RecordsWriteMessage | RecordsDeleteMessage): string | undefined;
+export declare function isRecordsWrite(obj: unknown): obj is RecordsWrite;
+/**
+ * Get the CID of the given RecordsWriteMessage.
+ */
+export declare function getRecordMessageCid(message: RecordsWriteMessage): Promise<string>;
+/**
+ *  Get the pagination cursor for the given RecordsWriteMessage and DateSort.
+ *
+ * @param message The RecordsWriteMessage for which to get the pagination cursor.
+ * @param dateSort The date sort that will be used in the query or subscription to which the cursor will be applied.
+ */
+export declare function getPaginationCursor(message: RecordsWriteMessage, dateSort: DateSort): Promise<PaginationCursor>;
+export declare function webReadableToIsomorphicNodeReadable(webReadable: ReadableStream<any>): ReadableWebToNodeStream;
+/**
+ * Polling function with interval, TTL accepting a custom fetch function
+ * @template T - the return you expect from the fetcher
+ * @param fetchFunction an http fetch function
+ * @param [interval=3000] how frequently to poll
+ * @param [ttl=300_000] how long until polling stops
+ * @returns T - the result of fetch
+ */
+export declare function pollWithTtl(fetchFunction: () => Promise<Response>, interval?: number, ttl?: number, abortSignal?: AbortSignal): Promise<Response | null>;
+/** Concatenates a base URL and a path ensuring that there is exactly one slash between them */
+export declare function concatenateUrl(baseUrl: string, path: string): string;
+//# sourceMappingURL=utils.d.ts.map

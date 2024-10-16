@@ -1,6 +1,6 @@
 services:
   applicant-svc:
-    command: sleep infinity
+    command: bash /app/run.sh applicant
     build:
       context: ..
       dockerfile: ./.devcontainer/images/Dockerfile.node
@@ -8,6 +8,7 @@ services:
         - default=${SSH_AUTH_SOCK}
       secrets:
         - npm_token
+
     volumes:
       - ..:/workspace
       - ../.git:/workspace/.git
@@ -19,7 +20,7 @@ services:
     tty: true
 
   issuer-svc:
-    command: sleep infinity
+    command: bash /app/run.sh issuer
     build:
       context: ..
       dockerfile: ./.devcontainer/images/Dockerfile.node
@@ -38,7 +39,7 @@ services:
     tty: true
 
   server-pkg:
-    command: sleep infinity
+    command: bash /app/run.sh server
     build:
       context: ..
       dockerfile: ./.devcontainer/images/Dockerfile.node

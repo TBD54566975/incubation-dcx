@@ -1,0 +1,147 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { AgentPermissionsApi, AgentDidResolverCache, } from '@web5/agent';
+import { LevelStore } from '@web5/common';
+import { DidDht, DidJwk } from '@web5/dids';
+import { AgentDidApi, AgentDwnApi, DwnDidStore, DwnKeyStore, AgentSyncApi, Web5RpcClient, AgentCryptoApi, HdIdentityVault, LocalKeyManager, SyncEngineLevel, AgentIdentityApi, DwnIdentityStore, } from '@web5/agent';
+export class Web5UserAgent {
+    constructor(params) {
+        this._agentDid = params.agentDid;
+        this.crypto = params.cryptoApi;
+        this.did = params.didApi;
+        this.dwn = params.dwnApi;
+        this.identity = params.identityApi;
+        this.keyManager = params.keyManager;
+        this.permissions = params.permissionsApi;
+        this.rpc = params.rpcClient;
+        this.sync = params.syncApi;
+        this.vault = params.agentVault;
+        // Set this agent to be the default agent.
+        this.did.agent = this;
+        this.dwn.agent = this;
+        this.identity.agent = this;
+        this.keyManager.agent = this;
+        this.permissions.agent = this;
+        this.sync.agent = this;
+    }
+    get agentDid() {
+        if (this._agentDid === undefined) {
+            throw new Error('Web5UserAgent: The "agentDid" property is not set. Ensure the agent is properly ' +
+                'initialized and a DID is assigned.');
+        }
+        return this._agentDid;
+    }
+    set agentDid(did) {
+        this._agentDid = did;
+    }
+    /**
+     * If any of the required agent components are not provided, instantiate default implementations.
+     */
+    static create({ dataPath = 'DATA/AGENT', agentDid, agentVault, cryptoApi, didApi, dwnApi, identityApi, keyManager, permissionsApi, rpcClient, syncApi } = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            agentVault !== null && agentVault !== void 0 ? agentVault : (agentVault = new HdIdentityVault({
+                keyDerivationWorkFactor: 210000,
+                store: new LevelStore({ location: `${dataPath}/VAULT_STORE` })
+            }));
+            cryptoApi !== null && cryptoApi !== void 0 ? cryptoApi : (cryptoApi = new AgentCryptoApi());
+            didApi !== null && didApi !== void 0 ? didApi : (didApi = new AgentDidApi({
+                didMethods: [DidDht, DidJwk],
+                resolverCache: new AgentDidResolverCache({ location: `${dataPath}/DID_RESOLVERCACHE` }),
+                store: new DwnDidStore()
+            }));
+            dwnApi !== null && dwnApi !== void 0 ? dwnApi : (dwnApi = new AgentDwnApi({
+                dwn: yield AgentDwnApi.createDwn({ dataPath, didResolver: didApi })
+            }));
+            identityApi !== null && identityApi !== void 0 ? identityApi : (identityApi = new AgentIdentityApi({ store: new DwnIdentityStore() }));
+            keyManager !== null && keyManager !== void 0 ? keyManager : (keyManager = new LocalKeyManager({ keyStore: new DwnKeyStore() }));
+            permissionsApi !== null && permissionsApi !== void 0 ? permissionsApi : (permissionsApi = new AgentPermissionsApi());
+            rpcClient !== null && rpcClient !== void 0 ? rpcClient : (rpcClient = new Web5RpcClient());
+            syncApi !== null && syncApi !== void 0 ? syncApi : (syncApi = new AgentSyncApi({ syncEngine: new SyncEngineLevel({ dataPath }) }));
+            // Instantiate the Agent using the provided or default components.
+            return new Web5UserAgent({
+                agentDid,
+                agentVault,
+                cryptoApi,
+                didApi,
+                dwnApi,
+                keyManager,
+                permissionsApi,
+                identityApi,
+                rpcClient,
+                syncApi
+            });
+        });
+    }
+    firstLaunch() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Check whether data vault is already initialize
+            return (yield this.vault.isInitialized()) === false;
+        });
+    }
+    /**
+     * Initializes the User Agent with a password, and optionally a recovery phrase.
+     *
+     * This method is typically called once, the first time the Agent is launched, and is responsible
+     * for setting up the agent's operational environment, cryptographic key material, and readiness
+     * for processing Web5 requests.
+     *
+     * The password is used to secure the Agent vault, and the recovery phrase is used to derive the
+     * cryptographic keys for the vault. If a recovery phrase is not provided, a new recovery phrase
+     * will be generated and returned. The password should be chosen and entered by the end-user.
+     */
+    initialize({ password, recoveryPhrase }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Initialize the Agent vault.
+            recoveryPhrase = yield this.vault.initialize({ password, recoveryPhrase });
+            return recoveryPhrase;
+        });
+    }
+    processDidRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.did.processRequest(request);
+        });
+    }
+    processDwnRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.dwn.processRequest(request);
+        });
+    }
+    processVcRequest(_request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+        });
+    }
+    sendDidRequest(_request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+        });
+    }
+    sendDwnRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.dwn.sendRequest(request);
+        });
+    }
+    sendVcRequest(_request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+        });
+    }
+    start({ password }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // If the Agent vault is locked, unlock it.
+            if (this.vault.isLocked()) {
+                yield this.vault.unlock({ password });
+            }
+            // Set the Agent's DID.
+            this.agentDid = yield this.vault.getDid();
+        });
+    }
+}
+//# sourceMappingURL=user-agent.js.map

@@ -1,0 +1,70 @@
+import type { RequireOnly } from '@web5/common';
+import type { AgentDataStore } from './store-data.js';
+import type { Web5PlatformAgent } from './types/agent.js';
+import type { DidMethodCreateOptions } from './did-api.js';
+import type { AgentKeyManager } from './types/key-manager.js';
+import type { IdentityMetadata, PortableIdentity } from './types/identity.js';
+import { BearerIdentity } from './bearer-identity.js';
+export interface IdentityApiParams<TKeyManager extends AgentKeyManager> {
+    agent?: Web5PlatformAgent<TKeyManager>;
+    store?: AgentDataStore<IdentityMetadata>;
+}
+export interface IdentityCreateParams<TKeyManager = AgentKeyManager, TMethod extends keyof DidMethodCreateOptions<TKeyManager> = keyof DidMethodCreateOptions<TKeyManager>> {
+    metadata: RequireOnly<IdentityMetadata, 'name'>;
+    didMethod?: TMethod;
+    didOptions?: DidMethodCreateOptions<TKeyManager>[TMethod];
+    tenant?: string;
+    store?: boolean;
+}
+export declare function isPortableIdentity(obj: unknown): obj is PortableIdentity;
+export declare class AgentIdentityApi<TKeyManager extends AgentKeyManager = AgentKeyManager> {
+    /**
+     * Holds the instance of a `Web5PlatformAgent` that represents the current execution context for
+     * the `AgentIdentityApi`. This agent is used to interact with other Web5 agent components. It's
+     * vital to ensure this instance is set to correctly contextualize operations within the broader
+     * Web5 Agent framework.
+     */
+    private _agent?;
+    private _store;
+    constructor({ agent, store }?: IdentityApiParams<TKeyManager>);
+    /**
+     * Retrieves the `Web5PlatformAgent` execution context.
+     *
+     * @returns The `Web5PlatformAgent` instance that represents the current execution context.
+     * @throws Will throw an error if the `agent` instance property is undefined.
+     */
+    get agent(): Web5PlatformAgent<TKeyManager>;
+    set agent(agent: Web5PlatformAgent<TKeyManager>);
+    create({ metadata, didMethod, didOptions, store, tenant }: IdentityCreateParams<TKeyManager>): Promise<BearerIdentity>;
+    export({ didUri, tenant }: {
+        didUri: string;
+        tenant?: string;
+    }): Promise<PortableIdentity>;
+    get({ didUri, tenant }: {
+        didUri: string;
+        tenant?: string;
+    }): Promise<BearerIdentity | undefined>;
+    import({ portableIdentity }: {
+        portableIdentity: PortableIdentity;
+    }): Promise<BearerIdentity>;
+    list({ tenant }?: {
+        tenant?: string;
+    }): Promise<BearerIdentity[]>;
+    manage({ portableIdentity }: {
+        portableIdentity: PortableIdentity;
+    }): Promise<BearerIdentity>;
+    delete({ didUri, tenant }: {
+        didUri: string;
+        tenant?: string;
+    }): Promise<void>;
+    /**
+     * Returns the connected Identity, if one is available.
+     *
+     * Accepts optional `connectedDid` parameter to filter the a specific connected identity,
+     * if none is provided the first connected identity is returned.
+     */
+    connectedIdentity({ connectedDid }?: {
+        connectedDid?: string;
+    }): Promise<BearerIdentity | undefined>;
+}
+//# sourceMappingURL=identity-api.d.ts.map

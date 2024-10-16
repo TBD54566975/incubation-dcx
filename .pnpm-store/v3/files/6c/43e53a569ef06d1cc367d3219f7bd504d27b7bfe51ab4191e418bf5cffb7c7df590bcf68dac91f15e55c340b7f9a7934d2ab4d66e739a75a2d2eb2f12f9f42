@@ -1,0 +1,383 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
+import chai, { expect } from 'chai';
+import dexProtocolDefinition from '../vectors/protocol-definitions/dex.json' assert { type: 'json' };
+import minimalProtocolDefinition from '../vectors/protocol-definitions/minimal.json' assert { type: 'json' };
+import { GeneralJwsBuilder } from '../../src/jose/jws/general/builder.js';
+import { lexicographicalCompare } from '../../src/utils/string.js';
+import { Message } from '../../src/core/message.js';
+import { ProtocolAction } from '../../src/types/protocols-types.js';
+import { TestDataGenerator } from '../utils/test-data-generator.js';
+import { TestEventStream } from '../test-event-stream.js';
+import { TestStores } from '../test-stores.js';
+import { TestStubGenerator } from '../utils/test-stub-generator.js';
+import { Time } from '../../src/utils/time.js';
+import { DidKey, UniversalResolver } from '@web5/dids';
+import { Dwn, DwnErrorCode, DwnInterfaceName, DwnMethodName, Encoder, Jws } from '../../src/index.js';
+chai.use(chaiAsPromised);
+export function testProtocolsConfigureHandler() {
+    describe('ProtocolsConfigureHandler.handle()', () => {
+        let didResolver;
+        let messageStore;
+        let dataStore;
+        let resumableTaskStore;
+        let eventLog;
+        let eventStream;
+        let dwn;
+        describe('functional tests', () => {
+            // important to follow the `before` and `after` pattern to initialize and clean the stores in tests
+            // so that different test suites can reuse the same backend store for testing
+            before(() => __awaiter(this, void 0, void 0, function* () {
+                didResolver = new UniversalResolver({ didResolvers: [DidKey] });
+                const stores = TestStores.get();
+                messageStore = stores.messageStore;
+                dataStore = stores.dataStore;
+                resumableTaskStore = stores.resumableTaskStore;
+                eventLog = stores.eventLog;
+                eventStream = TestEventStream.get();
+                dwn = yield Dwn.create({ didResolver, messageStore, dataStore, eventLog, eventStream, resumableTaskStore });
+            }));
+            beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+                sinon.restore(); // wipe all previous stubs/spies/mocks/fakes
+                // clean up before each test rather than after so that a test does not depend on other tests to do the clean up
+                yield messageStore.clear();
+                yield dataStore.clear();
+                yield resumableTaskStore.clear();
+                yield eventLog.clear();
+            }));
+            after(() => __awaiter(this, void 0, void 0, function* () {
+                yield dwn.close();
+            }));
+            it('should allow a protocol definition with schema or dataFormat omitted', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = minimalProtocolDefinition;
+                const protocolsConfig = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition,
+                });
+                const reply = yield dwn.processMessage(alice.did, protocolsConfig.message);
+                expect(reply.status.code).to.equal(202);
+            }));
+            it('should return 400 if more than 1 signature is provided in `authorization`', () => __awaiter(this, void 0, void 0, function* () {
+                const { author, message, protocolsConfigure } = yield TestDataGenerator.generateProtocolsConfigure();
+                const tenant = author.did;
+                // intentionally create more than one signature, which is not allowed
+                const extraRandomPersona = yield TestDataGenerator.generatePersona();
+                const signer1 = Jws.createSigner(author);
+                const signer2 = Jws.createSigner(extraRandomPersona);
+                const signaturePayloadBytes = Encoder.objectToBytes(protocolsConfigure.signaturePayload);
+                const jwsBuilder = yield GeneralJwsBuilder.create(signaturePayloadBytes, [signer1, signer2]);
+                message.authorization = { signature: jwsBuilder.getJws() };
+                TestStubGenerator.stubDidResolver(didResolver, [author]);
+                const reply = yield dwn.processMessage(tenant, message);
+                expect(reply.status.code).to.equal(400);
+                expect(reply.status.detail).to.contain('expected no more than 1 signature');
+            }));
+            it('should return 401 if auth fails', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const { message } = yield TestDataGenerator.generateProtocolsConfigure({ author: alice });
+                // use a bad signature to fail authentication
+                const badSignature = yield TestDataGenerator.randomSignatureString();
+                message.authorization.signature.signatures[0].signature = badSignature;
+                const reply = yield dwn.processMessage(alice.did, message);
+                expect(reply.status.code).to.equal(401);
+                expect(reply.status.detail).to.contain(DwnErrorCode.GeneralJwsVerifierInvalidSignature);
+            }));
+            it('should be able to overwrite existing protocol if timestamp is newer', () => __awaiter(this, void 0, void 0, function* () {
+                var _a;
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = minimalProtocolDefinition;
+                const oldProtocolsConfigure = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition,
+                });
+                yield Time.minimalSleep();
+                const middleProtocolsConfigure = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition,
+                });
+                // first ProtocolsConfigure
+                const reply1 = yield dwn.processMessage(alice.did, middleProtocolsConfigure.message);
+                expect(reply1.status.code).to.equal(202);
+                // older messages will not overwrite the existing
+                const reply2 = yield dwn.processMessage(alice.did, oldProtocolsConfigure.message);
+                expect(reply2.status.code).to.equal(409);
+                // newer message can overwrite the existing message
+                const newProtocolsConfigure = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition,
+                });
+                const reply3 = yield dwn.processMessage(alice.did, newProtocolsConfigure.message);
+                expect(reply3.status.code).to.equal(202);
+                // only the newest protocol should remain
+                const queryMessageData = yield TestDataGenerator.generateProtocolsQuery({
+                    author: alice,
+                    filter: { protocol: protocolDefinition.protocol }
+                });
+                const queryReply = yield dwn.processMessage(alice.did, queryMessageData.message);
+                expect(queryReply.status.code).to.equal(200);
+                expect((_a = queryReply.entries) === null || _a === void 0 ? void 0 : _a.length).to.equal(1);
+            }));
+            it('should only be able to overwrite existing protocol if new protocol is lexicographically larger and timestamps are identical', () => __awaiter(this, void 0, void 0, function* () {
+                var _b;
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                // Alter each protocol slightly to create lexicographic difference between them
+                const protocolDefinition1 = Object.assign(Object.assign({}, minimalProtocolDefinition), { types: Object.assign(Object.assign({}, minimalProtocolDefinition.types), { foo1: { dataFormats: ['bar1'] } }) });
+                const protocolDefinition2 = Object.assign(Object.assign({}, minimalProtocolDefinition), { types: Object.assign(Object.assign({}, minimalProtocolDefinition.types), { foo2: { dataFormats: ['bar2'] } }) });
+                const protocolDefinition3 = Object.assign(Object.assign({}, minimalProtocolDefinition), { types: Object.assign(Object.assign({}, minimalProtocolDefinition.types), { foo3: { dataFormats: ['bar3'] } }) });
+                // Create three `ProtocolsConfigure` with identical timestamp
+                const messageData1 = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition: protocolDefinition1
+                });
+                const messageData2 = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition: protocolDefinition2,
+                    messageTimestamp: messageData1.message.descriptor.messageTimestamp
+                });
+                const messageData3 = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition: protocolDefinition3,
+                    messageTimestamp: messageData1.message.descriptor.messageTimestamp
+                });
+                const messageDataWithCid = [];
+                for (const messageData of [messageData1, messageData2, messageData3]) {
+                    const cid = yield Message.getCid(messageData.message);
+                    messageDataWithCid.push(Object.assign({ cid }, messageData));
+                }
+                // sort the message in lexicographic order
+                const [lowestProtocolsConfigure, middleProtocolsConfigure, highestProtocolsConfigure] = messageDataWithCid.sort((messageDataA, messageDataB) => { return lexicographicalCompare(messageDataA.cid, messageDataB.cid); });
+                // write the protocol with the middle lexicographic value
+                const reply1 = yield dwn.processMessage(alice.did, middleProtocolsConfigure.message);
+                expect(reply1.status.code).to.equal(202);
+                // test that the protocol with the smallest lexicographic value cannot be written
+                const reply2 = yield dwn.processMessage(alice.did, lowestProtocolsConfigure.message);
+                expect(reply2.status.code).to.equal(409);
+                // test that the protocol with the largest lexicographic value can be written
+                const reply3 = yield dwn.processMessage(alice.did, highestProtocolsConfigure.message);
+                expect(reply3.status.code).to.equal(202);
+                // test that lower lexicographic protocol message is removed from DB and only the newer protocol message remains
+                const queryMessageData = yield TestDataGenerator.generateProtocolsQuery({
+                    author: alice,
+                    filter: { protocol: protocolDefinition1.protocol }
+                });
+                const queryReply = yield dwn.processMessage(alice.did, queryMessageData.message);
+                expect(queryReply.status.code).to.equal(200);
+                expect((_b = queryReply.entries) === null || _b === void 0 ? void 0 : _b.length).to.equal(1);
+            }));
+            it('should return 400 if protocol is not normalized', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                // query for non-normalized protocol
+                const protocolsConfig = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition: minimalProtocolDefinition
+                });
+                // overwrite protocol because #create auto-normalizes protocol
+                protocolsConfig.message.descriptor.definition.protocol = 'example.com/';
+                // Re-create auth because we altered the descriptor after signing
+                protocolsConfig.message.authorization = yield Message.createAuthorization({
+                    descriptor: protocolsConfig.message.descriptor,
+                    signer: Jws.createSigner(alice)
+                });
+                // Send records write message
+                const reply = yield dwn.processMessage(alice.did, protocolsConfig.message);
+                expect(reply.status.code).to.equal(400);
+                expect(reply.status.detail).to.contain(DwnErrorCode.UrlProtocolNotNormalized);
+            }));
+            it('should return 400 if schema is not normalized', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = dexProtocolDefinition;
+                const protocolsConfig = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: alice,
+                    protocolDefinition,
+                });
+                // overwrite schema because #create auto-normalizes schema
+                protocolsConfig.message.descriptor.definition.types.ask.schema = 'ask';
+                // Re-create auth because we altered the descriptor after signing
+                protocolsConfig.message.authorization = yield Message.createAuthorization({
+                    descriptor: protocolsConfig.message.descriptor,
+                    signer: Jws.createSigner(alice)
+                });
+                // Send records write message
+                const reply = yield dwn.processMessage(alice.did, protocolsConfig.message);
+                expect(reply.status.code).to.equal(400);
+                expect(reply.status.detail).to.contain(DwnErrorCode.UrlSchemaNotNormalized);
+            }));
+            it('rejects non-tenant non-granted ProtocolsConfigures with 401', () => __awaiter(this, void 0, void 0, function* () {
+                // Bob tries to ProtocolsConfigure to Alice's DWN without a permission grant
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const bob = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = dexProtocolDefinition;
+                const protocolsConfig = yield TestDataGenerator.generateProtocolsConfigure({
+                    author: bob,
+                    protocolDefinition,
+                });
+                const protocolsConfigureReply = yield dwn.processMessage(alice.did, protocolsConfig.message);
+                expect(protocolsConfigureReply.status.code).to.equal(401);
+                expect(protocolsConfigureReply.status.detail).to.contain(DwnErrorCode.AuthorizationAuthorNotOwner);
+            }));
+            it('should reject ProtocolsConfigure with action rule containing duplicated actor (`who` or `who` + `of` combination) within a rule set', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = {
+                    protocol: 'http://foo-bar',
+                    published: true,
+                    types: {
+                        foo: {},
+                    },
+                    structure: {
+                        foo: {
+                            $actions: [
+                                {
+                                    who: 'anyone',
+                                    can: [ProtocolAction.Create]
+                                },
+                                // duplicated `who` value
+                                {
+                                    who: 'anyone',
+                                    can: [ProtocolAction.Update]
+                                }
+                            ]
+                        }
+                    }
+                };
+                // manually craft the invalid ProtocolsConfigure message because our library will not let you create an invalid definition
+                const descriptor = {
+                    interface: DwnInterfaceName.Protocols,
+                    method: DwnMethodName.Configure,
+                    messageTimestamp: Time.getCurrentTimestamp(),
+                    definition: protocolDefinition
+                };
+                const authorization = yield Message.createAuthorization({
+                    descriptor,
+                    signer: Jws.createSigner(alice)
+                });
+                const protocolsConfigureMessage = { descriptor, authorization };
+                const protocolsConfigureReply = yield dwn.processMessage(alice.did, protocolsConfigureMessage);
+                expect(protocolsConfigureReply.status.code).to.equal(400);
+                expect(protocolsConfigureReply.status.detail).to.contain(DwnErrorCode.ProtocolsConfigureDuplicateActorInRuleSet);
+                // similar test as above but with `of` property
+                const protocolDefinition2 = {
+                    protocol: 'http://foo-bar',
+                    published: true,
+                    types: {
+                        foo: {},
+                        bar: {},
+                    },
+                    structure: {
+                        foo: {
+                            bar: {
+                                $actions: [
+                                    {
+                                        who: 'recipient',
+                                        of: 'foo',
+                                        can: [ProtocolAction.Create]
+                                    },
+                                    // duplicated `who` value
+                                    {
+                                        who: 'recipient',
+                                        of: 'foo',
+                                        can: [ProtocolAction.Update]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                };
+                const descriptor2 = {
+                    interface: DwnInterfaceName.Protocols,
+                    method: DwnMethodName.Configure,
+                    messageTimestamp: Time.getCurrentTimestamp(),
+                    definition: protocolDefinition2
+                };
+                const authorization2 = yield Message.createAuthorization({
+                    descriptor: descriptor2,
+                    signer: Jws.createSigner(alice)
+                });
+                const protocolsConfigureMessage2 = { descriptor: descriptor2, authorization: authorization2 };
+                const protocolsConfigure2Reply = yield dwn.processMessage(alice.did, protocolsConfigureMessage2);
+                expect(protocolsConfigure2Reply.status.code).to.equal(400);
+                expect(protocolsConfigure2Reply.status.detail).to.contain(DwnErrorCode.ProtocolsConfigureDuplicateActorInRuleSet);
+            }));
+            it('should reject ProtocolsConfigure with action rule containing duplicated role within a rule set', () => __awaiter(this, void 0, void 0, function* () {
+                const alice = yield TestDataGenerator.generateDidKeyPersona();
+                const protocolDefinition = {
+                    protocol: 'http://foo',
+                    published: true,
+                    types: {
+                        user: {},
+                        foo: {},
+                    },
+                    structure: {
+                        user: {
+                            $role: true
+                        },
+                        foo: {
+                            $actions: [
+                                {
+                                    role: 'user',
+                                    can: [ProtocolAction.Create]
+                                },
+                                // duplicated `role` value
+                                {
+                                    role: 'user',
+                                    can: [ProtocolAction.Update]
+                                }
+                            ]
+                        }
+                    }
+                };
+                // manually craft the invalid ProtocolsConfigure message because our library will not let you create an invalid definition
+                const descriptor = {
+                    interface: DwnInterfaceName.Protocols,
+                    method: DwnMethodName.Configure,
+                    messageTimestamp: Time.getCurrentTimestamp(),
+                    definition: protocolDefinition
+                };
+                const authorization = yield Message.createAuthorization({
+                    descriptor,
+                    signer: Jws.createSigner(alice)
+                });
+                const protocolsConfigureMessage = { descriptor, authorization };
+                const protocolsConfigureReply = yield dwn.processMessage(alice.did, protocolsConfigureMessage);
+                expect(protocolsConfigureReply.status.code).to.equal(400);
+                expect(protocolsConfigureReply.status.detail).to.contain(DwnErrorCode.ProtocolsConfigureDuplicateRoleInRuleSet);
+            }));
+            describe('event log', () => {
+                it('should add event for ProtocolsConfigure', () => __awaiter(this, void 0, void 0, function* () {
+                    const alice = yield TestDataGenerator.generateDidKeyPersona();
+                    const { message } = yield TestDataGenerator.generateProtocolsConfigure({ author: alice });
+                    const reply = yield dwn.processMessage(alice.did, message);
+                    expect(reply.status.code).to.equal(202);
+                    const { events } = yield eventLog.getEvents(alice.did);
+                    expect(events.length).to.equal(1);
+                    const messageCid = yield Message.getCid(message);
+                    expect(events[0]).to.equal(messageCid);
+                }));
+                it('should delete older ProtocolsConfigure events when one is overwritten', () => __awaiter(this, void 0, void 0, function* () {
+                    const alice = yield TestDataGenerator.generateDidKeyPersona();
+                    const oldestWrite = yield TestDataGenerator.generateProtocolsConfigure({ author: alice, protocolDefinition: minimalProtocolDefinition });
+                    yield Time.minimalSleep();
+                    const newestWrite = yield TestDataGenerator.generateProtocolsConfigure({ author: alice, protocolDefinition: minimalProtocolDefinition });
+                    let reply = yield dwn.processMessage(alice.did, oldestWrite.message);
+                    expect(reply.status.code).to.equal(202);
+                    reply = yield dwn.processMessage(alice.did, newestWrite.message);
+                    expect(reply.status.code).to.equal(202);
+                    const { events } = yield eventLog.getEvents(alice.did);
+                    expect(events.length).to.equal(1);
+                    const newestMessageCid = yield Message.getCid(newestWrite.message);
+                    expect(events[0]).to.equal(newestMessageCid);
+                }));
+            });
+        });
+    });
+}
+//# sourceMappingURL=protocols-configure.spec.js.map

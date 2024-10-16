@@ -1,0 +1,642 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import * as cbor from '@ipld/dag-cbor';
+import { CID } from 'multiformats/cid';
+import { DataStream } from '../../src/utils/data-stream.js';
+import { DidKey } from '@web5/dids';
+import { ed25519 } from '../../src/jose/algorithms/signing/ed25519.js';
+import { Encoder } from '../../src/utils/encoder.js';
+import { Encryption } from '../../src/utils/encryption.js';
+import { Jws } from '../../src/utils/jws.js';
+import { MessagesQuery } from '../../src/interfaces/messages-query.js';
+import { MessagesRead } from '../../src/interfaces/messages-read.js';
+import { MessagesSubscribe } from '../../src/interfaces/messages-subscribe.js';
+import { PermissionsProtocol } from '../../src/protocols/permissions.js';
+import { PrivateKeySigner } from '../../src/utils/private-key-signer.js';
+import { ProtocolsConfigure } from '../../src/interfaces/protocols-configure.js';
+import { ProtocolsQuery } from '../../src/interfaces/protocols-query.js';
+import { Records } from '../../src/utils/records.js';
+import { RecordsDelete } from '../../src/interfaces/records-delete.js';
+import { RecordsQuery } from '../../src/interfaces/records-query.js';
+import { RecordsSubscribe } from '../../src/interfaces/records-subscribe.js';
+import { RecordsWrite } from '../../src/interfaces/records-write.js';
+import { removeUndefinedProperties } from '../../src/utils/object.js';
+import { Secp256k1 } from '../../src/utils/secp256k1.js';
+import { sha256 } from 'multiformats/hashes/sha2';
+import { Time } from '../../src/utils/time.js';
+import { DwnInterfaceName, DwnMethodName } from '../../src/enums/dwn-interface-method.js';
+import { HdKey, KeyDerivationScheme } from '../../src/utils/hd-key.js';
+/**
+ * Utility class for generating data for testing.
+ */
+export class TestDataGenerator {
+    /**
+     * Generates a persona.
+     */
+    static generatePersona(input) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            // generate DID if not given
+            let did = input === null || input === void 0 ? void 0 : input.did;
+            if (!did) {
+                const didSuffix = TestDataGenerator.randomString(32);
+                did = `did:example:${didSuffix}`;
+            }
+            // generate persona key ID if not given
+            const keyIdSuffix = TestDataGenerator.randomString(10);
+            const keyId = (_a = input === null || input === void 0 ? void 0 : input.keyId) !== null && _a !== void 0 ? _a : `${did}#${keyIdSuffix}`;
+            // generate persona key pair if not given
+            const keyPair = (_b = input === null || input === void 0 ? void 0 : input.keyPair) !== null && _b !== void 0 ? _b : yield Secp256k1.generateKeyPair();
+            const persona = {
+                did,
+                keyId,
+                keyPair,
+                signer: new PrivateKeySigner({
+                    privateJwk: keyPair.privateJwk,
+                    algorithm: keyPair.privateJwk.alg,
+                    keyId: `${did}#${keyId}`,
+                })
+            };
+            return persona;
+        });
+    }
+    /**
+     * Generates a ProtocolsConfigure message for testing.
+     * Optional parameters are generated if not given.
+     * Implementation currently uses `ProtocolsConfigure.create()`.
+     */
+    static generateProtocolsConfigure(input) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            // generate protocol types and  definition if not given
+            let definition = input === null || input === void 0 ? void 0 : input.protocolDefinition;
+            if (!definition) {
+                const generatedLabel = 'record' + TestDataGenerator.randomString(10);
+                definition = {
+                    protocol: TestDataGenerator.randomString(20),
+                    published: (_b = input === null || input === void 0 ? void 0 : input.published) !== null && _b !== void 0 ? _b : false,
+                    types: {},
+                    structure: {}
+                };
+                definition.types[generatedLabel] = {
+                    schema: `test-object`,
+                    dataFormats: ['text/plain']
+                };
+                definition.structure[generatedLabel] = {};
+            }
+            const signer = Jws.createSigner(author);
+            const options = {
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                definition,
+                signer,
+                permissionGrantId: input === null || input === void 0 ? void 0 : input.permissionGrantId
+            };
+            const protocolsConfigure = yield ProtocolsConfigure.create(options);
+            return {
+                author,
+                message: protocolsConfigure.message,
+                protocolsConfigure
+            };
+        });
+    }
+    ;
+    /**
+     * Generates a ProtocolsQuery message for testing.
+     */
+    static generateProtocolsQuery(input) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            // generate author persona if not given
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const signer = Jws.createSigner(author);
+            const options = {
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                filter: input === null || input === void 0 ? void 0 : input.filter,
+                signer,
+                permissionGrantId: input === null || input === void 0 ? void 0 : input.permissionGrantId,
+            };
+            removeUndefinedProperties(options);
+            const protocolsQuery = yield ProtocolsQuery.create(options);
+            return {
+                author,
+                message: protocolsQuery.message,
+                protocolsQuery
+            };
+        });
+    }
+    ;
+    static generateGrantCreate(input) {
+        var _a, _b, _c, _d, _e, _f;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const grantedToPersona = (_b = input === null || input === void 0 ? void 0 : input.grantedTo) !== null && _b !== void 0 ? _b : yield TestDataGenerator.generatePersona();
+            const dateExpires = (_c = input === null || input === void 0 ? void 0 : input.dateExpires) !== null && _c !== void 0 ? _c : Time.createOffsetTimestamp({ seconds: 10 });
+            const scope = (_d = input === null || input === void 0 ? void 0 : input.scope) !== null && _d !== void 0 ? _d : {
+                interface: DwnInterfaceName.Messages,
+                method: DwnMethodName.Query
+            };
+            const signer = Jws.createSigner(author);
+            const grantedTo = grantedToPersona.did;
+            const options = {
+                signer,
+                grantedTo,
+                dateExpires,
+                scope,
+                description: (_e = input === null || input === void 0 ? void 0 : input.description) !== null && _e !== void 0 ? _e : TestDataGenerator.randomString(10),
+                delegated: (_f = input === null || input === void 0 ? void 0 : input.delegated) !== null && _f !== void 0 ? _f : false,
+                requestId: input === null || input === void 0 ? void 0 : input.requestId,
+                conditions: input === null || input === void 0 ? void 0 : input.conditions,
+            };
+            const grant = yield PermissionsProtocol.createGrant(options);
+            const dataStream = DataStream.fromBytes(grant.permissionGrantBytes);
+            return {
+                dataStream,
+                recordsWrite: grant.recordsWrite,
+                dataBytes: grant.permissionGrantBytes,
+                message: grant.recordsWrite.message,
+                dataEncodedMessage: grant.dataEncodedMessage
+            };
+        });
+    }
+    ;
+    /**
+     * Generates a RecordsWrite message for testing.
+     * `dataBytes` & `dataStream` returned will be `undefined` as long as `dataCid` or `dataSize` is given.
+     * Implementation currently uses `RecordsWrite.create()`.
+     * @param input.attesters Attesters of the message. Will NOT be generated if not given.
+     * @param input.data Data that belongs to the record. Generated when not given only if `dataCid` and `dataSize` are also not given.
+     * @param input.dataFormat Format of the data. Defaults to 'application/json' if not given.
+     * @param input.signer Signer of the message. Generated if not given.
+     * @param input.schema Schema of the message. Randomly generated if not given.
+     */
+    static generateRecordsWrite(input) {
+        var _a, _b, _c, _d, _e;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const signer = Jws.createSigner(author);
+            const attestationSigners = Jws.createSigners((_b = input === null || input === void 0 ? void 0 : input.attesters) !== null && _b !== void 0 ? _b : []);
+            const dataCid = input === null || input === void 0 ? void 0 : input.dataCid;
+            const dataSize = input === null || input === void 0 ? void 0 : input.dataSize;
+            let dataBytes;
+            let dataStream;
+            if (dataCid === undefined && dataSize === undefined) {
+                dataBytes = (_c = input === null || input === void 0 ? void 0 : input.data) !== null && _c !== void 0 ? _c : TestDataGenerator.randomBytes(32);
+                dataStream = DataStream.fromBytes(dataBytes);
+            }
+            const options = {
+                recipient: input === null || input === void 0 ? void 0 : input.recipient,
+                protocol: input === null || input === void 0 ? void 0 : input.protocol,
+                protocolPath: input === null || input === void 0 ? void 0 : input.protocolPath,
+                protocolRole: input === null || input === void 0 ? void 0 : input.protocolRole,
+                schema: (_d = input === null || input === void 0 ? void 0 : input.schema) !== null && _d !== void 0 ? _d : `http://${TestDataGenerator.randomString(20)}`,
+                tags: input === null || input === void 0 ? void 0 : input.tags,
+                recordId: input === null || input === void 0 ? void 0 : input.recordId,
+                parentContextId: input === null || input === void 0 ? void 0 : input.parentContextId,
+                published: input === null || input === void 0 ? void 0 : input.published,
+                dataFormat: (_e = input === null || input === void 0 ? void 0 : input.dataFormat) !== null && _e !== void 0 ? _e : 'application/json',
+                dateCreated: input === null || input === void 0 ? void 0 : input.dateCreated,
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                datePublished: input === null || input === void 0 ? void 0 : input.datePublished,
+                data: dataBytes,
+                dataCid,
+                dataSize,
+                signer,
+                attestationSigners,
+                encryptionInput: input === null || input === void 0 ? void 0 : input.encryptionInput,
+                permissionGrantId: input === null || input === void 0 ? void 0 : input.permissionGrantId,
+            };
+            const recordsWrite = yield RecordsWrite.create(options);
+            const message = recordsWrite.message;
+            return {
+                author,
+                message,
+                dataCid,
+                dataSize,
+                dataBytes,
+                dataStream,
+                recordsWrite
+            };
+        });
+    }
+    ;
+    /**
+     * Generates a encrypted RecordsWrite message for testing.
+     *
+     * @param input.protocolDefinition Protocol definition used to generate the RecordsWrite.
+     *        Must be the RECIPIENT's protocol definition if `encryptSymmetricKeyWithProtocolPathDerivedKey` is true,
+     *        because the recipient's public keys will be needed to encrypt the symmetric key.
+     *
+     * @param input.encryptSymmetricKeyWithProtocolPathDerivedKey
+     *        Set to `true` to attach the symmetric key encrypted by the protocol path derived public key
+     *
+     * @param input.encryptSymmetricKeyWithProtocolContextDerivedKey
+     *        Set to `true` to attach the symmetric key encrypted by the protocol context derived public key
+     */
+    static generateProtocolEncryptedRecordsWrite(input) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            const { plaintextBytes, author, recipient, protocolDefinition, protocolPath, protocolParentContextId, protocolContextDerivingRootKeyId, protocolContextDerivedPublicJwk, } = input;
+            // encrypt the plaintext data for the target with a randomly generated symmetric key
+            const plaintextStream = DataStream.fromBytes(plaintextBytes);
+            const dataEncryptionInitializationVector = TestDataGenerator.randomBytes(16);
+            const dataEncryptionKey = TestDataGenerator.randomBytes(32);
+            const encryptedDataStream = yield Encryption.aes256CtrEncrypt(dataEncryptionKey, dataEncryptionInitializationVector, plaintextStream);
+            const encryptedDataBytes = yield DataStream.toBytes(encryptedDataStream);
+            // author generates a RecordsWrite using the encrypted data
+            const protocolPathSegments = protocolPath.split('/');
+            const recordType = protocolPathSegments[protocolPathSegments.length - 1];
+            const { message, dataStream, recordsWrite } = yield TestDataGenerator.generateRecordsWrite({
+                author,
+                recipient,
+                protocol: protocolDefinition.protocol,
+                protocolPath,
+                parentContextId: protocolParentContextId,
+                schema: protocolDefinition.types[recordType].schema,
+                dataFormat: (_a = protocolDefinition.types[recordType].dataFormats) === null || _a === void 0 ? void 0 : _a[0],
+                data: encryptedDataBytes
+            });
+            // final encryption input (`keyEncryptionInputs` to be populated below)
+            const encryptionInput = {
+                initializationVector: dataEncryptionInitializationVector,
+                key: dataEncryptionKey,
+                keyEncryptionInputs: []
+            };
+            if (input.encryptSymmetricKeyWithProtocolPathDerivedKey) {
+                // locate the rule set corresponding the protocol path of the message
+                let protocolRuleSetSegment = protocolDefinition.structure;
+                for (const pathSegment of protocolPathSegments) {
+                    protocolRuleSetSegment = protocolRuleSetSegment[pathSegment];
+                }
+                const protocolPathDerivedPublicJwk = (_b = protocolRuleSetSegment.$encryption) === null || _b === void 0 ? void 0 : _b.publicKeyJwk;
+                const protocolPathDerivationRootKeyId = (_c = protocolRuleSetSegment.$encryption) === null || _c === void 0 ? void 0 : _c.rootKeyId;
+                const protocolPathDerivedKeyEncryptionInput = {
+                    publicKeyId: protocolPathDerivationRootKeyId,
+                    publicKey: protocolPathDerivedPublicJwk,
+                    derivationScheme: KeyDerivationScheme.ProtocolPath
+                };
+                encryptionInput.keyEncryptionInputs.push(protocolPathDerivedKeyEncryptionInput);
+            }
+            if (input.encryptSymmetricKeyWithProtocolContextDerivedKey) {
+                // generate key encryption input that will encrypt the symmetric encryption key using protocol-context derived public key
+                let protocolContextDerivedKeyEncryptionInput;
+                if (protocolParentContextId === undefined) {
+                    // author generates protocol-context derived public key for encrypting symmetric key
+                    const authorRootPrivateKey = {
+                        rootKeyId: author.keyId,
+                        derivationScheme: KeyDerivationScheme.ProtocolContext,
+                        derivedPrivateKey: author.keyPair.privateJwk
+                    };
+                    const contextId = yield RecordsWrite.getEntryId(author.did, message.descriptor);
+                    const contextDerivationPath = Records.constructKeyDerivationPathUsingProtocolContextScheme(contextId);
+                    const authorGeneratedProtocolContextDerivedPublicJwk = yield HdKey.derivePublicKey(authorRootPrivateKey, contextDerivationPath);
+                    protocolContextDerivedKeyEncryptionInput = {
+                        publicKeyId: author.keyId,
+                        publicKey: authorGeneratedProtocolContextDerivedPublicJwk,
+                        derivationScheme: KeyDerivationScheme.ProtocolContext
+                    };
+                }
+                else {
+                    if (protocolContextDerivingRootKeyId === undefined ||
+                        protocolContextDerivedPublicJwk === undefined) {
+                        throw new Error('`protocolContextDerivingRootKeyId` and `protocolContextDerivedPublicJwk` must both be defined if `protocolContextId` is given');
+                    }
+                    protocolContextDerivedKeyEncryptionInput = {
+                        publicKeyId: protocolContextDerivingRootKeyId,
+                        publicKey: protocolContextDerivedPublicJwk,
+                        derivationScheme: KeyDerivationScheme.ProtocolContext
+                    };
+                }
+                encryptionInput.keyEncryptionInputs.push(protocolContextDerivedKeyEncryptionInput);
+            }
+            yield recordsWrite.encryptSymmetricEncryptionKey(encryptionInput);
+            yield recordsWrite.sign({ signer: Jws.createSigner(author) });
+            return { message, dataStream: dataStream, recordsWrite, encryptedDataBytes, encryptionInput };
+        });
+    }
+    /**
+     * Generates a valid RecordsWrite that modifies the given an existing write.
+     * Any mutable property is not specified will be automatically mutated.
+     * e.g. if `published` is not specified, it will be toggled from the state of the given existing write.
+     */
+    static generateFromRecordsWrite(input) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            const existingMessage = input.existingWrite.message;
+            const currentTime = Time.getCurrentTimestamp();
+            const published = ((_a = input.published) !== null && _a !== void 0 ? _a : existingMessage.descriptor.published) ? false : true; // toggle from the parent value if not given explicitly
+            const datePublished = (_b = input.datePublished) !== null && _b !== void 0 ? _b : (published ? currentTime : undefined);
+            const dataBytes = (_c = input.data) !== null && _c !== void 0 ? _c : TestDataGenerator.randomBytes(32);
+            const dataStream = DataStream.fromBytes(dataBytes);
+            const options = {
+                recordsWriteMessage: input.existingWrite.message,
+                data: dataBytes,
+                published,
+                datePublished,
+                messageTimestamp: input.messageTimestamp,
+                protocolRole: input.protocolRole,
+                tags: input.tags,
+                signer: Jws.createSigner(input.author)
+            };
+            const recordsWrite = yield RecordsWrite.createFrom(options);
+            return {
+                message: recordsWrite.message,
+                recordsWrite,
+                dataBytes,
+                dataStream
+            };
+        });
+    }
+    /**
+     * Generates a RecordsQuery message for testing.
+     */
+    static generateRecordsQuery(input) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            let author = input === null || input === void 0 ? void 0 : input.author;
+            const anonymous = (_a = input === null || input === void 0 ? void 0 : input.anonymous) !== null && _a !== void 0 ? _a : false;
+            if (anonymous && author) {
+                throw new Error('Cannot have `author` and be anonymous at the same time.');
+            }
+            // generate author if needed
+            if (author === undefined && !anonymous) {
+                author = yield TestDataGenerator.generatePersona();
+            }
+            let signer = undefined;
+            if (author !== undefined) {
+                signer = Jws.createSigner(author);
+            }
+            const options = {
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                signer,
+                filter: (_b = input === null || input === void 0 ? void 0 : input.filter) !== null && _b !== void 0 ? _b : { schema: TestDataGenerator.randomString(10) },
+                dateSort: input === null || input === void 0 ? void 0 : input.dateSort,
+                pagination: input === null || input === void 0 ? void 0 : input.pagination,
+                protocolRole: input === null || input === void 0 ? void 0 : input.protocolRole,
+            };
+            removeUndefinedProperties(options);
+            const recordsQuery = yield RecordsQuery.create(options);
+            const message = recordsQuery.message;
+            return {
+                author,
+                message
+            };
+        });
+    }
+    ;
+    /**
+     * Generates a RecordsSubscribe message for testing.
+     */
+    static generateRecordsSubscribe(input) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            let author = input === null || input === void 0 ? void 0 : input.author;
+            const anonymous = (_a = input === null || input === void 0 ? void 0 : input.anonymous) !== null && _a !== void 0 ? _a : false;
+            if (anonymous && author) {
+                throw new Error('Cannot have `author` and be anonymous at the same time.');
+            }
+            // generate author if needed
+            if (author === undefined && !anonymous) {
+                author = yield TestDataGenerator.generatePersona();
+            }
+            let signer = undefined;
+            if (author !== undefined) {
+                signer = Jws.createSigner(author);
+            }
+            const options = {
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                signer,
+                filter: (_b = input === null || input === void 0 ? void 0 : input.filter) !== null && _b !== void 0 ? _b : { schema: TestDataGenerator.randomString(10) },
+                protocolRole: input === null || input === void 0 ? void 0 : input.protocolRole,
+            };
+            removeUndefinedProperties(options);
+            const recordsSubscribe = yield RecordsSubscribe.create(options);
+            const message = recordsSubscribe.message;
+            return {
+                author,
+                message
+            };
+        });
+    }
+    /**
+     * Generates a RecordsDelete for testing.
+     */
+    static generateRecordsDelete(input) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generateDidKeyPersona();
+            const recordsDelete = yield RecordsDelete.create({
+                recordId: (_b = input === null || input === void 0 ? void 0 : input.recordId) !== null && _b !== void 0 ? _b : yield TestDataGenerator.randomCborSha256Cid(),
+                protocolRole: input === null || input === void 0 ? void 0 : input.protocolRole,
+                signer: Jws.createSigner(author)
+            });
+            return {
+                author,
+                recordsDelete,
+                message: recordsDelete.message
+            };
+        });
+    }
+    static generateMessagesQuery(input) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const { filters, cursor, permissionGrantId } = input;
+            const author = (_a = input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const signer = Jws.createSigner(author);
+            const options = { signer, filters, cursor, permissionGrantId };
+            const messagesQuery = yield MessagesQuery.create(options);
+            return {
+                author,
+                messagesQuery,
+                message: messagesQuery.message
+            };
+        });
+    }
+    /**
+     * Generates a MessagesSubscribe message for testing.
+     */
+    static generateMessagesSubscribe(input) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const signer = Jws.createSigner(author);
+            const options = {
+                filters: input === null || input === void 0 ? void 0 : input.filters,
+                messageTimestamp: input === null || input === void 0 ? void 0 : input.messageTimestamp,
+                permissionGrantId: input === null || input === void 0 ? void 0 : input.permissionGrantId,
+                signer,
+            };
+            removeUndefinedProperties(options);
+            const messagesSubscribe = yield MessagesSubscribe.create(options);
+            const message = messagesSubscribe.message;
+            return {
+                author,
+                messagesSubscribe,
+                message
+            };
+        });
+    }
+    static generateMessagesRead(input) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const author = (_a = input === null || input === void 0 ? void 0 : input.author) !== null && _a !== void 0 ? _a : yield TestDataGenerator.generatePersona();
+            const signer = Jws.createSigner(author);
+            const options = {
+                signer,
+                messageCid: input.messageCid,
+                permissionGrantId: input.permissionGrantId
+            };
+            const messagesRead = yield MessagesRead.create(options);
+            return {
+                author,
+                messagesRead,
+                message: messagesRead.message,
+            };
+        });
+    }
+    /**
+     * Generates a dummy `authorization` property for a DWN message that only conforms to schema validation.
+     */
+    static generateAuthorization() {
+        return {
+            signature: TestDataGenerator.generateAuthorizationSignature()
+        };
+    }
+    /**
+     * Generates a dummy `authorization` property for a DWN message that only conforms to schema validation.
+     */
+    static generateAuthorizationSignature() {
+        return {
+            payload: 'anyPayload',
+            signatures: [{
+                    protected: 'anyProtectedHeader',
+                    signature: 'anySignature'
+                }]
+        };
+    }
+    /**
+     * Generates a random but well-formed signature string in Base64Url format.
+     */
+    static randomSignatureString() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const keyPair = yield ed25519.generateKeyPair();
+            const signatureBytes = yield ed25519.sign(TestDataGenerator.randomBytes(32), keyPair.privateJwk);
+            const signatureString = Encoder.bytesToBase64Url(signatureBytes);
+            return signatureString;
+        });
+    }
+    /**
+     * Generates a random alpha-numeric string.
+     */
+    static randomString(length) {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        // pick characters randomly
+        let randomString = '';
+        for (let i = 0; i < length; i++) {
+            randomString += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        return randomString;
+    }
+    ;
+    /**
+     * Generates a random byte array of given length.
+     */
+    static randomBytes(length) {
+        const randomBytes = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+            randomBytes[i] = Math.floor(Math.random() * 256);
+        }
+        return randomBytes;
+    }
+    ;
+    /**
+     * Generates a random CBOR SHA256 CID.
+     */
+    static randomCborSha256Cid() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const randomBytes = TestDataGenerator.randomBytes(32);
+            const randomMultihash = yield sha256.digest(randomBytes);
+            const cid = yield CID.createV1(cbor.code, randomMultihash);
+            return cid.toString();
+        });
+    }
+    /**
+     * Generates a random within a range (inclusive).
+     * @param min lowest potential value.
+     * @param max greatest potential value.
+     */
+    static randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
+    /**
+     * Generates a random timestamp. Optionally allows you to set specific non-randomized values for the timestamp.
+     *
+     * @returns random UTC ISO-8601 timestamp
+     */
+    static randomTimestamp(options) {
+        const { year, month, day, hour, minute, second, millisecond, microsecond } = options || {};
+        return Time.createTimestamp({
+            year: year || this.randomInt(2000, 2022),
+            month: month || this.randomInt(1, 12),
+            day: day || this.randomInt(1, 28),
+            hour: hour || this.randomInt(0, 23),
+            minute: minute || this.randomInt(0, 59),
+            second: second || this.randomInt(0, 59),
+            millisecond: millisecond || this.randomInt(0, 1000),
+            microsecond: microsecond || this.randomInt(0, 1000)
+        });
+    }
+    /**
+     * Creates a mock DID resolution result for testing purposes.
+     */
+    static createDidResolutionResult(persona) {
+        return {
+            didResolutionMetadata: {},
+            didDocument: {
+                id: persona.did,
+                verificationMethod: [{
+                        controller: persona.did,
+                        id: persona.keyId,
+                        type: 'JsonWebKey2020',
+                        // TODO: #672 - port and use type from @web5/crypto - https://github.com/TBD54566975/dwn-sdk-js/issues/672
+                        publicKeyJwk: persona.keyPair.publicJwk
+                    }]
+            },
+            didDocumentMetadata: {}
+        };
+    }
+    /**
+     * Generates a did:key persona.
+     */
+    static generateDidKeyPersona() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const did = yield DidKey.create();
+            const signingMethod = yield DidKey.getSigningMethod({ didDocument: did.document });
+            const keyId = signingMethod.id;
+            const portableDid = yield did.export();
+            const keyPair = {
+                // TODO: #672 - port and use type from @web5/crypto - https://github.com/TBD54566975/dwn-sdk-js/issues/672
+                publicJwk: signingMethod.publicKeyJwk,
+                privateJwk: portableDid.privateKeys[0],
+            };
+            return {
+                did: did.uri,
+                keyId,
+                keyPair,
+                signer: new PrivateKeySigner({
+                    privateJwk: keyPair.privateJwk,
+                    algorithm: keyPair.privateJwk.alg,
+                    keyId
+                })
+            };
+        });
+    }
+}
+//# sourceMappingURL=test-data-generator.js.map

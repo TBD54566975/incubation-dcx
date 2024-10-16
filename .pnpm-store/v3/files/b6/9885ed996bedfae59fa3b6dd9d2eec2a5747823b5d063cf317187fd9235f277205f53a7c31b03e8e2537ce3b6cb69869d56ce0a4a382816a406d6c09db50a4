@@ -1,0 +1,341 @@
+import type { DidResolutionResult } from '@web5/dids';
+import type { GeneralJws } from '../../src/types/jws-types.js';
+import type { PaginationCursor } from '../../src/types/query-types.js';
+import type { Readable } from 'readable-stream';
+import type { Signer } from '../../src/types/signer.js';
+import type { AuthorizationModel, Pagination } from '../../src/types/message-types.js';
+import type { EncryptionInput } from '../../src/interfaces/records-write.js';
+import type { DataEncodedRecordsWriteMessage, DateSort, RecordsDeleteMessage, RecordsFilter, RecordsQueryMessage, RecordsWriteTags } from '../../src/types/records-types.js';
+import type { MessagesFilter, MessagesQueryMessage, MessagesReadMessage, MessagesSubscribeMessage } from '../../src/types/messages-types.js';
+import type { PermissionConditions, PermissionScope } from '../../src/types/permission-types.js';
+import type { PrivateJwk, PublicJwk } from '../../src/types/jose-types.js';
+import type { ProtocolDefinition, ProtocolsConfigureMessage, ProtocolsQueryMessage } from '../../src/types/protocols-types.js';
+import type { RecordsSubscribeMessage, RecordsWriteMessage } from '../../src/types/records-types.js';
+import { MessagesQuery } from '../../src/interfaces/messages-query.js';
+import { MessagesRead } from '../../src/interfaces/messages-read.js';
+import { MessagesSubscribe } from '../../src/interfaces/messages-subscribe.js';
+import { ProtocolsConfigure } from '../../src/interfaces/protocols-configure.js';
+import { ProtocolsQuery } from '../../src/interfaces/protocols-query.js';
+import { RecordsDelete } from '../../src/interfaces/records-delete.js';
+import { RecordsWrite } from '../../src/interfaces/records-write.js';
+/**
+ * A logical grouping of user data used to generate test messages.
+ */
+export type Persona = {
+    did: string;
+    keyId: string;
+    keyPair: {
+        publicJwk: PublicJwk;
+        privateJwk: PrivateJwk;
+    };
+    signer: Signer;
+};
+export type GenerateProtocolsConfigureInput = {
+    /**
+     * Denotes if the Protocol Definition can be returned by unauthenticated `ProtocolsQuery`.
+     * Only takes effect if `protocolDefinition` is not explicitly set. Defaults to false if not specified.
+     */
+    published?: boolean;
+    /**
+     * Author who will be signing the protocol config created.
+     */
+    author?: Persona;
+    messageTimestamp?: string;
+    protocolDefinition?: ProtocolDefinition;
+    permissionGrantId?: string;
+};
+export type GenerateProtocolsConfigureOutput = {
+    author: Persona;
+    message: ProtocolsConfigureMessage;
+    protocolsConfigure: ProtocolsConfigure;
+};
+export type GenerateProtocolsQueryInput = {
+    author?: Persona;
+    messageTimestamp?: string;
+    permissionGrantId?: string;
+    filter?: {
+        protocol: string;
+    };
+};
+export type GenerateProtocolsQueryOutput = {
+    author: Persona;
+    message: ProtocolsQueryMessage;
+    protocolsQuery: ProtocolsQuery;
+};
+export type GenerateGrantCreateInput = {
+    author?: Persona;
+    grantedTo?: Persona;
+    dateGranted?: string;
+    dateExpires?: string;
+    requestId?: string;
+    description?: string;
+    delegated?: boolean;
+    scope?: PermissionScope;
+    conditions?: PermissionConditions;
+};
+export type GenerateGrantCreateOutput = {
+    message: RecordsWriteMessage;
+    dataBytes: Uint8Array;
+    dataStream: Readable;
+    recordsWrite: RecordsWrite;
+    dataEncodedMessage: DataEncodedRecordsWriteMessage;
+};
+export type GenerateRecordsWriteInput = {
+    author?: Persona;
+    attesters?: Persona[];
+    recipient?: string;
+    protocol?: string;
+    protocolPath?: string;
+    protocolRole?: string;
+    schema?: string;
+    tags?: RecordsWriteTags;
+    recordId?: string;
+    parentContextId?: string;
+    published?: boolean;
+    data?: Uint8Array;
+    dataCid?: string;
+    dataSize?: number;
+    dataFormat?: string;
+    dateCreated?: string;
+    messageTimestamp?: string;
+    datePublished?: string;
+    encryptionInput?: EncryptionInput;
+    permissionGrantId?: string;
+};
+export type GenerateFromRecordsWriteInput = {
+    author: Persona;
+    existingWrite: RecordsWrite;
+    data?: Uint8Array;
+    published?: boolean;
+    tags?: RecordsWriteTags;
+    messageTimestamp?: string;
+    datePublished?: string;
+    protocolRole?: string;
+};
+export type GenerateFromRecordsWriteOut = {
+    message: RecordsWriteMessage;
+    dataBytes: Uint8Array;
+    dataStream: Readable;
+    recordsWrite: RecordsWrite;
+};
+export type GenerateRecordsWriteOutput = {
+    author: Persona;
+    message: RecordsWriteMessage;
+    dataCid?: string;
+    dataSize?: number;
+    dataBytes?: Uint8Array;
+    dataStream?: Readable;
+    recordsWrite: RecordsWrite;
+};
+export type GenerateRecordsQueryInput = {
+    /**
+     * Treated as `false` if not given.
+     */
+    anonymous?: boolean;
+    author?: Persona;
+    messageTimestamp?: string;
+    filter?: RecordsFilter;
+    dateSort?: DateSort;
+    pagination?: Pagination;
+    protocolRole?: string;
+};
+export type GenerateRecordsQueryOutput = {
+    author: Persona | undefined;
+    message: RecordsQueryMessage;
+};
+export type GenerateRecordsSubscribeInput = {
+    /**
+     * Treated as `false` if not given.
+     */
+    anonymous?: boolean;
+    author?: Persona;
+    messageTimestamp?: string;
+    filter?: RecordsFilter;
+    protocolRole?: string;
+};
+export type GenerateRecordsSubscribeOutput = {
+    author: Persona | undefined;
+    message: RecordsSubscribeMessage;
+};
+export type GenerateRecordsDeleteInput = {
+    author?: Persona;
+    recordId?: string;
+    protocolRole?: string;
+};
+export type GenerateRecordsDeleteOutput = {
+    author: Persona;
+    recordsDelete: RecordsDelete;
+    message: RecordsDeleteMessage;
+};
+export type GenerateMessagesQueryInput = {
+    author?: Persona;
+    filters?: MessagesFilter[];
+    cursor?: PaginationCursor;
+    permissionGrantId?: string;
+};
+export type GenerateMessagesQueryOutput = {
+    author: Persona;
+    messagesQuery: MessagesQuery;
+    message: MessagesQueryMessage;
+};
+export type GenerateMessagesSubscribeInput = {
+    author: Persona;
+    filters?: MessagesFilter[];
+    messageTimestamp?: string;
+    permissionGrantId?: string;
+};
+export type GenerateMessagesSubscribeOutput = {
+    author: Persona;
+    messagesSubscribe: MessagesSubscribe;
+    message: MessagesSubscribeMessage;
+};
+export type GenerateMessagesReadInput = {
+    author?: Persona;
+    messageCid: string;
+    permissionGrantId?: string;
+};
+export type GenerateMessagesReadOutput = {
+    author: Persona;
+    message: MessagesReadMessage;
+    messagesRead: MessagesRead;
+};
+/**
+ * Utility class for generating data for testing.
+ */
+export declare class TestDataGenerator {
+    /**
+     * Generates a persona.
+     */
+    static generatePersona(input?: Partial<Persona>): Promise<Persona>;
+    /**
+     * Generates a ProtocolsConfigure message for testing.
+     * Optional parameters are generated if not given.
+     * Implementation currently uses `ProtocolsConfigure.create()`.
+     */
+    static generateProtocolsConfigure(input?: GenerateProtocolsConfigureInput): Promise<GenerateProtocolsConfigureOutput>;
+    /**
+     * Generates a ProtocolsQuery message for testing.
+     */
+    static generateProtocolsQuery(input?: GenerateProtocolsQueryInput): Promise<GenerateProtocolsQueryOutput>;
+    static generateGrantCreate(input?: GenerateGrantCreateInput): Promise<GenerateGrantCreateOutput>;
+    /**
+     * Generates a RecordsWrite message for testing.
+     * `dataBytes` & `dataStream` returned will be `undefined` as long as `dataCid` or `dataSize` is given.
+     * Implementation currently uses `RecordsWrite.create()`.
+     * @param input.attesters Attesters of the message. Will NOT be generated if not given.
+     * @param input.data Data that belongs to the record. Generated when not given only if `dataCid` and `dataSize` are also not given.
+     * @param input.dataFormat Format of the data. Defaults to 'application/json' if not given.
+     * @param input.signer Signer of the message. Generated if not given.
+     * @param input.schema Schema of the message. Randomly generated if not given.
+     */
+    static generateRecordsWrite(input?: GenerateRecordsWriteInput): Promise<GenerateRecordsWriteOutput>;
+    /**
+     * Generates a encrypted RecordsWrite message for testing.
+     *
+     * @param input.protocolDefinition Protocol definition used to generate the RecordsWrite.
+     *        Must be the RECIPIENT's protocol definition if `encryptSymmetricKeyWithProtocolPathDerivedKey` is true,
+     *        because the recipient's public keys will be needed to encrypt the symmetric key.
+     *
+     * @param input.encryptSymmetricKeyWithProtocolPathDerivedKey
+     *        Set to `true` to attach the symmetric key encrypted by the protocol path derived public key
+     *
+     * @param input.encryptSymmetricKeyWithProtocolContextDerivedKey
+     *        Set to `true` to attach the symmetric key encrypted by the protocol context derived public key
+     */
+    static generateProtocolEncryptedRecordsWrite(input: {
+        plaintextBytes: Uint8Array;
+        author: Persona;
+        recipient?: string;
+        protocolDefinition: ProtocolDefinition;
+        protocolPath: string;
+        protocolParentContextId?: string;
+        protocolContextDerivingRootKeyId?: string;
+        protocolContextDerivedPublicJwk?: PublicJwk;
+        encryptSymmetricKeyWithProtocolPathDerivedKey: boolean;
+        encryptSymmetricKeyWithProtocolContextDerivedKey: boolean;
+    }): Promise<{
+        message: RecordsWriteMessage;
+        dataStream: Readable;
+        recordsWrite: RecordsWrite;
+        encryptionInput: EncryptionInput;
+        encryptedDataBytes: Uint8Array;
+    }>;
+    /**
+     * Generates a valid RecordsWrite that modifies the given an existing write.
+     * Any mutable property is not specified will be automatically mutated.
+     * e.g. if `published` is not specified, it will be toggled from the state of the given existing write.
+     */
+    static generateFromRecordsWrite(input: GenerateFromRecordsWriteInput): Promise<GenerateFromRecordsWriteOut>;
+    /**
+     * Generates a RecordsQuery message for testing.
+     */
+    static generateRecordsQuery(input?: GenerateRecordsQueryInput): Promise<GenerateRecordsQueryOutput>;
+    /**
+     * Generates a RecordsSubscribe message for testing.
+     */
+    static generateRecordsSubscribe(input?: GenerateRecordsSubscribeInput): Promise<GenerateRecordsSubscribeOutput>;
+    /**
+     * Generates a RecordsDelete for testing.
+     */
+    static generateRecordsDelete(input?: GenerateRecordsDeleteInput): Promise<GenerateRecordsDeleteOutput>;
+    static generateMessagesQuery(input: GenerateMessagesQueryInput): Promise<GenerateMessagesQueryOutput>;
+    /**
+     * Generates a MessagesSubscribe message for testing.
+     */
+    static generateMessagesSubscribe(input?: GenerateMessagesSubscribeInput): Promise<GenerateMessagesSubscribeOutput>;
+    static generateMessagesRead(input: GenerateMessagesReadInput): Promise<GenerateMessagesReadOutput>;
+    /**
+     * Generates a dummy `authorization` property for a DWN message that only conforms to schema validation.
+     */
+    static generateAuthorization(): AuthorizationModel;
+    /**
+     * Generates a dummy `authorization` property for a DWN message that only conforms to schema validation.
+     */
+    static generateAuthorizationSignature(): GeneralJws;
+    /**
+     * Generates a random but well-formed signature string in Base64Url format.
+     */
+    static randomSignatureString(): Promise<string>;
+    /**
+     * Generates a random alpha-numeric string.
+     */
+    static randomString(length: number): string;
+    /**
+     * Generates a random byte array of given length.
+     */
+    static randomBytes(length: number): Uint8Array;
+    /**
+     * Generates a random CBOR SHA256 CID.
+     */
+    static randomCborSha256Cid(): Promise<string>;
+    /**
+     * Generates a random within a range (inclusive).
+     * @param min lowest potential value.
+     * @param max greatest potential value.
+     */
+    static randomInt(min: number, max: number): number;
+    /**
+     * Generates a random timestamp. Optionally allows you to set specific non-randomized values for the timestamp.
+     *
+     * @returns random UTC ISO-8601 timestamp
+     */
+    static randomTimestamp(options?: {
+        year?: number;
+        month?: number;
+        day?: number;
+        hour?: number;
+        minute?: number;
+        second?: number;
+        millisecond?: number;
+        microsecond?: number;
+    }): string;
+    /**
+     * Creates a mock DID resolution result for testing purposes.
+     */
+    static createDidResolutionResult(persona: Persona): DidResolutionResult;
+    /**
+     * Generates a did:key persona.
+     */
+    static generateDidKeyPersona(): Promise<Persona>;
+}
+//# sourceMappingURL=test-data-generator.d.ts.map

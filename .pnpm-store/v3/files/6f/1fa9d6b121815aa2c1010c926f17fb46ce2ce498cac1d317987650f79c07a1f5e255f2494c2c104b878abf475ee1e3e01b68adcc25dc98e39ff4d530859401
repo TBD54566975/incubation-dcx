@@ -1,0 +1,18 @@
+{
+  "name": "open-file-explorer",
+  "version": "1.0.2",
+  "description": "Open the given file path in the File explorer in your OS",
+  "main": "index.js",
+  "keywords": [
+    "file",
+    "explorer",
+    "file explorer",
+    "open"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vibhor1997a/nodejs-open-file-explorer.git"
+  },
+  "author": "vibhor agrawal <vibhor349a@rediffmail.com>",
+  "license": "Apache License 2.0"
+}

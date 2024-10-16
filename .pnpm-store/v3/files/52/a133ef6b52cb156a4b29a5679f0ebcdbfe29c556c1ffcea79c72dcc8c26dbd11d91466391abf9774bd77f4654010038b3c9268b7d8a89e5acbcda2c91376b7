@@ -1,0 +1,74 @@
+/// <reference types="node" resolution-mode="require"/>
+import type { AbstractLevel } from 'abstract-level';
+import type { SyncEngine, SyncIdentityOptions } from './types/sync.js';
+import type { Web5PlatformAgent } from './types/agent.js';
+export type SyncEngineLevelParams = {
+    agent?: Web5PlatformAgent;
+    dataPath?: string;
+    db?: AbstractLevel<string | Buffer | Uint8Array>;
+};
+export declare class SyncEngineLevel implements SyncEngine {
+    /**
+     * Holds the instance of a `Web5PlatformAgent` that represents the current execution context for
+     * the `SyncEngineLevel`. This agent is used to interact with other Web5 agent components. It's
+     * vital to ensure this instance is set to correctly contextualize operations within the broader
+     * Web5 Agent framework.
+     */
+    private _agent?;
+    /**
+     * An instance of the `AgentPermissionsApi` that is used to interact with permissions grants used during sync
+     */
+    private _cachedPermissionsApi;
+    private _db;
+    private _syncIntervalId?;
+    private _ulidFactory;
+    constructor({ agent, dataPath, db }: SyncEngineLevelParams);
+    /**
+     * Retrieves the `Web5PlatformAgent` execution context.
+     *
+     * @returns The `Web5PlatformAgent` instance that represents the current execution context.
+     * @throws Will throw an error if the `agent` instance property is undefined.
+     */
+    get agent(): Web5PlatformAgent;
+    set agent(agent: Web5PlatformAgent);
+    clear(): Promise<void>;
+    close(): Promise<void>;
+    private pull;
+    private push;
+    registerIdentity({ did, options }: {
+        did: string;
+        options?: SyncIdentityOptions;
+    }): Promise<void>;
+    sync(direction?: 'push' | 'pull'): Promise<void>;
+    startSync({ interval }: {
+        interval: string;
+    }): Promise<void>;
+    stopSync(): void;
+    /**
+     * 202: message was successfully written to the remote DWN
+     * 204: an initial write message was written without any data, cannot yet be read until a subsequent message is written with data
+     * 409: message was already present on the remote DWN
+     * RecordsDelete and the status code is 404: the initial write message was not found or the message was already deleted
+     */
+    private static syncMessageReplyIsSuccessful;
+    private enqueueOperations;
+    private static generateSyncMessageParamsKey;
+    private static parseSyncMessageParamsKey;
+    private getDwnEventLog;
+    private getDwnMessage;
+    private getSyncPeerState;
+    private getCursor;
+    private setCursor;
+    /**
+     * The message store is used to prevent "echoes" that occur during a sync pull operation.
+     * After a message is confirmed to already be synchronized on the local DWN, its CID is added
+     * to the message store to ensure that any subsequent pull attempts are skipped.
+     */
+    private messageExists;
+    private addMessage;
+    private getMessageStore;
+    private getCursorStore;
+    private getPushQueue;
+    private getPullQueue;
+}
+//# sourceMappingURL=sync-engine-level.d.ts.map

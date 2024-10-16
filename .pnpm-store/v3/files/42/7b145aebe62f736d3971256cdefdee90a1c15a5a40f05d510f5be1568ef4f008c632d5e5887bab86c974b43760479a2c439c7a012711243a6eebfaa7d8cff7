@@ -1,0 +1,95 @@
+{
+  "name": "audit-ci",
+  "version": "7.1.0",
+  "description": "Audits NPM, Yarn, and PNPM projects in CI environments",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "homepage": "https://github.com/IBM/audit-ci",
+  "bugs": "https://github.com/IBM/audit-ci/issues",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:IBM/audit-ci.git"
+  },
+  "keywords": [
+    "audit",
+    "ci",
+    "npm",
+    "yarn",
+    "pnpm",
+    "security",
+    "github",
+    "actions",
+    "github-actions",
+    "circleci"
+  ],
+  "bin": "./dist/bin.js",
+  "files": [
+    "dist/*",
+    "README.md"
+  ],
+  "scripts": {
+    "tsc": "tsc -p tsconfig.build.json",
+    "build": "concurrently \"tsc -p tsconfig.build.json --noEmit\" \"tsup lib/index.ts lib/bin.ts\"",
+    "lint": "eslint . --ext .ts,.js,.cjs",
+    "lint:fix": "eslint . --ext .ts,.js,.cjs --fix",
+    "format": "prettier --write lib test",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "check-types": "tsc -p tsconfig.json",
+    "schema": "ts-json-schema-generator -p ./docs/schema.d.ts -o ./docs/schema.json -t Schema"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.3",
+    "escape-string-regexp": "^4.0.0",
+    "event-stream": "4.0.1",
+    "jju": "^1.4.0",
+    "jsonstream-next": "^3.0.0",
+    "readline-transform": "1.0.0",
+    "semver": "^7.0.0",
+    "tslib": "^2.0.0",
+    "yargs": "^17.0.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.4",
+    "@types/cross-spawn": "^6.0.6",
+    "@types/event-stream": "^4.0.5",
+    "@types/jju": "^1.4.5",
+    "@types/jsonstream-next": "^3.0.3",
+    "@types/node": "^18",
+    "@types/readline-transform": "^1.0.4",
+    "@types/semver": "^7.5.8",
+    "@types/yargs": "^17.0.32",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "audit-types": "^0.6.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-unicorn": "^48.0.1",
+    "prettier": "^3.2.5",
+    "ts-json-schema-generator": "^2.2.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
