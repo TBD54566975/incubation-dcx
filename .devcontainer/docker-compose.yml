@@ -1,0 +1,61 @@
+services:
+  applicant-svc:
+    command: sleep infinity
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.aws:/home/datavant/.aws
+      - ${HOME}/.ssh:/home/datavant/.ssh
+      - ${HOME}/.git:/home/datavant/.git
+    stdin_open: true
+    tty: true
+
+  issuer-svc:
+    command: sleep infinity
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.aws:/home/datavant/.aws
+      - ${HOME}/.ssh:/home/datavant/.ssh
+      - ${HOME}/.git:/home/datavant/.git
+    stdin_open: true
+    tty: true
+
+  server-pkg:
+    command: sleep infinity
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.aws:/home/datavant/.aws
+      - ${HOME}/.ssh:/home/datavant/.ssh
+      - ${HOME}/.git:/home/datavant/.git
+    stdin_open: true
+    tty: true
+
+secrets:
+  npm_token:
+    environment: NPM_TOKEN
