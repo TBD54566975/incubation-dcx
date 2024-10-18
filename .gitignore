@@ -4,6 +4,7 @@
 dist
 db-data
 node_modules
+.pnpm-store
 
 .env.test
 .env.development
