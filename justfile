@@ -3,7 +3,9 @@ install:
 
     set -e
 
-    BASE_DIR="{{ invocation_dir_native() }}"
+    pnpm i
+
+    BASE_DIR="{{ justfile() }}"
 
     for package_dir in "$BASE_DIR/packages"/*; do
         cd "$package_dir" && \
@@ -37,9 +39,15 @@ run service:
 
     pnpm "$SERVICE"
 
-build:
+build clean="true" build_tests="false":
     #! /usr/bin/env bash
 
-    pnpm clean && \
-    pnpm build && \
-    pnpm build:tests:node
+    if [[ "{{ clean }}" == "true" ]]; then
+        pnpm clean
+    fi
+
+    pnpm build
+
+    if [[ "{{ build_tests }}" == "true" ]]; then
+        pnpm build:tests:node
+    fi
