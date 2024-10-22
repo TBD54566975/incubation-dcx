@@ -1,0 +1,38 @@
+{
+  "name": "issuer-service",
+  "dockerComposeFile": "../docker-compose.yml",
+  // We can specify environmental variables via remoteEnv
+  // to make them only available for debugging/terminal sessions
+  // etc.
+  "service": "issuer-svc",
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Set *default* container specific settings.json values on container create.
+      // These are all common to https://github.com/datavant/datavant-devcontainers/blob/main/.devcontainer/devcontainer.json
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "editor.formatOnSave": true,
+
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "always",
+          "source.organizeImports": "always"
+        },
+        "terminal.integrated.shellIntegration.decorationsEnabled": "both",
+        "editor.tabCompletion": "on",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "skellock.just"
+      ]
+    }
+  },
+  "postCreateCommand": "just install",
+  "workspaceFolder": "/workspace"
+}

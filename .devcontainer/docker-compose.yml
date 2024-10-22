@@ -1,0 +1,59 @@
+services:
+  applicant-svc:
+    command: bash /app/run.sh applicant
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.ssh:/root/.ssh
+      - ${HOME}/.git:/root/.git
+    stdin_open: true
+    tty: true
+
+  issuer-svc:
+    command: bash /app/run.sh issuer
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.ssh:/root/.ssh
+      - ${HOME}/.git:/root/.git
+    stdin_open: true
+    tty: true
+
+  server-pkg:
+    command: bash /app/run.sh server
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/images/Dockerfile.node
+      ssh:
+        - default=${SSH_AUTH_SOCK}
+      secrets:
+        - npm_token
+    volumes:
+      - ..:/workspace
+      - ../.git:/workspace/.git
+      - ../.devcontainer:/workspace/.devcontainer
+      - ${HOME}/.ssh:/root/.ssh
+      - ${HOME}/.git:/root/.git
+    stdin_open: true
+    tty: true
+
+secrets:
+  npm_token:
+    environment: NPM_TOKEN
